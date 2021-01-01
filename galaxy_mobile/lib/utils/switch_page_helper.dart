@@ -175,10 +175,10 @@ class SwitchPageHelper {
             : null;
       });
       //first(({ from, to }) => this.switchVideoSlots(from, to));
-      widget.updateDots(page, newFeeds.length);
     } else {
       FlutterLogs.logWarn("SwitchPageHelper", "switchVideos",
           "ignoring subscribe/unsubscribe/switch; other cams on mute mode");
     }
+    widget.updateDots(page, newFeeds.length);
   }
 }

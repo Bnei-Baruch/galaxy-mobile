@@ -12,7 +12,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test('leaving first from 3', () async {
-    var switchHelper = SwitchPageHelper(null, null, null, 3, false);
+    var switchHelper = SwitchPageHelper(null, null, null, 3, false, null);
     // = await rootBundle.loadString("feeds.json");
     var newFeeds_3 = await Utils.parseJson("feeds3.json");
     switchHelper.switchVideos(0, [], newFeeds_3);
@@ -39,7 +39,7 @@ void main() {
   });
 
   test('leaving first from 6', () async {
-    var switchHelper = SwitchPageHelper(null, null, null, 3, false);
+    var switchHelper = SwitchPageHelper(null, null, null, 3, false, null);
     // = await rootBundle.loadString("feeds.json");
     var newFeeds_6 = await Utils.parseJson("feeds6.json");
     switchHelper.switchVideos(0, [], newFeeds_6);
@@ -69,7 +69,7 @@ void main() {
     expect(feedsNewState.elementAt(2)["id"] == 752170363902192, true);
   });
   test('leaving second from 6 feeds', () async {
-    var switchHelper = SwitchPageHelper(null, null, null, 3, false);
+    var switchHelper = SwitchPageHelper(null, null, null, 3, false, null);
     // = await rootBundle.loadString("feeds.json");
     var newFeeds_6 = await Utils.parseJson("feeds6.json");
     switchHelper.switchVideos(0, [], newFeeds_6);
@@ -99,7 +99,7 @@ void main() {
     expect(feedsNewState.elementAt(2)["id"] == 752170363902192, true);
   });
   test('leaving third from 6 feeds', () async {
-    var switchHelper = SwitchPageHelper(null, null, null, 3, false);
+    var switchHelper = SwitchPageHelper(null, null, null, 3, false, null);
     // = await rootBundle.loadString("feeds.json");
     var newFeeds_6 = await Utils.parseJson("feeds6.json");
     switchHelper.switchVideos(0, newFeeds_6, newFeeds_6);
@@ -127,7 +127,7 @@ void main() {
     expect(feedsNewState.elementAt(2)["id"] == 752170363902192, true);
   });
   test('leaving first form second page in 6 feeds', () async {
-    var switchHelper = SwitchPageHelper(null, null, null, 3, false);
+    var switchHelper = SwitchPageHelper(null, null, null, 3, false, null);
     // = await rootBundle.loadString("feeds.json");
     var newFeeds_6 = await Utils.parseJson("feeds6.json");
     switchHelper.switchVideos(0, [], newFeeds_6);
@@ -155,7 +155,7 @@ void main() {
     expect(feedsNewState.elementAt(4)["id"] == 3432170363902192, true);
   });
   test('leaving first form second page in 9 feeds', () async {
-    var switchHelper = SwitchPageHelper(null, null, null, 3, false);
+    var switchHelper = SwitchPageHelper(null, null, null, 3, false, null);
     // = await rootBundle.loadString("feeds.json");
     var newFeeds_9 = await Utils.parseJson("feeds9.json");
     switchHelper.switchVideos(0, [], newFeeds_9);
@@ -185,7 +185,7 @@ void main() {
   });
 
   test('joining 1 to none streams', () async {
-    var switchHelper = SwitchPageHelper(null, null, null, 3, false);
+    var switchHelper = SwitchPageHelper(null, null, null, 3, false, null);
     // = await rootBundle.loadString("feeds.json");
     var newFeeds_3 = await Utils.parseJson("feeds3.json");
     switchHelper.switchVideos(0, [], []);
@@ -206,7 +206,7 @@ void main() {
     expect(newFeeds_3.elementAt(0)["id"] == 26725810025805, true);
   });
   test('joining 1 to 1 streams', () async {
-    var switchHelper = SwitchPageHelper(null, null, null, 3, false);
+    var switchHelper = SwitchPageHelper(null, null, null, 3, false, null);
     // = await rootBundle.loadString("feeds.json");
     var newFeeds_3 = await Utils.parseJson("feeds3.json");
     var oldFeed = (newFeeds_3 as List).sublist(0, 1);

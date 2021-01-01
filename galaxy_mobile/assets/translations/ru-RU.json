@@ -27,5 +27,7 @@
   "send_logs": "Отправить протокол",
   "sign_out": "Выход",
   "version": "Version",
-  "chat": "Чат"
+  "chat": "Чат",
+  "leave": "выход"
+
 }

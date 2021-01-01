@@ -26,5 +26,7 @@
   "send_logs": "Send Logs",
   "sign_out": "Sign Out",
   "version": "Version",
-  "chat": "Chat"
+  "chat": "Chat",
+  "leave": "leave"
+
 }

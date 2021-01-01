@@ -12,7 +12,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test('switch first page Test', () async {
-    var switchHelper = SwitchPageHelper(null, null, null, 3, false);
+    var switchHelper = SwitchPageHelper(null, null, null, 3, false, null);
     // = await rootBundle.loadString("feeds.json");
     var newFeeds_3 = await Utils.parseJson("feeds3.json");
     switchHelper.switchVideos(0, [], newFeeds_3);
@@ -24,7 +24,7 @@ void main() {
   });
 
   test('switch first page 6 feeds', () async {
-    var switchHelper = SwitchPageHelper(null, null, null, 3, false);
+    var switchHelper = SwitchPageHelper(null, null, null, 3, false, null);
     // = await rootBundle.loadString("feeds.json");
     var newFeeds_6 = await Utils.parseJson("feeds6.json");
     switchHelper.switchVideos(0, [], newFeeds_6);
@@ -35,7 +35,7 @@ void main() {
     });
   });
   test('switch second page 6 feeds', () async {
-    var switchHelper = SwitchPageHelper(null, null, null, 3, false);
+    var switchHelper = SwitchPageHelper(null, null, null, 3, false, null);
     // = await rootBundle.loadString("feeds.json");
     var newFeeds_6 = await Utils.parseJson("feeds6.json");
     switchHelper.switchVideos(1, newFeeds_6, newFeeds_6);
@@ -46,7 +46,7 @@ void main() {
     });
   });
   test('switch third page 6 feeds', () async {
-    var switchHelper = SwitchPageHelper(null, null, null, 3, false);
+    var switchHelper = SwitchPageHelper(null, null, null, 3, false, null);
     // = await rootBundle.loadString("feeds.json");
     var newFeeds_6 = await Utils.parseJson("feeds6.json");
     switchHelper.switchVideos(0, newFeeds_6, newFeeds_6);
@@ -57,7 +57,7 @@ void main() {
     });
   });
   test('switch back to page 0  6 feeds', () async {
-    var switchHelper = SwitchPageHelper(null, null, null, 3, false);
+    var switchHelper = SwitchPageHelper(null, null, null, 3, false, null);
     // = await rootBundle.loadString("feeds.json");
     var newFeeds_6 = await Utils.parseJson("feeds6.json");
     switchHelper.switchVideos(0, [], newFeeds_6);
@@ -70,7 +70,7 @@ void main() {
     });
   });
   test('switch back to page 0  6 feeds negative test', () async {
-    var switchHelper = SwitchPageHelper(null, null, null, 3, false);
+    var switchHelper = SwitchPageHelper(null, null, null, 3, false, null);
     // = await rootBundle.loadString("feeds.json");
     var newFeeds_6 = await Utils.parseJson("feeds6.json");
     switchHelper.switchVideos(0, [], newFeeds_6);
@@ -84,7 +84,7 @@ void main() {
   });
 
   test('switch remove one feed from start', () async {
-    var switchHelper = SwitchPageHelper(null, null, null, 3, false);
+    var switchHelper = SwitchPageHelper(null, null, null, 3, false, null);
     // = await rootBundle.loadString("feeds.json");
     var newFeeds_6 = await Utils.parseJson("feeds6.json");
     switchHelper.switchVideos(0, [], newFeeds_6);
@@ -99,7 +99,7 @@ void main() {
     });
   });
   test('switch remove one feed from end', () async {
-    var switchHelper = SwitchPageHelper(null, null, null, 3, false);
+    var switchHelper = SwitchPageHelper(null, null, null, 3, false, null);
     // = await rootBundle.loadString("feeds.json");
     var newFeeds_6 = await Utils.parseJson("feeds6.json");
     switchHelper.switchVideos(0, [], newFeeds_6);
@@ -115,7 +115,7 @@ void main() {
   });
 
   test('switch remove one feed from the middle', () async {
-    var switchHelper = SwitchPageHelper(null, null, null, 3, false);
+    var switchHelper = SwitchPageHelper(null, null, null, 3, false, null);
     // = await rootBundle.loadString("feeds.json");
     var newFeeds_6 = await Utils.parseJson("feeds6.json");
     switchHelper.switchVideos(0, [], newFeeds_6);
@@ -131,7 +131,7 @@ void main() {
   });
 
   test('switch add one feed from the beggining', () async {
-    var switchHelper = SwitchPageHelper(null, null, null, 3, false);
+    var switchHelper = SwitchPageHelper(null, null, null, 3, false, null);
     // = await rootBundle.loadString("feeds.json");
     var newFeeds_6 = await Utils.parseJson("feeds6.json");
     switchHelper.switchVideos(0, [], newFeeds_6);

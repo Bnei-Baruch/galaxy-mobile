@@ -21,6 +21,7 @@ import 'package:galaxy_mobile/widgets/loading_indicator.dart';
 import 'package:galaxy_mobile/widgets/videoRoomDrawer.dart';
 import 'package:galaxy_mobile/services/authService.dart';
 import 'package:galaxy_mobile/chat/chatMessage.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 enum AudioDevice { receiver, speaker, bluetooth }
 
@@ -197,6 +198,7 @@ class _DashboardState extends State<Dashboard> {
       mqttClient.addOnMsgReceivedCallback((payload) => handleCmdData(payload));
       mqttClient.addOnConnectionFailedCallback(() => handleConnectionFailed());
       mqttClient.connect();
+      tapped();
     };
     videoRoom.callExitRoomUserExists = () {
       stream.exit();
@@ -274,10 +276,10 @@ class _DashboardState extends State<Dashboard> {
       setState(() {});
     });
 
-    if (await changeAudioDevice(AudioDevice.receiver)) {
+    if (await changeAudioDevice(AudioDevice.speaker)) {
       FlutterLogs.logInfo(
           "dashboard", "initAudioMgr", ">>> switch to RECEIVER: Success");
-      _audioDevice = AudioDevice.receiver;
+      _audioDevice = AudioDevice.speaker;
     } else {
       FlutterLogs.logError(
           "dashboard", "initAudioMgr", ">>> switch to RECEIVER: Failed");
@@ -468,7 +470,7 @@ class _DashboardState extends State<Dashboard> {
   Icon setIcon() {
     FlutterLogs.logInfo("dashboard", "setIcon", "#### setIcon BEGIN");
     if (_audioDevice == AudioDevice.receiver) {
-      return Icon(Icons.phone);
+      return Icon(Mdi.volumeMute);
     } else if (_audioDevice == AudioDevice.speaker) {
       return Icon(Icons.volume_up);
     } else if (_audioDevice == AudioDevice.bluetooth) {
@@ -488,199 +490,213 @@ class _DashboardState extends State<Dashboard> {
     _activeRoomId = activeRoom.room.toString();
 
     return WillPopScope(
-      onWillPop: () {
-        final mqttClient = context.read<MQTTClient>();
-        Navigator.of(context).pop(true);
-        stream.exit();
-        videoRoom.exitRoom();
-        userTimer.cancel();
-        if (mqttClient != null) {
-          mqttClient.unsubscribe("galaxy/room/$_activeRoomId");
-          mqttClient.unsubscribe("galaxy/room/$_activeRoomId/chat");
-          mqttClient.removeOnConnectedCallback();
-          mqttClient.removeOnConnectionFailedCallback();
-          mqttClient.removeOnMsgReceivedCallback();
-          mqttClient.removeOnSubscribedCallback();
-          mqttClient.disconnect();
-        }
-        return;
-      },
-      child: Scaffold(
-        drawer: isFullScreen ? null : VideoRoomDrawer(),
-        appBar: isFullScreen
-            ? null
-            : !_show
-                ? CustomAppBar(
-                    appBar: AppBar(
-                      backgroundColor: Colors.transparent,
-                      iconTheme: IconThemeData(color: Colors.transparent),
-                    ),
-                    onTap: () => tapped(),
-                  )
-                : AppBar(
-                    title: Text(activeRoom.description,
-                        textAlign: TextAlign.center),
-                    centerTitle: true,
-                    leading: IconButton(
-                        icon: setIcon(),
-                        onPressed: () async {
-                          await switchAudioDevice();
-                          setState(() {});
-                        }),
-                    actions: <Widget>[
-                        // IconButton(
-                        //     icon: Icon(Icons.chat, color: Colors.white),
-                        //     onPressed: () {
-                        //       setState(() {
-                        //         isChatVisible = !isChatVisible;
-                        //       });
-                        //     }),
-                        Container(
-                            height: 30,
-                            child: TextButton(
-                                style: ButtonStyle(
-                                    foregroundColor:
-                                        MaterialStateProperty.all(Colors.white),
-                                    backgroundColor:
-                                        MaterialStateProperty.all(Colors.red)),
-                                child: Text(
-                                  "Leave",
-                                ),
-                                onPressed: () {
-                                  final mqttClient = context.read<MQTTClient>();
-                                  Navigator.of(context).pop(true);
-                                  stream.exit();
-                                  videoRoom.exitRoom();
-                                  userTimer.cancel();
-                                  if (mqttClient != null) {
-                                    mqttClient.unsubscribe(
-                                        "galaxy/room/$_activeRoomId");
-                                    mqttClient.unsubscribe(
-                                        "galaxy/room/$_activeRoomId/chat");
-                                    mqttClient.disconnect();
-                                  }
-                                }))
-                      ]),
-        body: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () => tapped(),
-            child: OrientationBuilder(builder: (context, orientation) {
-              return Stack(children: <Widget>[
-                Flex(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    direction: orientation == Orientation.landscape
-                        ? Axis.horizontal
-                        : Axis.vertical,
-                    children: [
-                      stream,
-                      // GestureDetector(
-                      //   child:
-                      videoRoom,
-                      // onTap: () {
-                      //   //if shown then hide  else show
-                      //   if (_show)
-                      //     hideBottomBar();
-                      //   else
-                      //     showBottomBar();
-                      // },
-                      // )
-                    ])
-              ]);
-            })),
-        bottomNavigationBar: isFullScreen
-            ? null
-            : !_show
-                ? GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => tapped(),
-                    child: Container(
-                      height: kBottomNavigationBarHeight,
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: DotsIndicator(
-                            dotsCount: (feedsLength / PAGE_SIZE).ceil() > 0
-                                ? (feedsLength / PAGE_SIZE).ceil()
-                                : 1,
-                            position: pagePosition.toDouble()),
+        onWillPop: () {
+          final mqttClient = context.read<MQTTClient>();
+          Navigator.of(context).pop(true);
+          stream.exit();
+          videoRoom.exitRoom();
+          userTimer.cancel();
+          if (mqttClient != null) {
+            mqttClient.unsubscribe("galaxy/room/$_activeRoomId");
+            mqttClient.unsubscribe("galaxy/room/$_activeRoomId/chat");
+            mqttClient.removeOnConnectedCallback();
+            mqttClient.removeOnConnectionFailedCallback();
+            mqttClient.removeOnMsgReceivedCallback();
+            mqttClient.removeOnSubscribedCallback();
+            mqttClient.disconnect();
+          }
+          return;
+        },
+        child: Scaffold(
+          drawer: isFullScreen ? null : VideoRoomDrawer(),
+          appBar: isFullScreen
+              ? null
+              : !_show
+                  ? CustomAppBar(
+                      appBar: AppBar(
+                        backgroundColor: Colors.transparent,
+                        iconTheme: IconThemeData(color: Colors.transparent),
                       ),
-                    ))
-                : BottomNavigationBar(
-                    showSelectedLabels: true, // <-- HERE
-                    showUnselectedLabels: true,
-                    selectedItemColor: Colors.white,
-                    unselectedItemColor: Colors.white,
-                    items: <BottomNavigationBarItem>[
-                      BottomNavigationBarItem(
-                          label: "Mic",
-                          icon: audioMute
-                              ? Icon(Icons.mic_off, color: Colors.red)
-                              : Icon(Icons.mic, color: Colors.white)),
-                      BottomNavigationBarItem(
-                          label: "Camera",
-                          icon: videoMute
-                              ? Icon(Icons.videocam_off, color: Colors.red)
-                              : Icon(Icons.videocam, color: Colors.white)),
-                      BottomNavigationBarItem(
-                          label: 'Ask',
-                          icon: !questionDisabled
-                              ? (videoRoom.getIsQuestion()
-                                  ? Icon(Mdi.help, color: Colors.red)
-                                  : Icon(Mdi.help, color: Colors.white))
-                              : Icon(Mdi.help, color: Colors.grey)),
-                      BottomNavigationBarItem(
-                          label: "Audio Mode",
-                          icon: audioMode
-                              ? Icon(Mdi.accountVoice, color: Colors.red)
-                              : Icon(Mdi.accountVoice, color: Colors.white)),
-                      BottomNavigationBarItem(
-                          label: "More",
-                          icon: audioMode
-                              ? Icon(Mdi.dotsVertical, color: Colors.red)
-                              : Icon(Mdi.dotsVertical, color: Colors.white)),
-                    ],
-                    onTap: (value) {
-                      FlutterLogs.logInfo(
-                          "Dashboard", "onTap", value.toString());
-                      switch (value) {
-                        case 0:
-                          videoRoom.mute();
-                          setState(() {
-                            audioMute = !audioMute;
-                          });
+                      onTap: () => tapped(),
+                    )
+                  : AppBar(
+                      backgroundColor: Colors.black26,
+                      title: Text(activeRoom.description,
+                          textAlign: TextAlign.center),
+                      centerTitle: true,
+                      leading: IconButton(
+                          icon: setIcon(),
+                          onPressed: () async {
+                            await switchAudioDevice();
+                            setState(() {});
+                          }),
+                      actions: <Widget>[
+                          // IconButton(
+                          //     icon: Icon(Icons.chat, color: Colors.white),
+                          //     onPressed: () {
+                          //       setState(() {
+                          //         isChatVisible = !isChatVisible;
+                          //       });
+                          //     }),
+                          Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: TextButton(
+                                  style: ButtonStyle(
+                                      foregroundColor:
+                                          MaterialStateProperty.all(
+                                              Colors.white),
+                                      backgroundColor:
+                                          MaterialStateProperty.all(
+                                              Colors.red)),
+                                  child: Text(
+                                    'Leave'.tr(),
+                                  ),
+                                  onPressed: () {
+                                    final mqttClient =
+                                        context.read<MQTTClient>();
+                                    Navigator.of(context).pop(true);
+                                    stream.exit();
+                                    videoRoom.exitRoom();
+                                    userTimer.cancel();
+                                    if (mqttClient != null) {
+                                      mqttClient.unsubscribe(
+                                          "galaxy/room/$_activeRoomId");
+                                      mqttClient.unsubscribe(
+                                          "galaxy/room/$_activeRoomId/chat");
+                                      mqttClient.disconnect();
+                                    }
+                                  }))
+                        ]),
+          body: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => tapped(),
+              child: OrientationBuilder(builder: (context, orientation) {
+                return Stack(children: <Widget>[
+                  Flex(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      direction: orientation == Orientation.landscape
+                          ? Axis.horizontal
+                          : Axis.vertical,
+                      children: [
+                        stream,
+                        // GestureDetector(
+                        //   child:
+                        videoRoom,
+                        // onTap: () {
+                        //   //if shown then hide  else show
+                        //   if (_show)
+                        //     hideBottomBar();
+                        //   else
+                        //     showBottomBar();
+                        // },
+                        // )
+                      ])
+                ]);
+              })),
+          bottomNavigationBar: isFullScreen
+              ? null
+              : Stack(
+                  children: [
+                    GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => tapped(),
+                        child: Container(
+                          height: kBottomNavigationBarHeight,
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: DotsIndicator(
+                                dotsCount: (feedsLength / PAGE_SIZE).ceil() > 0
+                                    ? (feedsLength / PAGE_SIZE).ceil()
+                                    : 1,
+                                position: pagePosition.toDouble()),
+                          ),
+                        )),
+                    AnimatedContainer(
+                      duration: Duration(milliseconds: 500),
+                      height: _show ? kBottomNavigationBarHeight : 0,
+                      child: BottomNavigationBar(
+                        showSelectedLabels: true, // <-- HERE
+                        showUnselectedLabels: true,
+                        selectedItemColor: Colors.white,
+                        unselectedItemColor: Colors.white,
+                        items: <BottomNavigationBarItem>[
+                          BottomNavigationBarItem(
+                              label: "Mic",
+                              icon: audioMute
+                                  ? Icon(Icons.mic_off, color: Colors.red)
+                                  : Icon(Icons.mic, color: Colors.white)),
+                          BottomNavigationBarItem(
+                              label: "Camera",
+                              icon: videoMute
+                                  ? Icon(Icons.videocam_off, color: Colors.red)
+                                  : Icon(Icons.videocam, color: Colors.white)),
+                          BottomNavigationBarItem(
+                              label: 'Ask',
+                              icon: !questionDisabled
+                                  ? (videoRoom.getIsQuestion()
+                                      ? Icon(Mdi.help, color: Colors.red)
+                                      : Icon(Mdi.help, color: Colors.white))
+                                  : Icon(Mdi.help, color: Colors.grey)),
+                          BottomNavigationBarItem(
+                              label: "Audio Mode",
+                              icon: audioMode
+                                  ? Icon(Mdi.accountVoice, color: Colors.red)
+                                  : Icon(Mdi.accountVoice,
+                                      color: Colors.white)),
+                          BottomNavigationBarItem(
+                              label: "More",
+                              icon: audioMode
+                                  ? Icon(Mdi.dotsVertical, color: Colors.red)
+                                  : Icon(Mdi.dotsVertical,
+                                      color: Colors.white)),
+                        ],
+                        onTap: (value) {
+                          FlutterLogs.logInfo(
+                              "Dashboard", "onTap", value.toString());
+                          switch (value) {
+                            case 0:
+                              videoRoom.mute();
+                              setState(() {
+                                audioMute = !audioMute;
+                              });
 
-                          break;
-                        case 1:
-                          videoRoom.toggleVideo();
-                          setState(() {
-                            videoMute = !videoMute;
-                            updateRoomWithMyState(false);
-                          });
-                          break;
-                        case 2:
-                          if (videoRoom.questionInRoom == null) {
-                            bool isQ = videoRoom.getIsQuestion();
-                            videoRoom.toggleQuestion();
-                            updateRoomWithMyState(!isQ);
-                            setState(() {
-                              videoRoom.setIsQuestion(!isQ);
-                            });
-                          } else {
-                            FlutterLogs.logWarn("Dashboard", "toggleQuestion",
-                                "question already set in room");
+                              break;
+                            case 1:
+                              videoRoom.toggleVideo();
+                              setState(() {
+                                videoMute = !videoMute;
+                                updateRoomWithMyState(false);
+                              });
+                              break;
+                            case 2:
+                              if (videoRoom.questionInRoom == null) {
+                                bool isQ = videoRoom.getIsQuestion();
+                                videoRoom.toggleQuestion();
+                                updateRoomWithMyState(!isQ);
+                                setState(() {
+                                  videoRoom.setIsQuestion(!isQ);
+                                });
+                              } else {
+                                FlutterLogs.logWarn(
+                                    "Dashboard",
+                                    "toggleQuestion",
+                                    "question already set in room");
+                              }
+                              break;
+                            case 3:
+                              setState(() {
+                                audioMode = !audioMode;
+                                stream.toggleAudioMode();
+                              });
+                              videoRoom.toggleAudioMode();
+                              break;
                           }
-                          break;
-                        case 3:
-                          setState(() {
-                            audioMode = !audioMode;
-                            stream.toggleAudioMode();
-                          });
-                          videoRoom.toggleAudioMode();
-                          break;
-                      }
-                    },
-                  ),
-      ),
-    );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+        ));
     // );
   }
 
@@ -688,8 +704,8 @@ class _DashboardState extends State<Dashboard> {
     setState(() {
       _show = true;
     });
-    Timer(Duration(seconds: 3), hideBottomBar);
-    Timer(Duration(seconds: 3), stream.hideBar);
+    Timer(Duration(seconds: 5), hideBottomBar);
+    Timer(Duration(seconds: 5), stream.hideBar);
   }
 
   void hideBottomBar() {
