@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:galaxy_mobile/routes.dart';
 import 'package:galaxy_mobile/themes/default.dart';
 
-
 void main() => runApp(MyApp());
 
 class MyApp extends StatefulWidget {
@@ -11,14 +10,12 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: appTheme(),
-      initialRoute: '/',
+      initialRoute: '/streaming',
       routes: routes,
     );
   }
-
 }
