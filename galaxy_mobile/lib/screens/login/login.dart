@@ -10,10 +10,10 @@ class Login extends StatelessWidget {
       ),
       body: Center(
         child: ElevatedButton(
-          child: Text('Launch screen'),
+          child: Text('Launch Stream'),
           onPressed: () {
             // Navigate to the second screen when tapped.
-             Navigator.pushNamed(context, '/room');
+            Navigator.pushNamed(context, '/streaming');
           },
         ),
       ),

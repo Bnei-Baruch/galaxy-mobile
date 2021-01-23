@@ -15,7 +15,8 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
   ], server: [
     "https://str2.kli.one/janustrl"
   ], withCredentials: false, apiSecret: "secret", isUnifiedPlan: true);
-  Plugin publishVideo;
+  Plugin videoStreamingPlugin;
+  Plugin audioStreamingPlugin;
   TextEditingController nameController = TextEditingController();
   RTCVideoRenderer _remoteRenderer = new RTCVideoRenderer();
   MediaStream _remoteStream;
@@ -27,8 +28,9 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
   StateSetter _setState;
 
   getStreamListing() {
+    //should get this list from our server later on
     var body = {"request": "list"};
-    publishVideo.send(
+    videoStreamingPlugin.send(
         message: body,
         onSuccess: () {
           print("listing");
@@ -52,6 +54,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
     // TODO: implement initState
     super.initState();
     janusClient.connect(onSuccess: (sessionId) {
+      //video plugin init
       janusClient.attach(Plugin(
           onRemoteTrack: (stream, track, mid, on) {
             print('got remote stream');
@@ -104,7 +107,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
                             color: Colors.green,
                             textColor: Colors.white,
                             onPressed: () {
-                              publishVideo.send(message: {
+                              videoStreamingPlugin.send(message: {
                                 "request": "watch",
                                 "id": selectedStreamId,
                                 "offer_audio": true,
@@ -121,9 +124,11 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
 
             if (jsep != null) {
               debugPrint("Handling SDP as well..." + jsep.toString());
-              await publishVideo.handleRemoteJsep(jsep);
-              RTCSessionDescription answer = await publishVideo.createAnswer();
-              publishVideo.send(message: {"request": "start"}, jsep: answer);
+              await videoStreamingPlugin.handleRemoteJsep(jsep);
+              RTCSessionDescription answer =
+                  await videoStreamingPlugin.createAnswer();
+              videoStreamingPlugin
+                  .send(message: {"request": "start"}, jsep: answer);
               Navigator.of(context).pop();
               setState(() {
                 _loader = false;
@@ -132,19 +137,106 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
           },
           onSuccess: (plugin) {
             setState(() {
-              publishVideo = plugin;
+              videoStreamingPlugin = plugin;
               this.getStreamListing();
+            });
+          }));
+      //audio plugin init
+      janusClient.attach(Plugin(
+          onRemoteTrack: (stream, track, mid, on) {
+            print('got remote stream');
+            _remoteStream
+                .addTrack(track)
+                .then((value) => _remoteRenderer.srcObject = _remoteStream);
+          },
+          plugin: "janus.plugin.streaming",
+          onMessage: (msg, jsep) async {
+            print('got onmsg');
+            print(msg);
+            if (msg['streaming'] != null && msg['result'] != null) {
+              if (msg['streaming'] == 'event' &&
+                  msg['result']['status'] == 'stopping') {
+                await this.destroy();
+              }
+            }
+
+            if (msg['janus'] == 'success' && msg['plugindata'] != null) {
+              var plugindata = msg['plugindata'];
+              print('got plugin data');
+              showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  child: StatefulBuilder(builder: (context, setstate) {
+                    _setState = setstate;
+                    _setState(() {
+                      streams = plugindata['data']['list'];
+                    });
+
+                    return AlertDialog(
+                      title: Text("Choose Stream To Play"),
+                      content: Column(
+                        children: [
+                          DropdownButtonFormField(
+                              isExpanded: true,
+                              value: selectedStreamId,
+                              items: List.generate(
+                                  streams.length,
+                                  (index) => DropdownMenuItem(
+                                      value: streams[index]['id'],
+                                      child:
+                                          Text(streams[index]['description']))),
+                              onChanged: (v) {
+                                _setState(() {
+                                  selectedStreamId = v;
+                                });
+                              }),
+                          RaisedButton(
+                            color: Colors.green,
+                            textColor: Colors.white,
+                            onPressed: () {
+                              audioStreamingPlugin.send(message: {
+                                "request": "watch",
+                                "id": selectedStreamId,
+                                "offer_audio": true,
+                                "offer_video": true,
+                              });
+                            },
+                            child: Text("Play"),
+                          )
+                        ],
+                      ),
+                    );
+                  }));
+            }
+
+            if (jsep != null) {
+              debugPrint("Handling SDP as well..." + jsep.toString());
+              await audioStreamingPlugin.handleRemoteJsep(jsep);
+              RTCSessionDescription answer =
+                  await videoStreamingPlugin.createAnswer();
+              audioStreamingPlugin
+                  .send(message: {"request": "start"}, jsep: answer);
+              Navigator.of(context).pop();
+              setState(() {
+                _loader = false;
+              });
+            }
+          },
+          onSuccess: (plugin) {
+            setState(() {
+              audioStreamingPlugin = plugin;
+              // this.getStreamListing();
             });
           }));
     });
   }
 
   Future<void> cleanUpAndBack() async {
-    publishVideo.send(message: {"request": "stop"});
+    videoStreamingPlugin.send(message: {"request": "stop"});
   }
 
   destroy() async {
-    await publishVideo.destroy();
+    await videoStreamingPlugin.destroy();
     janusClient.destroy();
     if (_remoteRenderer != null) {
       _remoteRenderer.srcObject = null;
@@ -179,7 +271,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
                           icon: Icon(Icons.stop),
                           color: Colors.white,
                           onPressed: () {
-                            publishVideo.send(
+                            videoStreamingPlugin.send(
                                 message: {"request": "stop"},
                                 onSuccess: () async {
                                   await cleanUpAndBack();

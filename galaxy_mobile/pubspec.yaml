@@ -26,6 +26,9 @@ dependencies:
   flutter_appauth: ^0.9.2+6
   http: ^0.12.2
 
+  flutter_volume_slider: ^1.0.6
+  flag: ^3.1.0
+
   janus_client: #^0.0.4
     git:
       url: https://github.com/shivanshtalwar0/flutter_janus_client.git
