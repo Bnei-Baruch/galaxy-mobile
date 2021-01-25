@@ -27,28 +27,40 @@ class _PlayerStateWidget extends State<PlayerWidget> {
   Widget build(BuildContext context) {
     return Material(
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Padding(
             padding: EdgeInsets.only(top: 40),
-            child: Row(
-              children: [
-                DecoratedBox(decoration: BoxDecoration(color: Colors.white)),
-                FlatButton(
-                  onPressed: () => widget.play(widget.isPlaying),
-                  child: Icon(
-                    widget.isPlaying ? Icons.stop : Icons.play_arrow,
-                    color: Colors.grey,
-                    size: 24.0,
-                    semanticLabel: 'Play/Stop button',
-                  ),
-                ),
-                DecoratedBox(
-                  decoration: BoxDecoration(color: Colors.white),
-                  child: Container(
-                    // constraints:
-                    //     BoxConstraints.tightForFinite(width: 150, height: 30),
-                    height: 32,
-                    width: 250,
+          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Container(
+                width: 35.0,
+                height: 35.0,
+                child: DecoratedBox(
+                    child: IconButton(
+                      // color: Colors.green,
+                      onPressed: () => widget.play(widget.isPlaying),
+                      icon: Icon(
+                        widget.isPlaying ? Icons.stop : Icons.play_arrow,
+                        color: Colors.black,
+                        // size: 24.0,
+                        semanticLabel: 'Play/Stop button',
+                      ),
+                    ),
+                    decoration: BoxDecoration(color: Colors.white)),
+              ),
+              DecoratedBox(
+                decoration: BoxDecoration(color: Colors.white),
+                child: Container(
+                  // constraints: BoxConstraints(minWidth: 100, maxWidth: 175),
+                  height: 35,
+                  width: 180,
+                  child: FittedBox(
                     child: FlutterVolumeSlider(
                       display: Display.HORIZONTAL,
                       sliderActiveColor: Colors.blue,
@@ -56,32 +68,50 @@ class _PlayerStateWidget extends State<PlayerWidget> {
                     ),
                   ),
                 ),
-                FlatButton(
-                  onPressed: null,
-                  child: Icon(
-                    Icons.fullscreen,
-                    color: Colors.grey,
-                    size: 24.0,
-                    semanticLabel: 'Full screen',
-                  ),
-                ),
-                FlatButton(
-                  onPressed: null,
-                  child: Icon(
-                    Icons.settings,
-                    color: Colors.grey,
-                    size: 24.0,
-                    semanticLabel: 'Full screen',
-                  ),
-                ),
-              ],
-            ),
+              ),
+              Container(
+                width: 35.0,
+                height: 35.0,
+                child: DecoratedBox(
+                    child: IconButton(
+                      color: Colors.white,
+                      // minWidth: 24,
+                      onPressed: () => widget.play(widget.isPlaying),
+                      icon: Icon(
+                        Icons.fullscreen,
+                        color: Colors.black,
+                        // size: 24.0,
+                        semanticLabel: 'Full screen',
+                      ),
+                    ),
+                    decoration: BoxDecoration(color: Colors.white)),
+              ),
+              Container(
+                width: 35.0,
+                height: 35.0,
+                child: DecoratedBox(
+                    child: IconButton(
+                      color: Colors.white,
+                      // minWidth: 24,
+                      onPressed: () => widget.play(widget.isPlaying),
+                      icon: Icon(
+                        Icons.settings,
+                        color: Colors.black,
+                        size: 24.0,
+                        semanticLabel: 'Settings',
+                      ),
+                    ),
+                    decoration: BoxDecoration(color: Colors.white)),
+              ),
+            ],
           ),
+          Padding(padding: EdgeInsets.only(top: 35)),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               DropdownButton<Map<String, Object>>(
                   value: widget.videoTypeValue,
-                  icon: Icon(Icons.arrow_downward),
+                  icon: Icon(Icons.video_label),
                   iconSize: 24,
                   elevation: 16,
                   style: TextStyle(color: Colors.white),
@@ -104,7 +134,7 @@ class _PlayerStateWidget extends State<PlayerWidget> {
                   }).toList()),
               DropdownButton<Map<String, Object>>(
                   value: widget.audioTypeValue,
-                  icon: Icon(Icons.arrow_downward),
+                  icon: Icon(Icons.multitrack_audio),
                   iconSize: 24,
                   elevation: 16,
                   style: TextStyle(color: Colors.white),
