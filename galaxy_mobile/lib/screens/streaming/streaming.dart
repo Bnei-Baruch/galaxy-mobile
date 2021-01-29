@@ -25,6 +25,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
   Plugin audioStreamingPlugin;
   TextEditingController nameController = TextEditingController();
   RTCVideoRenderer _remoteRenderer = new RTCVideoRenderer();
+  PlayerWidget playerOverlay = PlayerWidget();
   MediaStream _remoteStream;
 
   List<dynamic> streams = [];
@@ -59,6 +60,18 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    playerOverlay.play = (playing) =>
+        {audioStreamingPlugin.hangup(), videoStreamingPlugin.hangup()};
+    playerOverlay.audioChange = () {
+      audioStreamingPlugin.send(message: {"request": "stop"});
+      audioStreamingPlugin.send(message: {
+        "request": "watch",
+        "id": playerOverlay
+            .audioTypeValue["value"], //playerOverlay.videoTypeValue["value"],
+        "offer_audio": true,
+        "offer_video": true,
+      });
+    };
     widget.isPlayerShown = false;
     janusClient.connect(onSuccess: (sessionId) {
       //video plugin init
@@ -68,6 +81,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
             _remoteStream
                 .addTrack(track)
                 .then((value) => _remoteRenderer.srcObject = _remoteStream);
+            playerOverlay.isPlaying = true;
           },
           plugin: "janus.plugin.streaming",
           onMessage: (msg, jsep) async {
@@ -83,6 +97,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
             if (msg['janus'] == 'success' && msg['plugindata'] != null) {
               var plugindata = msg['plugindata'];
               print('got plugin data');
+
               // showDialog(
               //     context: context,
               //     barrierDismissible: false,
@@ -136,7 +151,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
                   await videoStreamingPlugin.createAnswer();
               videoStreamingPlugin
                   .send(message: {"request": "start"}, jsep: answer);
-              Navigator.of(context).pop();
+              // Navigator.of(context).pop();
               setState(() {
                 _loader = false;
               });
@@ -145,16 +160,23 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
           onSuccess: (plugin) {
             setState(() {
               videoStreamingPlugin = plugin;
-              this.getStreamListing();
+              // this.getStreamListing();
+              videoStreamingPlugin.send(message: {
+                "request": "watch",
+                "id": 1, //playerOverlay.videoTypeValue["value"],
+                "offer_audio": true,
+                "offer_video": true,
+              });
             });
           }));
       //audio plugin init
       janusClient.attach(Plugin(
           onRemoteTrack: (stream, track, mid, on) {
             print('got remote stream');
-            _remoteStream
-                .addTrack(track)
-                .then((value) => _remoteRenderer.srcObject = _remoteStream);
+            // _remoteStream
+            //     .addTrack(track)
+            //     .then((value) => _remoteRenderer.srcObject = _remoteStream);
+            playerOverlay.isPlaying = true;
           },
           plugin: "janus.plugin.streaming",
           onMessage: (msg, jsep) async {
@@ -170,60 +192,62 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
             if (msg['janus'] == 'success' && msg['plugindata'] != null) {
               var plugindata = msg['plugindata'];
               print('got plugin data');
-              showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  child: StatefulBuilder(builder: (context, setstate) {
-                    _setState = setstate;
-                    _setState(() {
-                      streams = plugindata['data']['list'];
-                    });
-
-                    return AlertDialog(
-                      title: Text("Choose Stream To Play"),
-                      content: Column(
-                        children: [
-                          DropdownButtonFormField(
-                              isExpanded: true,
-                              value: selectedStreamId,
-                              items: List.generate(
-                                  streams.length,
-                                  (index) => DropdownMenuItem(
-                                      value: streams[index]['id'],
-                                      child:
-                                          Text(streams[index]['description']))),
-                              onChanged: (v) {
-                                _setState(() {
-                                  selectedStreamId = v;
-                                });
-                              }),
-                          RaisedButton(
-                            color: Colors.green,
-                            textColor: Colors.white,
-                            onPressed: () {
-                              audioStreamingPlugin.send(message: {
-                                "request": "watch",
-                                "id": selectedStreamId,
-                                "offer_audio": true,
-                                "offer_video": true,
-                              });
-                            },
-                            child: Text("Play"),
-                          )
-                        ],
-                      ),
-                    );
-                  }));
+              // showDialog(
+              //     context: context,
+              //     barrierDismissible: false,
+              //     child: StatefulBuilder(builder: (context, setstate) {
+              //       _setState = setstate;
+              //       _setState(() {
+              //         streams = plugindata['data']['list'];
+              //       });
+              //
+              //       return AlertDialog(
+              //         title: Text("Choose Stream To Play"),
+              //         content: Column(
+              //           children: [
+              //             DropdownButtonFormField(
+              //                 isExpanded: true,
+              //                 value: selectedStreamId,
+              //                 items: List.generate(
+              //                     streams.length,
+              //                     (index) => DropdownMenuItem(
+              //                         value: streams[index]['id'],
+              //                         child:
+              //                             Text(streams[index]['description']))),
+              //                 onChanged: (v) {
+              //                   _setState(() {
+              //                     selectedStreamId = v;
+              //                   });
+              //                 }),
+              //             RaisedButton(
+              //               color: Colors.green,
+              //               textColor: Colors.white,
+              //               onPressed: () {
+              //                 audioStreamingPlugin.send(message: {
+              //                   "request": "watch",
+              //                   "id": selectedStreamId,
+              //                   "offer_audio": true,
+              //                   "offer_video": true,
+              //                 });
+              //               },
+              //               child: Text("Play"),
+              //             )
+              //           ],
+              //         ),
+              //       );
+              //     }
+              //     )
+              // );
             }
 
             if (jsep != null) {
               debugPrint("Handling SDP as well..." + jsep.toString());
               await audioStreamingPlugin.handleRemoteJsep(jsep);
               RTCSessionDescription answer =
-                  await videoStreamingPlugin.createAnswer();
+                  await audioStreamingPlugin.createAnswer();
               audioStreamingPlugin
                   .send(message: {"request": "start"}, jsep: answer);
-              Navigator.of(context).pop();
+              // Navigator.of(context).pop();
               setState(() {
                 _loader = false;
               });
@@ -233,6 +257,12 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
             setState(() {
               audioStreamingPlugin = plugin;
               // this.getStreamListing();
+              audioStreamingPlugin.send(message: {
+                "request": "watch",
+                "id": 15, //playerOverlay.videoTypeValue["value"],
+                "offer_audio": true,
+                "offer_video": true,
+              });
             });
           }));
     });
@@ -257,68 +287,32 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
     return Scaffold(
         body: GestureDetector(
             dragStartBehavior: DragStartBehavior.down,
-            child: Stack(children: [
+            child: Stack(alignment: Alignment.topCenter, children: [
               Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Stack(
-                    children: [
-                      Expanded(
-                        // height: 200,
-                        // width: 300,
-                        // color: Colors.green,
-                        child: RTCVideoView(
-                          _remoteRenderer,
-                          mirror: false,
-                          objectFit:
-                              RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-                        ),
-                      ),
-                      widget.isPlayerShown ? PlayerWidget() : Container(),
-                    ],
+                  Container(
+                    height: MediaQuery.of(context).size.height / 3,
+                    child: RTCVideoView(
+                      _remoteRenderer,
+                      mirror: false,
+                      // objectFit:
+                      //     RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
+                      // RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+                    ),
                   ),
                 ],
               ),
-              // !_loader
-              //     ? Align(
-              //         alignment: Alignment.bottomCenter,
-              //         child: Padding(
-              //           child: CircleAvatar(
-              //               backgroundColor: Colors.red,
-              //               radius: 30,
-              //               child: IconButton(
-              //                   icon: Icon(Icons.stop),
-              //                   color: Colors.white,
-              //                   onPressed: () {
-              //                     videoStreamingPlugin.send(
-              //                         message: {"request": "stop"},
-              //                         onSuccess: () async {
-              //                           await cleanUpAndBack();
-              //                         });
-              //                   })),
-              //           padding: EdgeInsets.all(10),
-              //         ),
-              //       )
-              //     : Padding(padding: EdgeInsets.zero),
-              // _loader
-              //     ? Align(
-              //         alignment: Alignment.center,
-              //         child: Column(
-              //           mainAxisAlignment: MainAxisAlignment.center,
-              //           crossAxisAlignment: CrossAxisAlignment.center,
-              //           children: [
-              //             CircularProgressIndicator(),
-              //             Padding(padding: EdgeInsets.all(10)),
-              //             Text("Fetching Available Streams..")
-              //           ],
-              //         ),
-              //       )
-              //     : Padding(padding: EdgeInsets.zero),
+              widget.isPlayerShown ? playerOverlay : Container(),
             ]),
             onTap: () {
               setState(() {
                 widget.isPlayerShown = !widget.isPlayerShown;
               });
-            }));
+            })
+        //
+        );
   }
 
   @override

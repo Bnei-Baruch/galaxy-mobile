@@ -10,6 +10,8 @@ typedef BooleanCallback = void Function(bool isTrue);
 class PlayerWidget extends StatefulWidget {
   bool isPlaying = false;
   BooleanCallback play;
+  VoidCallback audioChange;
+  VoidCallback videoChange;
 
   Map<String, Object> audioTypeValue;
   Map<String, Object> videoTypeValue;
@@ -21,6 +23,10 @@ class _PlayerStateWidget extends State<PlayerWidget> {
   @override
   void InitState() {
     widget.isPlaying = false;
+    // Map<String, Object> audioTypeValue = StreamConstants.audiog_options
+    //     .firstWhere((element) => element.keys.first == "he");
+    // Map<String, Object> videoTypeValue = StreamConstants.videos_options
+    //     .firstWhere((element) => element.keys.first == "1");
   }
 
   @override
@@ -146,6 +152,7 @@ class _PlayerStateWidget extends State<PlayerWidget> {
                   onChanged: (Map<String, Object> newValue) {
                     setState(() {
                       widget.audioTypeValue = newValue;
+                      widget.audioChange();
                     });
                   },
                   items: StreamConstants.audiog_options
