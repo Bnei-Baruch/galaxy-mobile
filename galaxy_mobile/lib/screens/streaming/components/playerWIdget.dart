@@ -129,6 +129,7 @@ class _PlayerStateWidget extends State<PlayerWidget> {
                   onChanged: (Map<String, Object> newValue) {
                     setState(() {
                       widget.videoTypeValue = newValue;
+                      widget.videoChange();
                     });
                   },
                   items: StreamConstants.videos_options

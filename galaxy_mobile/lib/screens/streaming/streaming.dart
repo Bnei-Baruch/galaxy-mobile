@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:galaxy_mobile/screens/streaming/constants.dart';
 import 'package:janus_client/Plugin.dart';
 import 'package:janus_client/janus_client.dart';
 import 'package:janus_client/utils.dart';
@@ -11,6 +12,10 @@ class StreamingUnified extends StatefulWidget {
   int defaultVideo = 15;
   int defaultAudio = 1;
   bool isPlayerShown = false;
+
+  var videoTrack;
+
+  var isVideoPlaying;
   @override
   _StreamingUnifiedState createState() => _StreamingUnifiedState();
 }
@@ -63,119 +68,45 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
     playerOverlay.play = (playing) =>
         {audioStreamingPlugin.hangup(), videoStreamingPlugin.hangup()};
     playerOverlay.audioChange = () {
-      audioStreamingPlugin.send(message: {"request": "stop"});
+      //  audioStreamingPlugin.send(message: {"request": "stop"});
       audioStreamingPlugin.send(message: {
-        "request": "watch",
-        "id": playerOverlay
-            .audioTypeValue["value"], //playerOverlay.videoTypeValue["value"],
-        "offer_audio": true,
-        "offer_video": true,
+        "request": "switch",
+        "id": playerOverlay.audioTypeValue["value"]
       });
+    };
+    playerOverlay.videoChange = () {
+      if (playerOverlay.videoTypeValue["value"] !=
+          StreamConstants.NO_VIDEO_OPTION_VALUE) {
+        if (videoStreamingPlugin != null && widget.isVideoPlaying == true) {
+          videoStreamingPlugin.send(message: {
+            "request": "switch",
+            "id": playerOverlay.videoTypeValue["value"]
+          });
+        } else {
+          videoStreamingPlugin.send(message: {
+            "request": "watch",
+            "id": playerOverlay.videoTypeValue[
+                "value"], //playerOverlay.videoTypeValue["value"],
+            "offer_audio": true,
+            "offer_video": true,
+          });
+        }
+      } else {
+        // _remoteRenderer.srcObject = null;
+        _remoteRenderer.dispose();
+        //  _remoteRenderer.srcObject.removeTrack(widget.videoTrack);
+        videoStreamingPlugin.send(message: {"request": "stop"});
+      }
     };
     widget.isPlayerShown = false;
     janusClient.connect(onSuccess: (sessionId) {
       //video plugin init
-      janusClient.attach(Plugin(
-          onRemoteTrack: (stream, track, mid, on) {
-            print('got remote stream');
-            _remoteStream
-                .addTrack(track)
-                .then((value) => _remoteRenderer.srcObject = _remoteStream);
-            playerOverlay.isPlaying = true;
-          },
-          plugin: "janus.plugin.streaming",
-          onMessage: (msg, jsep) async {
-            print('got onmsg');
-            print(msg);
-            if (msg['streaming'] != null && msg['result'] != null) {
-              if (msg['streaming'] == 'event' &&
-                  msg['result']['status'] == 'stopping') {
-                await this.destroy();
-              }
-            }
-
-            if (msg['janus'] == 'success' && msg['plugindata'] != null) {
-              var plugindata = msg['plugindata'];
-              print('got plugin data');
-
-              // showDialog(
-              //     context: context,
-              //     barrierDismissible: false,
-              //     child: StatefulBuilder(builder: (context, setstate) {
-              //       _setState = setstate;
-              //       _setState(() {
-              //         streams = plugindata['data']['list'];
-              //       });
-              //
-              //       return AlertDialog(
-              //         title: Text("Choose Stream To Play"),
-              //         content: Column(
-              //           children: [
-              //             DropdownButtonFormField(
-              //                 isExpanded: true,
-              //                 value: selectedStreamId,
-              //                 items: List.generate(
-              //                     streams.length,
-              //                     (index) => DropdownMenuItem(
-              //                         value: streams[index]['id'],
-              //                         child:
-              //                             Text(streams[index]['description']))),
-              //                 onChanged: (v) {
-              //                   _setState(() {
-              //                     selectedStreamId = v;
-              //                   });
-              //                 }),
-              //             RaisedButton(
-              //               color: Colors.green,
-              //               textColor: Colors.white,
-              //               onPressed: () {
-              //                 videoStreamingPlugin.send(message: {
-              //                   "request": "watch",
-              //                   "id": selectedStreamId,
-              //                   "offer_audio": true,
-              //                   "offer_video": true,
-              //                 });
-              //               },
-              //               child: Text("Play"),
-              //             )
-              //           ],
-              //         ),
-              //       );
-              //     }));
-            }
-
-            if (jsep != null) {
-              debugPrint("Handling SDP as well..." + jsep.toString());
-              await videoStreamingPlugin.handleRemoteJsep(jsep);
-              RTCSessionDescription answer =
-                  await videoStreamingPlugin.createAnswer();
-              videoStreamingPlugin
-                  .send(message: {"request": "start"}, jsep: answer);
-              // Navigator.of(context).pop();
-              setState(() {
-                _loader = false;
-              });
-            }
-          },
-          onSuccess: (plugin) {
-            setState(() {
-              videoStreamingPlugin = plugin;
-              // this.getStreamListing();
-              videoStreamingPlugin.send(message: {
-                "request": "watch",
-                "id": 1, //playerOverlay.videoTypeValue["value"],
-                "offer_audio": true,
-                "offer_video": true,
-              });
-            });
-          }));
+      initVideoStream();
       //audio plugin init
       janusClient.attach(Plugin(
           onRemoteTrack: (stream, track, mid, on) {
             print('got remote stream');
-            // _remoteStream
-            //     .addTrack(track)
-            //     .then((value) => _remoteRenderer.srcObject = _remoteStream);
+
             playerOverlay.isPlaying = true;
           },
           plugin: "janus.plugin.streaming",
@@ -185,59 +116,13 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
             if (msg['streaming'] != null && msg['result'] != null) {
               if (msg['streaming'] == 'event' &&
                   msg['result']['status'] == 'stopping') {
-                await this.destroy();
+                // await this.destroy();
               }
             }
 
             if (msg['janus'] == 'success' && msg['plugindata'] != null) {
               var plugindata = msg['plugindata'];
               print('got plugin data');
-              // showDialog(
-              //     context: context,
-              //     barrierDismissible: false,
-              //     child: StatefulBuilder(builder: (context, setstate) {
-              //       _setState = setstate;
-              //       _setState(() {
-              //         streams = plugindata['data']['list'];
-              //       });
-              //
-              //       return AlertDialog(
-              //         title: Text("Choose Stream To Play"),
-              //         content: Column(
-              //           children: [
-              //             DropdownButtonFormField(
-              //                 isExpanded: true,
-              //                 value: selectedStreamId,
-              //                 items: List.generate(
-              //                     streams.length,
-              //                     (index) => DropdownMenuItem(
-              //                         value: streams[index]['id'],
-              //                         child:
-              //                             Text(streams[index]['description']))),
-              //                 onChanged: (v) {
-              //                   _setState(() {
-              //                     selectedStreamId = v;
-              //                   });
-              //                 }),
-              //             RaisedButton(
-              //               color: Colors.green,
-              //               textColor: Colors.white,
-              //               onPressed: () {
-              //                 audioStreamingPlugin.send(message: {
-              //                   "request": "watch",
-              //                   "id": selectedStreamId,
-              //                   "offer_audio": true,
-              //                   "offer_video": true,
-              //                 });
-              //               },
-              //               child: Text("Play"),
-              //             )
-              //           ],
-              //         ),
-              //       );
-              //     }
-              //     )
-              // );
             }
 
             if (jsep != null) {
@@ -247,6 +132,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
                   await audioStreamingPlugin.createAnswer();
               audioStreamingPlugin
                   .send(message: {"request": "start"}, jsep: answer);
+
               // Navigator.of(context).pop();
               setState(() {
                 _loader = false;
@@ -266,6 +152,61 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
             });
           }));
     });
+  }
+
+  void initVideoStream() {
+    janusClient.attach(Plugin(
+        onRemoteTrack: (stream, track, mid, on) {
+          print('got remote stream');
+          widget.videoTrack = track;
+          _remoteStream
+              .addTrack(track)
+              .then((value) => _remoteRenderer.srcObject = _remoteStream);
+          playerOverlay.isPlaying = true;
+          widget.isVideoPlaying = true;
+        },
+        plugin: "janus.plugin.streaming",
+        onMessage: (msg, jsep) async {
+          print('got onmsg');
+          print(msg);
+          if (msg['streaming'] != null && msg['result'] != null) {
+            if (msg['streaming'] == 'event' &&
+                msg['result']['status'] == 'stopping') {
+              // await this.destroy();
+              widget.isVideoPlaying = false;
+            }
+          }
+
+          if (msg['janus'] == 'success' && msg['plugindata'] != null) {
+            var plugindata = msg['plugindata'];
+            print('got plugin data');
+          }
+
+          if (jsep != null) {
+            debugPrint("Handling SDP as well..." + jsep.toString());
+            await videoStreamingPlugin.handleRemoteJsep(jsep);
+            RTCSessionDescription answer =
+                await videoStreamingPlugin.createAnswer();
+            videoStreamingPlugin
+                .send(message: {"request": "start"}, jsep: answer);
+            // Navigator.of(context).pop();
+            setState(() {
+              _loader = false;
+            });
+          }
+        },
+        onSuccess: (plugin) {
+          setState(() {
+            videoStreamingPlugin = plugin;
+            // this.getStreamListing();
+            videoStreamingPlugin.send(message: {
+              "request": "watch",
+              "id": 1, //playerOverlay.videoTypeValue["value"],
+              "offer_audio": true,
+              "offer_video": true,
+            });
+          });
+        }));
   }
 
   Future<void> cleanUpAndBack() async {
