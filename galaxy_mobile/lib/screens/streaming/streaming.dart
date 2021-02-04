@@ -74,7 +74,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
         "id": playerOverlay.audioTypeValue["value"]
       });
     };
-    playerOverlay.videoChange = () {
+    playerOverlay.videoChange = () async {
       if (playerOverlay.videoTypeValue["value"] !=
           StreamConstants.NO_VIDEO_OPTION_VALUE) {
         if (videoStreamingPlugin != null && widget.isVideoPlaying == true) {
@@ -83,19 +83,28 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
             "id": playerOverlay.videoTypeValue["value"]
           });
         } else {
-          videoStreamingPlugin.send(message: {
-            "request": "watch",
-            "id": playerOverlay.videoTypeValue[
-                "value"], //playerOverlay.videoTypeValue["value"],
-            "offer_audio": true,
-            "offer_video": true,
-          });
+          // videoStreamingPlugin.send(message: {
+          //   "request": "watch",
+          //   "id": playerOverlay.videoTypeValue[
+          //       "value"], //playerOverlay.videoTypeValue["value"],
+          //   "offer_audio": true,
+          //   "offer_video": true,
+          // });
+          initVideoStream();
         }
       } else {
         // _remoteRenderer.srcObject = null;
-        _remoteRenderer.dispose();
+        // _remoteRenderer.dispose();
+        _remoteRenderer.srcObject = null;
+        _remoteStream.removeTrack(_remoteStream.getVideoTracks().first);
+        _remoteStream = await createLocalMediaStream("local");
+
+        //_remoteRenderer = new RTCVideoRenderer();
+        //await _remoteRenderer.initialize();
         //  _remoteRenderer.srcObject.removeTrack(widget.videoTrack);
         videoStreamingPlugin.send(message: {"request": "stop"});
+        videoStreamingPlugin.destroy();
+        videoStreamingPlugin = null;
       }
     };
     widget.isPlayerShown = false;
