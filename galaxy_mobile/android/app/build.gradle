@@ -46,7 +46,7 @@ android {
         versionName flutterVersionName
 
         manifestPlaceholders = [
-                'appAuthRedirectScheme': '<your_custom_scheme>'
+                'appAuthRedirectScheme': 'galaxy.mobile'
         ]
 
 

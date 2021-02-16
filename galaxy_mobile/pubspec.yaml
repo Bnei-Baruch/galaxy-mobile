@@ -30,6 +30,7 @@ dependencies:
   dropdown_search: ^0.4.8
   flutter_volume_slider: ^1.0.6
   flag: ^3.1.0
+  dotenv: ^2.0.0
 
   janus_client: #^0.0.4
     git:
