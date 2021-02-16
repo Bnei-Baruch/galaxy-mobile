@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:galaxy_mobile/config/env.dart';
@@ -13,14 +15,44 @@ class Room {
   final String region;
 // final Object extra" -> null
 
-  Room.fromJson(Map<String, dynamic> json) :
-  room = json['room'],
-  janus = json['janus'],
-  description = json['description'],
-  questions = json['questions'],
-  numUsers = json['numUsers'],
-  region = json['region']
-  ;
+  Room.fromJson(Map<String, dynamic> json)
+      : room = json['room'],
+        janus = json['janus'],
+        description = json['description'],
+        questions = json['questions'],
+        numUsers = json['numUse rs'],
+        region = json['region'];
+}
+//
+// class Config {
+//   final List<Gateway> gateways;
+//   Config.fromJson(Map<String, dynamic> json) : gateways = json['gateways'];
+// }
+//
+// class Gateway {
+//   final List<RoomsKey> keys;
+//   Gateway.fromJson(Map<String, dynamic> json) : keys = json['rooms'];
+// }
+//
+// class RoomsKey{
+//   final List<RoomData> rooms ;
+//   RoomsKey.fromJson(Map<String, dynamic> json): rooms = json['']
+// }
+//
+// Map jsonObject = json.decode(jsonString);
+// Iterable list = json.decode(jsonObject['worksheetData']);
+// List<WorksheetData> datasheet = list.map((f) => WorksheetData.fromJson(f)).toList();
+
+class RoomData {
+  final String name;
+  final String token;
+  final String type;
+  final String url;
+  RoomData.fromJson(Map<String, dynamic> json)
+      : name = json['name'],
+        token = json['token'],
+        type = json['type'],
+        url = json['url'];
 }
 
 class Api {
@@ -39,9 +71,15 @@ class Api {
 
   // fetchConfig = () =>
   //         this.logAndParse('fetch config', fetch(this.urlFor('/v2/config'), this.defaultOptions()));
-  Future<void> fetchConfig() async {
+  Future<List<RoomData>> fetchConfig() async {
     final response = await _dio.get('/v2/config');
-    return response.data;
+
+    Map<String, dynamic> gateways = response.data['gateways'];
+    Map<String, dynamic> roomsData = gateways['rooms'];
+    print(response.data['rooms']);
+    List<RoomData> dd =
+        roomsData.values.map((dynamic e) => RoomData.fromJson(e)).toList();
+    return dd;
   }
 
   // fetchAvailableRooms = (params = {}) =>
@@ -58,11 +96,10 @@ class Api {
   // fetchActiveRooms = () =>
   //       this.logAndParse('fetch active rooms', fetch(this.urlFor('/rooms'), this.defaultOptions()));
 
-    // fetchRoom = (id) =>
-    //     this.logAndParse(`fetch room ${id}`, fetch(this.urlFor(`/room/${id}`), this.defaultOptions()));
-    Future<Room> fetchRoom(num roomId) async {
-    final response = await _dio
-        .get('/room/$roomId');
+  // fetchRoom = (id) =>
+  //     this.logAndParse(`fetch room ${id}`, fetch(this.urlFor(`/room/${id}`), this.defaultOptions()));
+  Future<Room> fetchRoom(num roomId) async {
+    final response = await _dio.get('/room/$roomId');
     return Room.fromJson(response.data);
   }
 

@@ -13,12 +13,15 @@ class RoomSelector extends StatefulWidget {
 
 class _RoomSelectorState extends State<RoomSelector> {
   Future<List<Room>> fetchRooms;
+  Future<List<RoomData>> config;
 
   @override
   void initState() {
     super.initState();
     final api = Provider.of<Api>(context, listen: false);
     fetchRooms = api.fetchAvailableRooms();
+    config = api.fetchConfig();
+    print(config.hashCode);
   }
 
   @override
@@ -28,20 +31,20 @@ class _RoomSelectorState extends State<RoomSelector> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return DropdownSearch<Room>(
-                label: "Room",
-                hint: "Select Room",
-                items: snapshot.data,
-                // onFind: (String filter) => getData(filter),
-                itemAsString: (Room room) => room.description,
-                onChanged: (Room room) => print(room),
-                showClearButton: true,
-                // showSearchBox: true,
-                // searchBoxDecoration: InputDecoration(
-                //   border: OutlineInputBorder(),
-                //   contentPadding: EdgeInsets.fromLTRB(12, 12, 8, 0),
-                //   labelText: "Search a group",
-                // ),
-              );
+              label: "Room",
+              hint: "Select Room",
+              items: snapshot.data,
+              // onFind: (String filter) => getData(filter),
+              itemAsString: (Room room) => room.description,
+              onChanged: (Room room) => print(room),
+              showClearButton: true,
+              // showSearchBox: true,
+              // searchBoxDecoration: InputDecoration(
+              //   border: OutlineInputBorder(),
+              //   contentPadding: EdgeInsets.fromLTRB(12, 12, 8, 0),
+              //   labelText: "Search a group",
+              // ),
+            );
             // return Text("snapshot.data");
           } else if (snapshot.hasError) {
             return Text("${snapshot.error}");
