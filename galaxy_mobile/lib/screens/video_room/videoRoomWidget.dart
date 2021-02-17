@@ -9,6 +9,15 @@ import 'dart:async';
 
 class VideoRoom extends StatefulWidget {
   List<RTCVideoView> remote_videos = new List();
+  String server;
+  String token;
+  int roomNumber;
+
+  // VideoRoom(String serverUrl, String token, int roomNumber)
+  //     : this.roomNumber = roomNumber,
+  //       this.token = token,
+  //       this.server = serverUrl;
+
   @override
   _VideoRoomState createState() => _VideoRoomState();
 }
@@ -62,7 +71,7 @@ class _VideoRoomState extends State<VideoRoom> {
             // var body = {"request": "start", "room": 2157};
             var body = {
               "request": "start",
-              "room": 1234,
+              "room": widget.roomNumber,
             };
             await subscriberHandle.send(
                 message: body,
@@ -76,7 +85,7 @@ class _VideoRoomState extends State<VideoRoom> {
           });
           var register = {
             "request": "join",
-            "room": 1234,
+            "room": widget.roomNumber,
             "ptype": "subscriber",
             "streams": feeds,
           };
@@ -106,13 +115,10 @@ class _VideoRoomState extends State<VideoRoom> {
     setState(() {
       j = JanusClient(iceServers: [
         RTCIceServer(
-            url: "turn:40.85.216.95:3478",
-            username: "onemandev",
-            credential: "SecureIt"),
+            url: "turn:40.85.216.95:3478", username: "", credential: ""),
       ], server: [
-        'https://janus.conf.meetecho.com/janus',
-        'https://janus.onemandev.tech/janus',
-      ], withCredentials: true, isUnifiedPlan: true);
+        widget.server,
+      ], withCredentials: true, isUnifiedPlan: true, token: widget.token);
       j.connect(onSuccess: (sessionId) async {
         debugPrint('voilla! connection established with session id as' +
             sessionId.toString());
@@ -159,7 +165,7 @@ class _VideoRoomState extends State<VideoRoom> {
               });
               var register = {
                 "request": "join",
-                "room": 1234,
+                "room": widget.roomNumber,
                 "ptype": "publisher",
                 "display": 'User test'
               };
@@ -185,6 +191,10 @@ class _VideoRoomState extends State<VideoRoom> {
 
   @override
   Widget build(BuildContext context) {
+    final RoomArguments args = ModalRoute.of(context).settings.arguments;
+    widget.roomNumber = args.roomNumber;
+    widget.token = args.token;
+    widget.server = args.server;
     return Scaffold(
       appBar: AppBar(
         actions: [
@@ -275,4 +285,11 @@ class _VideoRoomState extends State<VideoRoom> {
       ]),
     );
   }
+}
+
+class RoomArguments {
+  final String server;
+  final String token;
+  final int roomNumber;
+  RoomArguments(this.server, this.token, this.roomNumber);
 }

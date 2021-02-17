@@ -1,11 +1,31 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:galaxy_mobile/screens/video_room/videoRoomWidget.dart';
+import 'package:galaxy_mobile/services/api.dart';
 import 'package:galaxy_mobile/widgets/audioMode.dart';
 import 'package:galaxy_mobile/widgets/roomSelector.dart';
 
 import 'package:galaxy_mobile/widgets/screenName.dart';
+import 'package:provider/provider.dart';
 
-class Settings extends StatelessWidget {
+class Settings extends StatefulWidget {
+  @override
+  State createState() => _SettingsState();
+}
+
+class _SettingsState extends State<Settings> {
+  Future<List<RoomData>> config;
+  int roomNumber;
+  String server;
+  String serverUrl;
+  String token;
+  @override
+  void initState() {
+    super.initState();
+    final api = Provider.of<Api>(context, listen: false);
+    config = api.fetchConfig();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -14,13 +34,15 @@ class Settings extends StatelessWidget {
         ),
         body: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           ScreenName(),
-          RoomSelector(),
+          RoomSelector((int room, String serverName) =>
+              {roomNumber = room, server = serverName, lookUpDataForRoom()}),
           AudioMode(),
           ElevatedButton(
             onPressed: () {
               // Respond to button press
+              Navigator.pushNamed(context, '/roomWidget',
+                  arguments: RoomArguments(serverUrl, token, roomNumber));
             },
-
             child: Text('Join Room'),
           )
         ]
@@ -33,5 +55,16 @@ class Settings extends StatelessWidget {
             //     child: Text('Go back!'),
             // ),
             ));
+  }
+
+  lookUpDataForRoom() {
+    RoomData element;
+    config.then((list) => {
+          element = list.firstWhere((element) => element.name == server),
+          serverUrl = element.url,
+          token = element.token
+        });
+    //  print(token);
+    //value[server]["url"].
   }
 }

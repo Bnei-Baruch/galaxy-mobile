@@ -76,10 +76,9 @@ class Api {
 
     Map<String, dynamic> gateways = response.data['gateways'];
     Map<String, dynamic> roomsData = gateways['rooms'];
-    print(response.data['rooms']);
-    List<RoomData> dd =
+    List<RoomData> rooms =
         roomsData.values.map((dynamic e) => RoomData.fromJson(e)).toList();
-    return dd;
+    return rooms;
   }
 
   // fetchAvailableRooms = (params = {}) =>
