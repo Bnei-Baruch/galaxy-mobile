@@ -1,5 +1,7 @@
 import 'dart:collection';
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:galaxy_mobile/services/authService.dart';
 import 'package:janus_client/janus_client.dart';
 import 'package:janus_client/utils.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
@@ -12,6 +14,8 @@ class VideoRoom extends StatefulWidget {
   String server;
   String token;
   int roomNumber;
+
+  User user;
 
   // VideoRoom(String serverUrl, String token, int roomNumber)
   //     : this.roomNumber = roomNumber,
@@ -167,7 +171,12 @@ class _VideoRoomState extends State<VideoRoom> {
                 "request": "join",
                 "room": widget.roomNumber,
                 "ptype": "publisher",
-                "display": 'User test'
+                "display": jsonEncode({
+                  "id": widget.user.sub,
+                  "timestamp": TimeOfDay.now().toString(),
+                  "role": "User",
+                  "display": widget.user.name
+                }) //'User test'
               };
               plugin.send(
                   message: register,
@@ -195,6 +204,7 @@ class _VideoRoomState extends State<VideoRoom> {
     widget.roomNumber = args.roomNumber;
     widget.token = args.token;
     widget.server = args.server;
+    widget.user = args.user;
     return Scaffold(
       appBar: AppBar(
         actions: [
@@ -291,5 +301,6 @@ class RoomArguments {
   final String server;
   final String token;
   final int roomNumber;
-  RoomArguments(this.server, this.token, this.roomNumber);
+  final User user;
+  RoomArguments(this.server, this.token, this.roomNumber, this.user);
 }

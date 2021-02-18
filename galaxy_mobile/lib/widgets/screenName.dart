@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:galaxy_mobile/services/authService.dart';
 import 'package:provider/provider.dart';
 
+typedef UserCallback = void Function(User user);
+
 class ScreenName extends StatelessWidget {
+  UserCallback gotUser;
+  ScreenName(UserCallback callback) : gotUser = callback;
+
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context, listen: false);
@@ -11,6 +16,7 @@ class ScreenName extends StatelessWidget {
         future: authService.getUser(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
+            gotUser(snapshot.data);
             return TextFormField(
                 enabled: false,
                 initialValue: snapshot.data.title,

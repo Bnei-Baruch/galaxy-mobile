@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:galaxy_mobile/screens/video_room/videoRoomWidget.dart';
 import 'package:galaxy_mobile/services/api.dart';
+import 'package:galaxy_mobile/services/authService.dart';
 import 'package:galaxy_mobile/widgets/audioMode.dart';
 import 'package:galaxy_mobile/widgets/roomSelector.dart';
 
@@ -19,10 +20,14 @@ class _SettingsState extends State<Settings> {
   String server;
   String serverUrl;
   String token;
+
+  User user;
   @override
   void initState() {
     super.initState();
     final api = Provider.of<Api>(context, listen: false);
+    final authService = Provider.of<AuthService>(context, listen: false);
+
     config = api.fetchConfig();
   }
 
@@ -33,7 +38,7 @@ class _SettingsState extends State<Settings> {
           title: Text("Settings"),
         ),
         body: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          ScreenName(),
+          ScreenName((User) => {user = User}),
           RoomSelector((int room, String serverName) =>
               {roomNumber = room, server = serverName, lookUpDataForRoom()}),
           AudioMode(),
@@ -41,7 +46,7 @@ class _SettingsState extends State<Settings> {
             onPressed: () {
               // Respond to button press
               Navigator.pushNamed(context, '/roomWidget',
-                  arguments: RoomArguments(serverUrl, token, roomNumber));
+                  arguments: RoomArguments(serverUrl, token, roomNumber, user));
             },
             child: Text('Join Room'),
           )
