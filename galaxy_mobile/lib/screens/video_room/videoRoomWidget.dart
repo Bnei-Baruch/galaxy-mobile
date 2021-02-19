@@ -58,10 +58,10 @@ class _VideoRoomState extends State<VideoRoom> {
       await renderer.initialize();
     }
     count = 0;
-    while (count < 4) {
-      createLocalMediaStream("local").then((value) => remoteStream.add(value));
-      count++;
-    }
+    // while (count < 4) {
+    createLocalMediaStream("local").then((value) => remoteStream.add(value));
+    //  count++;
+    //  }
   }
 
   _newRemoteFeed(JanusClient j, List<Map> feeds) async {
@@ -119,7 +119,7 @@ class _VideoRoomState extends State<VideoRoom> {
     setState(() {
       j = JanusClient(iceServers: [
         RTCIceServer(
-            url: "turn:40.85.216.95:3478", username: "", credential: ""),
+            url: "stun:galaxy.kli.one:3478", username: "", credential: ""),
       ], server: [
         widget.server,
       ], withCredentials: true, isUnifiedPlan: true, token: widget.token);
@@ -157,13 +157,12 @@ class _VideoRoomState extends State<VideoRoom> {
               }
             },
             onSuccess: (plugin) async {
-              setState(() {
-                pluginHandle = plugin;
-              });
+              // setState(() {
+              pluginHandle = plugin;
               MediaStream stream = await plugin.initializeMediaDevices();
-              setState(() {
-                myStream = stream;
-              });
+              myStream = stream;
+              myStream.getAudioTracks().first.setMicrophoneMute(true);
+              // });
               setState(() {
                 _localRenderer.srcObject = myStream;
               });
@@ -171,10 +170,12 @@ class _VideoRoomState extends State<VideoRoom> {
                 "request": "join",
                 "room": widget.roomNumber,
                 "ptype": "publisher",
-                "display": jsonEncode({
+                "display": //"igal test"
+
+                    jsonEncode({
                   "id": widget.user.sub,
                   "timestamp": TimeOfDay.now().toString(),
-                  "role": "User",
+                  "role": "user",
                   "display": widget.user.name
                 }) //'User test'
               };
@@ -249,50 +250,92 @@ class _VideoRoomState extends State<VideoRoom> {
         ],
         title: const Text('janus_client'),
       ),
-      body: Row(children: [
-        Expanded(
-            child: (_remoteRenderer != null &&
-                    _remoteRenderer.elementAt(0) != null)
-                ? RTCVideoView(_remoteRenderer.elementAt(0))
-                : Text(
-                    "Waiting...",
-                    style: TextStyle(color: Colors.black),
-                  )),
-        Expanded(
-            child: (_remoteRenderer != null &&
-                    _remoteRenderer.elementAt(1) != null)
-                ? RTCVideoView(_remoteRenderer.elementAt(1))
-                : Text(
-                    "Waiting...",
-                    style: TextStyle(color: Colors.black),
-                  )),
-        Expanded(
-            child: (_remoteRenderer != null &&
-                    _remoteRenderer.elementAt(2) != null)
-                ? RTCVideoView(_remoteRenderer.elementAt(2))
-                : Text(
-                    "Waiting...",
-                    style: TextStyle(color: Colors.black),
-                  )),
-        Expanded(
-            child: (_remoteRenderer != null &&
-                    _remoteRenderer.elementAt(3) != null)
-                ? RTCVideoView(_remoteRenderer.elementAt(3))
-                : Text(
-                    "Waiting...",
-                    style: TextStyle(color: Colors.black),
-                  )),
-        Align(
-          child: Container(
+      body:
+          // Row(children: [
+          GridView.count(
+        children: [
+          Container(
             child: RTCVideoView(
               _localRenderer,
             ),
             height: 200,
             width: 200,
           ),
-          alignment: Alignment.bottomRight,
-        )
-      ]),
+          (_remoteRenderer != null && _remoteRenderer.elementAt(0) != null)
+              ? RTCVideoView(_remoteRenderer.elementAt(0))
+              : Text(
+                  "Waiting...",
+                  style: TextStyle(color: Colors.white),
+                ),
+          (_remoteRenderer != null && _remoteRenderer.elementAt(1) != null)
+              ? RTCVideoView(_remoteRenderer.elementAt(1))
+              : Text(
+                  "Waiting...",
+                  style: TextStyle(color: Colors.white),
+                ),
+          (_remoteRenderer != null && _remoteRenderer.elementAt(2) != null)
+              ? RTCVideoView(_remoteRenderer.elementAt(2))
+              : Text(
+                  "Waiting...",
+                  style: TextStyle(color: Colors.white),
+                ),
+          (_remoteRenderer != null && _remoteRenderer.elementAt(3) != null)
+              ? RTCVideoView(_remoteRenderer.elementAt(3))
+              : Text(
+                  "Waiting...",
+                  style: TextStyle(color: Colors.white),
+                )
+        ],
+        primary: false,
+        padding: const EdgeInsets.all(20),
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        crossAxisCount: 2,
+      ),
+      // Expanded(
+      //     child: (_remoteRenderer != null &&
+      //             _remoteRenderer.elementAt(0) != null)
+      //         ? RTCVideoView(_remoteRenderer.elementAt(0))
+      //         : Text(
+      //             "Waiting...",
+      //             style: TextStyle(color: Colors.black),
+      //           )),
+      // Expanded(
+      //     child: (_remoteRenderer != null &&
+      //             _remoteRenderer.elementAt(1) != null)
+      //         ? RTCVideoView(_remoteRenderer.elementAt(1))
+      //         : Text(
+      //             "Waiting...",
+      //             style: TextStyle(color: Colors.black),
+      //           )),
+      // Expanded(
+      //     child: (_remoteRenderer != null &&
+      //             _remoteRenderer.elementAt(2) != null)
+      //         ? RTCVideoView(_remoteRenderer.elementAt(2))
+      //         : Text(
+      //             "Waiting...",
+      //             style: TextStyle(color: Colors.black),
+      //           )),
+      // Expanded(
+      //     child: (_remoteRenderer != null &&
+      //             _remoteRenderer.elementAt(3) != null)
+      //         ? RTCVideoView(_remoteRenderer.elementAt(3))
+      //         : Text(
+      //             "Waiting...",
+      //             style: TextStyle(color: Colors.black),
+      //           )),
+      // Align(
+      //   child: Container(
+      //     child: RTCVideoView(
+      //       _localRenderer,
+      //     ),
+      //     height: 200,
+      //     width: 200,
+      //   ),
+      //   alignment: Alignment.bottomRight,
+      // )
+      // ]
+      // ),
     );
   }
 }
