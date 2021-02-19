@@ -26,8 +26,7 @@ class _SettingsState extends State<Settings> {
   @override
   void initState() {
     super.initState();
-    final api = Provider.of<Api>(context, listen: false);
-    final authService = Provider.of<AuthService>(context, listen: false);
+    final api = context.read<Api>();
 
     config = api.fetchConfig();
   }

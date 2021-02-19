@@ -10,7 +10,7 @@ class ScreenName extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<AuthService>(context, listen: false);
+    final authService = context.read<AuthService>();
 
     return FutureBuilder<User>(
         future: authService.getUser(),
