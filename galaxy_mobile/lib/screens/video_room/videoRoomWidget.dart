@@ -35,6 +35,20 @@ class _VideoRoomState extends State<VideoRoom> {
   List<MediaStream> remoteStream = new List<MediaStream>();
   MediaStream myStream;
 
+  List<Map> roomFeeds;
+
+  var streams;
+
+  bool creatingFeed = false;
+
+  var feeds;
+
+  Map newStreamsMids;
+
+  set id(id) {}
+
+  set subscription(List subscription) {}
+
   @override
   void didChangeDependencies() async {
     // TODO: implement didChangeDependencies
@@ -64,12 +78,27 @@ class _VideoRoomState extends State<VideoRoom> {
     //  }
   }
 
+  sortAndFilterFeeds(List feeds) => feeds
+      .where((feed) => !feed["display"]["role"].match("/^(ghost|guest)"))
+      .toList()
+      .sort((a, b) => a["display"]["timestamp"] - b["display"]["timestamp"]);
+
+  userFeeds(feeds) => feeds.filter((feed) => feed["display"]["role"] == 'user');
+
   _newRemoteFeed(JanusClient j, List<Map> feeds) async {
-    List<Map> myFeeds = feeds;
+    roomFeeds = feeds;
     print('remote plugin attached');
     j.attach(Plugin(
         plugin: 'janus.plugin.videoroom',
         onMessage: (msg, jsep) async {
+          //update feed
+          if (msg["event"] == 'attached' ||
+              (msg["event"] == 'event' && msg['switched'] == 'ok') ||
+              msg["event"] == 'updated') {
+            newStreamsMids = new Map.of(msg['streams'].map(
+                (stream) => {"mid": stream["mid"], "feed_id": stream.feed_id}));
+          }
+
           if (jsep != null) {
             await subscriberHandle.handleRemoteJsep(jsep);
             // var body = {"request": "start", "room": 2157};
@@ -134,8 +163,8 @@ class _VideoRoomState extends State<VideoRoom> {
             opaqueId: "videoroom_user",
             plugin: 'janus.plugin.videoroom',
             onMessage: (msg, jsep) async {
-              print('publisheronmsg');
               if (msg["publishers"] != null) {
+                print('publisher on msg');
                 var list = msg["publishers"];
                 print('got publihers');
                 print(list);
@@ -149,8 +178,45 @@ class _VideoRoomState extends State<VideoRoom> {
                       })
                     });
                 //Map.from(item)..forEach((key, value) => if(key != ("id")) ));
-                _newRemoteFeed(j, subscription);
+                //need to keep the feeds currently in the room with the data they (present user), question, mute / unmute
+
+                //  _newRemoteFeed(j, subscription);
+
+                // User just joined the room.
+
+                var decoder = jsonDecode(
+                    "{\"id\":\"2834a16d-2204-4acc-85ff-a3cbd82d0414\",\"timestamp\":1613954128027,\"role\":\"user\",\"display\":\"shay\"}");
+                msg['publishers']
+                    .filter((l) => l["display"] = (jsonDecode(l["display"])));
+                //          List newFeeds = sortAndFilterFeeds();
+                List newFeeds = List();
+                print('New list of available publishers/feeds:' +
+                    newFeeds.toString());
+                Set newFeedsIds = new Set();
+                newFeedsIds.addAll(newFeeds.map((feed) => feed.id));
+                if (feeds.some((feed) => newFeedsIds.lookup(feed["id"]))) {
+                  print("New feed joining but one of the feeds already exist" +
+                      newFeeds.toString() +
+                      list.toString());
+                  return;
+                }
+                // Merge new feed with existing feeds and sort.
+                this.makeSubscription(
+                    newFeeds,
+                    /* feedsJustJoined= */ true,
+                    /* subscribeToVideo= */ false,
+                    /* subscribeToAudio= */ true,
+                    /* subscribeToData= */ true);
+                // this.switchVideos(/* page= */ this.state.page, userFeeds(feeds),
+                //  userFeeds(feedsNewState));
+                // this.setState({feeds: feedsNewState});
               }
+
+              //need to handle disconnection of room feed
+
+              //need to handle addition of room feed
+
+              //need to handle change of status of feeds
 
               if (jsep != null) {
                 pluginHandle.handleRemoteJsep(jsep);
@@ -199,6 +265,109 @@ class _VideoRoomState extends State<VideoRoom> {
     });
   }
 
+  // Subscribe to feeds, whether already existing in the room, when I joined
+  // or new feeds that join the room when I'm already in. In both cases I
+  // should add those feeds to my feeds list.
+  // In case of feeds just joined and |question| is set, we should notify the
+  // new entering user by notifying everyone.
+  // Subscribes selectively to different stream types |subscribeToVideo|, |subscribeToAudio|, |subscribeToData|.
+  // This is required to stop and then start only the videos to save bandwidth.
+  void makeSubscription(newFeeds, feedsJustJoined, subscribeToVideo,
+      subscribeToAudio, subscribeToData) {
+    List<Map> subscription = List<Map>();
+    newFeeds.forEach((feed, feedIndex) => () {
+          //const { id, streams } = feed;
+          String id = feed["id"];
+          streams = feed["streams"];
+          feed.video =
+              !!streams.find((v) => v.type == 'video' && v.codec == 'h264');
+          feed.audio =
+              !!streams.find((a) => a.type == 'audio' && a.codec == 'opus');
+          feed.data = !!streams.find((d) => d.type == 'data');
+          feed.cammute = !feed.video;
+
+          streams.forEach((stream) => () {
+                if ((subscribeToVideo &&
+                        stream.type == 'video' &&
+                        stream.codec == 'h264') ||
+                    (subscribeToAudio &&
+                        stream.type == 'audio' &&
+                        stream.codec == 'opus') ||
+                    (subscribeToData && stream.type == 'data')) {
+                  subscription.add({feed: id, "mid": stream.mid});
+                }
+              });
+        });
+
+    if (subscription.length > 0) {
+      //this.
+      subscribeTo(subscription);
+      // if (feedsJustJoined) {
+      // // Send question event for new feed, by notifying the whole room.
+      // // FIXME: Can this be done by notifying only the joined feed?
+      // setTimeout(() => {
+      // if (this.state.cammuted) {
+      // const msg = { type: 'client-state', user: this.state.user };
+      // if (this.state.msg_protocol == 'mqtt') {
+      // mqtt.send(JSON.stringify(msg), false, 'galaxy/room/' + this.state.room);
+      // } else {
+      // this.chat.sendCmdMessage(msg);
+      // }
+      // }
+      // }, 3000);
+      // }
+    }
+  }
+
+  void subscribeTo(List<Map> subscription) {
+    // New feeds are available, do we need create a new plugin handle first?
+    print(' :: Got subscribtion: ' +
+        subscription
+            .toString()); //, !!this.state.remoteFeed, this.state.creatingFeed);
+    if (pluginHandle != null) {
+      pluginHandle
+          .send(message: {"request": 'subscribe', streams: subscription});
+    }
+
+    // We don't have a handle yet, but we may be creating one already
+    // if (creatingFeed) {
+    //   // Still working on the handle
+    //   setTimeout(() => {
+    //   this.subscribeTo(subscription);
+    //   }, 500);
+    //   return;
+    // }
+
+    // We are not creating the feed, so let's do it.
+    creatingFeed = true;
+    _newRemoteFeed(j, subscription);
+  }
+  // Unsubscribe from feeds defined by |ids| (with all streams) and remove it when |onlyVideo| is false.
+  // If |onlyVideo| is true, will unsubscribe only from video stream of those specific feeds, keeping those feeds.
+  // void unsubscribeFrom(ids, onlyVideo) {
+  // const { feeds/*, feedStreams, index*/ } = this.state;
+  // const idsSet                            = new Set(ids);
+  // const unsubscribe                       = { request: 'unsubscribe', streams: [] };
+  // feeds.filter(feed => idsSet.has(feed.id)).forEach(feed => {
+  // if (onlyVideo) {
+  // // Unsubscribe only from one video stream (not all publisher feed).
+  // // Acutally expecting only one video stream, but writing more generic code.
+  // feed.streams.filter(stream => stream.type === 'video')
+  //     .map(stream => ({ feed: feed.id, mid: stream.mid }))
+  //     .forEach(stream => unsubscribe.streams.push(stream));
+  // } else {
+  // // Unsubscribe the whole feed (all it's streams).
+  // unsubscribe.streams.push({ feed: feed.id });
+  // Janus.log('Unsubscribe from Feed ' + JSON.stringify(feed) + ' (' + feed.id + ').');
+  // }
+  // });
+  // // Send an unsubscribe request.
+  // const { remoteFeed } = this.state;
+  // if (remoteFeed !== null && unsubscribe.streams.length > 0) {
+  // remoteFeed.send({ message: unsubscribe });
+  // }
+  // }
+
   @override
   Widget build(BuildContext context) {
     final RoomArguments args = ModalRoute.of(context).settings.arguments;
@@ -207,136 +376,94 @@ class _VideoRoomState extends State<VideoRoom> {
     widget.server = args.server;
     widget.user = args.user;
     return Scaffold(
-      appBar: AppBar(
-        actions: [
-          IconButton(
-              icon: Icon(
-                Icons.call,
-                color: Colors.greenAccent,
-              ),
-              onPressed: () async {
-                await this.initRenderers();
-                await this.initPlatformState();
+        appBar: AppBar(
+          actions: [
+            IconButton(
+                icon: Icon(
+                  Icons.call,
+                  color: Colors.greenAccent,
+                ),
+                onPressed: () async {
+                  await this.initRenderers();
+                  await this.initPlatformState();
 //                  -_localRenderer.
-              }),
-          IconButton(
-              icon: Icon(
-                Icons.call_end,
-                color: Colors.red,
+                }),
+            IconButton(
+                icon: Icon(
+                  Icons.call_end,
+                  color: Colors.red,
+                ),
+                onPressed: () {
+                  j.destroy();
+                  pluginHandle.hangup();
+                  subscriberHandle.hangup();
+                  _localRenderer.srcObject = null;
+                  _localRenderer.dispose();
+                  _remoteRenderer.map((e) => e.srcObject = null);
+                  _remoteRenderer.map((e) => e.dispose());
+                  setState(() {
+                    pluginHandle = null;
+                    subscriberHandle = null;
+                  });
+                }),
+            IconButton(
+                icon: Icon(
+                  Icons.switch_camera,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  if (pluginHandle != null) {
+                    pluginHandle.switchCamera();
+                  }
+                })
+          ],
+          title: const Text('janus_client'),
+        ),
+        body:
+            // Row(children: [
+            GridView.count(
+          children: [
+            Container(
+              child: RTCVideoView(
+                _localRenderer,
               ),
-              onPressed: () {
-                j.destroy();
-                pluginHandle.hangup();
-                subscriberHandle.hangup();
-                _localRenderer.srcObject = null;
-                _localRenderer.dispose();
-                _remoteRenderer.map((e) => e.srcObject = null);
-                _remoteRenderer.map((e) => e.dispose());
-                setState(() {
-                  pluginHandle = null;
-                  subscriberHandle = null;
-                });
-              }),
-          IconButton(
-              icon: Icon(
-                Icons.switch_camera,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                if (pluginHandle != null) {
-                  pluginHandle.switchCamera();
-                }
-              })
-        ],
-        title: const Text('janus_client'),
-      ),
-      body:
-          // Row(children: [
-          GridView.count(
-        children: [
-          Container(
-            child: RTCVideoView(
-              _localRenderer,
+              height: 200,
+              width: 200,
             ),
-            height: 200,
-            width: 200,
-          ),
-          (_remoteRenderer != null && _remoteRenderer.elementAt(0) != null)
-              ? RTCVideoView(_remoteRenderer.elementAt(0))
-              : Text(
-                  "Waiting...",
-                  style: TextStyle(color: Colors.white),
-                ),
-          (_remoteRenderer != null && _remoteRenderer.elementAt(1) != null)
-              ? RTCVideoView(_remoteRenderer.elementAt(1))
-              : Text(
-                  "Waiting...",
-                  style: TextStyle(color: Colors.white),
-                ),
-          (_remoteRenderer != null && _remoteRenderer.elementAt(2) != null)
-              ? RTCVideoView(_remoteRenderer.elementAt(2))
-              : Text(
-                  "Waiting...",
-                  style: TextStyle(color: Colors.white),
-                ),
-          (_remoteRenderer != null && _remoteRenderer.elementAt(3) != null)
-              ? RTCVideoView(_remoteRenderer.elementAt(3))
-              : Text(
-                  "Waiting...",
-                  style: TextStyle(color: Colors.white),
-                )
-        ],
-        primary: false,
-        padding: const EdgeInsets.all(20),
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        crossAxisCount: 2,
-      ),
-      // Expanded(
-      //     child: (_remoteRenderer != null &&
-      //             _remoteRenderer.elementAt(0) != null)
-      //         ? RTCVideoView(_remoteRenderer.elementAt(0))
-      //         : Text(
-      //             "Waiting...",
-      //             style: TextStyle(color: Colors.black),
-      //           )),
-      // Expanded(
-      //     child: (_remoteRenderer != null &&
-      //             _remoteRenderer.elementAt(1) != null)
-      //         ? RTCVideoView(_remoteRenderer.elementAt(1))
-      //         : Text(
-      //             "Waiting...",
-      //             style: TextStyle(color: Colors.black),
-      //           )),
-      // Expanded(
-      //     child: (_remoteRenderer != null &&
-      //             _remoteRenderer.elementAt(2) != null)
-      //         ? RTCVideoView(_remoteRenderer.elementAt(2))
-      //         : Text(
-      //             "Waiting...",
-      //             style: TextStyle(color: Colors.black),
-      //           )),
-      // Expanded(
-      //     child: (_remoteRenderer != null &&
-      //             _remoteRenderer.elementAt(3) != null)
-      //         ? RTCVideoView(_remoteRenderer.elementAt(3))
-      //         : Text(
-      //             "Waiting...",
-      //             style: TextStyle(color: Colors.black),
-      //           )),
-      // Align(
-      //   child: Container(
-      //     child: RTCVideoView(
-      //       _localRenderer,
-      //     ),
-      //     height: 200,
-      //     width: 200,
-      //   ),
-      //   alignment: Alignment.bottomRight,
-      // )
-      // ]
-      // ),
-    );
+            (_remoteRenderer != null && _remoteRenderer.elementAt(0) != null)
+                ? Stack(children: [
+                    RTCVideoView(_remoteRenderer.elementAt(0)),
+                    Align(
+                      alignment: Alignment.bottomLeft,
+                      child: Text("User name"),
+                    ),
+                  ])
+                : Text("Waiting...", style: TextStyle(color: Colors.white)),
+            (_remoteRenderer != null && _remoteRenderer.elementAt(1) != null)
+                ? RTCVideoView(_remoteRenderer.elementAt(1))
+                : Text(
+                    "Waiting...",
+                    style: TextStyle(color: Colors.white),
+                  ),
+            (_remoteRenderer != null && _remoteRenderer.elementAt(2) != null)
+                ? RTCVideoView(_remoteRenderer.elementAt(2))
+                : Text(
+                    "Waiting...",
+                    style: TextStyle(color: Colors.white),
+                  ),
+            (_remoteRenderer != null && _remoteRenderer.elementAt(3) != null)
+                ? RTCVideoView(_remoteRenderer.elementAt(3))
+                : Text(
+                    "Waiting...",
+                    style: TextStyle(color: Colors.white),
+                  )
+          ],
+          primary: false,
+          padding: const EdgeInsets.all(20),
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          crossAxisCount: 2,
+        ));
   }
 }
 

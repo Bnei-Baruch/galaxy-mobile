@@ -7,6 +7,7 @@ import 'package:galaxy_mobile/widgets/audioMode.dart';
 import 'package:galaxy_mobile/widgets/roomSelector.dart';
 
 import 'package:galaxy_mobile/widgets/screenName.dart';
+import 'package:galaxy_mobile/widgets/selfViewWidget.dart';
 import 'package:provider/provider.dart';
 
 class Settings extends StatefulWidget {
@@ -37,7 +38,12 @@ class _SettingsState extends State<Settings> {
         appBar: AppBar(
           title: Text("Settings"),
         ),
-        body: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        body: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+          Container(
+            height: 200,
+            width: 300,
+            child: SelfViewWidget(),
+          ),
           ScreenName((User) => {user = User}),
           RoomSelector((int room, String serverName) =>
               {roomNumber = room, server = serverName, lookUpDataForRoom()}),

@@ -29,56 +29,39 @@ class _SelfViewWidgetState extends State<SelfViewWidget> {
   @override
   void initState() {
     super.initState();
+    _localRenderer.initialize();
     initRenderers();
   }
 
-  initRenderers() async {
-    await _localRenderer.initialize();
-    MediaStream stream = await Plugin().initializeMediaDevices();
-    myStream = stream;
-    myStream.getAudioTracks().first.setMicrophoneMute(false);
-    _localRenderer.srcObject = myStream;
+  initRenderers() {
+    var mediaConstraints = {
+      "audio": true,
+      "video": {
+        "mandatory": {
+          "minWidth":
+              '1280', // Provide your own width, height and frame rate here
+          "minHeight": '720',
+          "minFrameRate": '60',
+        },
+        "facingMode": "user",
+        "optional": [],
+      }
+    };
+    Future<MediaStream> stream = navigator.getUserMedia(mediaConstraints);
+
+    stream.then((value) => setState(() {
+          _localRenderer.srcObject = value;
+        }));
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        actions: [
-          IconButton(
-              icon: Icon(
-                Icons.call,
-                color: Colors.greenAccent,
-              ),
-              onPressed: () async {
-                await this.initRenderers();
-              }),
-          IconButton(
-              icon: Icon(
-                Icons.call_end,
-                color: Colors.red,
-              ),
-              onPressed: () {
-                _localRenderer.srcObject = null;
-                _localRenderer.dispose();
-                setState(() {});
-              }),
-          IconButton(
-              icon: Icon(
-                Icons.switch_camera,
-                color: Colors.white,
-              ),
-              onPressed: () {})
-        ],
-        title: const Text('janus_client'),
+    return Container(
+      child: RTCVideoView(
+        _localRenderer,
       ),
-      body: Container(
-        child: RTCVideoView(
-          _localRenderer,
-        ),
-        height: 200,
-        width: 200,
-      ),
+      height: 200,
+      width: 200,
     );
   }
 }
