@@ -281,12 +281,19 @@ class _VideoRoomState extends State<VideoRoom> {
       //const { id, streams } = feed;
       var id = feed["id"];
       streams = feed["streams"];
-      feed["video"] =
-          !!streams.find((v) => v["type"] == 'video' && v["codec"] == 'h264');
-      feed["audio"] =
-          !!streams.find((a) => a["type"] == 'audio' && a["type"] == 'opus');
-      feed["data"] = !!streams.find((d) => d["type"] == 'data');
-      feed["cammute"] = !feed.video;
+      Map tempFeed = feed;
+
+      tempFeed.putIfAbsent(
+          "video",
+          () => !!streams
+              .find((v) => v["type"] == 'video' && v["codec"] == 'h264'));
+      tempFeed.putIfAbsent(
+          "audio",
+          () => !!streams
+              .find((a) => a["type"] == 'audio' && a["type"] == 'opus'));
+      tempFeed.putIfAbsent(
+          "data", () => !!streams.find((d) => d["type"] == 'data'));
+      tempFeed.putIfAbsent("cammute", () => !feed["video"]);
 
       streams.forEach((stream) => () {
             if ((subscribeToVideo &&
@@ -296,7 +303,7 @@ class _VideoRoomState extends State<VideoRoom> {
                     stream["type"] == 'audio' &&
                     stream["codec"] == 'opus') ||
                 (subscribeToData && stream["type"] == 'data')) {
-              subscription.add({feed: id, "mid": stream.mid});
+              subscription.add({feed: id, "mid": stream["mid"]});
             }
           });
     });
