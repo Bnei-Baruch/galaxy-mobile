@@ -41,7 +41,7 @@ class _VideoRoomState extends State<VideoRoom> {
 
   bool creatingFeed = false;
 
-  var feeds;
+  List feeds;
 
   Map newStreamsMids;
 
@@ -184,22 +184,24 @@ class _VideoRoomState extends State<VideoRoom> {
 
                 // User just joined the room.
 
-                var decoder = jsonDecode(
-                    "{\"id\":\"2834a16d-2204-4acc-85ff-a3cbd82d0414\",\"timestamp\":1613954128027,\"role\":\"user\",\"display\":\"shay\"}");
-                msg['publishers']
-                    .filter((l) => l["display"] = (jsonDecode(l["display"])));
+                (msg['publishers'] as List).forEach((value) =>
+                    value["display"] = (jsonDecode(value["display"])));
+                //( (l)  => l["display"] = (jsonDecode(l["display"])) as Map);
                 //          List newFeeds = sortAndFilterFeeds();
-                List newFeeds = List();
+                List newFeeds = msg['publishers'];
                 print('New list of available publishers/feeds:' +
                     newFeeds.toString());
                 Set newFeedsIds = new Set();
-                newFeedsIds.addAll(newFeeds.map((feed) => feed.id));
-                if (feeds.some((feed) => newFeedsIds.lookup(feed["id"]))) {
+                var tempset = newFeeds.map((feed) => feed["id"]).toSet();
+                newFeedsIds.addAll(newFeeds.map((feed) => feed["id"]).toSet());
+                if (feeds != null &&
+                    feeds.any((feed) => newFeedsIds.lookup(feed["id"]))) {
                   print("New feed joining but one of the feeds already exist" +
                       newFeeds.toString() +
                       list.toString());
                   return;
-                }
+                } else
+                  feeds = newFeeds;
                 // Merge new feed with existing feeds and sort.
                 this.makeSubscription(
                     newFeeds,
@@ -272,32 +274,32 @@ class _VideoRoomState extends State<VideoRoom> {
   // new entering user by notifying everyone.
   // Subscribes selectively to different stream types |subscribeToVideo|, |subscribeToAudio|, |subscribeToData|.
   // This is required to stop and then start only the videos to save bandwidth.
-  void makeSubscription(newFeeds, feedsJustJoined, subscribeToVideo,
+  void makeSubscription(List newFeeds, feedsJustJoined, subscribeToVideo,
       subscribeToAudio, subscribeToData) {
     List<Map> subscription = List<Map>();
-    newFeeds.forEach((feed, feedIndex) => () {
-          //const { id, streams } = feed;
-          String id = feed["id"];
-          streams = feed["streams"];
-          feed.video =
-              !!streams.find((v) => v.type == 'video' && v.codec == 'h264');
-          feed.audio =
-              !!streams.find((a) => a.type == 'audio' && a.codec == 'opus');
-          feed.data = !!streams.find((d) => d.type == 'data');
-          feed.cammute = !feed.video;
+    newFeeds.forEach((feed) {
+      //const { id, streams } = feed;
+      var id = feed["id"];
+      streams = feed["streams"];
+      feed["video"] =
+          !!streams.find((v) => v["type"] == 'video' && v["codec"] == 'h264');
+      feed["audio"] =
+          !!streams.find((a) => a["type"] == 'audio' && a["type"] == 'opus');
+      feed["data"] = !!streams.find((d) => d["type"] == 'data');
+      feed["cammute"] = !feed.video;
 
-          streams.forEach((stream) => () {
-                if ((subscribeToVideo &&
-                        stream.type == 'video' &&
-                        stream.codec == 'h264') ||
-                    (subscribeToAudio &&
-                        stream.type == 'audio' &&
-                        stream.codec == 'opus') ||
-                    (subscribeToData && stream.type == 'data')) {
-                  subscription.add({feed: id, "mid": stream.mid});
-                }
-              });
-        });
+      streams.forEach((stream) => () {
+            if ((subscribeToVideo &&
+                    stream["type"] == 'video' &&
+                    stream["codec"] == 'h264') ||
+                (subscribeToAudio &&
+                    stream["type"] == 'audio' &&
+                    stream["codec"] == 'opus') ||
+                (subscribeToData && stream["type"] == 'data')) {
+              subscription.add({feed: id, "mid": stream.mid});
+            }
+          });
+    });
 
     if (subscription.length > 0) {
       //this.
