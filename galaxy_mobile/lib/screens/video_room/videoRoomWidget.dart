@@ -9,6 +9,8 @@ import 'package:janus_client/Plugin.dart';
 
 import 'dart:async';
 
+final int PAGE_SIZE = 3;
+
 class VideoRoom extends StatefulWidget {
   List<RTCVideoView> remote_videos = new List();
   String server;
@@ -44,6 +46,8 @@ class _VideoRoomState extends State<VideoRoom> {
   List feeds;
 
   Map newStreamsMids;
+
+  bool muteOtherCams = false;
 
   set id(id) {}
 
@@ -376,6 +380,100 @@ class _VideoRoomState extends State<VideoRoom> {
   // }
   // }
 
+  void switchVideos(int page, List oldFeeds, List newFeeds) {
+    print('switchVideos: page' +
+        page.toString() +
+        'PAGE_SIZE:' +
+        PAGE_SIZE.toString() +
+        ' old ' +
+        oldFeeds.length.toString() +
+        'new' +
+        newFeeds.length.toString());
+
+    List oldVideoSlots = List();
+    for (int index = 0; index < PAGE_SIZE; index++) {
+      oldVideoSlots
+          .add(oldFeeds.firstWhere((feed) => feed["videoSlot"] == index));
+    }
+
+    List oldVideoFeeds =
+        oldVideoSlots.map((index) => index != -1 ? oldFeeds[index] : null);
+
+    List newVideoSlots = List();
+    for (int index = 0; index < PAGE_SIZE; index++) {
+      newVideoSlots.add((page * PAGE_SIZE) + index >= newFeeds.length
+          ? -1
+          : (page * PAGE_SIZE) + index);
+    }
+    List newVideoFeeds =
+        newVideoSlots.map((index) => index != -1 ? newFeeds[index] : null);
+
+    // Update video slots.
+    oldVideoFeeds.removeWhere((feed) => feed != null);
+    newVideoFeeds.asMap().entries.forEach((feed) {
+      if (feed.value != null) {
+        feed.value["videoSlot"] = feed.key;
+      }
+    });
+
+    // Cases:
+    // old: [0, 1, 2] [f0, f1, f2], new: [3, 4, 5] [f3, f4, f5]                  Simple next page switch.
+    // old: [3, 4, 5] [f3, f4, f5], new: [0, 1, 2] [f0, f1, f2]                  Simple prev page switch.
+    // old: [-1, -1, -1] [null, null, null], new: [0, -1, -1] [f0, null, null]   First user joins.
+    // old: [0, -1, -1] [f0, null, null], new: [0, 1, -1] [f0, f1, null]         Second user joins.
+    // old: [3, 4, 5] [f3, f4, f5], new: [3, 4, 5] [f3, f5, f6]                  User f4 left.
+    // old: [3, 4, 5] [f3, f4, f5], new: [3, 4, 5] [f3, fX, f4]                  User fX joins.
+
+    List subscribeFeeds = [];
+    List unsubscribeFeeds = [];
+    List switchFeeds = [];
+    newVideoFeeds.forEach((newFeed) {
+      if (newFeed != null &&
+          !oldVideoFeeds.firstWhere((oldFeed) {
+            oldFeed != null && oldFeed["id"] == newFeed["id"];
+          })) {
+        subscribeFeeds.add(newFeed);
+      }
+    });
+
+    oldVideoFeeds.forEach((oldFeed) {
+      if (oldFeed != null &&
+          !newVideoFeeds.firstWhere((newFeed) {
+            newFeed != null && newFeed["id"] == oldFeed["id"];
+          })) {
+        unsubscribeFeeds.add(oldFeed);
+      }
+    });
+    oldVideoFeeds.asMap().forEach((oldIndex, oldFeed) {
+      if (oldFeed != null) {
+        int newIndex = newVideoFeeds.indexWhere(
+            (newFeed) => newFeed != null && newFeed["id"] == oldFeed["id"]);
+        if (newIndex != -1 && oldIndex != newIndex) {
+          switchFeeds.add(
+              {"from": oldVideoSlots[oldIndex], "to": newVideoSlots[newIndex]});
+        }
+      }
+    }); //forEach((oldFeed, oldIndex) => {
+
+    if (!muteOtherCams) {
+      //print('refs' + this.refs, 'subscribeFeeds', subscribeFeeds, 'unsubscribeFeeds', unsubscribeFeeds, 'switchFeeds', switchFeeds);
+      this.makeSubscription(
+          subscribeFeeds,
+          /* feedsJustJoined= */ false,
+          /* subscribeToVideo= */ true,
+          /* subscribeToAudio= */ false,
+          /* subscribeToData= */ false);
+      this.unsubscribeFrom(
+          unsubscribeFeeds.map((feed) => feed.id), /* onlyVideo= */ true);
+      switchFeeds.forEach((element) {
+        this.switchVideoSlots(element["from"], element["to"]);
+      }); //first(({ from, to }) => this.switchVideoSlots(from, to));
+    } else {
+      print(
+          'Ignoring subscribe/unsubscribe/switch, we are at mute other cams mode.');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final RoomArguments args = ModalRoute.of(context).settings.arguments;
@@ -473,6 +571,10 @@ class _VideoRoomState extends State<VideoRoom> {
           crossAxisCount: 2,
         ));
   }
+
+  void unsubscribeFrom(Iterable map, bool bool) {}
+
+  void switchVideoSlots(element, element2) {}
 }
 
 class RoomArguments {
