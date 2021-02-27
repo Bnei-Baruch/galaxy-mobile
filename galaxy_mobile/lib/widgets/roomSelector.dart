@@ -43,8 +43,10 @@ class _RoomSelectorState extends State<RoomSelector> {
                 widget.serverName = room.janus,
                 widget.roomCallback(widget.roomNumber, widget.serverName)
               },
+              // selectedItem: snapshot.data
+              //     .firstWhere((element) => element.description == "PT 30"),
               showClearButton: true,
-              // showSearchBox: true,
+              showSearchBox: true,
               // searchBoxDecoration: InputDecoration(
               //   border: OutlineInputBorder(),
               //   contentPadding: EdgeInsets.fromLTRB(12, 12, 8, 0),

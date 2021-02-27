@@ -37,7 +37,7 @@ class _VideoRoomState extends State<VideoRoom> {
 
   List<Map> roomFeeds;
 
-  var streams;
+  List streams;
 
   bool creatingFeed = false;
 
@@ -281,31 +281,30 @@ class _VideoRoomState extends State<VideoRoom> {
       //const { id, streams } = feed;
       var id = feed["id"];
       streams = feed["streams"];
-      Map tempFeed = feed;
+      LinkedHashMap tempFeed = feed;
 
-      tempFeed.putIfAbsent(
-          "video",
-          () => !!streams
-              .find((v) => v["type"] == 'video' && v["codec"] == 'h264'));
+      var streamsFound =
+          streams.where((v) => v["type"] == 'video' && v["codec"] == 'h264');
+      tempFeed.putIfAbsent("video", () => streamsFound);
       tempFeed.putIfAbsent(
           "audio",
-          () => !!streams
-              .find((a) => a["type"] == 'audio' && a["type"] == 'opus'));
+          () => streams
+              .where((a) => a["type"] == 'audio' && a["type"] == 'opus'));
       tempFeed.putIfAbsent(
-          "data", () => !!streams.find((d) => d["type"] == 'data'));
-      tempFeed.putIfAbsent("cammute", () => !feed["video"]);
+          "data", () => streams.where((d) => d["type"] == 'data'));
+      tempFeed.putIfAbsent("cammute", () => feed["video"]);
 
-      streams.forEach((stream) => () {
-            if ((subscribeToVideo &&
-                    stream["type"] == 'video' &&
-                    stream["codec"] == 'h264') ||
-                (subscribeToAudio &&
-                    stream["type"] == 'audio' &&
-                    stream["codec"] == 'opus') ||
-                (subscribeToData && stream["type"] == 'data')) {
-              subscription.add({feed: id, "mid": stream["mid"]});
-            }
-          });
+      streams.forEach((stream) {
+        if ((subscribeToVideo &&
+                stream["type"] == 'video' &&
+                stream["codec"] == 'h264') ||
+            (subscribeToAudio &&
+                stream["type"] == 'audio' &&
+                stream["codec"] == 'opus') ||
+            (subscribeToData && stream["type"] == 'data')) {
+          subscription.add({"feed": id, "mid": stream["mid"]});
+        }
+      });
     });
 
     if (subscription.length > 0) {
