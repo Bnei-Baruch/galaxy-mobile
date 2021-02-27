@@ -99,6 +99,7 @@ class _VideoRoomState extends State<VideoRoom> {
     roomFeeds = feeds;
     print('remote plugin attached');
     j.attach(Plugin(
+        opaqueId: 'remotefeed_user',
         plugin: 'janus.plugin.videoroom',
         onMessage: (msg, jsep) async {
           //update feed
@@ -170,7 +171,7 @@ class _VideoRoomState extends State<VideoRoom> {
         };
 
         j.attach(Plugin(
-            opaqueId: "videoroom_user",
+            opaqueId: widget.user.sub,
             plugin: 'janus.plugin.videoroom',
             onMessage: (msg, jsep) async {
               var event = msg['videoroom'];
