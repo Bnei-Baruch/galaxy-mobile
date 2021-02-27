@@ -173,63 +173,163 @@ class _VideoRoomState extends State<VideoRoom> {
             opaqueId: "videoroom_user",
             plugin: 'janus.plugin.videoroom',
             onMessage: (msg, jsep) async {
-              if (msg["publishers"] != null) {
-                print('publisher on msg');
-                var list = msg["publishers"];
-                print('got publihers');
-                print(list);
-                List<Map> subscription = new List<Map>();
-                //    _newRemoteFeed(j, list[0]["id"]);
-                final filtereList = List.from(list);
-                filtereList.forEach((item) => {
-                      subscription.add({
-                        "feed": LinkedHashMap.of(item).remove("id"),
-                        "mid": "1"
-                      })
-                    });
-                //Map.from(item)..forEach((key, value) => if(key != ("id")) ));
-                //need to keep the feeds currently in the room with the data they (present user), question, mute / unmute
+              var event = msg['videoroom'];
+              if (event != null) {
+                if (event == 'joined') {
+                  if (msg["publishers"] != null) {
+                    print('publisher on msg');
+                    var list = msg["publishers"];
+                    print('got publihers');
+                    print(list);
+                    List<Map> subscription = new List<Map>();
+                    //    _newRemoteFeed(j, list[0]["id"]);
+                    final filtereList = List.from(list);
+                    filtereList.forEach((item) => {
+                          subscription.add({
+                            "feed": LinkedHashMap.of(item).remove("id"),
+                            "mid": "1"
+                          })
+                        });
+                    //Map.from(item)..forEach((key, value) => if(key != ("id")) ));
+                    //need to keep the feeds currently in the room with the data they (present user), question, mute / unmute
 
-                //  _newRemoteFeed(j, subscription);
+                    //  _newRemoteFeed(j, subscription);
 
-                // User just joined the room.
+                    // User just joined the room.
 
-                (msg['publishers'] as List).forEach((value) =>
-                    value["display"] = (jsonDecode(value["display"])));
-                //( (l)  => l["display"] = (jsonDecode(l["display"])) as Map);
-                //          List newFeeds = sortAndFilterFeeds();
-                List newFeeds = msg['publishers'];
-                print('New list of available publishers/feeds:' +
-                    newFeeds.toString());
-                Set newFeedsIds = new Set();
-                var tempset = newFeeds.map((feed) => feed["id"]).toSet();
-                newFeedsIds.addAll(newFeeds.map((feed) => feed["id"]).toSet());
-                if (feeds != null &&
-                    feeds.any((feed) => newFeedsIds.lookup(feed["id"]))) {
-                  print("New feed joining but one of the feeds already exist" +
-                      newFeeds.toString() +
-                      list.toString());
-                  return;
-                } else
-                  feeds = newFeeds;
-                // Merge new feed with existing feeds and sort.
-                this.makeSubscription(
-                    newFeeds,
-                    /* feedsJustJoined= */ true,
-                    /* subscribeToVideo= */ false,
-                    /* subscribeToAudio= */ true,
-                    /* subscribeToData= */ true);
-                // this.switchVideos(/* page= */ this.state.page, userFeeds(feeds),
-                //  userFeeds(feedsNewState));
-                // this.setState({feeds: feedsNewState});
+                    (msg['publishers'] as List).forEach((value) =>
+                        value["display"] = (jsonDecode(value["display"])));
+                    //( (l)  => l["display"] = (jsonDecode(l["display"])) as Map);
+                    //          List newFeeds = sortAndFilterFeeds();
+                    List newFeeds = msg['publishers'];
+                    print('New list of available publishers/feeds:' +
+                        newFeeds.toString());
+                    Set newFeedsIds = new Set();
+                    var tempset = newFeeds.map((feed) => feed["id"]).toSet();
+                    newFeedsIds
+                        .addAll(newFeeds.map((feed) => feed["id"]).toSet());
+                    if (feeds != null &&
+                        feeds.any((feed) => newFeedsIds.lookup(feed["id"]))) {
+                      print(
+                          "New feed joining but one of the feeds already exist" +
+                              newFeeds.toString() +
+                              list.toString());
+                      return;
+                    }
+                    // Merge new feed with existing feeds and sort.
+                    List newFeedsState = feeds + newFeeds;
+
+                    // Merge new feed with existing feeds and sort.
+                    this.makeSubscription(
+                        newFeeds,
+                        /* feedsJustJoined= */ true,
+                        /* subscribeToVideo= */ false,
+                        /* subscribeToAudio= */ true,
+                        /* subscribeToData= */ true);
+                    switchVideos(/* page= */ page, feeds, newFeedsState);
+                    feeds = newFeedsState;
+                    // this.setState({feeds: feedsNewState});
+                  }
+
+                  //need to handle disconnection of room feed
+
+                  //need to handle addition of room feed
+
+                  //need to handle change of status of feeds
+
+                } else if (event == 'talking') {
+                  // const feeds = Object.assign([], this.state.feeds);
+                  // const id    = msg['id'];
+                  // Janus.log(`User: ${id} - start talking`);
+                  // const feed = feeds.find(feed => feed.id === id);
+                  // if (!feed) {
+                  //   Janus.error(`Did not find user ${id}.`);
+                  //   return;
+                  // }
+                  // feed.talking = true;
+                  // this.setState({ feeds });
+                } else if (event == 'stopped-talking') {
+                  // const feeds = Object.assign([], this.state.feeds);
+                  // const id    = msg['id'];
+                  // Janus.log(`User: ${id} - stop talking`);
+                  // const feed = feeds.find(feed => feed.id === id);
+                  // if (!feed) {
+                  //   Janus.error(`Did not find user ${id}.`);
+                  //   return;
+                  // }
+                  // feed.talking = false;
+                  // this.setState({ feeds });
+                } else if (event == 'destroyed') {
+                  // The room has been destroyed
+                  // Janus.warn('The room has been destroyed!');
+                } else if (event == 'event') {
+                  if (msg['configured'] == 'ok') {
+                    // User published own feed successfully.
+                    // const user = {
+                    //   ...this.state.user,
+                    //   extra: {
+                    //     ...(this.state.user.extra || {}),
+                    //     streams: msg.streams
+                    //   }
+                    // };
+                    // this.setState({ user });
+                    // if (this.state.muteOtherCams) {
+                    //   this.camMute(/* cammuted= */ false);
+                    //   this.setState({ videos: NO_VIDEO_OPTION_VALUE });
+                    //   this.state.virtualStreamingJanus.setVideo(NO_VIDEO_OPTION_VALUE);
+                    // }
+                  } else if (msg['publishers'] != null &&
+                      msg['publishers'] != null) {
+                    // User just joined the room.
+                    // const newFeeds = sortAndFilterFeeds(msg['publishers'].filter(l => l.display = (JSON.parse(l.display))));
+                    //Janus.debug('New list of available publishers/feeds:', newFeeds);
+                    // const newFeedsIds = new Set(newFeeds.map(feed => feed.id));
+                    // const { feeds }   = this.state;
+                    // if (feeds.some(feed => newFeedsIds.has(feed.id))) {
+                    // Janus.error(`New feed joining but one of the feeds already exist`, newFeeds, feeds);
+                    // return;
+                    // }
+                    // // Merge new feed with existing feeds and sort.
+                    // const feedsNewState = sortAndFilterFeeds([...newFeeds, ...feeds]);
+                    // this.makeSubscription(newFeeds, /* feedsJustJoined= */ true,
+                    // /* subscribeToVideo= */ false,
+                    // /* subscribeToAudio= */ true, /* subscribeToData= */ true);
+                    // this.switchVideos(/* page= */ this.state.page, userFeeds(feeds), userFeeds(feedsNewState));
+                    // this.setState({ feeds: feedsNewState });
+
+                  } else if (msg['leaving'] != null && msg['leaving'] != null) {
+                    // User leaving the room which is same as publishers gone.
+                    // const leaving = msg['leaving'];
+                    // Janus.log('Publisher leaving: ', leaving);
+                    // const { feeds } = this.state;
+                    // this.unsubscribeFrom([leaving], /* onlyVideo= */ false);
+                    // const feedsNewState = feeds.filter(feed => feed.id !== leaving);
+                    // this.switchVideos(/* page= */ this.state.page, userFeeds(feeds), userFeeds(feedsNewState));
+                    // this.setState({ feeds: feedsNewState }, () => {
+                    // if (this.state.page * PAGE_SIZE === this.state.feeds.length) {
+                    // this.switchPage(this.state.page - 1, this.state.feeds);
+                    // }
+                    // });
+
+                  } else if (msg['unpublished'] != null &&
+                      msg['unpublished'] != null) {
+                    // const unpublished = msg['unpublished'];
+                    // Janus.log('Publisher unpublished: ', unpublished);
+                    // if (unpublished === 'ok') {
+                    // // That's us
+                    // videoroom.hangup();
+                    // return;
+                    // }
+
+                  } else if (msg['error'] != null && msg['error'] != null) {
+                    // if (msg['error_code'] === 426) {
+                    // Janus.log('This is a no such room');
+                    // } else {
+                    // Janus.log(msg['error']);
+                    // }
+                  }
+                }
               }
-
-              //need to handle disconnection of room feed
-
-              //need to handle addition of room feed
-
-              //need to handle change of status of feeds
-
               if (jsep != null) {
                 pluginHandle.handleRemoteJsep(jsep);
               }
@@ -360,6 +460,7 @@ class _VideoRoomState extends State<VideoRoom> {
     creatingFeed = true;
     _newRemoteFeed(j, subscription);
   }
+
   // Unsubscribe from feeds defined by |ids| (with all streams) and remove it when |onlyVideo| is false.
   // If |onlyVideo| is true, will unsubscribe only from video stream of those specific feeds, keeping those feeds.
   // void unsubscribeFrom(ids, onlyVideo) {
@@ -579,30 +680,33 @@ class _VideoRoomState extends State<VideoRoom> {
   }
 
   void unsubscribeFrom(Iterable ids, bool onlyVideo) {
-    Set idsSet                            = new Set();
+    Set idsSet = new Set();
     idsSet.addAll(ids);
-    var unsubscribe                       = { "request": 'unsubscribe', streams: [] };
-    feeds.forEach   ((feed) { idsSet.firstWhere((id){feed["id"] == id;}).forEach((feed) {
-    if (onlyVideo) {
-    // Unsubscribe only from one video stream (not all publisher feed).
-    // Acutally expecting only one video stream, but writing more generic code.
-      (feed["streams"] as List).where((stream) => stream["type"] == 'video')
-        .map((stream) => ({ "feed": feed["id"], "mid": stream["mid"] }))
-        .forEach((stream) => (unsubscribe["streams"] as List).add(stream));
-    } else {
-    // Unsubscribe the whole feed (all it's streams).
-      (unsubscribe["streams"] as List).add({ "feed": feed["id"] });
-    //Janus.log('Unsubscribe from Feed ' + JSON.stringify(feed) + ' (' + feed.id + ').');
-    }
+    var unsubscribe = {"request": 'unsubscribe', streams: []};
+    feeds.forEach((feed) {
+      idsSet.firstWhere((id) {
+        feed["id"] == id;
+      }).forEach((feed) {
+        if (onlyVideo) {
+          // Unsubscribe only from one video stream (not all publisher feed).
+          // Acutally expecting only one video stream, but writing more generic code.
+          (feed["streams"] as List)
+              .where((stream) => stream["type"] == 'video')
+              .map((stream) => ({"feed": feed["id"], "mid": stream["mid"]}))
+              .forEach(
+                  (stream) => (unsubscribe["streams"] as List).add(stream));
+        } else {
+          // Unsubscribe the whole feed (all it's streams).
+          (unsubscribe["streams"] as List).add({"feed": feed["id"]});
+          //Janus.log('Unsubscribe from Feed ' + JSON.stringify(feed) + ' (' + feed.id + ').');
+        }
+      });
+      // Send an unsubscribe request.
 
+      if (pluginHandle != null && (unsubscribe["streams"] as List).length > 0) {
+        pluginHandle.send(message: {"message": unsubscribe});
+      }
     });
-    // Send an unsubscribe request.
-
-    if (pluginHandle != null && (unsubscribe["streams"] as List).length > 0) {
-      pluginHandle.send(message: { "message": unsubscribe });
-    }
-
-
   }
 
   void switchVideoSlots(int from, int to) {
