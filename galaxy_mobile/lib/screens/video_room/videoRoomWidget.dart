@@ -49,6 +49,12 @@ class _VideoRoomState extends State<VideoRoom> {
 
   bool muteOtherCams = false;
 
+  int page;
+
+  int fromVideoIndex;
+
+  int toVideoIndex;
+
   set id(id) {}
 
   set subscription(List subscription) {}
@@ -572,9 +578,43 @@ class _VideoRoomState extends State<VideoRoom> {
         ));
   }
 
-  void unsubscribeFrom(Iterable map, bool bool) {}
+  void unsubscribeFrom(Iterable ids, bool onlyVideo) {
+    Set idsSet                            = new Set();
+    idsSet.addAll(ids);
+    var unsubscribe                       = { "request": 'unsubscribe', streams: [] };
+    feeds.forEach   ((feed) { idsSet.firstWhere((id){feed["id"] == id;}).forEach((feed) {
+    if (onlyVideo) {
+    // Unsubscribe only from one video stream (not all publisher feed).
+    // Acutally expecting only one video stream, but writing more generic code.
+      (feed["streams"] as List).where((stream) => stream["type"] == 'video')
+        .map((stream) => ({ "feed": feed["id"], "mid": stream["mid"] }))
+        .forEach((stream) => (unsubscribe["streams"] as List).add(stream));
+    } else {
+    // Unsubscribe the whole feed (all it's streams).
+      (unsubscribe["streams"] as List).add({ "feed": feed["id"] });
+    //Janus.log('Unsubscribe from Feed ' + JSON.stringify(feed) + ' (' + feed.id + ').');
+    }
 
-  void switchVideoSlots(element, element2) {}
+    });
+    // Send an unsubscribe request.
+
+    if (pluginHandle != null && (unsubscribe["streams"] as List).length > 0) {
+      pluginHandle.send(message: { "message": unsubscribe });
+    }
+
+
+  }
+
+  void switchVideoSlots(int from, int to) {
+    fromVideoIndex = from - page * PAGE_SIZE;
+    toVideoIndex = to - page * PAGE_SIZE;
+
+    //switch current video items RTCVideo with the correct index
+    // const stream = fromRemoteVideo.srcObject;
+    // Janus.log(`Switching stream from ${from} to ${to}`, stream, fromRemoteVideo, toRemoteVideo);
+    // Janus.attachMediaStream(toRemoteVideo, stream);
+    // Janus.attachMediaStream(fromRemoteVideo, null);
+  }
 }
 
 class RoomArguments {
