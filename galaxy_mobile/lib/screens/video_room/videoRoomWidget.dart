@@ -43,13 +43,13 @@ class _VideoRoomState extends State<VideoRoom> {
 
   bool creatingFeed = false;
 
-  List feeds;
+  List feeds = List.empty();
 
-  Map newStreamsMids;
+  Map newStreamsMids = Map.identity();
 
   bool muteOtherCams = false;
 
-  int page;
+  int page = 0;
 
   int fromVideoIndex;
 
@@ -194,7 +194,7 @@ class _VideoRoomState extends State<VideoRoom> {
                     //Map.from(item)..forEach((key, value) => if(key != ("id")) ));
                     //need to keep the feeds currently in the room with the data they (present user), question, mute / unmute
 
-                    //  _newRemoteFeed(j, subscription);
+                    _newRemoteFeed(j, subscription);
 
                     // User just joined the room.
 
@@ -218,16 +218,17 @@ class _VideoRoomState extends State<VideoRoom> {
                       return;
                     }
                     // Merge new feed with existing feeds and sort.
-                    List newFeedsState = feeds + newFeeds;
+                    List newFeedsState =
+                        feeds != null ? (feeds + newFeeds) : newFeeds;
 
                     // Merge new feed with existing feeds and sort.
-                    this.makeSubscription(
-                        newFeeds,
-                        /* feedsJustJoined= */ true,
-                        /* subscribeToVideo= */ false,
-                        /* subscribeToAudio= */ true,
-                        /* subscribeToData= */ true);
-                    switchVideos(/* page= */ page, feeds, newFeedsState);
+                    // this.makeSubscription(
+                    //     newFeeds,
+                    //     /* feedsJustJoined= */ true,
+                    //     /* subscribeToVideo= */ false,
+                    //     /* subscribeToAudio= */ true,
+                    //     /* subscribeToData= */ true);
+                    // switchVideos(/* page= */ page, List.empty(), newFeedsState);
                     feeds = newFeedsState;
                     // this.setState({feeds: feedsNewState});
                   }
@@ -500,12 +501,15 @@ class _VideoRoomState extends State<VideoRoom> {
 
     List oldVideoSlots = List();
     for (int index = 0; index < PAGE_SIZE; index++) {
-      oldVideoSlots
-          .add(oldFeeds.firstWhere((feed) => feed["videoSlot"] == index));
+      oldVideoSlots.add(oldFeeds.firstWhere(
+          (feed) => feed["videoSlot"] == index,
+          orElse: () => oldFeeds));
     }
 
-    List oldVideoFeeds =
-        oldVideoSlots.map((index) => index != -1 ? oldFeeds[index] : null);
+    List oldVideoFeeds = oldFeeds.isNotEmpty
+        ? oldVideoSlots
+            .map((index) => index != -1 ? oldFeeds.elementAt(index) : null)
+        : List.empty();
 
     List newVideoSlots = List();
     for (int index = 0; index < PAGE_SIZE; index++) {
@@ -513,8 +517,8 @@ class _VideoRoomState extends State<VideoRoom> {
           ? -1
           : (page * PAGE_SIZE) + index);
     }
-    List newVideoFeeds =
-        newVideoSlots.map((index) => index != -1 ? newFeeds[index] : null);
+    List newVideoFeeds = newVideoSlots
+        .map((index) => index != -1 ? newFeeds.elementAt(index) : null);
 
     // Update video slots.
     oldVideoFeeds.removeWhere((feed) => feed != null);
