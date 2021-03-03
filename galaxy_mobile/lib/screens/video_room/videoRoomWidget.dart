@@ -39,6 +39,8 @@ class _VideoRoomState extends State<VideoRoom> {
 
   List<Map> roomFeeds;
 
+  int tempConter = 0;
+
   List streams;
 
   bool creatingFeed = false;
@@ -73,7 +75,7 @@ class _VideoRoomState extends State<VideoRoom> {
 
   initRenderers() async {
     int count = 0;
-    while (count < 4) {
+    while (count < 3) {
       _remoteRenderer.add(new RTCVideoRenderer());
       count++;
     }
@@ -81,11 +83,11 @@ class _VideoRoomState extends State<VideoRoom> {
     for (var renderer in _remoteRenderer) {
       await renderer.initialize();
     }
-    count = 0;
-    // while (count < 4) {
-    createLocalMediaStream("local").then((value) => remoteStream.add(value));
-    //  count++;
-    //  }
+    int count_t = 0;
+    while (count_t < 3) {
+      createLocalMediaStream("local").then((value) => remoteStream.add(value));
+      count_t++;
+    }
   }
 
   sortAndFilterFeeds(List feeds) => feeds
@@ -139,16 +141,15 @@ class _VideoRoomState extends State<VideoRoom> {
         onRemoteTrack: (stream, track, mid, on) {
           print('got remote track with mid=$mid');
           setState(() {
-            if ((track as MediaStreamTrack).kind == "video" && on == true) {
-              if (num.tryParse(mid).toInt() < 4) {
+            if ((track as MediaStreamTrack).kind == "video" &&
+                (track as MediaStreamTrack).enabled) {
+              if (tempConter++ < 3) {
                 remoteStream
-                    .elementAt(num.tryParse(mid).toInt())
+                    .elementAt(tempConter)
                     .addTrack(track, addToNative: true);
                 print('added track to stream locally');
-                _remoteRenderer
-                        .elementAt(num.tryParse(mid as String).toInt())
-                        .srcObject =
-                    remoteStream.elementAt(num.tryParse(mid).toInt());
+                _remoteRenderer.elementAt(tempConter).srcObject =
+                    remoteStream.elementAt(tempConter);
               }
             }
           });
@@ -186,11 +187,15 @@ class _VideoRoomState extends State<VideoRoom> {
                     //    _newRemoteFeed(j, list[0]["id"]);
                     final filtereList = List.from(list);
                     filtereList.forEach((item) => {
-                          subscription.add({
-                            "feed": LinkedHashMap.of(item).remove("id"),
-                            "mid": "1"
-                          })
+                          if ((item["streams"] as List).length == 2)
+                            {
+                              subscription.add({
+                                "feed": LinkedHashMap.of(item).remove("id"),
+                                "mid": "1"
+                              })
+                            }
                         });
+
                     //Map.from(item)..forEach((key, value) => if(key != ("id")) ));
                     //need to keep the feeds currently in the room with the data they (present user), question, mute / unmute
 
@@ -446,7 +451,7 @@ class _VideoRoomState extends State<VideoRoom> {
             .toString()); //, !!this.state.remoteFeed, this.state.creatingFeed);
     if (pluginHandle != null) {
       pluginHandle
-          .send(message: {"request": 'subscribe', streams: subscription});
+          .send(message: {"request": 'subscribe', "streams": subscription});
     }
 
     // We don't have a handle yet, but we may be creating one already
@@ -509,6 +514,7 @@ class _VideoRoomState extends State<VideoRoom> {
     List oldVideoFeeds = oldFeeds.isNotEmpty
         ? oldVideoSlots
             .map((index) => index != -1 ? oldFeeds.elementAt(index) : null)
+            .toList()
         : List.empty();
 
     List newVideoSlots = List();
@@ -518,10 +524,13 @@ class _VideoRoomState extends State<VideoRoom> {
           : (page * PAGE_SIZE) + index);
     }
     List newVideoFeeds = newVideoSlots
-        .map((index) => index != -1 ? newFeeds.elementAt(index) : null);
+        .map((index) => index != -1 ? newFeeds.elementAt(index) : null)
+        .toList();
 
     // Update video slots.
-    oldVideoFeeds.removeWhere((feed) => feed != null);
+    oldVideoFeeds.forEach((feed) => {
+          if (feed != null) {feed["videoSlot"] = null}
+        });
     newVideoFeeds.asMap().entries.forEach((feed) {
       if (feed.value != null) {
         feed.value["videoSlot"] = feed.key;
@@ -541,32 +550,34 @@ class _VideoRoomState extends State<VideoRoom> {
     List switchFeeds = [];
     newVideoFeeds.forEach((newFeed) {
       if (newFeed != null &&
-          !oldVideoFeeds.firstWhere((oldFeed) {
-            oldFeed != null && oldFeed["id"] == newFeed["id"];
-          })) {
+          !oldVideoFeeds.any(
+            (oldFeed) => oldFeed != null && oldFeed["id"] == newFeed["id"],
+          )) {
         subscribeFeeds.add(newFeed);
       }
     });
 
-    oldVideoFeeds.forEach((oldFeed) {
-      if (oldFeed != null &&
-          !newVideoFeeds.firstWhere((newFeed) {
-            newFeed != null && newFeed["id"] == oldFeed["id"];
-          })) {
-        unsubscribeFeeds.add(oldFeed);
-      }
-    });
-    oldVideoFeeds.asMap().forEach((oldIndex, oldFeed) {
-      if (oldFeed != null) {
-        int newIndex = newVideoFeeds.indexWhere(
-            (newFeed) => newFeed != null && newFeed["id"] == oldFeed["id"]);
-        if (newIndex != -1 && oldIndex != newIndex) {
-          switchFeeds.add(
-              {"from": oldVideoSlots[oldIndex], "to": newVideoSlots[newIndex]});
+    if (oldVideoFeeds.isNotEmpty) {
+      oldVideoFeeds.forEach((oldFeed) {
+        if (oldFeed != null &&
+            newVideoFeeds.any((newFeed) =>
+                newFeed != null && newFeed["id"] == oldFeed["id"])) {
+          unsubscribeFeeds.add(oldFeed);
         }
-      }
-    }); //forEach((oldFeed, oldIndex) => {
-
+      });
+      oldVideoFeeds.asMap().forEach((oldIndex, oldFeed) {
+        if (oldFeed != null) {
+          int newIndex = newVideoFeeds.indexWhere(
+              (newFeed) => newFeed != null && newFeed["id"] == oldFeed["id"]);
+          if (newIndex != -1 && oldIndex != newIndex) {
+            switchFeeds.add({
+              "from": oldVideoSlots[oldIndex],
+              "to": newVideoSlots[newIndex]
+            });
+          }
+        }
+      }); //forEach((oldFeed, oldIndex) => {
+    }
     if (!muteOtherCams) {
       //print('refs' + this.refs, 'subscribeFeeds', subscribeFeeds, 'unsubscribeFeeds', unsubscribeFeeds, 'switchFeeds', switchFeeds);
       this.makeSubscription(
@@ -651,10 +662,10 @@ class _VideoRoomState extends State<VideoRoom> {
             (_remoteRenderer != null && _remoteRenderer.elementAt(0) != null)
                 ? Stack(children: [
                     RTCVideoView(_remoteRenderer.elementAt(0)),
-                    Align(
-                      alignment: Alignment.bottomLeft,
-                      child: Text("User name"),
-                    ),
+                    // Align(
+                    //   alignment: Alignment.bottomLeft,
+                    //   child: Text("User name"),
+                    // ),
                   ])
                 : Text("Waiting...", style: TextStyle(color: Colors.white)),
             (_remoteRenderer != null && _remoteRenderer.elementAt(1) != null)
@@ -669,12 +680,48 @@ class _VideoRoomState extends State<VideoRoom> {
                     "Waiting...",
                     style: TextStyle(color: Colors.white),
                   ),
-            (_remoteRenderer != null && _remoteRenderer.elementAt(3) != null)
-                ? RTCVideoView(_remoteRenderer.elementAt(3))
-                : Text(
-                    "Waiting...",
-                    style: TextStyle(color: Colors.white),
-                  )
+            // (_remoteRenderer != null && _remoteRenderer.elementAt(3) != null)
+            //     ? RTCVideoView(_remoteRenderer.elementAt(3))
+            //     : Text(
+            //         "Waiting...",
+            //         style: TextStyle(color: Colors.white),
+            //       ),
+            // (_remoteRenderer != null && _remoteRenderer.elementAt(4) != null)
+            //     ? RTCVideoView(_remoteRenderer.elementAt(4))
+            //     : Text(
+            //         "Waiting...",
+            //         style: TextStyle(color: Colors.white),
+            //       ),
+            // (_remoteRenderer != null && _remoteRenderer.elementAt(5) != null)
+            //     ? RTCVideoView(_remoteRenderer.elementAt(5))
+            //     : Text(
+            //         "Waiting...",
+            //         style: TextStyle(color: Colors.white),
+            //       ),
+            // (_remoteRenderer != null && _remoteRenderer.elementAt(6) != null)
+            //     ? RTCVideoView(_remoteRenderer.elementAt(6))
+            //     : Text(
+            //         "Waiting...",
+            //         style: TextStyle(color: Colors.white),
+            //       ),
+            // (_remoteRenderer != null && _remoteRenderer.elementAt(7) != null)
+            //     ? RTCVideoView(_remoteRenderer.elementAt(7))
+            //     : Text(
+            //         "Waiting...",
+            //         style: TextStyle(color: Colors.white),
+            //       ),
+            // (_remoteRenderer != null && _remoteRenderer.elementAt(8) != null)
+            //     ? RTCVideoView(_remoteRenderer.elementAt(8))
+            //     : Text(
+            //         "Waiting...",
+            //         style: TextStyle(color: Colors.white),
+            //       ),
+            // (_remoteRenderer != null && _remoteRenderer.elementAt(9) != null)
+            //     ? RTCVideoView(_remoteRenderer.elementAt(9))
+            //     : Text(
+            //         "Waiting...",
+            //         style: TextStyle(color: Colors.white),
+            //       )
           ],
           primary: false,
           padding: const EdgeInsets.all(20),
