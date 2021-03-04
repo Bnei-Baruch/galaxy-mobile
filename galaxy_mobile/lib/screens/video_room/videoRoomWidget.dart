@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:galaxy_mobile/services/authService.dart';
 import 'package:janus_client/janus_client.dart';
@@ -47,7 +48,7 @@ class _VideoRoomState extends State<VideoRoom> {
 
   List feeds = List.empty();
 
-  Map newStreamsMids = Map.identity();
+  List newStreamsMids = List.empty();
 
   bool muteOtherCams = false;
 
@@ -105,11 +106,15 @@ class _VideoRoomState extends State<VideoRoom> {
         plugin: 'janus.plugin.videoroom',
         onMessage: (msg, jsep) async {
           //update feed
-          if (msg["event"] == 'attached' ||
-              (msg["event"] == 'event' && msg['switched'] == 'ok') ||
-              msg["event"] == 'updated') {
-            newStreamsMids = new Map.of(msg['streams'].map(
-                (stream) => {"mid": stream["mid"], "feed_id": stream.feed_id}));
+          var event = msg["videoroom"];
+          if (event == 'attached' ||
+              (event == 'event' && msg['switched'] == 'ok') ||
+              event == 'updated') {
+            creatingFeed = false;
+            newStreamsMids = (msg['streams'] as List)
+                .map((stream) =>
+                    {"mid": stream["mid"], "feed_id": stream["feed_id"]})
+                .toList();
           }
 
           if (jsep != null) {
@@ -199,7 +204,7 @@ class _VideoRoomState extends State<VideoRoom> {
                     //Map.from(item)..forEach((key, value) => if(key != ("id")) ));
                     //need to keep the feeds currently in the room with the data they (present user), question, mute / unmute
 
-                    _newRemoteFeed(j, subscription);
+                    //    _newRemoteFeed(j, subscription);
 
                     // User just joined the room.
 
@@ -227,13 +232,13 @@ class _VideoRoomState extends State<VideoRoom> {
                         feeds != null ? (feeds + newFeeds) : newFeeds;
 
                     // Merge new feed with existing feeds and sort.
-                    // this.makeSubscription(
-                    //     newFeeds,
-                    //     /* feedsJustJoined= */ true,
-                    //     /* subscribeToVideo= */ false,
-                    //     /* subscribeToAudio= */ true,
-                    //     /* subscribeToData= */ true);
-                    // switchVideos(/* page= */ page, List.empty(), newFeedsState);
+                    this.makeSubscription(
+                        newFeeds,
+                        /* feedsJustJoined= */ true,
+                        /* subscribeToVideo= */ false,
+                        /* subscribeToAudio= */ true,
+                        /* subscribeToData= */ true);
+                    switchVideos(/* page= */ page, List.empty(), newFeedsState);
                     feeds = newFeedsState;
                     // this.setState({feeds: feedsNewState});
                   }
@@ -455,13 +460,12 @@ class _VideoRoomState extends State<VideoRoom> {
     }
 
     // We don't have a handle yet, but we may be creating one already
-    // if (creatingFeed) {
-    //   // Still working on the handle
-    //   setTimeout(() => {
-    //   this.subscribeTo(subscription);
-    //   }, 500);
-    //   return;
-    // }
+    if (creatingFeed) {
+      // Still working on the handle
+      Future.delayed(
+          Duration(milliseconds: 500), () => subscribeTo(subscription));
+      return;
+    }
 
     // We are not creating the feed, so let's do it.
     creatingFeed = true;
