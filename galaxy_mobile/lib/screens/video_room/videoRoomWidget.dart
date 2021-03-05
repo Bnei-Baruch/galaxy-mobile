@@ -373,7 +373,7 @@ class _VideoRoomState extends State<VideoRoom> {
 
                     jsonEncode({
                   "id": widget.user.sub,
-                  "timestamp": TimeOfDay.now().toString(),
+                  "timestamp": DateTime.now().millisecond,
                   "role": "user",
                   "display": widget.user.name
                 }) //'User test'
@@ -673,67 +673,53 @@ class _VideoRoomState extends State<VideoRoom> {
               width: 200,
             ),
             (_remoteRenderer != null && _remoteRenderer.elementAt(0) != null)
-                ? RTCVideoView(_remoteRenderer.elementAt(0))
-                // Align(
-                //   alignment: Alignment.bottomLeft,
-                //   child: Text("User name"),
-                // ),
-
+                ? Stack(
+                    children: [
+                      RTCVideoView(_remoteRenderer.elementAt(0)),
+                      Align(
+                        alignment: Alignment.bottomLeft,
+                        child: Text(feeds.isNotEmpty
+                            ? feeds.firstWhere((element) =>
+                                element["videoSlot"] == 0)["display"]["display"]
+                            : ""),
+                      ),
+                    ],
+                  )
                 : Text("Waiting...", style: TextStyle(color: Colors.white)),
             (_remoteRenderer != null && _remoteRenderer.elementAt(1) != null)
-                ? RTCVideoView(_remoteRenderer.elementAt(1))
+                ? Stack(
+                    children: [
+                      RTCVideoView(_remoteRenderer.elementAt(1)),
+                      Align(
+                        alignment: Alignment.bottomLeft,
+                        child: Text(feeds.isNotEmpty
+                            ? feeds.firstWhere((element) =>
+                                element["videoSlot"] == 1)["display"]["display"]
+                            : ""),
+                      ),
+                    ],
+                  )
                 : Text(
                     "Waiting...",
                     style: TextStyle(color: Colors.white),
                   ),
             (_remoteRenderer != null && _remoteRenderer.elementAt(2) != null)
-                ? RTCVideoView(_remoteRenderer.elementAt(2))
+                ? Stack(
+                    children: [
+                      RTCVideoView(_remoteRenderer.elementAt(2)),
+                      Align(
+                        alignment: Alignment.bottomLeft,
+                        child: Text(feeds.isNotEmpty
+                            ? feeds.firstWhere((element) =>
+                                element["videoSlot"] == 2)["display"]["display"]
+                            : ""),
+                      ),
+                    ],
+                  )
                 : Text(
                     "Waiting...",
                     style: TextStyle(color: Colors.white),
                   ),
-            // (_remoteRenderer != null && _remoteRenderer.elementAt(3) != null)
-            //     ? RTCVideoView(_remoteRenderer.elementAt(3))
-            //     : Text(
-            //         "Waiting...",
-            //         style: TextStyle(color: Colors.white),
-            //       ),
-            // (_remoteRenderer != null && _remoteRenderer.elementAt(4) != null)
-            //     ? RTCVideoView(_remoteRenderer.elementAt(4))
-            //     : Text(
-            //         "Waiting...",
-            //         style: TextStyle(color: Colors.white),
-            //       ),
-            // (_remoteRenderer != null && _remoteRenderer.elementAt(5) != null)
-            //     ? RTCVideoView(_remoteRenderer.elementAt(5))
-            //     : Text(
-            //         "Waiting...",
-            //         style: TextStyle(color: Colors.white),
-            //       ),
-            // (_remoteRenderer != null && _remoteRenderer.elementAt(6) != null)
-            //     ? RTCVideoView(_remoteRenderer.elementAt(6))
-            //     : Text(
-            //         "Waiting...",
-            //         style: TextStyle(color: Colors.white),
-            //       ),
-            // (_remoteRenderer != null && _remoteRenderer.elementAt(7) != null)
-            //     ? RTCVideoView(_remoteRenderer.elementAt(7))
-            //     : Text(
-            //         "Waiting...",
-            //         style: TextStyle(color: Colors.white),
-            //       ),
-            // (_remoteRenderer != null && _remoteRenderer.elementAt(8) != null)
-            //     ? RTCVideoView(_remoteRenderer.elementAt(8))
-            //     : Text(
-            //         "Waiting...",
-            //         style: TextStyle(color: Colors.white),
-            //       ),
-            // (_remoteRenderer != null && _remoteRenderer.elementAt(9) != null)
-            //     ? RTCVideoView(_remoteRenderer.elementAt(9))
-            //     : Text(
-            //         "Waiting...",
-            //         style: TextStyle(color: Colors.white),
-            //       )
           ],
           primary: false,
           padding: const EdgeInsets.all(20),
