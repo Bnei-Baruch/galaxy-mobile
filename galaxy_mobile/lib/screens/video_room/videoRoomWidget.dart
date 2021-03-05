@@ -48,7 +48,7 @@ class _VideoRoomState extends State<VideoRoom> {
 
   List feeds = List.empty();
 
-  List newStreamsMids = List.empty();
+  List newStreamsMids = List.empty(growable: true);
 
   bool muteOtherCams = false;
 
@@ -111,10 +111,14 @@ class _VideoRoomState extends State<VideoRoom> {
               (event == 'event' && msg['switched'] == 'ok') ||
               event == 'updated') {
             creatingFeed = false;
-            newStreamsMids = (msg['streams'] as List)
-                .map((stream) =>
-                    {"mid": stream["mid"], "feed_id": stream["feed_id"]})
+            List midslist = (msg['streams'] as List)
+                .map((stream) => {
+                      "mid": stream["mid"],
+                      "feed_id": stream["feed_id"],
+                      "type": stream["type"]
+                    })
                 .toList();
+            newStreamsMids.addAll(midslist);
           }
 
           if (jsep != null) {
@@ -148,15 +152,20 @@ class _VideoRoomState extends State<VideoRoom> {
           setState(() {
             if ((track as MediaStreamTrack).kind == "video" &&
                 (track as MediaStreamTrack).enabled) {
-              if (tempConter++ < 3) {
-                remoteStream
-                    .elementAt(tempConter)
-                    .addTrack(track, addToNative: true);
-                print('added track to stream locally');
-                _remoteRenderer.elementAt(tempConter).srcObject =
-                    remoteStream.elementAt(tempConter);
-              }
+              var midElement = newStreamsMids.firstWhere((element) =>
+                  element["type"] == "video" && element["mid"] == mid);
+              var feed = this.feeds.firstWhere(
+                  (element) => element["id"] == midElement["feed_id"]);
+
+              //if (tempConter++ < 3) {
+              remoteStream
+                  .elementAt(feed["videoSlot"])
+                  .addTrack(track, addToNative: true);
+              print('added track to stream locally');
+              _remoteRenderer.elementAt(feed["videoSlot"]).srcObject =
+                  remoteStream.elementAt(feed["videoSlot"]);
             }
+            // }
           });
         }));
   }
@@ -664,13 +673,12 @@ class _VideoRoomState extends State<VideoRoom> {
               width: 200,
             ),
             (_remoteRenderer != null && _remoteRenderer.elementAt(0) != null)
-                ? Stack(children: [
-                    RTCVideoView(_remoteRenderer.elementAt(0)),
-                    // Align(
-                    //   alignment: Alignment.bottomLeft,
-                    //   child: Text("User name"),
-                    // ),
-                  ])
+                ? RTCVideoView(_remoteRenderer.elementAt(0))
+                // Align(
+                //   alignment: Alignment.bottomLeft,
+                //   child: Text("User name"),
+                // ),
+
                 : Text("Waiting...", style: TextStyle(color: Colors.white)),
             (_remoteRenderer != null && _remoteRenderer.elementAt(1) != null)
                 ? RTCVideoView(_remoteRenderer.elementAt(1))
@@ -784,3 +792,37 @@ class RoomArguments {
   final User user;
   RoomArguments(this.server, this.token, this.roomNumber, this.user);
 }
+
+class VideoView {
+  RTCVideoView view;
+  Map streamMid;
+  Text display;
+}
+// CarouselSlider(
+// height: 200.0,
+// autoPlay: true,
+// autoPlayInterval: Duration(seconds: 3),
+// autoPlayAnimationDuration: Duration(milliseconds: 800),
+// autoPlayCurve: Curves.fastOutSlowIn,
+// pauseAutoPlayOnTouch: Duration(seconds: 10),
+// aspectRatio: 2.0,
+// onPageChanged: (index) {
+// setState(() {
+// _currentIndex = index;
+// });
+// },
+// items: cardList.map((card){
+// return Builder(
+// builder:(BuildContext context){
+// return Container(
+// height: MediaQuery.of(context).size.height*0.30,
+// width: MediaQuery.of(context).size.width,
+// child: Card(
+// color: Colors.blueAccent,
+// child: card,
+// ),
+// );
+// }
+// );
+// }).toList(),
+// ),
