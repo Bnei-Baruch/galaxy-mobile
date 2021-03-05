@@ -1,7 +1,5 @@
-import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:galaxy_mobile/config/env.dart';
 import 'package:galaxy_mobile/utils/dio_log.dart';
 
@@ -20,7 +18,7 @@ class Room {
         janus = json['janus'],
         description = json['description'],
         questions = json['questions'],
-        numUsers = json['numUse rs'],
+        numUsers = json['numUsers'],
         region = json['region'];
 }
 //
@@ -43,6 +41,7 @@ class Room {
 // Iterable list = json.decode(jsonObject['worksheetData']);
 // List<WorksheetData> datasheet = list.map((f) => WorksheetData.fromJson(f)).toList();
 
+// TODO: consider change to RoomGatway
 class RoomData {
   final String name;
   final String token;

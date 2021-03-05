@@ -3,11 +3,14 @@ import 'dart:convert';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/services/authService.dart';
 import 'package:janus_client/janus_client.dart';
 import 'package:janus_client/utils.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:janus_client/Plugin.dart';
+import 'package:provider/provider.dart';
+
 
 import 'dart:async';
 
@@ -664,7 +667,12 @@ class _VideoRoomState extends State<VideoRoom> {
 
   @override
   Widget build(BuildContext context) {
-    final RoomArguments args = ModalRoute.of(context).settings.arguments;
+    final s = context.read<MainStore>();
+
+    final args = RoomArguments(s.activeGateway.url, s.activeGateway.token,
+        s.activeRoom.room.toInt(), s.activeUser);
+
+    // final RoomArguments args = ModalRoute.of(/context).settings.arguments;
     widget.roomNumber = args.roomNumber;
     widget.token = args.token;
     widget.server = args.server;
