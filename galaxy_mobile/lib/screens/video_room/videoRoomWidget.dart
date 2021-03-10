@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'dart:convert';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:galaxy_mobile/services/authService.dart';
@@ -89,6 +90,14 @@ class _VideoRoomState extends State<VideoRoom> {
       createLocalMediaStream("local").then((value) => remoteStream.add(value));
       count_t++;
     }
+  }
+
+  void switchPage(int page) {
+    // Normalize page, e.g., if it is -1 or too large...
+
+    int numPages = (feeds.length / PAGE_SIZE).ceil();
+    this.page = numPages == 0 ? 0 : (numPages + page) % numPages;
+    this.switchVideos(page, feeds, feeds);
   }
 
   sortAndFilterFeeds(List feeds) => feeds
@@ -526,7 +535,9 @@ class _VideoRoomState extends State<VideoRoom> {
 
     List oldVideoFeeds = oldFeeds.isNotEmpty
         ? oldVideoSlots
-            .map((index) => index != -1 ? oldFeeds.elementAt(index) : null)
+            .map((slot) => slot["videoSlot"] != -1
+                ? oldFeeds.elementAt(slot["videoSlot"])
+                : null)
             .toList()
         : List.empty();
 
@@ -574,7 +585,7 @@ class _VideoRoomState extends State<VideoRoom> {
       oldVideoFeeds.forEach((oldFeed) {
         if (oldFeed != null &&
             newVideoFeeds.any((newFeed) =>
-                newFeed != null && newFeed["id"] == oldFeed["id"])) {
+                newFeed != null && newFeed["id"] != oldFeed["id"])) {
           unsubscribeFeeds.add(oldFeed);
         }
       });
@@ -600,7 +611,7 @@ class _VideoRoomState extends State<VideoRoom> {
           /* subscribeToAudio= */ false,
           /* subscribeToData= */ false);
       this.unsubscribeFrom(
-          unsubscribeFeeds.map((feed) => feed.id), /* onlyVideo= */ true);
+          unsubscribeFeeds.map((feed) => feed["id"]), /* onlyVideo= */ true);
       switchFeeds.forEach((element) {
         this.switchVideoSlots(element["from"], element["to"]);
       }); //first(({ from, to }) => this.switchVideoSlots(from, to));
@@ -665,6 +676,14 @@ class _VideoRoomState extends State<VideoRoom> {
             // Row(children: [
             GridView.count(
           children: [
+            IconButton(
+              icon: Icon(Icons.arrow_back),
+              onPressed: () {
+                setState(() {
+                  switchPage(page - 1);
+                });
+              },
+            ),
             Container(
               child: RTCVideoView(
                 _localRenderer,
@@ -720,6 +739,40 @@ class _VideoRoomState extends State<VideoRoom> {
                     "Waiting...",
                     style: TextStyle(color: Colors.white),
                   ),
+            IconButton(
+              icon: Icon(Icons.arrow_forward),
+              onPressed: () {
+                setState(() {
+                  switchPage(page + 1);
+                });
+              },
+            ),
+            // CarouselSlider(
+            //   height: 200.0,
+            //   autoPlay: true,
+            //   autoPlayInterval: Duration(seconds: 3),
+            //   autoPlayAnimationDuration: Duration(milliseconds: 800),
+            //   autoPlayCurve: Curves.fastOutSlowIn,
+            //   pauseAutoPlayOnTouch: Duration(seconds: 10),
+            //   aspectRatio: 2.0,
+            //   onPageChanged: (index) {
+            //     setState(() {
+            //       page = index;
+            //     });
+            //   },
+            //   items: feeds.map((feed) {
+            //     return Builder(builder: (BuildContext context) {
+            //       return Container(
+            //         height: MediaQuery.of(context).size.height * 0.30,
+            //         width: MediaQuery.of(context).size.width,
+            //         child: Card(
+            //           color: Colors.blueAccent,
+            //           child: Container(),
+            //         ),
+            //       );
+            //     });
+            //   }).toList(),
+            // ),
           ],
           primary: false,
           padding: const EdgeInsets.all(20),
@@ -734,29 +787,29 @@ class _VideoRoomState extends State<VideoRoom> {
     idsSet.addAll(ids);
     var unsubscribe = {"request": 'unsubscribe', streams: []};
     feeds.forEach((feed) {
-      idsSet.firstWhere((id) {
-        feed["id"] == id;
-      }).forEach((feed) {
+      var feedFound = idsSet.firstWhere((id) => feed["id"] == id);
+      if (feedFound != null) {
         if (onlyVideo) {
           // Unsubscribe only from one video stream (not all publisher feed).
           // Acutally expecting only one video stream, but writing more generic code.
-          (feed["streams"] as List)
+          (feedFound["streams"] as List)
               .where((stream) => stream["type"] == 'video')
-              .map((stream) => ({"feed": feed["id"], "mid": stream["mid"]}))
+              .map(
+                  (stream) => ({"feed": feedFound["id"], "mid": stream["mid"]}))
               .forEach(
                   (stream) => (unsubscribe["streams"] as List).add(stream));
         } else {
           // Unsubscribe the whole feed (all it's streams).
-          (unsubscribe["streams"] as List).add({"feed": feed["id"]});
+          (unsubscribe["streams"] as List).add({"feed": feedFound["id"]});
           //Janus.log('Unsubscribe from Feed ' + JSON.stringify(feed) + ' (' + feed.id + ').');
         }
-      });
-      // Send an unsubscribe request.
-
-      if (pluginHandle != null && (unsubscribe["streams"] as List).length > 0) {
-        pluginHandle.send(message: {"message": unsubscribe});
       }
     });
+    // Send an unsubscribe request.
+
+    if (pluginHandle != null && (unsubscribe["streams"] as List).length > 0) {
+      pluginHandle.send(message: {"message": unsubscribe});
+    }
   }
 
   void switchVideoSlots(int from, int to) {
