@@ -35,7 +35,8 @@ dependencies:
 
   janus_client: #^0.0.4
     git:
-      url: https://github.com/shivanshtalwar0/flutter_janus_client.git
+      url: https://github.com/igala/flutter_janus_client.git
+      #https://github.com/shivanshtalwar0/flutter_janus_client.git
       ref: master
 #      path: flutter_janus_client
 
