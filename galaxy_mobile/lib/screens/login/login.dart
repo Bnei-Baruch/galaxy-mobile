@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/services/api.dart';
@@ -10,12 +9,12 @@ class Login extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Login'),
+        title: Text('Welcome'),
       ),
       body: Center(
           child: Column(children: [
         ElevatedButton(
-          child: Text('Launch screen'),
+          child: Text('Login'),
           onPressed: () async {
             final auth = context.read<AuthService>();
             final authResponse = await auth.signIn();
@@ -28,10 +27,17 @@ class Login extends StatelessWidget {
               ..fetchConfig()
               ..fetchAvailableRooms(false);
 
-             Navigator.pushNamed(context, '/settings');
+            Navigator.pushNamed(context, '/settings');
           },
         ),
-      ),
+         ElevatedButton(
+          child: Text('log out'),
+          onPressed: () async {
+            final auth = context.read<AuthService>();
+            auth.logout();
+          },
+        ),
+
       ])),
     );
   }
