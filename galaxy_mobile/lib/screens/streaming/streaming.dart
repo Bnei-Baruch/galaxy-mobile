@@ -220,10 +220,12 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
 
   Future<void> cleanUpAndBack() async {
     videoStreamingPlugin.send(message: {"request": "stop"});
+    audioStreamingPlugin.send(message: {"request": "stop"});
   }
 
   destroy() async {
     await videoStreamingPlugin.destroy();
+    await audioStreamingPlugin.destroy()
     janusClient.destroy();
     if (_remoteRenderer != null) {
       _remoteRenderer.srcObject = null;
@@ -268,6 +270,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
   @override
   void dispose() async {
     // TODO: implement dispose
+
     super.dispose();
   }
 }
