@@ -94,7 +94,7 @@ class _VideoRoomState extends State<VideoRoom> {
 
   void switchPage(int page) {
     // Normalize page, e.g., if it is -1 or too large...
-
+    print("switch page to : " + page.toString());
     int numPages = (feeds.length / PAGE_SIZE).ceil();
     this.page = numPages == 0 ? 0 : (numPages + page) % numPages;
     this.switchVideos(page, feeds, feeds);
@@ -127,7 +127,8 @@ class _VideoRoomState extends State<VideoRoom> {
                       "type": stream["type"]
                     })
                 .toList();
-            newStreamsMids.addAll(midslist);
+            // newStreamsMids.addAll(midslist);
+            newStreamsMids = midslist;
           }
 
           if (jsep != null) {
@@ -160,12 +161,14 @@ class _VideoRoomState extends State<VideoRoom> {
           print('got remote track with mid=$mid');
           setState(() {
             if ((track as MediaStreamTrack).kind == "video" &&
-                (track as MediaStreamTrack).enabled) {
+                (track as MediaStreamTrack).enabled &&
+                on) {
               var midElement = newStreamsMids.firstWhere((element) =>
                   element["type"] == "video" && element["mid"] == mid);
               var feed = this.feeds.firstWhere(
                   (element) => element["id"] == midElement["feed_id"]);
 
+              print("video slot is: " + feed["videoSlot"].toString());
               //if (tempConter++ < 3) {
               remoteStream
                   .elementAt(feed["videoSlot"])
@@ -249,6 +252,7 @@ class _VideoRoomState extends State<VideoRoom> {
                     List newFeedsState =
                         feeds != null ? (feeds + newFeeds) : newFeeds;
 
+                    feeds = newFeedsState;
                     // Merge new feed with existing feeds and sort.
                     this.makeSubscription(
                         newFeeds,
@@ -257,7 +261,7 @@ class _VideoRoomState extends State<VideoRoom> {
                         /* subscribeToAudio= */ true,
                         /* subscribeToData= */ true);
                     switchVideos(/* page= */ page, List.empty(), newFeedsState);
-                    feeds = newFeedsState;
+
                     // this.setState({feeds: feedsNewState});
                   }
 
@@ -787,15 +791,17 @@ class _VideoRoomState extends State<VideoRoom> {
     idsSet.addAll(ids);
     var unsubscribe = {"request": 'unsubscribe', streams: []};
     feeds.forEach((feed) {
-      var feedFound = idsSet.firstWhere((id) => feed["id"] == id);
-      if (feedFound != null) {
+      var isFeedFound = idsSet.any((id) => feed["id"] == id);
+      if (isFeedFound == true) {
+        var feedFound = idsSet.firstWhere((id) => feed["id"] == id);
+        var feedToHandle =
+            feeds.firstWhere((element) => element["id"] == feedFound);
         if (onlyVideo) {
           // Unsubscribe only from one video stream (not all publisher feed).
           // Acutally expecting only one video stream, but writing more generic code.
-          (feedFound["streams"] as List)
+          (feedToHandle["streams"] as List)
               .where((stream) => stream["type"] == 'video')
-              .map(
-                  (stream) => ({"feed": feedFound["id"], "mid": stream["mid"]}))
+              .map((stream) => ({"feed": feedFound, "mid": stream["mid"]}))
               .forEach(
                   (stream) => (unsubscribe["streams"] as List).add(stream));
         } else {
@@ -807,7 +813,9 @@ class _VideoRoomState extends State<VideoRoom> {
     });
     // Send an unsubscribe request.
 
-    if (pluginHandle != null && (unsubscribe["streams"] as List).length > 0) {
+    if (pluginHandle != null &&
+        (unsubscribe["streams"] as List) != null &&
+        (unsubscribe["streams"] as List).length > 0) {
       pluginHandle.send(message: {"message": unsubscribe});
     }
   }
