@@ -10,7 +10,7 @@ class ScreenLoader extends StatelessWidget {
         child: Center(
             child: Column(
           children: [
-            Image.asset('lib/assets/images/logo.png', fit: BoxFit.contain),
+            Image.asset('assets/graphics/logo.png', fit: BoxFit.contain),
             LinearProgressIndicator(),
             Text("loading"),
           ],
