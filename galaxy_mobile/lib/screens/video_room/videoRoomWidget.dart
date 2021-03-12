@@ -172,11 +172,13 @@ class _VideoRoomState extends State<VideoRoom> {
               print("video slot is: " + feed["videoSlot"].toString());
               //if (tempConter++ < 3) {
 
-              if (_remoteRenderer
-                  .elementAt(feed["videoSlot"])
-                  .srcObject
-                  .getVideoTracks()
-                  .isNotEmpty) {
+              if (_remoteRenderer.elementAt(feed["videoSlot"]).srcObject !=
+                      null &&
+                  _remoteRenderer
+                      .elementAt(feed["videoSlot"])
+                      .srcObject
+                      .getVideoTracks()
+                      .isNotEmpty) {
                 print("removing video track");
                 remoteStream.elementAt(feed["videoSlot"]).removeTrack(
                     remoteStream
