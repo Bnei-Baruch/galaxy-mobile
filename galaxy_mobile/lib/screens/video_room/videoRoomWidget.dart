@@ -128,6 +128,7 @@ class _VideoRoomState extends State<VideoRoom> {
                     })
                 .toList();
             // newStreamsMids.addAll(midslist);
+            print("got newStreamsMids ");
             newStreamsMids = midslist;
           }
 
@@ -170,6 +171,30 @@ class _VideoRoomState extends State<VideoRoom> {
 
               print("video slot is: " + feed["videoSlot"].toString());
               //if (tempConter++ < 3) {
+
+              if (_remoteRenderer
+                  .elementAt(feed["videoSlot"])
+                  .srcObject
+                  .getVideoTracks()
+                  .isNotEmpty) {
+                print("removing video track");
+                remoteStream.elementAt(feed["videoSlot"]).removeTrack(
+                    remoteStream
+                        .elementAt(feed["videoSlot"])
+                        .getVideoTracks()
+                        .first,
+                    removeFromNative: true);
+                _remoteRenderer
+                    .elementAt(feed["videoSlot"])
+                    .srcObject
+                    .removeTrack(
+                        _remoteRenderer
+                            .elementAt(feed["videoSlot"])
+                            .srcObject
+                            .getVideoTracks()
+                            .first,
+                        removeFromNative: true);
+              }
               remoteStream
                   .elementAt(feed["videoSlot"])
                   .addTrack(track, addToNative: true);
@@ -272,6 +297,7 @@ class _VideoRoomState extends State<VideoRoom> {
                   //need to handle change of status of feeds
 
                 } else if (event == 'talking') {
+                  print("talking");
                   // const feeds = Object.assign([], this.state.feeds);
                   // const id    = msg['id'];
                   // Janus.log(`User: ${id} - start talking`);
@@ -283,6 +309,7 @@ class _VideoRoomState extends State<VideoRoom> {
                   // feed.talking = true;
                   // this.setState({ feeds });
                 } else if (event == 'stopped-talking') {
+                  print("stopped-talking");
                   // const feeds = Object.assign([], this.state.feeds);
                   // const id    = msg['id'];
                   // Janus.log(`User: ${id} - stop talking`);
@@ -294,10 +321,13 @@ class _VideoRoomState extends State<VideoRoom> {
                   // feed.talking = false;
                   // this.setState({ feeds });
                 } else if (event == 'destroyed') {
+                  print("destroyed");
+
                   // The room has been destroyed
                   // Janus.warn('The room has been destroyed!');
                 } else if (event == 'event') {
                   if (msg['configured'] == 'ok') {
+                    print("configured");
                     // User published own feed successfully.
                     // const user = {
                     //   ...this.state.user,
@@ -314,6 +344,7 @@ class _VideoRoomState extends State<VideoRoom> {
                     // }
                   } else if (msg['publishers'] != null &&
                       msg['publishers'] != null) {
+                    print("just joined");
                     // User just joined the room.
                     // const newFeeds = sortAndFilterFeeds(msg['publishers'].filter(l => l.display = (JSON.parse(l.display))));
                     //Janus.debug('New list of available publishers/feeds:', newFeeds);
@@ -332,6 +363,8 @@ class _VideoRoomState extends State<VideoRoom> {
                     // this.setState({ feeds: feedsNewState });
 
                   } else if (msg['leaving'] != null && msg['leaving'] != null) {
+                    print("leaving");
+
                     // User leaving the room which is same as publishers gone.
                     // const leaving = msg['leaving'];
                     // Janus.log('Publisher leaving: ', leaving);
@@ -347,6 +380,7 @@ class _VideoRoomState extends State<VideoRoom> {
 
                   } else if (msg['unpublished'] != null &&
                       msg['unpublished'] != null) {
+                    print("unpublished");
                     // const unpublished = msg['unpublished'];
                     // Janus.log('Publisher unpublished: ', unpublished);
                     // if (unpublished === 'ok') {
@@ -356,6 +390,7 @@ class _VideoRoomState extends State<VideoRoom> {
                     // }
 
                   } else if (msg['error'] != null && msg['error'] != null) {
+                    print("error");
                     // if (msg['error_code'] === 426) {
                     // Janus.log('This is a no such room');
                     // } else {
@@ -789,7 +824,7 @@ class _VideoRoomState extends State<VideoRoom> {
   void unsubscribeFrom(Iterable ids, bool onlyVideo) {
     Set idsSet = new Set();
     idsSet.addAll(ids);
-    var unsubscribe = {"request": 'unsubscribe', streams: []};
+    var unsubscribe = {"request": 'unsubscribe', "streams": []};
     feeds.forEach((feed) {
       var isFeedFound = idsSet.any((id) => feed["id"] == id);
       if (isFeedFound == true) {
