@@ -66,8 +66,14 @@ class AuthService {
   Future<User> getUser() async {
     debugPrint("Get User");
 
-    final response = await _dio.get(APP_AUTH_USERINFO_URL);
+    final response = await _dio.get(APP_OPENID_AUTH_USERINFO_ENDPOINT);
     return User.fromJson(response.data);
+  }
+
+  Future<void> logout() async {
+    debugPrint("Logout");
+
+    await _dio.get(APP_OPENID_END_SESSION_ENDPOINT);
   }
 }
 

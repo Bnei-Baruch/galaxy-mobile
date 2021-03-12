@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/routes.dart';
 import 'package:galaxy_mobile/services/api.dart';
 import 'package:galaxy_mobile/services/authService.dart';
@@ -13,11 +14,16 @@ void main() async {
       providers: [
         Provider<AuthService>(create: (_) => AuthService()),
         Provider<Api>(create: (_) => Api()),
+        ChangeNotifierProxyProvider2<AuthService, Api, MainStore>(
+          create: (_) => MainStore(),
+          update: (_, auth, api, model) => model..update(auth, api)
+        ),
       ],
-      child: MyApp(),
+      child: MyApp()
     ),
   );
 }
+
 
 class MyApp extends StatelessWidget {
   @override

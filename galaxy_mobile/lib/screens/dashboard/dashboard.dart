@@ -1,22 +1,25 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:galaxy_mobile/models/mainStore.dart';
+import 'package:galaxy_mobile/screens/streaming/streaming.dart';
+import 'package:galaxy_mobile/screens/video_room/videoRoomWidget.dart';
+import 'package:provider/provider.dart';
 
-class Room extends StatelessWidget {
+class Dashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final activeRoom = context.select((MainStore s) => s.activeRoom);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text("Room Name"),
+        title: Text(activeRoom.description),
       ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            // Navigate back to first screen when tapped.
-            Navigator.pop(context);
-          },
-          child: Text('Go back!'),
-        ),
-      ),
+      // body: FittedBox(
+      //     child: Container(child: Placeholder(), color: Colors.green),
+      //     fit: BoxFit.fill),
+      body: Column(children: [
+        StreamingUnified(),
+        VideoRoom(),
+      ]),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
