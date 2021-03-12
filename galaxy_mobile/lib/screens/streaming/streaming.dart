@@ -225,7 +225,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
 
   destroy() async {
     await videoStreamingPlugin.destroy();
-    await audioStreamingPlugin.destroy()
+    await audioStreamingPlugin.destroy();
     janusClient.destroy();
     if (_remoteRenderer != null) {
       _remoteRenderer.srcObject = null;
