@@ -4,7 +4,18 @@ import 'package:galaxy_mobile/screens/streaming/streaming.dart';
 import 'package:galaxy_mobile/screens/video_room/videoRoomWidget.dart';
 import 'package:provider/provider.dart';
 
-class Dashboard extends StatelessWidget {
+class Dashboard extends StatefulWidget {
+  @override
+  State createState() => _DashboardState();
+}
+
+class _DashboardState extends State<Dashboard> {
+  var stream = StreamingUnified();
+  var videoRoom = VideoRoom();
+  @override
+  void initState() {
+    // TODO: implement initState
+  }
   @override
   Widget build(BuildContext context) {
     final activeRoom = context.select((MainStore s) => s.activeRoom);
@@ -16,10 +27,9 @@ class Dashboard extends StatelessWidget {
       // body: FittedBox(
       //     child: Container(child: Placeholder(), color: Colors.green),
       //     fit: BoxFit.fill),
-      body: Column(children: [
-        StreamingUnified(),
-        VideoRoom(),
-      ]),
+      body: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [stream, videoRoom]),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
@@ -38,7 +48,18 @@ class Dashboard extends StatelessWidget {
         ],
         // currentIndex: _selectedIndex,
         // selectedItemColor: Colors.amber[800],
-        // onTap: _onItemTapped,
+        onTap: (value) {
+          //only for debugging purposes
+          print(value);
+          switch (value) {
+            case 0:
+              videoRoom.exitRoom();
+              break;
+            case 1:
+              stream.exit();
+              break;
+          }
+        },
       ),
     );
   }

@@ -11,7 +11,6 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:janus_client/Plugin.dart';
 import 'package:provider/provider.dart';
 
-
 import 'dart:async';
 
 final int PAGE_SIZE = 3;
@@ -24,21 +23,33 @@ class VideoRoom extends StatefulWidget {
 
   User user;
 
+  JanusClient j;
+  RTCVideoRenderer _localRenderer = new RTCVideoRenderer();
+  List<RTCVideoRenderer> _remoteRenderer = new List<RTCVideoRenderer>();
+  Plugin pluginHandle;
+  Plugin subscriberHandle;
   // VideoRoom(String serverUrl, String token, int roomNumber)
   //     : this.roomNumber = roomNumber,
   //       this.token = token,
   //       this.server = serverUrl;
+
+  void exitRoom() {
+    j.destroy();
+    pluginHandle.hangup();
+    subscriberHandle.destroy();
+    _localRenderer.srcObject = null;
+    _localRenderer.dispose();
+    _remoteRenderer.map((e) => e.srcObject = null);
+    _remoteRenderer.map((e) => e.dispose());
+    pluginHandle = null;
+    subscriberHandle = null;
+  }
 
   @override
   _VideoRoomState createState() => _VideoRoomState();
 }
 
 class _VideoRoomState extends State<VideoRoom> {
-  JanusClient j;
-  RTCVideoRenderer _localRenderer = new RTCVideoRenderer();
-  List<RTCVideoRenderer> _remoteRenderer = new List<RTCVideoRenderer>();
-  Plugin pluginHandle;
-  Plugin subscriberHandle;
   List<MediaStream> remoteStream = new List<MediaStream>();
   MediaStream myStream;
 
@@ -81,11 +92,11 @@ class _VideoRoomState extends State<VideoRoom> {
   initRenderers() async {
     int count = 0;
     while (count < 3) {
-      _remoteRenderer.add(new RTCVideoRenderer());
+      widget._remoteRenderer.add(new RTCVideoRenderer());
       count++;
     }
-    await _localRenderer.initialize();
-    for (var renderer in _remoteRenderer) {
+    await widget._localRenderer.initialize();
+    for (var renderer in widget._remoteRenderer) {
       await renderer.initialize();
     }
     int count_t = 0;
@@ -136,21 +147,21 @@ class _VideoRoomState extends State<VideoRoom> {
           }
 
           if (jsep != null) {
-            await subscriberHandle.handleRemoteJsep(jsep);
+            await widget.subscriberHandle.handleRemoteJsep(jsep);
             // var body = {"request": "start", "room": 2157};
             var body = {
               "request": "start",
               "room": widget.roomNumber,
             };
-            await subscriberHandle.send(
+            await widget.subscriberHandle.send(
                 message: body,
-                jsep: await subscriberHandle.createAnswer(),
+                jsep: await widget.subscriberHandle.createAnswer(),
                 onSuccess: () {});
           }
         },
         onSuccess: (plugin) {
           setState(() {
-            subscriberHandle = plugin;
+            widget.subscriberHandle = plugin;
           });
           var register = {
             "request": "join",
@@ -159,7 +170,8 @@ class _VideoRoomState extends State<VideoRoom> {
             "streams": feeds,
           };
           print("Requesting to subscribe to publishers...");
-          subscriberHandle.send(message: register, onSuccess: () async {});
+          widget.subscriberHandle
+              .send(message: register, onSuccess: () async {});
         },
         onRemoteTrack: (stream, track, mid, on) {
           print('got remote track with mid=$mid');
@@ -175,9 +187,11 @@ class _VideoRoomState extends State<VideoRoom> {
               print("video slot is: " + feed["videoSlot"].toString());
               //if (tempConter++ < 3) {
 
-              if (_remoteRenderer.elementAt(feed["videoSlot"]).srcObject !=
+              if (widget._remoteRenderer
+                          .elementAt(feed["videoSlot"])
+                          .srcObject !=
                       null &&
-                  _remoteRenderer
+                  widget._remoteRenderer
                       .elementAt(feed["videoSlot"])
                       .srcObject
                       .getVideoTracks()
@@ -189,11 +203,11 @@ class _VideoRoomState extends State<VideoRoom> {
                         .getVideoTracks()
                         .first,
                     removeFromNative: true);
-                _remoteRenderer
+                widget._remoteRenderer
                     .elementAt(feed["videoSlot"])
                     .srcObject
                     .removeTrack(
-                        _remoteRenderer
+                        widget._remoteRenderer
                             .elementAt(feed["videoSlot"])
                             .srcObject
                             .getVideoTracks()
@@ -204,7 +218,7 @@ class _VideoRoomState extends State<VideoRoom> {
                   .elementAt(feed["videoSlot"])
                   .addTrack(track, addToNative: true);
               print('added track to stream locally');
-              _remoteRenderer.elementAt(feed["videoSlot"]).srcObject =
+              widget._remoteRenderer.elementAt(feed["videoSlot"]).srcObject =
                   remoteStream.elementAt(feed["videoSlot"]);
             }
             // }
@@ -214,20 +228,20 @@ class _VideoRoomState extends State<VideoRoom> {
 
   Future<void> initPlatformState() async {
     setState(() {
-      j = JanusClient(iceServers: [
+      widget.j = JanusClient(iceServers: [
         RTCIceServer(
             url: "stun:galaxy.kli.one:3478", username: "", credential: ""),
       ], server: [
         widget.server,
       ], withCredentials: true, isUnifiedPlan: true, token: widget.token);
-      j.connect(onSuccess: (sessionId) async {
+      widget.j.connect(onSuccess: (sessionId) async {
         debugPrint('voilla! connection established with session id as' +
             sessionId.toString());
         Map<String, dynamic> configuration = {
-          "iceServers": j.iceServers.map((e) => e.toMap()).toList()
+          "iceServers": widget.j.iceServers.map((e) => e.toMap()).toList()
         };
 
-        j.attach(Plugin(
+        widget.j.attach(Plugin(
             opaqueId: widget.user.sub,
             plugin: 'janus.plugin.videoroom',
             onMessage: (msg, jsep) async {
@@ -405,18 +419,18 @@ class _VideoRoomState extends State<VideoRoom> {
                 }
               }
               if (jsep != null) {
-                pluginHandle.handleRemoteJsep(jsep);
+                widget.pluginHandle.handleRemoteJsep(jsep);
               }
             },
             onSuccess: (plugin) async {
               // setState(() {
-              pluginHandle = plugin;
+              widget.pluginHandle = plugin;
               MediaStream stream = await plugin.initializeMediaDevices();
               myStream = stream;
               myStream.getAudioTracks().first.setMicrophoneMute(true);
               // });
               setState(() {
-                _localRenderer.srcObject = myStream;
+                widget._localRenderer.srcObject = myStream;
               });
               var register = {
                 "request": "join",
@@ -516,8 +530,8 @@ class _VideoRoomState extends State<VideoRoom> {
     print(' :: Got subscribtion: ' +
         subscription
             .toString()); //, !!this.state.remoteFeed, this.state.creatingFeed);
-    if (pluginHandle != null) {
-      pluginHandle
+    if (widget.pluginHandle != null) {
+      widget.pluginHandle
           .send(message: {"request": 'subscribe', "streams": subscription});
     }
 
@@ -531,7 +545,7 @@ class _VideoRoomState extends State<VideoRoom> {
 
     // We are not creating the feed, so let's do it.
     creatingFeed = true;
-    _newRemoteFeed(j, subscription);
+    _newRemoteFeed(widget.j, subscription);
   }
 
   // Unsubscribe from feeds defined by |ids| (with all streams) and remove it when |onlyVideo| is false.
@@ -677,55 +691,65 @@ class _VideoRoomState extends State<VideoRoom> {
     widget.token = args.token;
     widget.server = args.server;
     widget.user = args.user;
-    return Scaffold(
-        appBar: AppBar(
-          actions: [
-            IconButton(
-                icon: Icon(
-                  Icons.call,
-                  color: Colors.greenAccent,
-                ),
-                onPressed: () async {
-                  await this.initRenderers();
-                  await this.initPlatformState();
-//                  -_localRenderer.
-                }),
-            IconButton(
-                icon: Icon(
-                  Icons.call_end,
-                  color: Colors.red,
-                ),
-                onPressed: () {
-                  j.destroy();
-                  pluginHandle.hangup();
-                  subscriberHandle.hangup();
-                  _localRenderer.srcObject = null;
-                  _localRenderer.dispose();
-                  _remoteRenderer.map((e) => e.srcObject = null);
-                  _remoteRenderer.map((e) => e.dispose());
-                  setState(() {
-                    pluginHandle = null;
-                    subscriberHandle = null;
-                  });
-                }),
-            IconButton(
-                icon: Icon(
-                  Icons.switch_camera,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  if (pluginHandle != null) {
-                    pluginHandle.switchCamera();
-                  }
-                })
-          ],
-          title: const Text('janus_client'),
-        ),
-        body:
-            // Row(children: [
-            GridView.count(
-          children: [
-            IconButton(
+    if (widget.pluginHandle == null) {
+      initRenderers();
+      initPlatformState();
+    }
+    return
+//         appBar: AppBar(
+//           actions: [
+//             IconButton(
+//                 icon: Icon(
+//                   Icons.call,
+//                   color: Colors.greenAccent,
+//                 ),
+//                 onPressed: () async {
+//                   await this.initRenderers();
+//                   await this.initPlatformState();
+// //                  -_localRenderer.
+//                 }),
+//             IconButton(
+//                 icon: Icon(
+//                   Icons.call_end,
+//                   color: Colors.red,
+//                 ),
+//                 onPressed: () {
+//                   j.destroy();
+//                   pluginHandle.hangup();
+//                   subscriberHandle.hangup();
+//                   _localRenderer.srcObject = null;
+//                   _localRenderer.dispose();
+//                   _remoteRenderer.map((e) => e.srcObject = null);
+//                   _remoteRenderer.map((e) => e.dispose());
+//                   setState(() {
+//                     pluginHandle = null;
+//                     subscriberHandle = null;
+//                   });
+//                 }),
+//             IconButton(
+//                 icon: Icon(
+//                   Icons.switch_camera,
+//                   color: Colors.white,
+//                 ),
+//                 onPressed: () {
+//                   if (pluginHandle != null) {
+//                     pluginHandle.switchCamera();
+//                   }
+//                 })
+//           ],
+//           title: const Text('janus_client'),
+//         ),
+
+        // Row(children: [
+        Container(
+      alignment: Alignment.topCenter,
+      height: MediaQuery.of(context).size.height / 3 * 2 - 136,
+      child: Stack(
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: IconButton(
+              color: Colors.blue,
               icon: Icon(Icons.arrow_back),
               onPressed: () {
                 setState(() {
@@ -733,62 +757,108 @@ class _VideoRoomState extends State<VideoRoom> {
                 });
               },
             ),
-            Container(
-              child: RTCVideoView(
-                _localRenderer,
+          ),
+          GridView.count(
+            children: [
+              Container(
+                child: RTCVideoView(
+                  widget._localRenderer,
+                ),
+                height: 200,
+                width: 200,
               ),
-              height: 200,
-              width: 200,
-            ),
-            (_remoteRenderer != null && _remoteRenderer.elementAt(0) != null)
-                ? Stack(
-                    children: [
-                      RTCVideoView(_remoteRenderer.elementAt(0)),
-                      Align(
-                        alignment: Alignment.bottomLeft,
-                        child: Text(feeds.isNotEmpty
-                            ? feeds.firstWhere((element) =>
-                                element["videoSlot"] == 0)["display"]["display"]
-                            : ""),
-                      ),
-                    ],
-                  )
-                : Text("Waiting...", style: TextStyle(color: Colors.white)),
-            (_remoteRenderer != null && _remoteRenderer.elementAt(1) != null)
-                ? Stack(
-                    children: [
-                      RTCVideoView(_remoteRenderer.elementAt(1)),
-                      Align(
-                        alignment: Alignment.bottomLeft,
-                        child: Text(feeds.isNotEmpty
-                            ? feeds.firstWhere((element) =>
-                                element["videoSlot"] == 1)["display"]["display"]
-                            : ""),
-                      ),
-                    ],
-                  )
-                : Text(
-                    "Waiting...",
-                    style: TextStyle(color: Colors.white),
-                  ),
-            (_remoteRenderer != null && _remoteRenderer.elementAt(2) != null)
-                ? Stack(
-                    children: [
-                      RTCVideoView(_remoteRenderer.elementAt(2)),
-                      Align(
-                        alignment: Alignment.bottomLeft,
-                        child: Text(feeds.isNotEmpty
-                            ? feeds.firstWhere((element) =>
-                                element["videoSlot"] == 2)["display"]["display"]
-                            : ""),
-                      ),
-                    ],
-                  )
-                : Text(
-                    "Waiting...",
-                    style: TextStyle(color: Colors.white),
-                  ),
-            IconButton(
+              (widget._remoteRenderer != null &&
+                      widget._remoteRenderer.elementAt(0) != null)
+                  ? Stack(
+                      children: [
+                        RTCVideoView(widget._remoteRenderer.elementAt(0)),
+                        Align(
+                          alignment: Alignment.bottomLeft,
+                          child: Text(feeds.isNotEmpty
+                              ? feeds.firstWhere((element) =>
+                                      element["videoSlot"] == 0)["display"]
+                                  ["display"]
+                              : ""),
+                        ),
+                      ],
+                    )
+                  : Text("Waiting...", style: TextStyle(color: Colors.white)),
+              (widget._remoteRenderer != null &&
+                      widget._remoteRenderer.elementAt(1) != null)
+                  ? Stack(
+                      children: [
+                        RTCVideoView(widget._remoteRenderer.elementAt(1)),
+                        Align(
+                          alignment: Alignment.bottomLeft,
+                          child: Text(feeds.isNotEmpty
+                              ? feeds.firstWhere((element) =>
+                                      element["videoSlot"] == 1)["display"]
+                                  ["display"]
+                              : ""),
+                        ),
+                      ],
+                    )
+                  : Text(
+                      "Waiting...",
+                      style: TextStyle(color: Colors.white),
+                    ),
+              (widget._remoteRenderer != null &&
+                      widget._remoteRenderer.elementAt(2) != null)
+                  ? Stack(
+                      children: [
+                        RTCVideoView(widget._remoteRenderer.elementAt(2)),
+                        Align(
+                          alignment: Alignment.bottomLeft,
+                          child: Text(feeds.isNotEmpty
+                              ? feeds.firstWhere((element) =>
+                                      element["videoSlot"] == 2)["display"]
+                                  ["display"]
+                              : ""),
+                        ),
+                      ],
+                    )
+                  : Text(
+                      "Waiting...",
+                      style: TextStyle(color: Colors.white),
+                    ),
+
+              // CarouselSlider(
+              //   height: 200.0,
+              //   autoPlay: true,
+              //   autoPlayInterval: Duration(seconds: 3),
+              //   autoPlayAnimationDuration: Duration(milliseconds: 800),
+              //   autoPlayCurve: Curves.fastOutSlowIn,
+              //   pauseAutoPlayOnTouch: Duration(seconds: 10),
+              //   aspectRatio: 2.0,
+              //   onPageChanged: (index) {
+              //     setState(() {
+              //       page = index;
+              //     });
+              //   },
+              //   items: feeds.map((feed) {
+              //     return Builder(builder: (BuildContext context) {
+              //       return Container(
+              //         height: MediaQuery.of(context).size.height * 0.30,
+              //         width: MediaQuery.of(context).size.width,
+              //         child: Card(
+              //           color: Colors.blueAccent,
+              //           child: Container(),
+              //         ),
+              //       );
+              //     });
+              //   }).toList(),
+              // ),
+            ],
+            primary: false,
+            padding: const EdgeInsets.all(20),
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            crossAxisCount: 2,
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: IconButton(
+              color: Colors.blue,
               icon: Icon(Icons.arrow_forward),
               onPressed: () {
                 setState(() {
@@ -796,39 +866,10 @@ class _VideoRoomState extends State<VideoRoom> {
                 });
               },
             ),
-            // CarouselSlider(
-            //   height: 200.0,
-            //   autoPlay: true,
-            //   autoPlayInterval: Duration(seconds: 3),
-            //   autoPlayAnimationDuration: Duration(milliseconds: 800),
-            //   autoPlayCurve: Curves.fastOutSlowIn,
-            //   pauseAutoPlayOnTouch: Duration(seconds: 10),
-            //   aspectRatio: 2.0,
-            //   onPageChanged: (index) {
-            //     setState(() {
-            //       page = index;
-            //     });
-            //   },
-            //   items: feeds.map((feed) {
-            //     return Builder(builder: (BuildContext context) {
-            //       return Container(
-            //         height: MediaQuery.of(context).size.height * 0.30,
-            //         width: MediaQuery.of(context).size.width,
-            //         child: Card(
-            //           color: Colors.blueAccent,
-            //           child: Container(),
-            //         ),
-            //       );
-            //     });
-            //   }).toList(),
-            // ),
-          ],
-          primary: false,
-          padding: const EdgeInsets.all(20),
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-          crossAxisCount: 2,
-        ));
+          )
+        ],
+      ),
+    );
   }
 
   void unsubscribeFrom(Iterable ids, bool onlyVideo) {
@@ -858,10 +899,10 @@ class _VideoRoomState extends State<VideoRoom> {
     });
     // Send an unsubscribe request.
 
-    if (pluginHandle != null &&
+    if (widget.pluginHandle != null &&
         (unsubscribe["streams"] as List) != null &&
         (unsubscribe["streams"] as List).length > 0) {
-      pluginHandle.send(message: {"message": unsubscribe});
+      widget.pluginHandle.send(message: {"message": unsubscribe});
     }
   }
 
