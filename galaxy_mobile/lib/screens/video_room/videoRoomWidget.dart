@@ -100,10 +100,10 @@ class _VideoRoomState extends State<VideoRoom> {
       await renderer.initialize();
     }
     int count_t = 0;
-    while (count_t < 3) {
-      createLocalMediaStream("local").then((value) => remoteStream.add(value));
-      count_t++;
-    }
+    // while (count_t < 3) {
+    //   createLocalMediaStream("local").then((value) => remoteStream.add(value));
+    //   count_t++;
+    // }
   }
 
   void switchPage(int page) {
@@ -197,29 +197,22 @@ class _VideoRoomState extends State<VideoRoom> {
                       .getVideoTracks()
                       .isNotEmpty) {
                 print("removing video track");
-                remoteStream.elementAt(feed["videoSlot"]).removeTrack(
-                    remoteStream
-                        .elementAt(feed["videoSlot"])
-                        .getVideoTracks()
-                        .first,
-                    removeFromNative: true);
+                remoteStream.elementAt(feed["videoSlot"]).dispose();
                 widget._remoteRenderer
                     .elementAt(feed["videoSlot"])
                     .srcObject
-                    .removeTrack(
-                        widget._remoteRenderer
-                            .elementAt(feed["videoSlot"])
-                            .srcObject
-                            .getVideoTracks()
-                            .first,
-                        removeFromNative: true);
+                    .dispose();
               }
-              remoteStream
-                  .elementAt(feed["videoSlot"])
-                  .addTrack(track, addToNative: true);
-              print('added track to stream locally');
-              widget._remoteRenderer.elementAt(feed["videoSlot"]).srcObject =
-                  remoteStream.elementAt(feed["videoSlot"]);
+              createLocalMediaStream("local").then((stream) => {
+                    remoteStream.insert(feed["videoSlot"], stream),
+                    remoteStream
+                        .elementAt(feed["videoSlot"])
+                        .addTrack(track, addToNative: true),
+                    print('added track to stream locally'),
+                    widget._remoteRenderer
+                        .elementAt(feed["videoSlot"])
+                        .srcObject = remoteStream.elementAt(feed["videoSlot"])
+                  });
             }
             // }
           });
@@ -743,80 +736,80 @@ class _VideoRoomState extends State<VideoRoom> {
         // Row(children: [
         Container(
       alignment: Alignment.topCenter,
-      height: MediaQuery.of(context).size.height / 3 * 2 - 136,
+      height: MediaQuery.of(context).size.height / 3 * 2 - 140,
       child: Stack(
         children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: IconButton(
-              color: Colors.blue,
-              icon: Icon(Icons.arrow_back),
-              onPressed: () {
-                setState(() {
-                  switchPage(page - 1);
-                });
-              },
-            ),
-          ),
           GridView.count(
             children: [
               Container(
+                decoration: BoxDecoration(
+                    border: Border.all(
+                        color: Colors.black)), //Colors.lightGreenAccent
                 child: RTCVideoView(
                   widget._localRenderer,
                 ),
-                height: 200,
-                width: 200,
+                // height: 200,
+                // width: 200,
               ),
               (widget._remoteRenderer != null &&
                       widget._remoteRenderer.elementAt(0) != null)
-                  ? Stack(
-                      children: [
-                        RTCVideoView(widget._remoteRenderer.elementAt(0)),
-                        Align(
-                          alignment: Alignment.bottomLeft,
-                          child: Text(feeds.isNotEmpty
-                              ? feeds.firstWhere((element) =>
-                                      element["videoSlot"] == 0)["display"]
-                                  ["display"]
-                              : ""),
-                        ),
-                      ],
-                    )
+                  ? Container(
+                      decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black)),
+                      child: Stack(
+                        children: [
+                          RTCVideoView(widget._remoteRenderer.elementAt(0)),
+                          Align(
+                            alignment: Alignment.bottomLeft,
+                            child: Text(feeds.isNotEmpty
+                                ? feeds.firstWhere((element) =>
+                                        element["videoSlot"] == 0)["display"]
+                                    ["display"]
+                                : ""),
+                          ),
+                        ],
+                      ))
                   : Text("Waiting...", style: TextStyle(color: Colors.white)),
               (widget._remoteRenderer != null &&
                       widget._remoteRenderer.elementAt(1) != null)
-                  ? Stack(
-                      children: [
-                        RTCVideoView(widget._remoteRenderer.elementAt(1)),
-                        Align(
-                          alignment: Alignment.bottomLeft,
-                          child: Text(feeds.isNotEmpty
-                              ? feeds.firstWhere((element) =>
-                                      element["videoSlot"] == 1)["display"]
-                                  ["display"]
-                              : ""),
-                        ),
-                      ],
-                    )
+                  ? Container(
+                      decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black)),
+                      child: Stack(
+                        children: [
+                          RTCVideoView(widget._remoteRenderer.elementAt(1)),
+                          Align(
+                            alignment: Alignment.bottomLeft,
+                            child: Text(feeds.isNotEmpty
+                                ? feeds.firstWhere((element) =>
+                                        element["videoSlot"] == 1)["display"]
+                                    ["display"]
+                                : ""),
+                          ),
+                        ],
+                      ))
                   : Text(
                       "Waiting...",
                       style: TextStyle(color: Colors.white),
                     ),
               (widget._remoteRenderer != null &&
                       widget._remoteRenderer.elementAt(2) != null)
-                  ? Stack(
-                      children: [
-                        RTCVideoView(widget._remoteRenderer.elementAt(2)),
-                        Align(
-                          alignment: Alignment.bottomLeft,
-                          child: Text(feeds.isNotEmpty
-                              ? feeds.firstWhere((element) =>
-                                      element["videoSlot"] == 2)["display"]
-                                  ["display"]
-                              : ""),
-                        ),
-                      ],
-                    )
+                  ? Container(
+                      decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black)),
+                      child: Stack(
+                        children: [
+                          RTCVideoView(widget._remoteRenderer.elementAt(2)),
+                          Align(
+                            alignment: Alignment.bottomLeft,
+                            child: Text(feeds.isNotEmpty
+                                ? feeds.firstWhere((element) =>
+                                        element["videoSlot"] == 2)["display"]
+                                    ["display"]
+                                : ""),
+                          ),
+                        ],
+                      ))
                   : Text(
                       "Waiting...",
                       style: TextStyle(color: Colors.white),
@@ -850,9 +843,9 @@ class _VideoRoomState extends State<VideoRoom> {
               // ),
             ],
             primary: false,
-            padding: const EdgeInsets.all(20),
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
+            padding: const EdgeInsets.all(0),
+            crossAxisSpacing: 0,
+            mainAxisSpacing: 0,
             crossAxisCount: 2,
           ),
           Align(
@@ -866,7 +859,19 @@ class _VideoRoomState extends State<VideoRoom> {
                 });
               },
             ),
-          )
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: IconButton(
+              color: Colors.blue,
+              icon: Icon(Icons.arrow_back),
+              onPressed: () {
+                setState(() {
+                  switchPage(page - 1);
+                });
+              },
+            ),
+          ),
         ],
       ),
     );
@@ -902,7 +907,7 @@ class _VideoRoomState extends State<VideoRoom> {
     if (widget.pluginHandle != null &&
         (unsubscribe["streams"] as List) != null &&
         (unsubscribe["streams"] as List).length > 0) {
-      widget.pluginHandle.send(message: {"message": unsubscribe});
+      widget.pluginHandle.send(message: unsubscribe);
     }
   }
 

@@ -162,12 +162,12 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
             setState(() {
               widget.audioStreamingPlugin = plugin;
               // this.getStreamListing();
-              widget.audioStreamingPlugin.send(message: {
-                "request": "watch",
-                "id": 15, //playerOverlay.videoTypeValue["value"],
-                "offer_audio": true,
-                "offer_video": true,
-              });
+              // widget.audioStreamingPlugin.send(message: {
+              //   "request": "watch",
+              //   "id": 15, //playerOverlay.videoTypeValue["value"],
+              //   "offer_audio": true,
+              //   "offer_video": true,
+              // });
             });
           }));
     });
