@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:galaxy_mobile/services/api.dart';
 import 'package:galaxy_mobile/services/authService.dart';
 import 'package:galaxy_mobile/utils/shared_pref.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class MainStore extends ChangeNotifier {
   Api _api;
