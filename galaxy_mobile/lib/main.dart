@@ -4,9 +4,12 @@ import 'package:galaxy_mobile/routes.dart';
 import 'package:galaxy_mobile/services/api.dart';
 import 'package:galaxy_mobile/services/authService.dart';
 import 'package:galaxy_mobile/themes/default.dart';
+import 'package:galaxy_mobile/utils/shared_pref.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
+   WidgetsFlutterBinding.ensureInitialized();
+  await SharedPrefs().init();
   runApp(
     /// Providers are above [MyApp] instead of inside it, so that tests
     /// can use [MyApp] while mocking the providers

@@ -8,16 +8,20 @@ class RoomSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rooms = context.select((MainStore s) => s.availableRooms);
+    final activeRoom = context.select((MainStore s) => s.activeRoom);
 
+    // TODO: the dropdown is slow, consider replace with another package.
     return DropdownSearch<Room>(
+      mode: Mode.DIALOG,
       label: "Room",
       hint: "Select Room",
       items: rooms,
+      selectedItem: activeRoom,
       // onFind: (String filter) => getData(filter),
       itemAsString: (Room room) => room.description,
       onChanged: (Room room) => {
         print(room),
-        context.read<MainStore>().setActiveRoom(room.room)
+        context.read<MainStore>().setActiveRoom(room.description)
       },
       showClearButton: true,
       showSearchBox: true,
