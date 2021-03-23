@@ -18,7 +18,6 @@ class _SettingsState extends State<Settings> {
   Widget build(BuildContext context) {
     final activeUser = context.select((MainStore s) => s.activeUser);
     final rooms = context.select((MainStore s) => s.availableRooms);
-    final activeRoom = context.select((MainStore s) => s.activeRoom);
 
     if ((activeUser == null) || (rooms == null)) {
       return ScreenLoader();
@@ -39,7 +38,6 @@ class _SettingsState extends State<Settings> {
 
             ScreenName(activeUser.title),
             RoomSelector(),
-            Text(activeRoom?.room.toString()), // Just for debug
             // Container(
             //   height: 200,
             //   width: 300,

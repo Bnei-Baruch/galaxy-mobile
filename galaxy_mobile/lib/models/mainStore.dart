@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:galaxy_mobile/models/sharedPref.dart';
 import 'package:galaxy_mobile/services/api.dart';
 import 'package:galaxy_mobile/services/authService.dart';
 
@@ -12,39 +13,53 @@ class MainStore extends ChangeNotifier {
   User activeUser;
   Room activeRoom;
   RoomData activeGateway;
-  bool audioMode = false;
+  bool audioMode;
+
+  Future init() async {
+    await Future.wait([fetchUser(), fetchConfig(), fetchAvailableRooms(false)]);
+
+    setActiveRoom(SharedPrefs().roomName);
+    setAudioMode(SharedPrefs().audioMode);
+  }
 
   void update(AuthService auth, Api api) {
     _auth = auth;
     _api = api;
   }
 
-  void setActiveRoom(int id) {
-    activeRoom = availableRooms.firstWhere((element) => element.room == id);
+  void setActiveRoom(String roomName) {
+    if (roomName.isEmpty) return;
+
+    activeRoom =
+        availableRooms.firstWhere((element) => element.description == roomName);
     activeGateway = config.firstWhere((e) => e.name == activeRoom.janus);
+
+    // TODO: what if the room doesn't exists anymore ?
+    SharedPrefs().roomName = roomName;
     notifyListeners();
   }
 
   void setAudioMode(bool value) {
+    SharedPrefs().audioMode = value;
     audioMode = value;
     notifyListeners();
   }
 
-  void fetchConfig() async {
+  Future fetchConfig() async {
     if (config == null) {
       config = await _api.fetchConfig();
     }
     notifyListeners();
   }
 
-  void fetchAvailableRooms([bool withNumUsers = true]) async {
+  Future fetchAvailableRooms([bool withNumUsers = true]) async {
     if (availableRooms == null) {
       availableRooms = await _api.fetchAvailableRooms((withNumUsers));
     }
     notifyListeners();
   }
 
-  void fetchUser() async {
+  Future fetchUser() async {
     if (activeUser == null) {
       activeUser = await _auth.getUser();
     }

@@ -22,10 +22,8 @@ class Login extends StatelessWidget {
             final api = context.read<Api>();
             api.setAccessToken(authResponse.accessToken);
 
-            context.read<MainStore>()
-              ..fetchUser()
-              ..fetchConfig()
-              ..fetchAvailableRooms(false);
+            await context.read<MainStore>().init();
+
 
             Navigator.pushNamed(context, '/settings');
           },

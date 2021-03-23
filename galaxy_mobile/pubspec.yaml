@@ -32,6 +32,7 @@ dependencies:
   flag: ^3.1.0
   dotenv: ^2.0.0
   carousel_slider: ^1.4.1
+  shared_preferences: <=2.0.3
 
   janus_client: #^0.0.4
 #    git:
