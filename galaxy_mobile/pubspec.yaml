@@ -18,7 +18,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: ">=2.10.0 <3.0.0"
 
 dependencies:
   flutter:
@@ -34,11 +34,11 @@ dependencies:
   carousel_slider: ^1.4.1
 
   janus_client: #^0.0.4
-    git:
-      url: https://github.com/igala/flutter_janus_client.git
+#    git:
+#      url: https://github.com/igala/flutter_janus_client.git
       #https://github.com/shivanshtalwar0/flutter_janus_client.git
-      ref: master
-#      path: flutter_janus_client
+#      ref: master
+      path: ../../Documents/Github/flutter_janus_client-fork/
 
 
   # The following adds the Cupertino Icons font to your application.

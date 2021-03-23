@@ -86,7 +86,6 @@ class _VideoRoomState extends State<VideoRoom> {
   @override
   void initState() {
     super.initState();
-    initRenderers();
   }
 
   initRenderers() async {
@@ -160,9 +159,7 @@ class _VideoRoomState extends State<VideoRoom> {
           }
         },
         onSuccess: (plugin) {
-          setState(() {
-            widget.subscriberHandle = plugin;
-          });
+          widget.subscriberHandle = plugin;
           var register = {
             "request": "join",
             "room": widget.roomNumber,
@@ -170,52 +167,63 @@ class _VideoRoomState extends State<VideoRoom> {
             "streams": feeds,
           };
           print("Requesting to subscribe to publishers...");
-          widget.subscriberHandle
-              .send(message: register, onSuccess: () async {});
+          widget.subscriberHandle.send(
+            message: register,
+            onSuccess: () async {
+              print("onSuccess subscribe to publishers...");
+            },
+            onError: (error) {
+              print("onError subscribe to publishers..." + error);
+            },
+          );
         },
         onRemoteTrack: (stream, track, mid, on) {
           print('got remote track with mid=$mid');
-          setState(() {
-            if ((track as MediaStreamTrack).kind == "video" &&
-                (track as MediaStreamTrack).enabled &&
-                on) {
-              var midElement = newStreamsMids.firstWhere((element) =>
-                  element["type"] == "video" && element["mid"] == mid);
-              var feed = this.feeds.firstWhere(
-                  (element) => element["id"] == midElement["feed_id"]);
+          //  setState(() {
+          if ((track as MediaStreamTrack).kind == "video" &&
+              (track as MediaStreamTrack).enabled &&
+              on) {
+            var midElement = newStreamsMids.firstWhere((element) =>
+                element["type"] == "video" && element["mid"] == mid);
+            var feed = this.feeds.firstWhere(
+                (element) => element["id"] == midElement["feed_id"]);
 
-              print("video slot is: " + feed["videoSlot"].toString());
-              //if (tempConter++ < 3) {
+            print("video slot is: " + feed["videoSlot"].toString());
+            //if (tempConter++ < 3) {
 
-              if (widget._remoteRenderer
-                          .elementAt(feed["videoSlot"])
-                          .srcObject !=
-                      null &&
-                  widget._remoteRenderer
-                      .elementAt(feed["videoSlot"])
-                      .srcObject
-                      .getVideoTracks()
-                      .isNotEmpty) {
-                print("removing video track");
-                remoteStream.elementAt(feed["videoSlot"]).dispose();
+            if (widget._remoteRenderer.elementAt(feed["videoSlot"]).srcObject !=
+                    null &&
                 widget._remoteRenderer
                     .elementAt(feed["videoSlot"])
                     .srcObject
-                    .dispose();
-              }
-              createLocalMediaStream("local").then((stream) => {
-                    remoteStream.insert(feed["videoSlot"], stream),
-                    remoteStream
-                        .elementAt(feed["videoSlot"])
-                        .addTrack(track, addToNative: true),
-                    print('added track to stream locally'),
-                    widget._remoteRenderer
-                        .elementAt(feed["videoSlot"])
-                        .srcObject = remoteStream.elementAt(feed["videoSlot"])
-                  });
+                    .getVideoTracks()
+                    .isNotEmpty) {
+              print("removing video track");
+              remoteStream.elementAt(feed["videoSlot"]).dispose();
+              widget._remoteRenderer
+                  .elementAt(feed["videoSlot"])
+                  .srcObject
+                  .dispose();
             }
-            // }
-          });
+
+            createLocalMediaStream("local").then((stream) => {
+                  remoteStream.insert(feed["videoSlot"], stream),
+                  remoteStream
+                      .elementAt(feed["videoSlot"])
+                      .addTrack(track, addToNative: true)
+                      .then((value) => {
+                            print('added track to stream locally'),
+                            setState(() {
+                              widget._remoteRenderer
+                                      .elementAt(feed["videoSlot"])
+                                      .srcObject =
+                                  remoteStream.elementAt(feed["videoSlot"]);
+                            }),
+                          })
+                });
+          }
+          // }
+          // });
         }));
   }
 
@@ -523,9 +531,14 @@ class _VideoRoomState extends State<VideoRoom> {
     print(' :: Got subscribtion: ' +
         subscription
             .toString()); //, !!this.state.remoteFeed, this.state.creatingFeed);
-    if (widget.pluginHandle != null) {
-      widget.pluginHandle
-          .send(message: {"request": 'subscribe', "streams": subscription});
+    if (widget.subscriberHandle != null) {
+      widget.subscriberHandle.send(
+        message: {"request": 'subscribe', "streams": subscription},
+        onError: (error) {
+          print("error subscribe to streams : " + error);
+        },
+      );
+      return;
     }
 
     // We don't have a handle yet, but we may be creating one already
@@ -752,7 +765,8 @@ class _VideoRoomState extends State<VideoRoom> {
                 // width: 200,
               ),
               (widget._remoteRenderer != null &&
-                      widget._remoteRenderer.elementAt(0) != null)
+                      widget._remoteRenderer.elementAt(0) != null &&
+                      widget._remoteRenderer.elementAt(0).srcObject != null)
                   ? Container(
                       decoration: BoxDecoration(
                           border: Border.all(color: Colors.black)),
@@ -771,7 +785,8 @@ class _VideoRoomState extends State<VideoRoom> {
                       ))
                   : Text("Waiting...", style: TextStyle(color: Colors.white)),
               (widget._remoteRenderer != null &&
-                      widget._remoteRenderer.elementAt(1) != null)
+                      widget._remoteRenderer.elementAt(1) != null &&
+                      widget._remoteRenderer.elementAt(1).srcObject != null)
                   ? Container(
                       decoration: BoxDecoration(
                           border: Border.all(color: Colors.black)),
@@ -793,7 +808,8 @@ class _VideoRoomState extends State<VideoRoom> {
                       style: TextStyle(color: Colors.white),
                     ),
               (widget._remoteRenderer != null &&
-                      widget._remoteRenderer.elementAt(2) != null)
+                      widget._remoteRenderer.elementAt(2) != null &&
+                      widget._remoteRenderer.elementAt(2).srcObject != null)
                   ? Container(
                       decoration: BoxDecoration(
                           border: Border.all(color: Colors.black)),
@@ -904,10 +920,10 @@ class _VideoRoomState extends State<VideoRoom> {
     });
     // Send an unsubscribe request.
 
-    if (widget.pluginHandle != null &&
+    if (widget.subscriberHandle != null &&
         (unsubscribe["streams"] as List) != null &&
         (unsubscribe["streams"] as List).length > 0) {
-      widget.pluginHandle.send(message: unsubscribe);
+      widget.subscriberHandle.send(message: unsubscribe);
     }
   }
 
