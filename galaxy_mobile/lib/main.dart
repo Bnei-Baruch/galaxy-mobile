@@ -9,6 +9,13 @@ import 'package:provider/provider.dart';
 import 'models/sharedPref.dart';
 
 
+/* Compile notes:
+- to generate luncher icons run:
+flutter pub run flutter_launcher_icons:main
+
+*/
+
+
 void main() async {
    WidgetsFlutterBinding.ensureInitialized();
   await SharedPrefs().init();
