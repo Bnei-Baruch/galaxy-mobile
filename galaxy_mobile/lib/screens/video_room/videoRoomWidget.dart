@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'dart:convert';
+import 'dart:ffi';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,8 @@ import 'package:janus_client/Plugin.dart';
 import 'package:provider/provider.dart';
 
 import 'dart:async';
+
+import 'package:synchronized/synchronized.dart';
 
 final int PAGE_SIZE = 3;
 
@@ -28,6 +31,8 @@ class VideoRoom extends StatefulWidget {
   List<RTCVideoRenderer> _remoteRenderer = new List<RTCVideoRenderer>();
   Plugin pluginHandle;
   Plugin subscriberHandle;
+
+  var remoteStream;
   // VideoRoom(String serverUrl, String token, int roomNumber)
   //     : this.roomNumber = roomNumber,
   //       this.token = token,
@@ -69,6 +74,8 @@ class _VideoRoomState extends State<VideoRoom> {
 
   int page = 0;
 
+  bool initialized = false;
+
   int fromVideoIndex;
 
   int toVideoIndex;
@@ -88,7 +95,12 @@ class _VideoRoomState extends State<VideoRoom> {
     super.initState();
   }
 
-  initRenderers() async {
+  Future<void> initInfra() async {
+    await initRenderers();
+    await initPlatformState();
+  }
+
+  Future<void> initRenderers() async {
     int count = 0;
     while (count < 3) {
       widget._remoteRenderer.add(new RTCVideoRenderer());
@@ -98,16 +110,11 @@ class _VideoRoomState extends State<VideoRoom> {
     for (var renderer in widget._remoteRenderer) {
       await renderer.initialize();
     }
-    int count_t = 0;
-    // while (count_t < 3) {
-    //   createLocalMediaStream("local").then((value) => remoteStream.add(value));
-    //   count_t++;
-    // }
   }
 
   void switchPage(int page) {
     // Normalize page, e.g., if it is -1 or too large...
-    print("switch page to : " + page.toString());
+    print("xxx switch page to : " + page.toString());
     int numPages = (feeds.length / PAGE_SIZE).ceil();
     this.page = numPages == 0 ? 0 : (numPages + page) % numPages;
     this.switchVideos(page, feeds, feeds);
@@ -127,12 +134,12 @@ class _VideoRoomState extends State<VideoRoom> {
         opaqueId: 'remotefeed_user',
         plugin: 'janus.plugin.videoroom',
         onMessage: (msg, jsep) async {
+          print("xxx message new remote Feed: $msg");
           //update feed
           var event = msg["videoroom"];
           if (event == 'attached' ||
               (event == 'event' && msg['switched'] == 'ok') ||
               event == 'updated') {
-            creatingFeed = false;
             List midslist = (msg['streams'] as List)
                 .map((stream) => {
                       "mid": stream["mid"],
@@ -141,7 +148,7 @@ class _VideoRoomState extends State<VideoRoom> {
                     })
                 .toList();
             // newStreamsMids.addAll(midslist);
-            print("got newStreamsMids ");
+            print("xxx got newStreamsMids ");
             newStreamsMids = midslist;
           }
 
@@ -155,7 +162,15 @@ class _VideoRoomState extends State<VideoRoom> {
             await widget.subscriberHandle.send(
                 message: body,
                 jsep: await widget.subscriberHandle.createAnswer(),
-                onSuccess: () {});
+                onSuccess: () {
+                  print(
+                      " xxx subscribe Handle onSuccess create answer and start");
+                  creatingFeed = false;
+                },
+                onError: (error) =>
+                    {print(" xxx could not create answer: $error")});
+          } else {
+            print("xxx no jsep to answer");
           }
         },
         onSuccess: (plugin) {
@@ -170,60 +185,61 @@ class _VideoRoomState extends State<VideoRoom> {
           widget.subscriberHandle.send(
             message: register,
             onSuccess: () async {
-              print("onSuccess subscribe to publishers...");
+              print("xxx onSuccess subscribe to publishers...");
             },
             onError: (error) {
-              print("onError subscribe to publishers..." + error);
+              print("xxx onError subscribe to publishers..." + error);
             },
           );
         },
         onRemoteTrack: (stream, track, mid, on) {
-          print('got remote track with mid=$mid');
-          //  setState(() {
+          print(
+              'xxx got remote track with mid=$mid trackid=${track.toString()} , is on = $on stream with id=${stream.id} has tracks = ${(stream as MediaStream).getVideoTracks().length} with ids=${(stream as MediaStream).getVideoTracks().map((e) => e.toString())}');
+
+          (stream as MediaStream).getVideoTracks().forEach((element) => {
+                print(
+                    "xxx track ${element.id} is enabled=${element.enabled} and muted=${element.muted}")
+              });
           if ((track as MediaStreamTrack).kind == "video" &&
               (track as MediaStreamTrack).enabled &&
               on) {
-            var midElement = newStreamsMids.firstWhere((element) =>
-                element["type"] == "video" && element["mid"] == mid);
-            var feed = this.feeds.firstWhere(
-                (element) => element["id"] == midElement["feed_id"]);
+            setState(() {
+              var midElement = newStreamsMids.firstWhere((element) =>
+                  element["type"] == "video" && element["mid"] == mid);
+              var feed = this.feeds.firstWhere(
+                  (element) => element["id"] == midElement["feed_id"]);
 
-            print("video slot is: " + feed["videoSlot"].toString());
-            //if (tempConter++ < 3) {
+              int trackIndex = (stream as MediaStream)
+                  .getVideoTracks()
+                  .indexWhere((element) => element.id == track.id);
 
-            if (widget._remoteRenderer.elementAt(feed["videoSlot"]).srcObject !=
-                    null &&
-                widget._remoteRenderer
-                    .elementAt(feed["videoSlot"])
-                    .srcObject
-                    .getVideoTracks()
-                    .isNotEmpty) {
-              print("removing video track");
-              remoteStream.elementAt(feed["videoSlot"]).dispose();
-              widget._remoteRenderer
-                  .elementAt(feed["videoSlot"])
-                  .srcObject
-                  .dispose();
-            }
+              print("xxx video slot is: " +
+                  feed["videoSlot"].toString() +
+                  "track index : ${trackIndex}");
 
-            createLocalMediaStream("local").then((stream) => {
-                  remoteStream.insert(feed["videoSlot"], stream),
-                  remoteStream
-                      .elementAt(feed["videoSlot"])
-                      .addTrack(track, addToNative: true)
-                      .then((value) => {
-                            print('added track to stream locally'),
-                            setState(() {
-                              widget._remoteRenderer
-                                      .elementAt(feed["videoSlot"])
-                                      .srcObject =
-                                  remoteStream.elementAt(feed["videoSlot"]);
-                            }),
-                          })
+              int slot = feed["videoSlot"];
+
+              var lock = Lock();
+              lock.synchronized(() async {
+                Future.delayed(const Duration(milliseconds: 100), () {
+                  setState(() {
+                    widget._remoteRenderer.elementAt(slot).trackIndex =
+                        trackIndex;
+                    widget._remoteRenderer.elementAt(slot).srcObject =
+                        stream; //remoteStream.elementAt(slot);
+                    print("xxx done set renderer stream for video slot: " +
+                        slot.toString());
+                    // }
+                  });
                 });
+                // );
+                //   }
+              });
+              // }
+            });
           }
-          // }
-          // });
+
+          //});
         }));
   }
 
@@ -366,36 +382,48 @@ class _VideoRoomState extends State<VideoRoom> {
                       msg['publishers'] != null) {
                     print("just joined");
                     // User just joined the room.
-                    // const newFeeds = sortAndFilterFeeds(msg['publishers'].filter(l => l.display = (JSON.parse(l.display))));
-                    //Janus.debug('New list of available publishers/feeds:', newFeeds);
-                    // const newFeedsIds = new Set(newFeeds.map(feed => feed.id));
-                    // const { feeds }   = this.state;
-                    // if (feeds.some(feed => newFeedsIds.has(feed.id))) {
-                    // Janus.error(`New feed joining but one of the feeds already exist`, newFeeds, feeds);
-                    // return;
-                    // }
-                    // // Merge new feed with existing feeds and sort.
-                    // const feedsNewState = sortAndFilterFeeds([...newFeeds, ...feeds]);
-                    // this.makeSubscription(newFeeds, /* feedsJustJoined= */ true,
-                    // /* subscribeToVideo= */ false,
-                    // /* subscribeToAudio= */ true, /* subscribeToData= */ true);
-                    // this.switchVideos(/* page= */ this.state.page, userFeeds(feeds), userFeeds(feedsNewState));
-                    // this.setState({ feeds: feedsNewState });
-
+                    var newFeeds = sortAndFilterFeeds(msg['publishers'].filter(
+                        (l) => l["display"] = (jsonDecode(l)["display)"])));
+                    print('New list of available publishers/feeds:' +
+                        newFeeds.toString());
+                    Set newFeedsIds = new Set();
+                    newFeedsIds
+                        .addAll(newFeeds.map((feed) => feed["id"]).toSet());
+                    if (feeds.any((feed) => newFeedsIds.contains(feed.id))) {
+                      print(
+                          "New feed joining but one of the feeds already exist" +
+                              newFeeds);
+                      return;
+                    }
+                    // Merge new feed with existing feeds and sort.
+                    var feedsNewState =
+                        sortAndFilterFeeds([...newFeeds, ...feeds]);
+                    makeSubscription(
+                        newFeeds,
+                        /* feedsJustJoined= */ true,
+                        /* subscribeToVideo= */ false,
+                        /* subscribeToAudio= */ true,
+                        /* subscribeToData= */ true);
+                    this.switchVideos(/* page= */ page, userFeeds(feeds),
+                        userFeeds(feedsNewState));
+                    feeds = feedsNewState;
                   } else if (msg['leaving'] != null && msg['leaving'] != null) {
-                    print("leaving");
+                    // print("yyy leaving");
 
                     // User leaving the room which is same as publishers gone.
-                    // const leaving = msg['leaving'];
-                    // Janus.log('Publisher leaving: ', leaving);
+                    var leaving = (msg["leaving"] as Double);
+                    print('Publisher leaving: ' + leaving.toString());
                     // const { feeds } = this.state;
-                    // this.unsubscribeFrom([leaving], /* onlyVideo= */ false);
-                    // const feedsNewState = feeds.filter(feed => feed.id !== leaving);
-                    // this.switchVideos(/* page= */ this.state.page, userFeeds(feeds), userFeeds(feedsNewState));
+                    unsubscribeFrom([leaving], /* onlyVideo= */ false);
+                    List feedsNewState =
+                        feeds.map((feed) => feed["id"] != leaving).toList();
+                    switchVideos(/* page= */ page, userFeeds(feeds),
+                        userFeeds(feedsNewState));
+                    feeds = feedsNewState;
                     // this.setState({ feeds: feedsNewState }, () => {
-                    // if (this.state.page * PAGE_SIZE === this.state.feeds.length) {
-                    // this.switchPage(this.state.page - 1, this.state.feeds);
-                    // }
+                    if (page * PAGE_SIZE == feeds.length) {
+                      this.switchPage(page - 1);
+                    }
                     // });
 
                   } else if (msg['unpublished'] != null &&
@@ -455,7 +483,13 @@ class _VideoRoomState extends State<VideoRoom> {
                       "video": true,
                       "bitrate": 2000000
                     };
-                    RTCSessionDescription offer = await plugin.createOffer();
+                    RTCSessionDescription offer =
+                        await plugin.createOffer(offerOptions: {
+                      "mandatory": {
+                        "OfferToReceiveAudio": true,
+                        "OfferToReceiveVideo": true,
+                      }
+                    });
                     plugin.send(
                         message: publish, jsep: offer, onSuccess: () {});
                   });
@@ -528,14 +562,35 @@ class _VideoRoomState extends State<VideoRoom> {
 
   void subscribeTo(List<Map> subscription) {
     // New feeds are available, do we need create a new plugin handle first?
-    print(' :: Got subscribtion: ' +
+    print('xxx :: Got subscribtion: ' +
         subscription
             .toString()); //, !!this.state.remoteFeed, this.state.creatingFeed);
     if (widget.subscriberHandle != null) {
+      // var register = {
+      //   "request": "join",
+      //   "room": widget.roomNumber,
+      //   "ptype": "subscriber",
+      //   "streams": subscription,
+      // };
+      // print("Requesting to subscribe to publishers...");
+      // widget.subscriberHandle.send(
+      //   message: register,
+      //   onSuccess: () async {
+      //     print("onSuccess subscribe to publishers...");
+      //   },
+      //   onError: (error) {
+      //     print("onError subscribe to publishers..." + error);
+      //   },
+      // );
+
       widget.subscriberHandle.send(
         message: {"request": 'subscribe', "streams": subscription},
+        onSuccess: () {
+          print(
+              "xxx onSuccess subscribe to streams " + subscription.toString());
+        },
         onError: (error) {
-          print("error subscribe to streams : " + error);
+          print("xxx error subscribe to streams : " + error);
         },
       );
       return;
@@ -581,27 +636,24 @@ class _VideoRoomState extends State<VideoRoom> {
   // }
 
   void switchVideos(int page, List oldFeeds, List newFeeds) {
-    print('switchVideos: page' +
+    print('xxx switchVideos: page ' +
         page.toString() +
-        'PAGE_SIZE:' +
+        ' PAGE_SIZE: ' +
         PAGE_SIZE.toString() +
-        ' old ' +
+        ' old  ' +
         oldFeeds.length.toString() +
-        'new' +
+        'new ' +
         newFeeds.length.toString());
 
     List oldVideoSlots = List();
     for (int index = 0; index < PAGE_SIZE; index++) {
-      oldVideoSlots.add(oldFeeds.firstWhere(
-          (feed) => feed["videoSlot"] == index,
-          orElse: () => oldFeeds));
+      oldVideoSlots
+          .add(oldFeeds.indexWhere((feed) => feed["videoSlot"] == index));
     }
 
     List oldVideoFeeds = oldFeeds.isNotEmpty
         ? oldVideoSlots
-            .map((slot) => slot["videoSlot"] != -1
-                ? oldFeeds.elementAt(slot["videoSlot"])
-                : null)
+            .map((slot) => slot != -1 ? oldFeeds.elementAt(slot) : null)
             .toList()
         : List.empty();
 
@@ -611,20 +663,30 @@ class _VideoRoomState extends State<VideoRoom> {
           ? -1
           : (page * PAGE_SIZE) + index);
     }
+    print("xxx oldvideoSlots: " + oldVideoSlots.toString());
+    print("xxx newvideoslots: " + newVideoSlots.toString());
+
     List newVideoFeeds = newVideoSlots
         .map((index) => index != -1 ? newFeeds.elementAt(index) : null)
         .toList();
 
     // Update video slots.
-    oldVideoFeeds.forEach((feed) => {
-          if (feed != null) {feed["videoSlot"] = null}
-        });
-    newVideoFeeds.asMap().entries.forEach((feed) {
+    // oldVideoFeeds.forEach((feed) => {
+    //       if (feed != null) {feed["videoSlot"] = -1}
+    //     });
+    oldVideoFeeds.asMap().entries.forEach((feed) {
       if (feed.value != null) {
-        feed.value["videoSlot"] = feed.key;
+        feed.value["videoSlot"] = null;
       }
     });
+    newVideoFeeds.asMap().entries.forEach((feed) {
+      feed.value["videoSlot"] = feed.key;
+    });
 
+    print("xxx oldVideoFeeds: " +
+        oldVideoFeeds.toString() +
+        " newVideoFeeds: " +
+        newVideoFeeds.toString());
     // Cases:
     // old: [0, 1, 2] [f0, f1, f2], new: [3, 4, 5] [f3, f4, f5]                  Simple next page switch.
     // old: [3, 4, 5] [f3, f4, f5], new: [0, 1, 2] [f0, f1, f2]                  Simple prev page switch.
@@ -667,7 +729,12 @@ class _VideoRoomState extends State<VideoRoom> {
       }); //forEach((oldFeed, oldIndex) => {
     }
     if (!muteOtherCams) {
-      //print('refs' + this.refs, 'subscribeFeeds', subscribeFeeds, 'unsubscribeFeeds', unsubscribeFeeds, 'switchFeeds', switchFeeds);
+      print('xxx subscribeFeeds:' +
+          subscribeFeeds.toString() +
+          ' unsubscribeFeeds' +
+          unsubscribeFeeds.toString() +
+          'switchFeeds' +
+          switchFeeds.toString());
       this.makeSubscription(
           subscribeFeeds,
           /* feedsJustJoined= */ false,
@@ -698,8 +765,12 @@ class _VideoRoomState extends State<VideoRoom> {
     widget.server = args.server;
     widget.user = args.user;
     if (widget.pluginHandle == null) {
-      initRenderers();
-      initPlatformState();
+      // ignore: unnecessary_statements
+      // initInfra();
+    }
+    if (!initialized) {
+      initialized = true;
+      initInfra();
     }
     return
 //         appBar: AppBar(
@@ -784,6 +855,21 @@ class _VideoRoomState extends State<VideoRoom> {
                         ],
                       ))
                   : Text("Waiting...", style: TextStyle(color: Colors.white)),
+
+              // FutureBuilder<RTCVideoRenderer>(
+              //     builder: (context, snapshot) {
+              //       if (snapshot.hasData && snapshot.data.srcObject != null) {
+              //         return RTCVideoView(widget._remoteRenderer.elementAt(0));
+              //       } else {
+              //         return Text(
+              //           "Waiting...",
+              //           style: TextStyle(color: Colors.white),
+              //         );
+              //       }
+              //     },
+              //     future: ,
+              //     initialData: widget._remoteRenderer.elementAt(0)),
+
               (widget._remoteRenderer != null &&
                       widget._remoteRenderer.elementAt(1) != null &&
                       widget._remoteRenderer.elementAt(1).srcObject != null)
@@ -923,7 +1009,15 @@ class _VideoRoomState extends State<VideoRoom> {
     if (widget.subscriberHandle != null &&
         (unsubscribe["streams"] as List) != null &&
         (unsubscribe["streams"] as List).length > 0) {
-      widget.subscriberHandle.send(message: unsubscribe);
+      print("xxx unsubscribing streams: $unsubscribe");
+      widget.subscriberHandle.send(
+          message: unsubscribe,
+          onSuccess: () {
+            print("xxx unsubscribed success" + unsubscribe.toString());
+          },
+          onError: (error) {
+            print("xxx unsubcribed failed $error");
+          });
     }
   }
 
