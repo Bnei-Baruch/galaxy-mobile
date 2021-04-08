@@ -667,21 +667,25 @@ class _VideoRoomState extends State<VideoRoom> {
     print("xxx newvideoslots: " + newVideoSlots.toString());
 
     List newVideoFeeds = newVideoSlots
-        .map((index) => index != -1 ? newFeeds.elementAt(index) : null)
+        .map((index) => {if (index != -1) newFeeds.elementAt(index)})
         .toList();
 
     // Update video slots.
     // oldVideoFeeds.forEach((feed) => {
     //       if (feed != null) {feed["videoSlot"] = -1}
     //     });
-    oldVideoFeeds.asMap().entries.forEach((feed) {
-      if (feed.value != null) {
-        feed.value["videoSlot"] = null;
-      }
-    });
-    newVideoFeeds.asMap().entries.forEach((feed) {
-      feed.value["videoSlot"] = feed.key;
-    });
+    oldVideoFeeds.isNotEmpty
+        ? oldVideoFeeds.forEach((feed) {
+            if (feed != null) {
+              feed["videoSlot"] = null;
+            }
+          })
+        : null;
+    newVideoFeeds.isNotEmpty
+        ? newVideoFeeds.asMap().forEach((index, feed) {
+            if (feed != null) feed["videoSlot"] = index;
+          })
+        : null;
 
     print("xxx oldVideoFeeds: " +
         oldVideoFeeds.toString() +

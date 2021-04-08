@@ -1,0 +1,96 @@
+[
+  {
+    "id": 26725810025805,
+    "display": {
+      "id": "51611aca-72f1-403b-9955-193c6c577718",
+      "timestamp": 1617838583361,
+      "role": "user",
+      "display": "eran"
+    },
+    "audio_codec": "opus",
+    "video_codec": "h264",
+    "streams": [
+      {
+        "type": "audio",
+        "mindex": 0,
+        "mid": "0",
+        "codec": "opus",
+        "talking": false
+      },
+      {
+        "type": "video",
+        "mindex": 1,
+        "mid": "1",
+        "codec": "h264"
+      }
+    ],
+    "talking": false,
+    "video": true,
+    "audio": true,
+    "data": false,
+    "cammute": false
+  },
+  {
+    "id": 666765090359584,
+    "display": {
+      "id": "ede5d124-9e8c-4a8f-852e-0d2d76e4a8da",
+      "timestamp": 1617838994250,
+      "role": "user",
+      "display": "vlad "
+    },
+    "audio_codec": "opus",
+    "video_codec": "h264",
+    "streams": [
+      {
+        "type": "audio",
+        "mindex": 0,
+        "mid": "0",
+        "codec": "opus",
+        "talking": false
+      },
+      {
+        "type": "video",
+        "mindex": 1,
+        "mid": "1",
+        "codec": "h264"
+      }
+    ],
+    "talking": false,
+    "video": true,
+    "audio": true,
+    "data": false,
+    "cammute": true,
+    "question": false
+  },
+  {
+    "id": 1502170363902192,
+    "display": {
+      "id": "097b6ad4-7e20-448e-b54e-10e88debbf8f",
+      "timestamp": 1617839118069,
+      "role": "user",
+      "display": "Sombol"
+    },
+    "audio_codec": "opus",
+    "video_codec": "h264",
+    "streams": [
+      {
+        "type": "audio",
+        "mindex": 0,
+        "mid": "0",
+        "codec": "opus",
+        "talking": false
+      },
+      {
+        "type": "video",
+        "mindex": 1,
+        "mid": "1",
+        "codec": "h264"
+      }
+    ],
+    "talking": false,
+    "video": true,
+    "audio": true,
+    "data": false,
+    "cammute": false
+  }
+]
