@@ -1,10 +1,11 @@
 import 'package:dio/dio.dart';
 
-typedef unsub = Function(dynamic, dynamic);
+typedef unsub = Function(Iterable<dynamic>, bool);
 
-typedef make = Function(dynamic, dynamic, dynamic, dynamic, dynamic);
+typedef make = dynamic Function(
+    List<dynamic>, dynamic, dynamic, dynamic, dynamic);
 
-typedef switcher = Function(dynamic, dynamic);
+typedef switcher = Function(int, int);
 
 class SwitchPageHelper {
   int PAGE_SIZE;
@@ -16,6 +17,9 @@ class SwitchPageHelper {
       int pageSize, bool mute) {
     PAGE_SIZE = pageSize;
     muteOtherCams = mute;
+    makeSubscription = makeSub;
+    unsubscribeFrom = unsubscriber;
+    switchVideoSlots = Switcher;
   }
   void switchVideos(
     int page,

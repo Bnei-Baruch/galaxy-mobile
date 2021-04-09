@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/services/authService.dart';
+import 'package:galaxy_mobile/utils/switch_page_helper.dart';
 import 'package:janus_client/janus_client.dart';
 import 'package:janus_client/utils.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
@@ -84,6 +85,8 @@ class _VideoRoomState extends State<VideoRoom> {
 
   set subscription(List subscription) {}
 
+  SwitchPageHelper switcher;
+
   @override
   void didChangeDependencies() async {
     // TODO: implement didChangeDependencies
@@ -93,6 +96,8 @@ class _VideoRoomState extends State<VideoRoom> {
   @override
   void initState() {
     super.initState();
+    switcher = SwitchPageHelper(unsubscribeFrom, makeSubscription,
+        switchVideoSlots, PAGE_SIZE, muteOtherCams);
   }
 
   Future<void> initInfra() async {
@@ -117,7 +122,7 @@ class _VideoRoomState extends State<VideoRoom> {
     print("xxx switch page to : " + page.toString());
     int numPages = (feeds.length / PAGE_SIZE).ceil();
     this.page = numPages == 0 ? 0 : (numPages + page) % numPages;
-    this.switchVideos(page, feeds, feeds);
+    switcher.switchVideos(page, feeds, feeds);
   }
 
   sortAndFilterFeeds(List feeds) => feeds
@@ -321,7 +326,10 @@ class _VideoRoomState extends State<VideoRoom> {
                         /* subscribeToVideo= */ false,
                         /* subscribeToAudio= */ true,
                         /* subscribeToData= */ true);
-                    switchVideos(/* page= */ page, List.empty(), newFeedsState);
+                    switcher.switchVideos(
+                        /* page= */ page,
+                        List.empty(),
+                        newFeedsState);
 
                     // this.setState({feeds: feedsNewState});
                   }
@@ -404,7 +412,7 @@ class _VideoRoomState extends State<VideoRoom> {
                         /* subscribeToVideo= */ false,
                         /* subscribeToAudio= */ true,
                         /* subscribeToData= */ true);
-                    this.switchVideos(/* page= */ page, userFeeds(feeds),
+                    switcher.switchVideos(/* page= */ page, userFeeds(feeds),
                         userFeeds(feedsNewState));
                     feeds = feedsNewState;
                   } else if (msg['leaving'] != null && msg['leaving'] != null) {
@@ -417,7 +425,7 @@ class _VideoRoomState extends State<VideoRoom> {
                     unsubscribeFrom([leaving], /* onlyVideo= */ false);
                     List feedsNewState =
                         feeds.map((feed) => feed["id"] != leaving).toList();
-                    switchVideos(/* page= */ page, userFeeds(feeds),
+                    switcher.switchVideos(/* page= */ page, userFeeds(feeds),
                         userFeeds(feedsNewState));
                     feeds = feedsNewState;
                     // this.setState({ feeds: feedsNewState }, () => {
