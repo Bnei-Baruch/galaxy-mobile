@@ -130,7 +130,7 @@ class _VideoRoomState extends State<VideoRoom> {
       .toList()
       .sort((a, b) => a["display"]["timestamp"] - b["display"]["timestamp"]);
 
-  userFeeds(feeds) => feeds.filter((feed) => feed["display"]["role"] == 'user');
+  userFeeds(feeds) => feeds.map((feed) => feed["display"]["role"] == 'user');
 
   _newRemoteFeed(JanusClient j, List<Map> feeds) async {
     roomFeeds = feeds;
@@ -139,7 +139,7 @@ class _VideoRoomState extends State<VideoRoom> {
         opaqueId: 'remotefeed_user',
         plugin: 'janus.plugin.videoroom',
         onMessage: (msg, jsep) async {
-          print("xxx message new remote Feed: $msg");
+          print("xxx message: $msg");
           //update feed
           var event = msg["videoroom"];
           if (event == 'attached' ||
@@ -320,7 +320,7 @@ class _VideoRoomState extends State<VideoRoom> {
 
                     feeds = newFeedsState;
                     // Merge new feed with existing feeds and sort.
-                    this.makeSubscription(
+                    switcher.makeSubscription(
                         newFeeds,
                         /* feedsJustJoined= */ true,
                         /* subscribeToVideo= */ false,
@@ -406,34 +406,38 @@ class _VideoRoomState extends State<VideoRoom> {
                     // Merge new feed with existing feeds and sort.
                     var feedsNewState =
                         sortAndFilterFeeds([...newFeeds, ...feeds]);
-                    makeSubscription(
+                    switcher.makeSubscription(
                         newFeeds,
                         /* feedsJustJoined= */ true,
                         /* subscribeToVideo= */ false,
                         /* subscribeToAudio= */ true,
                         /* subscribeToData= */ true);
-                    switcher.switchVideos(/* page= */ page, userFeeds(feeds),
-                        userFeeds(feedsNewState));
+                    switcher.switchVideos(
+                        /* page= */ page,
+                        feeds,
+                        feedsNewState);
                     feeds = feedsNewState;
                   } else if (msg['leaving'] != null && msg['leaving'] != null) {
-                    // print("yyy leaving");
-
                     // User leaving the room which is same as publishers gone.
-                    var leaving = (msg["leaving"] as Double);
+
+                    final leaving = msg["leaving"];
+                    print("${leaving.toString()} leaving");
                     print('Publisher leaving: ' + leaving.toString());
                     // const { feeds } = this.state;
-                    unsubscribeFrom([leaving], /* onlyVideo= */ false);
+                    switcher.unsubscribeFrom([leaving], /* onlyVideo= */ false);
                     List feedsNewState =
-                        feeds.map((feed) => feed["id"] != leaving).toList();
-                    switcher.switchVideos(/* page= */ page, userFeeds(feeds),
-                        userFeeds(feedsNewState));
+                        (feeds).where((feed) => feed["id"] != leaving).toList();
+                    switcher.switchVideos(
+                        /* page= */ page,
+                        feeds,
+                        feedsNewState);
                     feeds = feedsNewState;
                     // this.setState({ feeds: feedsNewState }, () => {
                     if (page * PAGE_SIZE == feeds.length) {
                       this.switchPage(page - 1);
                     }
-                    // });
 
+                    print("${leaving.toString()} left");
                   } else if (msg['unpublished'] != null &&
                       msg['unpublished'] != null) {
                     print("unpublished");
@@ -754,7 +758,8 @@ class _VideoRoomState extends State<VideoRoom> {
           /* subscribeToAudio= */ false,
           /* subscribeToData= */ false);
       this.unsubscribeFrom(
-          unsubscribeFeeds.map((feed) => feed["id"]), /* onlyVideo= */ true);
+          unsubscribeFeeds.map((feed) => feed["id"]).toList(),
+          /* onlyVideo= */ true);
       switchFeeds.forEach((element) {
         this.switchVideoSlots(element["from"], element["to"]);
       }); //first(({ from, to }) => this.switchVideoSlots(from, to));
@@ -991,7 +996,7 @@ class _VideoRoomState extends State<VideoRoom> {
     );
   }
 
-  void unsubscribeFrom(Iterable ids, bool onlyVideo) {
+  void unsubscribeFrom(List ids, bool onlyVideo) {
     Set idsSet = new Set();
     idsSet.addAll(ids);
     var unsubscribe = {"request": 'unsubscribe', "streams": []};
@@ -1011,7 +1016,7 @@ class _VideoRoomState extends State<VideoRoom> {
                   (stream) => (unsubscribe["streams"] as List).add(stream));
         } else {
           // Unsubscribe the whole feed (all it's streams).
-          (unsubscribe["streams"] as List).add({"feed": feedFound["id"]});
+          (unsubscribe["streams"] as List).add({"feed": feedFound});
           //Janus.log('Unsubscribe from Feed ' + JSON.stringify(feed) + ' (' + feed.id + ').');
         }
       }

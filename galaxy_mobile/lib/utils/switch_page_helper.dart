@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 
-typedef unsub = Function(Iterable<dynamic>, bool);
+typedef unsub = Function(List<dynamic>, bool);
 
 typedef make = dynamic Function(
     List<dynamic>, dynamic, dynamic, dynamic, dynamic);
@@ -74,7 +74,7 @@ class SwitchPageHelper {
     newVideoFeeds.isNotEmpty
         ? newVideoFeeds.forEach((feed) {
             var index = newVideoFeeds.indexOf(feed);
-            if (feed != null) feed["videoSlot"] = index;
+            if (feed != null && feed.isNotEmpty) feed["videoSlot"] = index;
           })
         : null;
 
@@ -140,7 +140,8 @@ class SwitchPageHelper {
           : null;
       (this.unsubscribeFrom != null)
           ? this.unsubscribeFrom(
-              unsubscribeFeeds.map((feed) => feed["id"]), /* onlyVideo= */ true)
+              unsubscribeFeeds.map((feed) => feed["id"]).toList(),
+              /* onlyVideo= */ true)
           : null;
       switchFeeds.forEach((element) {
         (this.switchVideoSlots != null)
