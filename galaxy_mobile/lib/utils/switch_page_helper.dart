@@ -20,6 +20,18 @@ class SwitchPageHelper {
     makeSubscription = makeSub;
     unsubscribeFrom = unsubscriber;
     switchVideoSlots = Switcher;
+
+    if (unsubscribeFrom == null) {
+      unsubscribeFrom = (list, camOnly) {
+        print("unsubscribing : ${list.toString()}");
+      };
+    }
+
+    if (makeSub == null) {
+      makeSubscription = (list, bool1, bool2, bool3, bool4) {
+        print("subscribing : ${list.toString()}");
+      };
+    }
   }
   void switchVideos(
     int page,
@@ -105,8 +117,8 @@ class SwitchPageHelper {
     if (oldVideoFeeds.isNotEmpty) {
       oldVideoFeeds.forEach((oldFeed) {
         if (oldFeed != null &&
-            newVideoFeeds.any((newFeed) =>
-                newFeed != null && newFeed["id"] != oldFeed["id"])) {
+            !newVideoFeeds.any((newFeed) =>
+                newFeed != null && newFeed["id"] == oldFeed["id"])) {
           unsubscribeFeeds.add(oldFeed);
         }
       });
