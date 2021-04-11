@@ -153,7 +153,7 @@ class _VideoRoomState extends State<VideoRoom> {
                     })
                 .toList();
             // newStreamsMids.addAll(midslist);
-            print("xxx got newStreamsMids ");
+            print("xxx got newStreamsMids ${midslist.toString()}");
             newStreamsMids = midslist;
           }
 
@@ -235,6 +235,10 @@ class _VideoRoomState extends State<VideoRoom> {
                     print("xxx done set renderer stream for video slot: " +
                         slot.toString());
                     // }
+
+                    //check if mids changed place
+                    // int index = widget._remoteRenderer.elementAt(0).trackIndex;
+                    // var otherFeeds = feeds.where((element) => element["videoSlot"]!= slot && element["videoSlot"] != null && element["videoSlot"] !=-1);
                   });
                 });
                 // );
@@ -854,7 +858,8 @@ class _VideoRoomState extends State<VideoRoom> {
               ),
               (widget._remoteRenderer != null &&
                       widget._remoteRenderer.elementAt(0) != null &&
-                      widget._remoteRenderer.elementAt(0).srcObject != null)
+                      widget._remoteRenderer.elementAt(0).srcObject != null &&
+                      feeds.any((element) => element["videoSlot"] == 0))
                   ? Container(
                       decoration: BoxDecoration(
                           border: Border.all(color: Colors.black)),
@@ -863,7 +868,9 @@ class _VideoRoomState extends State<VideoRoom> {
                           RTCVideoView(widget._remoteRenderer.elementAt(0)),
                           Align(
                             alignment: Alignment.bottomLeft,
-                            child: Text(feeds.isNotEmpty
+                            child: Text((feeds.isNotEmpty &&
+                                    feeds.any(
+                                        (element) => element["videoSlot"] == 0))
                                 ? feeds.firstWhere((element) =>
                                         element["videoSlot"] == 0)["display"]
                                     ["display"]
@@ -873,23 +880,10 @@ class _VideoRoomState extends State<VideoRoom> {
                       ))
                   : Text("Waiting...", style: TextStyle(color: Colors.white)),
 
-              // FutureBuilder<RTCVideoRenderer>(
-              //     builder: (context, snapshot) {
-              //       if (snapshot.hasData && snapshot.data.srcObject != null) {
-              //         return RTCVideoView(widget._remoteRenderer.elementAt(0));
-              //       } else {
-              //         return Text(
-              //           "Waiting...",
-              //           style: TextStyle(color: Colors.white),
-              //         );
-              //       }
-              //     },
-              //     future: ,
-              //     initialData: widget._remoteRenderer.elementAt(0)),
-
               (widget._remoteRenderer != null &&
                       widget._remoteRenderer.elementAt(1) != null &&
-                      widget._remoteRenderer.elementAt(1).srcObject != null)
+                      widget._remoteRenderer.elementAt(1).srcObject != null &&
+                      feeds.any((element) => element["videoSlot"] == 1))
                   ? Container(
                       decoration: BoxDecoration(
                           border: Border.all(color: Colors.black)),
@@ -898,7 +892,9 @@ class _VideoRoomState extends State<VideoRoom> {
                           RTCVideoView(widget._remoteRenderer.elementAt(1)),
                           Align(
                             alignment: Alignment.bottomLeft,
-                            child: Text(feeds.isNotEmpty
+                            child: Text((feeds.isNotEmpty &&
+                                    feeds.any(
+                                        (element) => element["videoSlot"] == 1))
                                 ? feeds.firstWhere((element) =>
                                         element["videoSlot"] == 1)["display"]
                                     ["display"]
@@ -912,7 +908,8 @@ class _VideoRoomState extends State<VideoRoom> {
                     ),
               (widget._remoteRenderer != null &&
                       widget._remoteRenderer.elementAt(2) != null &&
-                      widget._remoteRenderer.elementAt(2).srcObject != null)
+                      widget._remoteRenderer.elementAt(2).srcObject != null &&
+                      feeds.any((element) => element["videoSlot"] == 2))
                   ? Container(
                       decoration: BoxDecoration(
                           border: Border.all(color: Colors.black)),
@@ -921,7 +918,9 @@ class _VideoRoomState extends State<VideoRoom> {
                           RTCVideoView(widget._remoteRenderer.elementAt(2)),
                           Align(
                             alignment: Alignment.bottomLeft,
-                            child: Text(feeds.isNotEmpty
+                            child: Text((feeds.isNotEmpty &&
+                                    feeds.any(
+                                        (element) => element["videoSlot"] == 2))
                                 ? feeds.firstWhere((element) =>
                                         element["videoSlot"] == 2)["display"]
                                     ["display"]
@@ -929,10 +928,13 @@ class _VideoRoomState extends State<VideoRoom> {
                           ),
                         ],
                       ))
-                  : Text(
-                      "Waiting...",
-                      style: TextStyle(color: Colors.white),
-                    ),
+                  : Container(
+                      color: Colors.black,
+                      child: Text(
+                        "Waiting...",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    )
 
               // CarouselSlider(
               //   height: 200.0,
