@@ -122,7 +122,7 @@ class _VideoRoomState extends State<VideoRoom> {
     print("xxx switch page to : " + page.toString());
     int numPages = (feeds.length / PAGE_SIZE).ceil();
     this.page = numPages == 0 ? 0 : (numPages + page) % numPages;
-    switcher.switchVideos(page, feeds, feeds);
+    switcher.switchVideos(this.page, feeds, feeds);
   }
 
   sortAndFilterFeeds(List feeds) => feeds
@@ -221,7 +221,7 @@ class _VideoRoomState extends State<VideoRoom> {
               print("xxx video slot is: " +
                   feed["videoSlot"].toString() +
                   "track index : ${trackIndex}");
-
+              feed["trackIndex"] = trackIndex;
               int slot = feed["videoSlot"];
 
               var lock = Lock();
@@ -237,8 +237,24 @@ class _VideoRoomState extends State<VideoRoom> {
                     // }
 
                     //check if mids changed place
-                    // int index = widget._remoteRenderer.elementAt(0).trackIndex;
-                    // var otherFeeds = feeds.where((element) => element["videoSlot"]!= slot && element["videoSlot"] != null && element["videoSlot"] !=-1);
+
+                    var otherFeeds = this.feeds.where((element) =>
+                        element["videoSlot"] != slot &&
+                        element["videoSlot"] != null &&
+                        element["videoSlot"] != -1);
+                    print(
+                        "xxx other feeds ${otherFeeds.toString()} and all feeds ${feeds.toString()}");
+                    otherFeeds.forEach((element) {
+                      int index = element["videoSlot"];
+                      if (widget._remoteRenderer.elementAt(index).trackIndex !=
+                          element["trackIndex"]) {
+                        print("xxx retracking video");
+                        widget._remoteRenderer.elementAt(index).trackIndex =
+                            element["trackIndex"];
+                        widget._remoteRenderer.elementAt(slot).srcObject =
+                            stream;
+                      }
+                    });
                   });
                 });
                 // );
