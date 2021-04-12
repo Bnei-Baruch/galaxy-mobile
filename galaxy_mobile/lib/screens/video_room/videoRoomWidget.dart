@@ -408,24 +408,27 @@ class _VideoRoomState extends State<VideoRoom> {
                     // }
                   } else if (msg['publishers'] != null &&
                       msg['publishers'] != null) {
-                    print("just joined");
+                    print("xxx just joined");
                     // User just joined the room.
-                    var newFeeds = sortAndFilterFeeds(msg['publishers'].filter(
-                        (l) => l["display"] = (jsonDecode(l)["display)"])));
-                    print('New list of available publishers/feeds:' +
+                    (msg['publishers'] as List).forEach((value) {
+                      value["display"] = (jsonDecode(value["display"]));
+                    });
+                    var newFeeds = msg['publishers']
+                        as List; //sortAndFilterFeeds(msg['publishers'] as List);
+                    print('xxx New list of available publishers/feeds:' +
                         newFeeds.toString());
                     Set newFeedsIds = new Set();
                     newFeedsIds
                         .addAll(newFeeds.map((feed) => feed["id"]).toSet());
-                    if (feeds.any((feed) => newFeedsIds.contains(feed.id))) {
+                    if (feeds.any((feed) => newFeedsIds.contains(feed["id"]))) {
                       print(
-                          "New feed joining but one of the feeds already exist" +
-                              newFeeds);
+                          "xxx New feed joining but one of the feeds already exist" +
+                              newFeeds.toString());
                       return;
                     }
                     // Merge new feed with existing feeds and sort.
-                    var feedsNewState =
-                        sortAndFilterFeeds([...newFeeds, ...feeds]);
+                    // var feedsNewState =
+                    //     sortAndFilterFeeds([...newFeeds, ...feeds]);
                     switcher.makeSubscription(
                         newFeeds,
                         /* feedsJustJoined= */ true,
@@ -435,8 +438,8 @@ class _VideoRoomState extends State<VideoRoom> {
                     switcher.switchVideos(
                         /* page= */ page,
                         feeds,
-                        feedsNewState);
-                    feeds = feedsNewState;
+                        newFeeds);
+                    feeds = newFeeds;
                   } else if (msg['leaving'] != null && msg['leaving'] != null) {
                     // User leaving the room which is same as publishers gone.
 

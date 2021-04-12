@@ -183,4 +183,50 @@ void main() {
     expect(feedsNewState.elementAt(4)["id"] == 3432170363902192, true);
     expect(feedsNewState.elementAt(5)["id"] == 212170363902192, true);
   });
+
+  test('joining 1 to none streams', () async {
+    var switchHelper = SwitchPageHelper(null, null, null, 3, false);
+    // = await rootBundle.loadString("feeds.json");
+    var newFeeds_3 = await Utils.parseJson("feeds3.json");
+    switchHelper.switchVideos(0, [], []);
+
+    (newFeeds_3 as List).removeRange(1, 2);
+
+    switchHelper.switchVideos(
+        /* page= */ 0,
+        [],
+        newFeeds_3);
+
+    newFeeds_3.forEach((feed) {
+      if (newFeeds_3.indexOf(feed) < 1) {
+        expect(feed["videoSlot"] == null || feed["videoSlot"] == -1, false);
+      }
+    });
+
+    expect(newFeeds_3.elementAt(0)["id"] == 26725810025805, true);
+  });
+  test('joining 1 to 1 streams', () async {
+    var switchHelper = SwitchPageHelper(null, null, null, 3, false);
+    // = await rootBundle.loadString("feeds.json");
+    var newFeeds_3 = await Utils.parseJson("feeds3.json");
+    var oldFeed = (newFeeds_3 as List).sublist(0, 1);
+
+    switchHelper.switchVideos(0, [], oldFeed);
+
+    var newFeed = (newFeeds_3 as List).sublist(1, 2);
+    newFeed.addAll(oldFeed);
+    switchHelper.switchVideos(
+        /* page= */ 0,
+        oldFeed,
+        newFeed);
+
+    newFeed.forEach((feed) {
+      if (newFeed.indexOf(feed) < 2) {
+        expect(feed["videoSlot"] == null || feed["videoSlot"] == -1, false);
+      }
+    });
+
+    expect(newFeed.elementAt(0)["id"] == 26725810025805, true);
+    expect(newFeed.elementAt(1)["id"] == 666765090359584, true);
+  });
 }
