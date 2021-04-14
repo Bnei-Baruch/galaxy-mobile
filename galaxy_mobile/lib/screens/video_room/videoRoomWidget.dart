@@ -908,20 +908,20 @@ class _VideoRoomState extends State<VideoRoom> {
                             alignment: Alignment.bottomLeft,
                             child: Row(
                               children: [
-                                (feeds.firstWhere((element) =>
-                                                element["videoSlot"] ==
-                                                0)["talking"] !=
-                                            null &&
-                                        feeds.firstWhere((element) =>
-                                                element["videoSlot"] ==
-                                                0)["talking"] ==
-                                            true)
-                                    ? Container()
-                                    : Icon(
-                                        Icons.mic_off,
-                                        color: Colors.red,
-                                        size: 18,
-                                      ),
+                                Icon(
+                                  Icons.mic_off,
+                                  color: (feeds.firstWhere((element) =>
+                                                  element["videoSlot"] ==
+                                                  0)["talking"] !=
+                                              null &&
+                                          feeds.firstWhere((element) =>
+                                                  element["videoSlot"] ==
+                                                  0)["talking"] ==
+                                              true)
+                                      ? Colors.transparent
+                                      : Colors.red,
+                                  size: 18,
+                                ),
                                 Text((feeds.isNotEmpty &&
                                         feeds.any((element) =>
                                             element["videoSlot"] == 0))
@@ -960,20 +960,20 @@ class _VideoRoomState extends State<VideoRoom> {
                             alignment: Alignment.bottomLeft,
                             child: Row(
                               children: [
-                                (feeds.firstWhere((element) =>
-                                                element["videoSlot"] ==
-                                                1)["talking"] !=
-                                            null &&
-                                        feeds.firstWhere((element) =>
-                                                element["videoSlot"] ==
-                                                1)["talking"] ==
-                                            true)
-                                    ? Container()
-                                    : Icon(
-                                        Icons.mic_off,
-                                        color: Colors.red,
-                                        size: 18,
-                                      ),
+                                Icon(
+                                  Icons.mic_off,
+                                  color: (feeds.firstWhere((element) =>
+                                                  element["videoSlot"] ==
+                                                  1)["talking"] !=
+                                              null &&
+                                          feeds.firstWhere((element) =>
+                                                  element["videoSlot"] ==
+                                                  1)["talking"] ==
+                                              true)
+                                      ? Colors.transparent
+                                      : Colors.red,
+                                  size: 18,
+                                ),
                                 Text((feeds.isNotEmpty &&
                                         feeds.any((element) =>
                                             element["videoSlot"] == 1))
@@ -1014,20 +1014,20 @@ class _VideoRoomState extends State<VideoRoom> {
                             alignment: Alignment.bottomLeft,
                             child: Row(
                               children: [
-                                (feeds.firstWhere((element) =>
-                                                element["videoSlot"] ==
-                                                2)["talking"] !=
-                                            null &&
-                                        feeds.firstWhere((element) =>
-                                                element["videoSlot"] ==
-                                                2)["talking"] ==
-                                            true)
-                                    ? Container()
-                                    : Icon(
-                                        Icons.mic_off,
-                                        color: Colors.red,
-                                        size: 18,
-                                      ),
+                                Icon(
+                                  Icons.mic_off,
+                                  color: (feeds.firstWhere((element) =>
+                                                  element["videoSlot"] ==
+                                                  2)["talking"] !=
+                                              null &&
+                                          feeds.firstWhere((element) =>
+                                                  element["videoSlot"] ==
+                                                  2)["talking"] ==
+                                              true)
+                                      ? Colors.transparent
+                                      : Colors.red,
+                                  size: 18,
+                                ),
                                 Text((feeds.isNotEmpty &&
                                         feeds.any((element) =>
                                             element["videoSlot"] == 2))
