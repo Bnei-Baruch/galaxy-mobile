@@ -906,13 +906,31 @@ class _VideoRoomState extends State<VideoRoom> {
                                   backgroundColor: Colors.cyan),
                           Align(
                             alignment: Alignment.bottomLeft,
-                            child: Text((feeds.isNotEmpty &&
-                                    feeds.any(
-                                        (element) => element["videoSlot"] == 0))
-                                ? feeds.firstWhere((element) =>
-                                        element["videoSlot"] == 0)["display"]
-                                    ["display"]
-                                : ""),
+                            child: Row(
+                              children: [
+                                (feeds.firstWhere((element) =>
+                                                element["videoSlot"] ==
+                                                0)["talking"] !=
+                                            null &&
+                                        feeds.firstWhere((element) =>
+                                                element["videoSlot"] ==
+                                                0)["talking"] ==
+                                            true)
+                                    ? Container()
+                                    : Icon(
+                                        Icons.mic_off,
+                                        color: Colors.red,
+                                        size: 18,
+                                      ),
+                                Text((feeds.isNotEmpty &&
+                                        feeds.any((element) =>
+                                            element["videoSlot"] == 0))
+                                    ? feeds.firstWhere((element) =>
+                                        element["videoSlot"] ==
+                                        0)["display"]["display"]
+                                    : ""),
+                              ],
+                            ),
                           ),
                         ],
                       ))
@@ -940,13 +958,31 @@ class _VideoRoomState extends State<VideoRoom> {
                           RTCVideoView(widget._remoteRenderer.elementAt(1)),
                           Align(
                             alignment: Alignment.bottomLeft,
-                            child: Text((feeds.isNotEmpty &&
-                                    feeds.any(
-                                        (element) => element["videoSlot"] == 1))
-                                ? feeds.firstWhere((element) =>
-                                        element["videoSlot"] == 1)["display"]
-                                    ["display"]
-                                : ""),
+                            child: Row(
+                              children: [
+                                (feeds.firstWhere((element) =>
+                                                element["videoSlot"] ==
+                                                1)["talking"] !=
+                                            null &&
+                                        feeds.firstWhere((element) =>
+                                                element["videoSlot"] ==
+                                                1)["talking"] ==
+                                            true)
+                                    ? Container()
+                                    : Icon(
+                                        Icons.mic_off,
+                                        color: Colors.red,
+                                        size: 18,
+                                      ),
+                                Text((feeds.isNotEmpty &&
+                                        feeds.any((element) =>
+                                            element["videoSlot"] == 1))
+                                    ? feeds.firstWhere((element) =>
+                                        element["videoSlot"] ==
+                                        1)["display"]["display"]
+                                    : ""),
+                              ],
+                            ),
                           ),
                         ],
                       ))
@@ -976,13 +1012,31 @@ class _VideoRoomState extends State<VideoRoom> {
                           RTCVideoView(widget._remoteRenderer.elementAt(2)),
                           Align(
                             alignment: Alignment.bottomLeft,
-                            child: Text((feeds.isNotEmpty &&
-                                    feeds.any(
-                                        (element) => element["videoSlot"] == 2))
-                                ? feeds.firstWhere((element) =>
-                                        element["videoSlot"] == 2)["display"]
-                                    ["display"]
-                                : ""),
+                            child: Row(
+                              children: [
+                                (feeds.firstWhere((element) =>
+                                                element["videoSlot"] ==
+                                                2)["talking"] !=
+                                            null &&
+                                        feeds.firstWhere((element) =>
+                                                element["videoSlot"] ==
+                                                2)["talking"] ==
+                                            true)
+                                    ? Container()
+                                    : Icon(
+                                        Icons.mic_off,
+                                        color: Colors.red,
+                                        size: 18,
+                                      ),
+                                Text((feeds.isNotEmpty &&
+                                        feeds.any((element) =>
+                                            element["videoSlot"] == 2))
+                                    ? feeds.firstWhere((element) =>
+                                        element["videoSlot"] ==
+                                        2)["display"]["display"]
+                                    : ""),
+                              ],
+                            ),
                           ),
                         ],
                       ))
