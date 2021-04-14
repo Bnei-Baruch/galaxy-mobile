@@ -427,10 +427,9 @@ class _VideoRoomState extends State<VideoRoom> {
                       return;
                     }
                     // Merge new feed with existing feeds and sort.
-                    // var feedsNewState =
-                    //     sortAndFilterFeeds([...newFeeds, ...feeds]);
+                    var feedsNewState = feeds + newFeeds;
                     switcher.makeSubscription(
-                        newFeeds,
+                        feedsNewState,
                         /* feedsJustJoined= */ true,
                         /* subscribeToVideo= */ false,
                         /* subscribeToAudio= */ true,
@@ -438,8 +437,8 @@ class _VideoRoomState extends State<VideoRoom> {
                     switcher.switchVideos(
                         /* page= */ page,
                         feeds,
-                        newFeeds);
-                    feeds = newFeeds;
+                        feedsNewState);
+                    feeds = feedsNewState;
                   } else if (msg['leaving'] != null && msg['leaving'] != null) {
                     // User leaving the room which is same as publishers gone.
 
@@ -560,7 +559,8 @@ class _VideoRoomState extends State<VideoRoom> {
               .where((a) => a["type"] == 'audio' && a["type"] == 'opus'));
       tempFeed.putIfAbsent(
           "data", () => streams.where((d) => d["type"] == 'data'));
-      tempFeed.putIfAbsent("cammute", () => feed["video"]);
+      tempFeed.putIfAbsent(
+          "cammute", () => (feed["video"] == null) ? true : false);
 
       streams.forEach((stream) {
         if ((subscribeToVideo &&
@@ -884,7 +884,18 @@ class _VideoRoomState extends State<VideoRoom> {
                           border: Border.all(color: Colors.black)),
                       child: Stack(
                         children: [
-                          RTCVideoView(widget._remoteRenderer.elementAt(0)),
+                          (feeds.firstWhere((element) =>
+                                      element["videoSlot"] == 0)["cammute"] ==
+                                  false)
+                              ? RTCVideoView(
+                                  widget._remoteRenderer.elementAt(0))
+                              : CircleAvatar(
+                                  child: Icon(
+                                    Icons.account_circle,
+                                    color: Colors.white,
+                                  ), // Icon widget changed with FaIcon
+                                  radius: 60.0,
+                                  backgroundColor: Colors.cyan),
                           Align(
                             alignment: Alignment.bottomLeft,
                             child: Text((feeds.isNotEmpty &&

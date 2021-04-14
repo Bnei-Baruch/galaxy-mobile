@@ -215,6 +215,8 @@ void main() {
 
     var newFeed = (newFeeds_3 as List).sublist(1, 2);
     newFeed.addAll(oldFeed);
+
+    newFeed = newFeed.reversed.toList();
     switchHelper.switchVideos(
         /* page= */ 0,
         oldFeed,
