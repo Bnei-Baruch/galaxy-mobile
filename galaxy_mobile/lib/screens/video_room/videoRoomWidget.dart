@@ -353,36 +353,34 @@ class _VideoRoomState extends State<VideoRoom> {
 
                     // this.setState({feeds: feedsNewState});
                   }
-
-                  //need to handle disconnection of room feed
-
-                  //need to handle addition of room feed
-
-                  //need to handle change of status of feeds
-
                 } else if (event == 'talking') {
-                  print("talking");
-                  // const feeds = Object.assign([], this.state.feeds);
-                  // const id    = msg['id'];
-                  // Janus.log(`User: ${id} - start talking`);
-                  // const feed = feeds.find(feed => feed.id === id);
-                  // if (!feed) {
-                  //   Janus.error(`Did not find user ${id}.`);
-                  //   return;
-                  // }
-                  // feed.talking = true;
-                  // this.setState({ feeds });
+                  print("xxx talking");
+                  final id = msg['id'];
+                  print("User: ${id} - stop talking");
+                  final feed = feeds.firstWhere((feed) => feed["id"] == id,
+                      orElse: null);
+                  if (feed == null) {
+                    print("xxx Did not find user ${id}.");
+                    return;
+                  }
+                  setState(() {
+                    feed["talking"] = true;
+                  });
                 } else if (event == 'stopped-talking') {
-                  print("stopped-talking");
+                  print("xxx stopped-talking");
                   // const feeds = Object.assign([], this.state.feeds);
-                  // const id    = msg['id'];
-                  // Janus.log(`User: ${id} - stop talking`);
-                  // const feed = feeds.find(feed => feed.id === id);
-                  // if (!feed) {
-                  //   Janus.error(`Did not find user ${id}.`);
-                  //   return;
-                  // }
-                  // feed.talking = false;
+                  final id = msg['id'];
+                  print("User: ${id} - stop talking");
+                  final feed = feeds.firstWhere((feed) => feed["id"] == id,
+                      orElse: null);
+                  if (feed == null) {
+                    print("xxx Did not find user ${id}.");
+                    return;
+                  }
+                  setState(() {
+                    feed["talking"] = false;
+                  });
+
                   // this.setState({ feeds });
                 } else if (event == 'destroyed') {
                   print("destroyed");
@@ -881,7 +879,17 @@ class _VideoRoomState extends State<VideoRoom> {
                       feeds.any((element) => element["videoSlot"] == 0))
                   ? Container(
                       decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black)),
+                          border: Border.all(
+                              color: (feeds.firstWhere((element) =>
+                                              element["videoSlot"] ==
+                                              0)["talking"] !=
+                                          null &&
+                                      feeds.firstWhere((element) =>
+                                              element["videoSlot"] ==
+                                              0)["talking"] ==
+                                          true)
+                                  ? Colors.lightGreen
+                                  : Colors.black)),
                       child: Stack(
                         children: [
                           (feeds.firstWhere((element) =>
@@ -916,7 +924,17 @@ class _VideoRoomState extends State<VideoRoom> {
                       feeds.any((element) => element["videoSlot"] == 1))
                   ? Container(
                       decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black)),
+                          border: Border.all(
+                              color: (feeds.firstWhere((element) =>
+                                              element["videoSlot"] ==
+                                              1)["talking"] !=
+                                          null &&
+                                      feeds.firstWhere((element) =>
+                                              element["videoSlot"] ==
+                                              1)["talking"] ==
+                                          true)
+                                  ? Colors.lightGreen
+                                  : Colors.black)),
                       child: Stack(
                         children: [
                           RTCVideoView(widget._remoteRenderer.elementAt(1)),
@@ -942,7 +960,17 @@ class _VideoRoomState extends State<VideoRoom> {
                       feeds.any((element) => element["videoSlot"] == 2))
                   ? Container(
                       decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black)),
+                          border: Border.all(
+                              color: (feeds.firstWhere((element) =>
+                                              element["videoSlot"] ==
+                                              2)["talking"] !=
+                                          null &&
+                                      feeds.firstWhere((element) =>
+                                              element["videoSlot"] ==
+                                              2)["talking"] ==
+                                          true)
+                                  ? Colors.lightGreen
+                                  : Colors.black)),
                       child: Stack(
                         children: [
                           RTCVideoView(widget._remoteRenderer.elementAt(2)),
