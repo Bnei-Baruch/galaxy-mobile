@@ -28,7 +28,7 @@ class _SettingsState extends State<Settings> {
           ),
           body: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
             Text(
-              "Hello ${activeUser.title}",
+              "Hello ${activeUser.givenName}",
               style: Theme.of(context).textTheme.headline4,
             ),
             Text(
@@ -36,7 +36,7 @@ class _SettingsState extends State<Settings> {
               style: Theme.of(context).textTheme.headline6,
             ),
 
-            ScreenName(activeUser.title),
+            ScreenName(activeUser.givenName),
             RoomSelector(),
             // Container(
             //   height: 200,
