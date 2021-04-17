@@ -35,6 +35,7 @@ class VideoRoom extends StatefulWidget {
   bool myAudioMuted = false;
   MediaStream myStream;
   var remoteStream;
+  var state;
   // VideoRoom(String serverUrl, String token, int roomNumber)
   //     : this.roomNumber = roomNumber,
   //       this.token = token,
@@ -60,7 +61,12 @@ class VideoRoom extends StatefulWidget {
         .getAudioTracks()
         .first
         .setMicrophoneMute(!myStream.getAudioTracks().first.muted);
-    myAudioMuted = !myAudioMuted;
+    if (state != null && state.mounted)
+      state.setState(() {
+        myAudioMuted = !myAudioMuted;
+      });
+    else
+      myAudioMuted = !myAudioMuted;
   }
 
   void toggleVideo() {
@@ -111,6 +117,7 @@ class _VideoRoomState extends State<VideoRoom> {
     super.initState();
     switcher = SwitchPageHelper(unsubscribeFrom, makeSubscription,
         switchVideoSlots, PAGE_SIZE, muteOtherCams);
+    widget.state = this;
   }
 
   Future<void> initInfra() async {
