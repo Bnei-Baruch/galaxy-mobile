@@ -1222,6 +1222,7 @@ class _VideoRoomState extends State<VideoRoom> {
           message: unsubscribe,
           onSuccess: () {
             print("xxx unsubscribed success" + unsubscribe.toString());
+            setState(() {});
           },
           onError: (error) {
             print("xxx unsubcribed failed $error");
