@@ -969,18 +969,26 @@ class _VideoRoomState extends State<VideoRoom> {
                                   : Colors.black)),
                       child: Stack(
                         children: [
-                          (feeds.firstWhere((element) =>
-                                      element["videoSlot"] == 0)["cammute"] ==
-                                  false)
+                          // (feeds.firstWhere((element) =>
+                          //             element["videoSlot"] == 0)["cammute"] ==
+                          //         false)
+                          (widget._remoteRenderer
+                                  .elementAt(0)
+                                  .srcObject
+                                  .getVideoTracks()
+                                  .elementAt(widget._remoteRenderer
+                                      .elementAt(0)
+                                      .trackIndex)
+                                  .enabled)
                               ? RTCVideoView(
                                   widget._remoteRenderer.elementAt(0))
-                              : CircleAvatar(
-                                  child: Icon(
-                                    Icons.account_circle,
-                                    color: Colors.white,
-                                  ), // Icon widget changed with FaIcon
-                                  radius: 60.0,
-                                  backgroundColor: Colors.cyan),
+                              : Icon(
+                                  Icons.mic_off,
+                                  color: (widget.myAudioMuted != true)
+                                      ? Colors.transparent
+                                      : Colors.red,
+                                  size: 18,
+                                ),
                           Align(
                             alignment: Alignment.bottomLeft,
                             child: Row(
@@ -1032,7 +1040,23 @@ class _VideoRoomState extends State<VideoRoom> {
                                   : Colors.black)),
                       child: Stack(
                         children: [
-                          RTCVideoView(widget._remoteRenderer.elementAt(1)),
+                          (widget._remoteRenderer
+                                  .elementAt(1)
+                                  .srcObject
+                                  .getVideoTracks()
+                                  .elementAt(widget._remoteRenderer
+                                      .elementAt(1)
+                                      .trackIndex)
+                                  .enabled)
+                              ? RTCVideoView(
+                                  widget._remoteRenderer.elementAt(1))
+                              : Icon(
+                                  Icons.mic_off,
+                                  color: (widget.myAudioMuted != true)
+                                      ? Colors.transparent
+                                      : Colors.red,
+                                  size: 18,
+                                ),
                           Align(
                             alignment: Alignment.bottomLeft,
                             child: Row(
@@ -1086,7 +1110,23 @@ class _VideoRoomState extends State<VideoRoom> {
                                   : Colors.black)),
                       child: Stack(
                         children: [
-                          RTCVideoView(widget._remoteRenderer.elementAt(2)),
+                          (widget._remoteRenderer
+                                  .elementAt(2)
+                                  .srcObject
+                                  .getVideoTracks()
+                                  .elementAt(widget._remoteRenderer
+                                      .elementAt(2)
+                                      .trackIndex)
+                                  .enabled)
+                              ? RTCVideoView(
+                                  widget._remoteRenderer.elementAt(2))
+                              : Icon(
+                                  Icons.mic_off,
+                                  color: (widget.myAudioMuted != true)
+                                      ? Colors.transparent
+                                      : Colors.red,
+                                  size: 18,
+                                ),
                           Align(
                             alignment: Alignment.bottomLeft,
                             child: Row(

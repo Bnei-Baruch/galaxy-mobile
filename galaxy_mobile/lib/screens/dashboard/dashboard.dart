@@ -5,6 +5,9 @@ import 'package:galaxy_mobile/screens/video_room/videoRoomWidget.dart';
 import 'package:provider/provider.dart';
 
 class Dashboard extends StatefulWidget {
+  bool audioMute;
+  bool videoMute;
+
   @override
   State createState() => _DashboardState();
 }
@@ -12,10 +15,14 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   var stream = StreamingUnified();
   var videoRoom = VideoRoom();
+
   @override
   void initState() {
     // TODO: implement initState
+    widget.audioMute = true;
+    widget.videoMute = true;
   }
+
   @override
   Widget build(BuildContext context) {
     final activeRoom = context.select((MainStore s) => s.activeRoom);
@@ -36,16 +43,27 @@ class _DashboardState extends State<Dashboard> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [stream, videoRoom]),
         bottomNavigationBar: BottomNavigationBar(
-          items: const <BottomNavigationBarItem>[
+          items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-              // IconButton()
-              icon: Icon(Icons.mic),
-              label: 'Mute',
-            ),
+                // IconButton()
+                icon: widget.audioMute
+                    ? Icon(
+                        Icons.mic_off,
+                        color: Colors.red,
+                      )
+                    : Icon(
+                        Icons.mic,
+                        color: Colors.white,
+                      ),
+                label: "Mic"),
             BottomNavigationBarItem(
-              icon: Icon(Icons.videocam),
-              label: 'Stop Video',
-            ),
+                icon: widget.videoMute
+                    ? Icon(
+                        Icons.videocam_off,
+                        color: Colors.red,
+                      )
+                    : Icon(Icons.videocam),
+                label: "Video"),
             BottomNavigationBarItem(
               icon: Icon(Icons.live_help),
               label: 'Ask Question',
@@ -59,9 +77,17 @@ class _DashboardState extends State<Dashboard> {
             switch (value) {
               case 0:
                 videoRoom.mute();
+                setState(() {
+                  widget.audioMute = !widget.audioMute;
+                });
+
                 break;
               case 1:
                 videoRoom.toggleVideo();
+                setState(() {
+                  widget.videoMute = !widget.videoMute;
+                });
+
                 break;
             }
           },
