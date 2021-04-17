@@ -10,7 +10,7 @@ PODS:
     - Flutter
   - flutter_volume_slider (1.0.0):
     - Flutter
-  - flutter_webrtc (0.2.2):
+  - flutter_webrtc (0.5.8):
     - Flutter
     - GoogleWebRTC (= 1.1.31999)
     - Libyuv (= 1703)
@@ -20,6 +20,10 @@ PODS:
   - Libyuv (1703)
   - path_provider (0.0.1):
     - Flutter
+  - searchable_dropdown (1.1.1):
+    - Flutter
+  - shared_preferences (0.0.1):
+    - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
@@ -28,6 +32,8 @@ DEPENDENCIES:
   - flutter_webrtc (from `.symlinks/plugins/flutter_webrtc/ios`)
   - janus_client (from `.symlinks/plugins/janus_client/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
+  - searchable_dropdown (from `.symlinks/plugins/searchable_dropdown/ios`)
+  - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
 
 SPEC REPOS:
   trunk:
@@ -48,6 +54,10 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/janus_client/ios"
   path_provider:
     :path: ".symlinks/plugins/path_provider/ios"
+  searchable_dropdown:
+    :path: ".symlinks/plugins/searchable_dropdown/ios"
+  shared_preferences:
+    :path: ".symlinks/plugins/shared_preferences/ios"
 
 SPEC CHECKSUMS:
   AppAuth: 8803ba1aec6d00d9afd30093f82e600307eaa6ea
@@ -59,6 +69,8 @@ SPEC CHECKSUMS:
   janus_client: d77ae8ecd25551407740931f9506f1a64ba067a3
   Libyuv: 5f79ced0ee66e60a612ca97de1e6ccacd187a437
   path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
+  searchable_dropdown: 5058be32fdc5e0481d300ff2087129072e71bd62
+  shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
 
 PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
 
