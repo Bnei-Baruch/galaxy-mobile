@@ -6,6 +6,7 @@ import 'package:galaxy_mobile/widgets/roomSelector.dart';
 import 'package:galaxy_mobile/widgets/screenLoader.dart';
 
 import 'package:galaxy_mobile/widgets/screenName.dart';
+import 'package:galaxy_mobile/widgets/selfViewWidget.dart';
 import 'package:provider/provider.dart';
 
 class Settings extends StatefulWidget {
@@ -27,6 +28,7 @@ class _SettingsState extends State<Settings> {
             title: Text("Settings"),
           ),
           body: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+            SelfViewWidget(),
             Text(
               "Hello ${activeUser.givenName}",
               style: Theme.of(context).textTheme.headline4,
