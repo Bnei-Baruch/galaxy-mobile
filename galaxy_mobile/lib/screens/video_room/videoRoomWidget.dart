@@ -32,7 +32,8 @@ class VideoRoom extends StatefulWidget {
   List<RTCVideoRenderer> _remoteRenderer = new List<RTCVideoRenderer>();
   Plugin pluginHandle;
   Plugin subscriberHandle;
-
+  bool myAudioMuted = false;
+  MediaStream myStream;
   var remoteStream;
   // VideoRoom(String serverUrl, String token, int roomNumber)
   //     : this.roomNumber = roomNumber,
@@ -53,11 +54,23 @@ class VideoRoom extends StatefulWidget {
 
   @override
   _VideoRoomState createState() => _VideoRoomState();
+
+  void mute() {
+    myStream
+        .getAudioTracks()
+        .first
+        .setMicrophoneMute(!myStream.getAudioTracks().first.muted);
+    myAudioMuted = !myAudioMuted;
+  }
+
+  void toggleVideo() {
+    myStream.getVideoTracks().first.enabled =
+        !myStream.getVideoTracks().first.enabled;
+  }
 }
 
 class _VideoRoomState extends State<VideoRoom> {
   List<MediaStream> remoteStream = new List<MediaStream>();
-  MediaStream myStream;
 
   List<Map> roomFeeds;
 
@@ -358,7 +371,7 @@ class _VideoRoomState extends State<VideoRoom> {
                   final id = msg['id'];
                   print("User: ${id} - stop talking");
                   final feed = feeds.firstWhere((feed) => feed["id"] == id,
-                      orElse: null);
+                      orElse: () => null);
                   if (feed == null) {
                     print("xxx Did not find user ${id}.");
                     return;
@@ -372,7 +385,7 @@ class _VideoRoomState extends State<VideoRoom> {
                   final id = msg['id'];
                   print("User: ${id} - stop talking");
                   final feed = feeds.firstWhere((feed) => feed["id"] == id,
-                      orElse: null);
+                      orElse: () => null);
                   if (feed == null) {
                     print("xxx Did not find user ${id}.");
                     return;
@@ -487,11 +500,13 @@ class _VideoRoomState extends State<VideoRoom> {
               // setState(() {
               widget.pluginHandle = plugin;
               MediaStream stream = await plugin.initializeMediaDevices();
-              myStream = stream;
-              myStream.getAudioTracks().first.setMicrophoneMute(true);
+              widget.myStream = stream;
+              widget.myStream.getAudioTracks().first.setMicrophoneMute(true);
+              widget.myStream.getVideoTracks().first.enabled = false;
+              widget.myAudioMuted = true;
               // });
               setState(() {
-                widget._localRenderer.srcObject = myStream;
+                widget._localRenderer.srcObject = widget.myStream;
               });
               var register = {
                 "request": "join",
@@ -864,15 +879,46 @@ class _VideoRoomState extends State<VideoRoom> {
           GridView.count(
             children: [
               Container(
-                decoration: BoxDecoration(
-                    border: Border.all(
-                        color: Colors.black)), //Colors.lightGreenAccent
-                child: RTCVideoView(
-                  widget._localRenderer,
-                ),
-                // height: 200,
-                // width: 200,
-              ),
+                  decoration: BoxDecoration(
+                      border: Border.all(
+                          color: (widget.myAudioMuted != true)
+                              ? Colors.lightGreen
+                              : Colors.black)), //Colors.lightGreenAccent
+                  child: Stack(
+                    children: [
+                      (widget.myStream != null)
+                          ? RTCVideoView(widget._localRenderer)
+                          : CircleAvatar(
+                              child: Icon(
+                                Icons.account_circle,
+                                color: Colors.white,
+                              ), // Icon widget changed with FaIcon
+                              radius: 60.0,
+                              backgroundColor: Colors.cyan),
+                      Align(
+                        alignment: Alignment.bottomLeft,
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.mic_off,
+                              color: (widget.myAudioMuted != true)
+                                  ? Colors.transparent
+                                  : Colors.red,
+                              size: 18,
+                            ),
+                            Text(widget.user.name),
+                          ],
+                        ),
+                      ),
+                    ],
+                  )
+
+                  // RTCVideoView(
+                  //   widget._localRenderer,  //widget.user.name
+                  // ),
+                  // height: 200,
+                  // width: 200,
+                  ),
               (widget._remoteRenderer != null &&
                       widget._remoteRenderer.elementAt(0) != null &&
                       widget._remoteRenderer.elementAt(0).srcObject != null &&
