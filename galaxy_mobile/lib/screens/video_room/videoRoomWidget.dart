@@ -33,6 +33,8 @@ class VideoRoom extends StatefulWidget {
   Plugin pluginHandle;
   Plugin subscriberHandle;
   bool myAudioMuted = false;
+  bool myVideoMuted = false;
+
   MediaStream myStream;
   var remoteStream;
   var state;
@@ -72,6 +74,13 @@ class VideoRoom extends StatefulWidget {
   void toggleVideo() {
     myStream.getVideoTracks().first.enabled =
         !myStream.getVideoTracks().first.enabled;
+
+    if (state != null && state.mounted)
+      state.setState(() {
+        myVideoMuted = !myVideoMuted;
+      });
+    else
+      myVideoMuted = !myVideoMuted;
   }
 }
 
@@ -275,6 +284,20 @@ class _VideoRoomState extends State<VideoRoom> {
                             stream;
                       }
                     });
+                    // switch (otherFeeds.length) {
+                    //   case 0:
+                    //     widget._remoteRenderer.elementAt(0).srcObject = null;
+                    //     widget._remoteRenderer.elementAt(1).srcObject = null;
+                    //     widget._remoteRenderer.elementAt(2).srcObject = null;
+                    //     break;
+                    //   case 1:
+                    //     widget._remoteRenderer.elementAt(1).srcObject = null;
+                    //     widget._remoteRenderer.elementAt(2).srcObject = null;
+                    //     break;
+                    //   // case 2:
+                    //   //   widget._remoteRenderer.elementAt(2).srcObject = null;
+                    //   //   break;
+                    // }
                   });
                 });
                 // );
@@ -893,15 +916,16 @@ class _VideoRoomState extends State<VideoRoom> {
                               : Colors.black)), //Colors.lightGreenAccent
                   child: Stack(
                     children: [
-                      (widget.myStream != null)
+                      (widget.myVideoMuted)
                           ? RTCVideoView(widget._localRenderer)
-                          : CircleAvatar(
+                          : Align(
+                              alignment: Alignment.center,
                               child: Icon(
                                 Icons.account_circle,
                                 color: Colors.white,
-                              ), // Icon widget changed with FaIcon
-                              radius: 60.0,
-                              backgroundColor: Colors.cyan),
+                                size: 120,
+                              ),
+                            ), // Icon widget changed with FaIcon),
                       Align(
                         alignment: Alignment.bottomLeft,
                         child: Row(
