@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/screens/streaming/streaming.dart';
 import 'package:galaxy_mobile/screens/video_room/videoRoomWidget.dart';
+import 'package:galaxy_mobile/services/mqttClient.dart';
 import 'package:provider/provider.dart';
+
+import '../../services/authService.dart';
 
 class Dashboard extends StatefulWidget {
   bool audioMute;
@@ -16,6 +19,8 @@ class _DashboardState extends State<Dashboard> {
   var stream = StreamingUnified();
   var videoRoom = VideoRoom();
 
+  MQTTClient _mqttClient;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -23,9 +28,22 @@ class _DashboardState extends State<Dashboard> {
     widget.videoMute = true;
   }
 
+  void handleCmdData(String msgPayload) {
+    print('[Dashboard] Received message:$msgPayload');
+  }
+
   @override
   Widget build(BuildContext context) {
     final activeRoom = context.select((MainStore s) => s.activeRoom);
+    final authService = context.read<AuthService>();
+
+    if (_mqttClient == null) {
+      _mqttClient =
+          MQTTClient(authService.getUserEmail(),
+              authService.getAuthToken(),
+          this.handleCmdData);
+      _mqttClient.connect();
+    }
 
     return WillPopScope(
       onWillPop: () {
