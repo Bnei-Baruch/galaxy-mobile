@@ -68,6 +68,8 @@ class AuthService {
     Map<String, dynamic> payload = Jwt.parseJwt(this._authToken);
     print(payload);
 
+    _authEmail = payload['preferred_username'];
+
     return result;
   }
 

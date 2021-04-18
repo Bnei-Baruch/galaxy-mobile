@@ -275,14 +275,14 @@ class _VideoRoomState extends State<VideoRoom> {
                         "xxx other feeds ${otherFeeds.toString()} and all feeds ${feeds.toString()}");
                     otherFeeds.forEach((element) {
                       int index = element["videoSlot"];
-                      if (widget._remoteRenderer.elementAt(index).trackIndex !=
-                          element["trackIndex"]) {
-                        print("xxx retracking video");
-                        widget._remoteRenderer.elementAt(index).trackIndex =
-                            element["trackIndex"];
-                        widget._remoteRenderer.elementAt(slot).srcObject =
-                            stream;
-                      }
+                      // if (widget._remoteRenderer.elementAt(index).trackIndex !=
+                      //     element["trackIndex"]) {
+                      //   print("xxx retracking video");
+                      //   widget._remoteRenderer.elementAt(index).trackIndex =
+                      //       element["trackIndex"];
+                      //   widget._remoteRenderer.elementAt(slot).srcObject =
+                      //       stream;
+                      // }
                     });
                     // switch (otherFeeds.length) {
                     //   case 0:
@@ -972,14 +972,15 @@ class _VideoRoomState extends State<VideoRoom> {
                           // (feeds.firstWhere((element) =>
                           //             element["videoSlot"] == 0)["cammute"] ==
                           //         false)
-                          (widget._remoteRenderer
-                                  .elementAt(0)
-                                  .srcObject
-                                  .getVideoTracks()
-                                  .elementAt(widget._remoteRenderer
-                                      .elementAt(0)
-                                      .trackIndex)
-                                  .enabled)
+                          (true)
+                          // (widget._remoteRenderer
+                          //         .elementAt(0)
+                          //         .srcObject
+                          //         .getVideoTracks()
+                          //         .elementAt(widget._remoteRenderer
+                          //             .elementAt(0)
+                          //             .trackIndex)
+                          //         .enabled)
                               ? RTCVideoView(
                                   widget._remoteRenderer.elementAt(0))
                               : Icon(
@@ -1040,14 +1041,15 @@ class _VideoRoomState extends State<VideoRoom> {
                                   : Colors.black)),
                       child: Stack(
                         children: [
-                          (widget._remoteRenderer
-                                  .elementAt(1)
-                                  .srcObject
-                                  .getVideoTracks()
-                                  .elementAt(widget._remoteRenderer
-                                      .elementAt(1)
-                                      .trackIndex)
-                                  .enabled)
+                          (true)
+                          // (widget._remoteRenderer
+                          //         .elementAt(1)
+                          //         .srcObject
+                          //         .getVideoTracks()
+                          //         .elementAt(widget._remoteRenderer
+                          //             .elementAt(1)
+                          //             .trackIndex)
+                          //         .enabled)
                               ? RTCVideoView(
                                   widget._remoteRenderer.elementAt(1))
                               : Icon(
@@ -1110,14 +1112,15 @@ class _VideoRoomState extends State<VideoRoom> {
                                   : Colors.black)),
                       child: Stack(
                         children: [
-                          (widget._remoteRenderer
-                                  .elementAt(2)
-                                  .srcObject
-                                  .getVideoTracks()
-                                  .elementAt(widget._remoteRenderer
-                                      .elementAt(2)
-                                      .trackIndex)
-                                  .enabled)
+                          (true)
+                          // (widget._remoteRenderer
+                          //         .elementAt(2)
+                          //         .srcObject
+                          //         .getVideoTracks()
+                          //         .elementAt(widget._remoteRenderer
+                          //             .elementAt(2)
+                          //             .trackIndex)
+                          //         .enabled)
                               ? RTCVideoView(
                                   widget._remoteRenderer.elementAt(2))
                               : Icon(

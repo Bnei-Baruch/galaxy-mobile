@@ -29,7 +29,7 @@ class _DashboardState extends State<Dashboard> {
   }
 
   void handleCmdData(String msgPayload) {
-    print('[Dashboard] Received message:$msgPayload');
+    print('[Dashboard] Received message: $msgPayload');
   }
 
   @override
@@ -43,6 +43,7 @@ class _DashboardState extends State<Dashboard> {
               authService.getAuthToken(),
           this.handleCmdData);
       _mqttClient.connect();
+      _mqttClient.subscribe('galaxy/users/broadcast');
     }
 
     return WillPopScope(
