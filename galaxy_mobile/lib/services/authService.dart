@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:galaxy_mobile/config/env.dart';
 import 'package:galaxy_mobile/utils/dio_log.dart';
+import 'package:jwt_decode/jwt_decode.dart';
 
 final String _clientId = APP_AUTH_CLIENT_ID;
 final String _redirectUrl = 'galaxy.mobile://login-callback';
@@ -43,6 +44,8 @@ class User {
 class AuthService {
   final FlutterAppAuth _appAuth = FlutterAppAuth();
   final Dio _dio = Dio();
+  String _authEmail;
+  String _authToken;
 
   AuthService() {
     this._dio.interceptors.add(LogInterceptors());
@@ -60,6 +63,13 @@ class AuthService {
       ),
     );
     this._dio.options.headers["Authorization"] = "Bearer ${result.accessToken}";
+    this._authToken = result.accessToken;
+
+    Map<String, dynamic> payload = Jwt.parseJwt(this._authToken);
+    print(payload);
+
+    _authEmail = payload['preferred_username'];
+
     return result;
   }
 
@@ -69,6 +79,9 @@ class AuthService {
     final response = await _dio.get(APP_OPENID_AUTH_USERINFO_ENDPOINT);
     return User.fromJson(response.data);
   }
+
+  String getUserEmail() { return _authEmail; }
+  String getAuthToken() { return _authToken; }
 
   Future<void> logout() async {
     debugPrint("Logout");
