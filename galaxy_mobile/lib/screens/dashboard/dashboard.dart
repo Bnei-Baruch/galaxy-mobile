@@ -31,6 +31,7 @@ class _DashboardState extends State<Dashboard> {
       onWillPop: () {
         Navigator.of(context).pop(true);
         videoRoom.exitRoom();
+        stream.exit();
       },
       child: Scaffold(
         appBar: AppBar(
