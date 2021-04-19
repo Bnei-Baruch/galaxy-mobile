@@ -20,4 +20,10 @@ class SharedPrefs {
 
   bool get audioMode => _sharedPrefs.getBool('audioMode') ?? false;
   set audioMode(bool value) => _sharedPrefs.setBool('audioMode', value);
+
+  int get audioPreset => _sharedPrefs.getInt('audioPreset') ?? 15;
+  set audioPreset(int value) => _sharedPrefs.setInt('audioPreset', value);
+
+  int get videoPreset => _sharedPrefs.getInt('videoPreset') ?? 1;
+  set videoPreset(int value) => _sharedPrefs.setInt('videoPreset', value);
 }

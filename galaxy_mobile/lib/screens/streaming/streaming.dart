@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/screens/streaming/constants.dart';
 import 'package:janus_client/Plugin.dart';
 import 'package:janus_client/janus_client.dart';
@@ -7,6 +8,7 @@ import 'package:janus_client/utils.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 import 'components/playerWIdget.dart';
+import 'package:provider/provider.dart';
 
 class StreamingUnified extends StatefulWidget {
   int defaultVideo = 15;
@@ -14,16 +16,22 @@ class StreamingUnified extends StatefulWidget {
   bool isPlayerShown = false;
 
   var videoTrack;
+  var audioTrack;
+  var audioStream;
 
   var isVideoPlaying;
   Plugin videoStreamingPlugin;
   Plugin audioStreamingPlugin;
 
+  bool initialized = false;
+  bool connected = false;
+
   @override
   _StreamingUnifiedState createState() => _StreamingUnifiedState();
 
   void exit() {
-    videoStreamingPlugin.send(message: {"request": "stop"});
+    if (videoStreamingPlugin != null)
+      videoStreamingPlugin.send(message: {"request": "stop"});
     audioStreamingPlugin.send(message: {"request": "stop"});
   }
 }
@@ -72,18 +80,49 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    playerOverlay.play = (playing) => {
-          widget.audioStreamingPlugin.hangup(),
-          widget.videoStreamingPlugin.hangup()
-        };
+
+    playerOverlay.play = (playing) {
+      if (!playing) {
+        if (widget.videoStreamingPlugin != null)
+          widget.videoStreamingPlugin.send(message: {"request": "stop"});
+        widget.audioStreamingPlugin.send(message: {"request": "stop"});
+        setState(() {
+          widget.isVideoPlaying = playing;
+        });
+      } else {
+        // widget.videoStreamingPlugin.send(message: {
+        //   "request": "watch",
+        //   "id": 1, //playerOverlay.videoTypeValue["value"],
+        //   "offer_audio": true,
+        //   "offer_video": true,
+        // });
+        // widget.audioStreamingPlugin.send(message: {
+        //   "request": "watch",
+        //   "id": 15, //playerOverlay.videoTypeValue["value"],
+        //   "offer_audio": true,
+        //   "offer_video": true,
+        // });
+        initAudioStream();
+        initVideoStream();
+      }
+    };
+    playerOverlay.mute = (muted) {
+      if (muted)
+        _remoteStream.getAudioTracks().first.setVolume(0);
+      else
+        _remoteStream.getAudioTracks().first.setVolume(0.5);
+    };
     playerOverlay.audioChange = () {
-      //  audioStreamingPlugin.send(message: {"request": "stop"});
+      // context.select((MainStore s) =>
+      //     s.audioPreset = playerOverlay.audioTypeValue["value"]);
       widget.audioStreamingPlugin.send(message: {
         "request": "switch",
         "id": playerOverlay.audioTypeValue["value"]
       });
     };
     playerOverlay.videoChange = () async {
+      // context.select((MainStore s) =>
+      //     s.videoPreset = playerOverlay.videoTypeValue["value"]);
       if (playerOverlay.videoTypeValue["value"] !=
           StreamConstants.NO_VIDEO_OPTION_VALUE) {
         if (widget.videoStreamingPlugin != null &&
@@ -119,70 +158,19 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
     };
     widget.isPlayerShown = false;
     janusClient.connect(onSuccess: (sessionId) {
-      //video plugin init
-      initVideoStream();
-      //audio plugin init
-      janusClient.attach(Plugin(
-          onRemoteTrack: (stream, track, mid, on) {
-            print('got remote stream');
-
-            playerOverlay.isPlaying = true;
-          },
-          plugin: "janus.plugin.streaming",
-          onMessage: (msg, jsep) async {
-            print('got onmsg');
-            print(msg);
-            if (msg['streaming'] != null && msg['result'] != null) {
-              if (msg['streaming'] == 'event' &&
-                  msg['result']['status'] == 'stopping') {
-                // await this.destroy();
-              }
-            }
-
-            if (msg['janus'] == 'success' && msg['plugindata'] != null) {
-              var plugindata = msg['plugindata'];
-              print('got plugin data');
-            }
-
-            if (jsep != null) {
-              debugPrint("Handling SDP as well..." + jsep.toString());
-              await widget.audioStreamingPlugin.handleRemoteJsep(jsep);
-              RTCSessionDescription answer =
-                  await widget.audioStreamingPlugin.createAnswer();
-              widget.audioStreamingPlugin
-                  .send(message: {"request": "start"}, jsep: answer);
-
-              // Navigator.of(context).pop();
-              setState(() {
-                _loader = false;
-              });
-            }
-          },
-          onSuccess: (plugin) {
-            setState(() {
-              widget.audioStreamingPlugin = plugin;
-              // this.getStreamListing();
-              // widget.audioStreamingPlugin.send(message: {
-              //   "request": "watch",
-              //   "id": 15, //playerOverlay.videoTypeValue["value"],
-              //   "offer_audio": true,
-              //   "offer_video": true,
-              // });
-            });
-          }));
+      widget.connected = true;
+      setState(() {});
     });
   }
 
-  void initVideoStream() {
+  void initAudioStream() {
     janusClient.attach(Plugin(
         onRemoteTrack: (stream, track, mid, on) {
           print('got remote stream');
-          widget.videoTrack = track;
-          _remoteStream
-              .addTrack(track)
-              .then((value) => _remoteRenderer.srcObject = _remoteStream);
+          widget.audioTrack = track;
+          _remoteStream.addTrack(track);
+          // widget.audioStream = stream;
           playerOverlay.isPlaying = true;
-          widget.isVideoPlaying = true;
         },
         plugin: "janus.plugin.streaming",
         onMessage: (msg, jsep) async {
@@ -192,7 +180,67 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
             if (msg['streaming'] == 'event' &&
                 msg['result']['status'] == 'stopping') {
               // await this.destroy();
-              widget.isVideoPlaying = false;
+            }
+          }
+
+          if (msg['janus'] == 'success' && msg['plugindata'] != null) {
+            var plugindata = msg['plugindata'];
+            print('got plugin data');
+          }
+
+          if (jsep != null) {
+            debugPrint("Handling SDP as well..." + jsep.toString());
+            await widget.audioStreamingPlugin.handleRemoteJsep(jsep);
+            RTCSessionDescription answer =
+                await widget.audioStreamingPlugin.createAnswer();
+            widget.audioStreamingPlugin
+                .send(message: {"request": "start"}, jsep: answer);
+
+            // Navigator.of(context).pop();
+            setState(() {
+              _loader = false;
+            });
+          }
+        },
+        onSuccess: (plugin) {
+          setState(() {
+            widget.audioStreamingPlugin = plugin;
+            //     this.getStreamListing();
+            widget.audioStreamingPlugin.send(message: {
+              "request": "watch",
+              "id": playerOverlay.audioTypeValue["value"], //15, //
+              "offer_audio": true,
+              "offer_video": true,
+            });
+          });
+        }));
+  }
+
+  void initVideoStream() {
+    janusClient.attach(Plugin(
+        onRemoteTrack: (stream, track, mid, on) {
+          print('got remote stream');
+          widget.videoTrack = track;
+          _remoteStream.addTrack(track);
+          //     .then((value) =>
+
+          _remoteRenderer.srcObject = stream;
+          playerOverlay.isPlaying = true;
+          setState(() {
+            widget.isVideoPlaying = true;
+          });
+        },
+        plugin: "janus.plugin.streaming",
+        onMessage: (msg, jsep) async {
+          print('got onmsg');
+          print(msg);
+          if (msg['streaming'] != null && msg['result'] != null) {
+            if (msg['streaming'] == 'event' &&
+                msg['result']['status'] == 'stopping') {
+              // await this.destroy();
+              setState(() {
+                widget.isVideoPlaying = false;
+              });
             }
           }
 
@@ -220,17 +268,12 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
             // this.getStreamListing();
             widget.videoStreamingPlugin.send(message: {
               "request": "watch",
-              "id": 1, //playerOverlay.videoTypeValue["value"],
+              "id": playerOverlay.videoTypeValue["value"], //1, //
               "offer_audio": true,
               "offer_video": true,
             });
           });
         }));
-  }
-
-  Future<void> cleanUpAndBack() async {
-    widget.videoStreamingPlugin.send(message: {"request": "stop"});
-    widget.audioStreamingPlugin.send(message: {"request": "stop"});
   }
 
   destroy() async {
@@ -246,6 +289,20 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
 
   @override
   Widget build(BuildContext context) {
+    //set user preset of audio and video
+    final int audio = context.select((MainStore s) => s.audioPreset);
+    final int video = context.select((MainStore s) => s.videoPreset);
+    playerOverlay.audioPreset = audio;
+    playerOverlay.videoPreset = video;
+
+    playerOverlay.setStreamPresets(audio, video);
+    if (widget.connected && !widget.initialized) {
+      //video plugin init
+      initVideoStream();
+      //audio plugin init
+      initAudioStream();
+      widget.initialized = true;
+    }
     return GestureDetector(
         dragStartBehavior: DragStartBehavior.down,
         child: Stack(alignment: Alignment.topCenter, children: [
@@ -255,13 +312,29 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
             children: [
               Container(
                 height: MediaQuery.of(context).size.height / 3,
-                child: RTCVideoView(
-                  _remoteRenderer,
-                  mirror: false,
-                  // objectFit:
-                  //     RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
-                  // RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-                ),
+                child:
+                    (_remoteRenderer.srcObject != null && widget.isVideoPlaying)
+                        ? RTCVideoView(
+                            _remoteRenderer,
+                            mirror: false,
+                            // objectFit:
+                            //     RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
+                            // RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+                          )
+                        : InkWell(
+                            onTap: () {
+                              setState(() {
+                                widget.isPlayerShown = !widget.isPlayerShown;
+                              });
+                            },
+                            child: Container(
+                                height: MediaQuery.of(context).size.height / 3,
+                                width: MediaQuery.of(context).size.width,
+                                child: Center(
+                                    child: Text(
+                                  "No video",
+                                  style: TextStyle(fontSize: 24),
+                                )))),
               ),
             ],
           ),

@@ -8,11 +8,26 @@ typedef BooleanCallback = void Function(bool isTrue);
 class PlayerWidget extends StatefulWidget {
   bool isPlaying = false;
   BooleanCallback play;
+  BooleanCallback mute;
   VoidCallback audioChange;
   VoidCallback videoChange;
 
   Map<String, Object> audioTypeValue;
   Map<String, Object> videoTypeValue;
+
+  bool isMuted = false;
+
+  int audioPreset;
+
+  int videoPreset;
+
+  setStreamPresets(int audio, int video) {
+    videoTypeValue = StreamConstants.videos_options
+        .firstWhere((element) => element["value"] == video);
+    audioTypeValue = StreamConstants.audiog_options
+        .firstWhere((element) => element["value"] == audio);
+  }
+
   @override
   _PlayerStateWidget createState() => _PlayerStateWidget();
 }
@@ -21,6 +36,7 @@ class _PlayerStateWidget extends State<PlayerWidget> {
   @override
   void InitState() {
     widget.isPlaying = false;
+
     // Map<String, Object> audioTypeValue = StreamConstants.audiog_options
     //     .firstWhere((element) => element.keys.first == "he");
     // Map<String, Object> videoTypeValue = StreamConstants.videos_options
@@ -43,71 +59,106 @@ class _PlayerStateWidget extends State<PlayerWidget> {
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Container(
-                width: 35.0,
-                height: 35.0,
-                child: DecoratedBox(
-                    child: IconButton(
-                      // color: Colors.green,
-                      onPressed: () => widget.play(widget.isPlaying),
-                      icon: Icon(
-                        widget.isPlaying ? Icons.stop : Icons.play_arrow,
-                        color: Colors.black,
-                        // size: 24.0,
-                        semanticLabel: 'Play/Stop button',
-                      ),
-                    ),
-                    decoration: BoxDecoration(color: Colors.white)),
-              ),
-              DecoratedBox(
-                decoration: BoxDecoration(color: Colors.white),
-                child: Container(
-                  // constraints: BoxConstraints(minWidth: 100, maxWidth: 175),
-                  height: 35,
-                  width: 180,
-                  child: FittedBox(
-                    child: FlutterVolumeSlider(
-                      display: Display.HORIZONTAL,
-                      sliderActiveColor: Colors.blue,
-                      sliderInActiveColor: Colors.grey,
+              // Container(
+              //   width: 35.0,
+              //   height: 35.0,
+              //   child: DecoratedBox(
+              //       child:
+              Center(
+                child: Ink(
+                  decoration: const ShapeDecoration(
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(),
+                  ),
+                  child: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        widget.isPlaying = !widget.isPlaying;
+                        widget.play(widget.isPlaying);
+                      });
+                    },
+                    icon: Icon(
+                      widget.isPlaying ? Icons.stop : Icons.play_arrow,
+                      color: Colors.black,
+                      // size: 24.0,
+                      semanticLabel: 'Play/Stop button',
                     ),
                   ),
                 ),
               ),
-              Container(
-                width: 35.0,
-                height: 35.0,
-                child: DecoratedBox(
-                    child: IconButton(
-                      color: Colors.white,
-                      // minWidth: 24,
-                      onPressed: () => widget.play(widget.isPlaying),
-                      icon: Icon(
-                        Icons.fullscreen,
-                        color: Colors.black,
-                        // size: 24.0,
-                        semanticLabel: 'Full screen',
-                      ),
+              Center(
+                child: Ink(
+                  decoration: const ShapeDecoration(
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(),
+                  ),
+                  child: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        widget.isMuted = !widget.isMuted;
+                        widget.mute(widget.isMuted);
+                      });
+                    },
+                    icon: Icon(
+                      widget.isMuted ? Icons.volume_mute : Icons.volume_up,
+                      color: Colors.black,
+                      // size: 24.0,
+                      semanticLabel: 'Play/Stop button',
                     ),
-                    decoration: BoxDecoration(color: Colors.white)),
+                  ),
+                ),
               ),
-              Container(
-                width: 35.0,
-                height: 35.0,
-                child: DecoratedBox(
-                    child: IconButton(
-                      color: Colors.white,
-                      // minWidth: 24,
-                      onPressed: () => widget.play(widget.isPlaying),
-                      icon: Icon(
-                        Icons.settings,
-                        color: Colors.black,
-                        size: 24.0,
-                        semanticLabel: 'Settings',
-                      ),
-                    ),
-                    decoration: BoxDecoration(color: Colors.white)),
-              ),
+              // decoration: BoxDecoration(color: Colors.white)),
+              // ),
+              // DecoratedBox(
+              //   decoration: BoxDecoration(color: Colors.white),
+              //   child: Container(
+              //     // constraints: BoxConstraints(minWidth: 100, maxWidth: 175),
+              //     height: 35,
+              //     width: 180,
+              //     child: FittedBox(
+              //       child: FlutterVolumeSlider(
+              //         display: Display.HORIZONTAL,
+              //         sliderActiveColor: Colors.blue,
+              //         sliderInActiveColor: Colors.grey,
+              //       ),
+              //     ),
+              //   ),
+              // ),
+              // Container(
+              //   width: 35.0,
+              //   height: 35.0,
+              //   child: DecoratedBox(
+              //       child: IconButton(
+              //         color: Colors.white,
+              //         // minWidth: 24,
+              //         onPressed: () => widget.play(widget.isPlaying),
+              //         icon: Icon(
+              //           Icons.fullscreen,
+              //           color: Colors.black,
+              //           // size: 24.0,
+              //           semanticLabel: 'Full screen',
+              //         ),
+              //       ),
+              //       decoration: BoxDecoration(color: Colors.white)),
+              // ),
+              // Container(
+              //   width: 35.0,
+              //   height: 35.0,
+              //   child: DecoratedBox(
+              //       child: IconButton(
+              //         color: Colors.white,
+              //         // minWidth: 24,
+              //         onPressed: () => widget.play(widget.isPlaying),
+              //         icon: Icon(
+              //           Icons.settings,
+              //           color: Colors.black,
+              //           size: 24.0,
+              //           semanticLabel: 'Settings',
+              //         ),
+              //       ),
+              //       decoration: BoxDecoration(color: Colors.white)),
+              // ),
             ],
           ),
           Padding(padding: EdgeInsets.only(top: 35)),

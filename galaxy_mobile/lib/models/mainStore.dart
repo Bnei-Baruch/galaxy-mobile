@@ -14,12 +14,16 @@ class MainStore extends ChangeNotifier {
   Room activeRoom;
   RoomData activeGateway;
   bool audioMode;
+  int audioPreset;
+  int videoPreset;
 
   Future init() async {
     await Future.wait([fetchUser(), fetchConfig(), fetchAvailableRooms(false)]);
 
     setActiveRoom(SharedPrefs().roomName);
     setAudioMode(SharedPrefs().audioMode);
+    setAudioPreset(SharedPrefs().audioPreset);
+    setVideoPreset(SharedPrefs().videoPreset);
   }
 
   void update(AuthService auth, Api api) {
@@ -63,6 +67,18 @@ class MainStore extends ChangeNotifier {
     if (activeUser == null) {
       activeUser = await _auth.getUser();
     }
+    notifyListeners();
+  }
+
+  void setAudioPreset(int audioPreset) {
+    SharedPrefs().audioPreset = audioPreset;
+    this.audioPreset = audioPreset;
+    notifyListeners();
+  }
+
+  void setVideoPreset(int videoPreset) {
+    SharedPrefs().videoPreset = videoPreset;
+    this.videoPreset = videoPreset;
     notifyListeners();
   }
 }

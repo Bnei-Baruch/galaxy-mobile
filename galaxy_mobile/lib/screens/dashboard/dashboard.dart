@@ -10,8 +10,8 @@ import 'package:provider/provider.dart';
 import '../../services/authService.dart';
 
 class Dashboard extends StatefulWidget {
-  bool audioMute;
-  bool videoMute;
+  bool audioMute = true;
+  bool videoMute = true;
 
   @override
   State createState() => _DashboardState();
@@ -45,18 +45,18 @@ class _DashboardState extends State<Dashboard> {
     final activeRoom = context.select((MainStore s) => s.activeRoom);
     final authService = context.read<AuthService>();
 
-    if (_mqttClient == null) {
-      _mqttClient = MQTTClient(authService.getUserEmail(),
-          authService.getAuthToken(), this.handleCmdData);
-      _mqttClient.connect();
-      _mqttClient.subscribe('galaxy/users/broadcast');
-    }
+    // if (_mqttClient == null) {
+    //   _mqttClient = MQTTClient(authService.getUserEmail(),
+    //       authService.getAuthToken(), this.handleCmdData);
+    //   _mqttClient.connect();
+    //   _mqttClient.subscribe('galaxy/users/broadcast');
+    // }
 
     return WillPopScope(
       onWillPop: () {
         Navigator.of(context).pop(true);
-        videoRoom.exitRoom();
         stream.exit();
+        videoRoom.exitRoom();
       },
       child: Scaffold(
         appBar: AppBar(
