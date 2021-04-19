@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/screens/streaming/streaming.dart';
@@ -30,6 +32,12 @@ class _DashboardState extends State<Dashboard> {
 
   void handleCmdData(String msgPayload) {
     print('[Dashboard] Received message: $msgPayload');
+    var jsonCmd = JsonDecoder().convert(msgPayload);
+    switch (jsonCmd["type"]) {
+      case "client-state":
+        // videoRoom.setUserState(jsonCmd["data"]["user"]);
+        break;
+    }
   }
 
   @override
@@ -38,10 +46,8 @@ class _DashboardState extends State<Dashboard> {
     final authService = context.read<AuthService>();
 
     if (_mqttClient == null) {
-      _mqttClient =
-          MQTTClient(authService.getUserEmail(),
-              authService.getAuthToken(),
-          this.handleCmdData);
+      _mqttClient = MQTTClient(authService.getUserEmail(),
+          authService.getAuthToken(), this.handleCmdData);
       _mqttClient.connect();
       _mqttClient.subscribe('galaxy/users/broadcast');
     }

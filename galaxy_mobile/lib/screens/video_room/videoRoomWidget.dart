@@ -973,14 +973,14 @@ class _VideoRoomState extends State<VideoRoom> {
                           //             element["videoSlot"] == 0)["cammute"] ==
                           //         false)
                           (true)
-                          // (widget._remoteRenderer
-                          //         .elementAt(0)
-                          //         .srcObject
-                          //         .getVideoTracks()
-                          //         .elementAt(widget._remoteRenderer
-                          //             .elementAt(0)
-                          //             .trackIndex)
-                          //         .enabled)
+                              // (widget._remoteRenderer
+                              //         .elementAt(0)
+                              //         .srcObject
+                              //         .getVideoTracks()
+                              //         .elementAt(widget._remoteRenderer
+                              //             .elementAt(0)
+                              //             .trackIndex)
+                              //         .enabled)
                               ? RTCVideoView(
                                   widget._remoteRenderer.elementAt(0))
                               : Icon(
@@ -1042,14 +1042,14 @@ class _VideoRoomState extends State<VideoRoom> {
                       child: Stack(
                         children: [
                           (true)
-                          // (widget._remoteRenderer
-                          //         .elementAt(1)
-                          //         .srcObject
-                          //         .getVideoTracks()
-                          //         .elementAt(widget._remoteRenderer
-                          //             .elementAt(1)
-                          //             .trackIndex)
-                          //         .enabled)
+                              // (widget._remoteRenderer
+                              //         .elementAt(1)
+                              //         .srcObject
+                              //         .getVideoTracks()
+                              //         .elementAt(widget._remoteRenderer
+                              //             .elementAt(1)
+                              //             .trackIndex)
+                              //         .enabled)
                               ? RTCVideoView(
                                   widget._remoteRenderer.elementAt(1))
                               : Icon(
@@ -1113,14 +1113,14 @@ class _VideoRoomState extends State<VideoRoom> {
                       child: Stack(
                         children: [
                           (true)
-                          // (widget._remoteRenderer
-                          //         .elementAt(2)
-                          //         .srcObject
-                          //         .getVideoTracks()
-                          //         .elementAt(widget._remoteRenderer
-                          //             .elementAt(2)
-                          //             .trackIndex)
-                          //         .enabled)
+                              // (widget._remoteRenderer
+                              //         .elementAt(2)
+                              //         .srcObject
+                              //         .getVideoTracks()
+                              //         .elementAt(widget._remoteRenderer
+                              //             .elementAt(2)
+                              //             .trackIndex)
+                              //         .enabled)
                               ? RTCVideoView(
                                   widget._remoteRenderer.elementAt(2))
                               : Icon(
@@ -1293,11 +1293,6 @@ class RoomArguments {
   RoomArguments(this.server, this.token, this.roomNumber, this.user);
 }
 
-class VideoView {
-  RTCVideoView view;
-  Map streamMid;
-  Text display;
-}
 // CarouselSlider(
 // height: 200.0,
 // autoPlay: true,
