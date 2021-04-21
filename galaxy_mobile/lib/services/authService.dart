@@ -39,6 +39,32 @@ class User {
         givenName = json['given_name'],
         familyName = json['family_name'],
         group = json['group'];
+
+  Map<String, dynamic> toJson() => {
+    'sub': sub,
+    'name': name,
+    'title': title,
+    'emailVerified': emailVerified,
+    'email': email,
+    'preferredUsername': preferredUsername,
+    'givenName': givenName,
+    'familyName': familyName,
+    'group': group,
+  };
+
+  @override
+  String toString() {
+    return
+      '{sub: ${this.sub}, '
+          'name: ${this.name} ,'
+          'title: ${this.title} ,'
+          'emailVerified: ${this.emailVerified} ,'
+          'email: ${this.email} ,'
+          'preferredUsername: ${this.preferredUsername} ,'
+          'givenName: ${this.givenName} ,'
+          'familyName: ${this.familyName} ,'
+          'group: ${this.group}}';
+  }
 }
 
 class AuthService {

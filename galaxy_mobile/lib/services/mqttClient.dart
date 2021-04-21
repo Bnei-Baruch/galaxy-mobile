@@ -8,9 +8,12 @@ class MQTTClient {
 
   MqttServerClient _client;
 
+  final void Function() _onConnectedcallback;
   final void Function(String) _onMsgReceivedcallback;
 
-  MQTTClient(this._username, this._password, this._onMsgReceivedcallback) {
+  MQTTClient(this._username, this._password,
+      this._onMsgReceivedcallback, this._onConnectedcallback)
+  {
     _client =
         MqttServerClient.withPort('mqtt.kli.one', 'mobile_test_clientid', 9001);
   }
@@ -74,6 +77,7 @@ class MQTTClient {
 
   void onConnected() {
     print('[MQTTClient] Connected');
+    _onConnectedcallback();
   }
 
   void onDisconnected() {

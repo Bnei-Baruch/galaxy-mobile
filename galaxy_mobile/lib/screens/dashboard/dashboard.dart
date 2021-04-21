@@ -23,6 +23,8 @@ class _DashboardState extends State<Dashboard> {
 
   MQTTClient _mqttClient;
 
+  String _activeRoomId;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -35,22 +37,30 @@ class _DashboardState extends State<Dashboard> {
     var jsonCmd = JsonDecoder().convert(msgPayload);
     switch (jsonCmd["type"]) {
       case "client-state":
-        // videoRoom.setUserState(jsonCmd["data"]["user"]);
+        videoRoom.setUserState(jsonCmd["data"]["user"]);
         break;
     }
+  }
+
+  void connectedToBroker() {
+    _mqttClient.subscribe("galaxy/room/" + _activeRoomId);
   }
 
   @override
   Widget build(BuildContext context) {
     final activeRoom = context.select((MainStore s) => s.activeRoom);
     final authService = context.read<AuthService>();
+    final activeUser = context.select((MainStore s) => s.activeUser);
 
-    // if (_mqttClient == null) {
-    //   _mqttClient = MQTTClient(authService.getUserEmail(),
-    //       authService.getAuthToken(), this.handleCmdData);
-    //   _mqttClient.connect();
-    //   _mqttClient.subscribe('galaxy/users/broadcast');
-    // }
+    _activeRoomId = activeRoom.room.toString();
+
+    if (_mqttClient == null) {
+      _mqttClient = MQTTClient(authService.getUserEmail(),
+          authService.getAuthToken(),
+          this.handleCmdData, this.connectedToBroker);
+      _mqttClient.connect();
+      // _mqttClient.subscribe('galaxy/users/broadcast');
+    }
 
     return WillPopScope(
       onWillPop: () {
@@ -113,7 +123,12 @@ class _DashboardState extends State<Dashboard> {
                 setState(() {
                   widget.videoMute = !widget.videoMute;
                 });
-
+                String msg =
+                    "{"
+                        "type: client-state, "
+                        "user: " + activeUser.toString() +
+                    "}";
+                _mqttClient.send("galaxy/room/" + _activeRoomId, msg);
                 break;
             }
           },

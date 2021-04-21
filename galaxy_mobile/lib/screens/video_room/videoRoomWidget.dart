@@ -82,6 +82,17 @@ class VideoRoom extends StatefulWidget {
     else
       myVideoMuted = !myVideoMuted;
   }
+
+  void setUserState(var user) {
+    List<Map> roomFeeds = state.getFeeds();
+    for (var feed in roomFeeds) {
+      if (feed != null && feed['id'] == user['rfid']) {
+        feed['cammute'] = !user['camera'];
+        feed['question'] = user['question'];
+        break;
+      }
+    }
+  }
 }
 
 class _VideoRoomState extends State<VideoRoom> {
@@ -114,6 +125,8 @@ class _VideoRoomState extends State<VideoRoom> {
   set subscription(List subscription) {}
 
   SwitchPageHelper switcher;
+
+  List<Map> getFeeds() { return roomFeeds; }
 
   @override
   void didChangeDependencies() async {
