@@ -46,7 +46,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
   TextEditingController nameController = TextEditingController();
   RTCVideoRenderer _remoteRenderer = new RTCVideoRenderer();
   PlayerWidget playerOverlay = PlayerWidget();
-  MediaStream _remoteStream;
+  MediaStream _remoteStreamAudio;
 
   List<dynamic> streams = [];
   int selectedStreamId;
@@ -73,7 +73,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
     // TODO: implement didChangeDependencies
     super.didChangeDependencies();
     await _remoteRenderer.initialize();
-    _remoteStream = await createLocalMediaStream("local");
+    _remoteStreamAudio = await createLocalMediaStream("local");
   }
 
   @override
@@ -116,9 +116,9 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
     };
     playerOverlay.mute = (muted) {
       if (muted)
-        _remoteStream.getAudioTracks().first.setVolume(0);
+        _remoteStreamAudio.getAudioTracks().first.setVolume(0);
       else
-        _remoteStream.getAudioTracks().first.setVolume(0.5);
+        _remoteStreamAudio.getAudioTracks().first.setVolume(0.5);
     };
     playerOverlay.audioChange = () {
       context
@@ -159,8 +159,9 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
         // _remoteRenderer.srcObject = null;
         // _remoteRenderer.dispose();
         _remoteRenderer.srcObject = null;
-        _remoteStream.removeTrack(_remoteStream.getVideoTracks().first);
-        _remoteStream = await createLocalMediaStream("local");
+        // _remoteStreamAudio
+        //     .removeTrack(_remoteStreamAudio.getVideoTracks().first);
+        // _remoteStreamAudio = await createLocalMediaStream("local");
 
         //_remoteRenderer = new RTCVideoRenderer();
         //await _remoteRenderer.initialize();
@@ -182,7 +183,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
         onRemoteTrack: (stream, track, mid, on) {
           print('got remote stream');
           widget.audioTrack = track;
-          _remoteStream.addTrack(track);
+          _remoteStreamAudio.addTrack(track);
           // widget.audioStream = stream;
           playerOverlay.isPlaying = true;
         },
@@ -235,7 +236,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
         onRemoteTrack: (stream, track, mid, on) {
           print('got remote stream');
           widget.videoTrack = track;
-          _remoteStream.addTrack(track);
+          // _remoteStreamAudio.addTrack(track);
           //     .then((value) =>
 
           _remoteRenderer.srcObject = stream;
