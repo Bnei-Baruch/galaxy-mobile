@@ -80,6 +80,14 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
   void initState() {
     // TODO: implement initState
     super.initState();
+//set user preset of audio and video
+    final int audio =
+        Provider.of<MainStore>(context, listen: false).audioPreset;
+    final int video =
+        Provider.of<MainStore>(context, listen: false).videoPreset;
+    playerOverlay.audioPreset = audio;
+    playerOverlay.videoPreset = video;
+    playerOverlay.setStreamPresets(audio, video);
 
     playerOverlay.play = (playing) {
       if (!playing) {
@@ -113,6 +121,9 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
         _remoteStream.getAudioTracks().first.setVolume(0.5);
     };
     playerOverlay.audioChange = () {
+      context
+          .read<MainStore>()
+          .setAudioPreset(playerOverlay.audioTypeValue["value"]);
       // context.select((MainStore s) =>
       //     s.audioPreset = playerOverlay.audioTypeValue["value"]);
       widget.audioStreamingPlugin.send(message: {
@@ -121,6 +132,9 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
       });
     };
     playerOverlay.videoChange = () async {
+      context
+          .read<MainStore>()
+          .setVideoPreset(playerOverlay.videoTypeValue["value"]);
       // context.select((MainStore s) =>
       //     s.videoPreset = playerOverlay.videoTypeValue["value"]);
       if (playerOverlay.videoTypeValue["value"] !=
@@ -289,13 +303,6 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
 
   @override
   Widget build(BuildContext context) {
-    //set user preset of audio and video
-    final int audio = context.select((MainStore s) => s.audioPreset);
-    final int video = context.select((MainStore s) => s.videoPreset);
-    playerOverlay.audioPreset = audio;
-    playerOverlay.videoPreset = video;
-
-    playerOverlay.setStreamPresets(audio, video);
     if (widget.connected && !widget.initialized) {
       //video plugin init
       initVideoStream();
