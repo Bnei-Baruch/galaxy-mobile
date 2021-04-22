@@ -1,5 +1,6 @@
 
 import 'package:dio/dio.dart';
+import 'package:flutter_logs/flutter_logs.dart';
 import 'package:galaxy_mobile/config/env.dart';
 import 'package:galaxy_mobile/utils/dio_log.dart';
 
@@ -87,7 +88,8 @@ class Api {
     final response = await _dio
         .get('/groups', queryParameters: {'with_num_users': withNumUsers});
     List<Object> rooms = response.data['rooms'];
-    print(response.data['rooms']);
+    FlutterLogs.logInfo("Api", "fetchAvailableRooms", "rooms: " + response.data['rooms'].toString());
+    // print(response.data['rooms']);
     return rooms.map((dynamic e) => Room.fromJson(e)).toList();
   }
 

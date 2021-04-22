@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
+import 'package:flutter_logs/flutter_logs.dart';
 import 'package:galaxy_mobile/config/env.dart';
 import 'package:galaxy_mobile/utils/dio_log.dart';
 import 'package:jwt_decode/jwt_decode.dart';
@@ -78,7 +78,7 @@ class AuthService {
   }
 
   Future<AuthorizationTokenResponse> signIn() async {
-    debugPrint("Sign in");
+    FlutterLogs.logInfo("AuthService", "signIn", "Signed in");
 
     final result = await _appAuth.authorizeAndExchangeCode(
       AuthorizationTokenRequest(
@@ -92,7 +92,7 @@ class AuthService {
     this._authToken = result.accessToken;
 
     Map<String, dynamic> payload = Jwt.parseJwt(this._authToken);
-    print(payload);
+    FlutterLogs.logInfo("AuthService", "signIn", "parsed token: $payload");
 
     _authEmail = payload['preferred_username'];
 
@@ -100,8 +100,7 @@ class AuthService {
   }
 
   Future<User> getUser() async {
-    debugPrint("Get User");
-
+    FlutterLogs.logInfo("AuthService", "signIn", "getting user");
     final response = await _dio.get(APP_OPENID_AUTH_USERINFO_ENDPOINT);
     return User.fromJson(response.data);
   }
@@ -110,8 +109,7 @@ class AuthService {
   String getAuthToken() { return _authToken; }
 
   Future<void> logout() async {
-    debugPrint("Logout");
-
+    FlutterLogs.logInfo("AuthService", "signIn", "logout");
     await _dio.get(APP_OPENID_END_SESSION_ENDPOINT);
   }
 }

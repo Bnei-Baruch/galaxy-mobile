@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_logs/flutter_logs.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/screens/streaming/streaming.dart';
 import 'package:galaxy_mobile/screens/video_room/videoRoomWidget.dart';
@@ -33,7 +34,7 @@ class _DashboardState extends State<Dashboard> {
   }
 
   void handleCmdData(String msgPayload) {
-    print('[Dashboard] Received message: $msgPayload');
+    FlutterLogs.logInfo("Dashboard", "handleCmdData", "Received message: $msgPayload");
     var jsonCmd = JsonDecoder().convert(msgPayload);
     switch (jsonCmd["type"]) {
       case "client-state":
@@ -109,7 +110,7 @@ class _DashboardState extends State<Dashboard> {
           // selectedItemColor: Colors.amber[800],
           onTap: (value) {
             //only for debugging purposes
-            print(value);
+            FlutterLogs.logInfo("Dashboard", "onTap", value.toString());
             switch (value) {
               case 0:
                 videoRoom.mute();

@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_logs/flutter_logs.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/screens/streaming/constants.dart';
 import 'package:janus_client/Plugin.dart';
@@ -60,11 +61,10 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
     widget.videoStreamingPlugin.send(
         message: body,
         onSuccess: () {
-          print("listing");
+          FlutterLogs.logInfo("Streaming", "getStreamListing", "listing");
         },
         onError: (e) {
-          print('got error in listing');
-          print(e);
+          FlutterLogs.logInfo("Streaming", "getStreamListing", "error occurred during listing: $e");
         });
   }
 
@@ -181,7 +181,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
   void initAudioStream() {
     janusClient.attach(Plugin(
         onRemoteTrack: (stream, track, mid, on) {
-          print('got remote stream');
+          FlutterLogs.logInfo("Streaming", "initAudioStream", "got remote stream");
           widget.audioTrack = track;
           _remoteStreamAudio.addTrack(track);
           // widget.audioStream = stream;
@@ -189,8 +189,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
         },
         plugin: "janus.plugin.streaming",
         onMessage: (msg, jsep) async {
-          print('got onmsg');
-          print(msg);
+          FlutterLogs.logInfo("Streaming", "initAudioStream", "got onmsg: $msg");
           if (msg['streaming'] != null && msg['result'] != null) {
             if (msg['streaming'] == 'event' &&
                 msg['result']['status'] == 'stopping') {
@@ -200,11 +199,13 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
 
           if (msg['janus'] == 'success' && msg['plugindata'] != null) {
             var plugindata = msg['plugindata'];
-            print('got plugin data');
+            FlutterLogs.logInfo("Streaming", "initAudioStream", "got plugin data");
           }
 
           if (jsep != null) {
-            debugPrint("Handling SDP as well..." + jsep.toString());
+            String jsepStr = jsep.toString();
+            FlutterLogs.logInfo("Streaming", "initAudioStream", "Handling SDP as well... $jsepStr");
+            // debugPrint("Handling SDP as well..." + jsep.toString());
             await widget.audioStreamingPlugin.handleRemoteJsep(jsep);
             RTCSessionDescription answer =
                 await widget.audioStreamingPlugin.createAnswer();
@@ -234,7 +235,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
   void initVideoStream() {
     janusClient.attach(Plugin(
         onRemoteTrack: (stream, track, mid, on) {
-          print('got remote stream');
+          FlutterLogs.logInfo("Streaming", "initVideoStream", "got remote stream");
           widget.videoTrack = track;
           // _remoteStreamAudio.addTrack(track);
           //     .then((value) =>
@@ -247,8 +248,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
         },
         plugin: "janus.plugin.streaming",
         onMessage: (msg, jsep) async {
-          print('got onmsg');
-          print(msg);
+          FlutterLogs.logInfo("Streaming", "initVideoStream", "got onmsg: $msg");
           if (msg['streaming'] != null && msg['result'] != null) {
             if (msg['streaming'] == 'event' &&
                 msg['result']['status'] == 'stopping') {
@@ -261,11 +261,13 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
 
           if (msg['janus'] == 'success' && msg['plugindata'] != null) {
             var plugindata = msg['plugindata'];
-            print('got plugin data');
+            FlutterLogs.logInfo("Streaming", "initVideoStream", "got plugin data");
           }
 
           if (jsep != null) {
-            debugPrint("Handling SDP as well..." + jsep.toString());
+            String jsepStr = jsep.toString();
+            FlutterLogs.logInfo("Streaming", "initAudioStream", "Handling SDP as well... $jsepStr");
+            // debugPrint("Handling SDP as well..." + jsep.toString());
             await widget.videoStreamingPlugin.handleRemoteJsep(jsep);
             RTCSessionDescription answer =
                 await widget.videoStreamingPlugin.createAnswer();
