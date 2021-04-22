@@ -221,6 +221,13 @@ packages:
       url: "https://github.com/igala/flutter-webrtc.git"
     source: git
     version: "0.5.8"
+  fluttertoast:
+    dependency: "direct main"
+    description:
+      name: fluttertoast
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "7.1.8"
   http:
     dependency: "direct main"
     description:
