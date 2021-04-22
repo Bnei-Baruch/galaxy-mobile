@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/widgets/audioMode.dart';
+import 'package:galaxy_mobile/widgets/drawer.dart';
 import 'package:galaxy_mobile/widgets/roomSelector.dart';
 import 'package:galaxy_mobile/widgets/screenLoader.dart';
 
@@ -27,6 +28,7 @@ class _SettingsState extends State<Settings> {
           appBar: AppBar(
             title: Text("Settings"),
           ),
+          drawer: AppDrawer(),
           body: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
             SelfViewWidget(),
             Text(
