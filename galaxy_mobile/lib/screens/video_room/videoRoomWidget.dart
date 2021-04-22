@@ -84,11 +84,13 @@ class VideoRoom extends StatefulWidget {
   }
 
   void setUserState(var user) {
-    List<Map> roomFeeds = state.getFeeds();
+    List roomFeeds = state.getFeeds();
     for (var feed in roomFeeds) {
       if (feed != null && feed['id'] == user['rfid']) {
-        feed['cammute'] = !user['camera'];
-        feed['question'] = user['question'];
+        state.setState(() {
+          feed['cammute'] = !user['camera'];
+          feed['question'] = user['question'];
+        });
         break;
       }
     }
@@ -126,7 +128,9 @@ class _VideoRoomState extends State<VideoRoom> {
 
   SwitchPageHelper switcher;
 
-  List<Map> getFeeds() { return roomFeeds; }
+  List getFeeds() {
+    return feeds;
+  }
 
   @override
   void didChangeDependencies() async {
@@ -982,10 +986,10 @@ class _VideoRoomState extends State<VideoRoom> {
                                   : Colors.black)),
                       child: Stack(
                         children: [
-                          // (feeds.firstWhere((element) =>
-                          //             element["videoSlot"] == 0)["cammute"] ==
-                          //         false)
-                          (true)
+                          (feeds.firstWhere((element) =>
+                                      element["videoSlot"] == 0)["cammute"] ==
+                                  false)
+                              // (true)
                               // (widget._remoteRenderer
                               //         .elementAt(0)
                               //         .srcObject
@@ -996,12 +1000,13 @@ class _VideoRoomState extends State<VideoRoom> {
                               //         .enabled)
                               ? RTCVideoView(
                                   widget._remoteRenderer.elementAt(0))
-                              : Icon(
-                                  Icons.mic_off,
-                                  color: (widget.myAudioMuted != true)
-                                      ? Colors.transparent
-                                      : Colors.red,
-                                  size: 18,
+                              : Align(
+                                  alignment: Alignment.center,
+                                  child: Icon(
+                                    Icons.account_circle,
+                                    color: Colors.white,
+                                    size: 120,
+                                  ),
                                 ),
                           Align(
                             alignment: Alignment.bottomLeft,
@@ -1033,7 +1038,7 @@ class _VideoRoomState extends State<VideoRoom> {
                           ),
                         ],
                       ))
-                  : Text("Waiting...", style: TextStyle(color: Colors.white)),
+                  : Container(),
 
               (widget._remoteRenderer != null &&
                       widget._remoteRenderer.elementAt(1) != null &&
@@ -1054,7 +1059,9 @@ class _VideoRoomState extends State<VideoRoom> {
                                   : Colors.black)),
                       child: Stack(
                         children: [
-                          (true)
+                          (feeds.firstWhere((element) =>
+                                      element["videoSlot"] == 1)["cammute"] ==
+                                  false)
                               // (widget._remoteRenderer
                               //         .elementAt(1)
                               //         .srcObject
@@ -1065,12 +1072,13 @@ class _VideoRoomState extends State<VideoRoom> {
                               //         .enabled)
                               ? RTCVideoView(
                                   widget._remoteRenderer.elementAt(1))
-                              : Icon(
-                                  Icons.mic_off,
-                                  color: (widget.myAudioMuted != true)
-                                      ? Colors.transparent
-                                      : Colors.red,
-                                  size: 18,
+                              : Align(
+                                  alignment: Alignment.center,
+                                  child: Icon(
+                                    Icons.account_circle,
+                                    color: Colors.white,
+                                    size: 120,
+                                  ),
                                 ),
                           Align(
                             alignment: Alignment.bottomLeft,
@@ -1102,10 +1110,7 @@ class _VideoRoomState extends State<VideoRoom> {
                           ),
                         ],
                       ))
-                  : Text(
-                      "Waiting...",
-                      style: TextStyle(color: Colors.white),
-                    ),
+                  : Container(),
               (widget._remoteRenderer != null &&
                       widget._remoteRenderer.elementAt(2) != null &&
                       widget._remoteRenderer.elementAt(2).srcObject != null &&
@@ -1125,7 +1130,9 @@ class _VideoRoomState extends State<VideoRoom> {
                                   : Colors.black)),
                       child: Stack(
                         children: [
-                          (true)
+                          (feeds.firstWhere((element) =>
+                                      element["videoSlot"] == 2)["cammute"] ==
+                                  false)
                               // (widget._remoteRenderer
                               //         .elementAt(2)
                               //         .srcObject
@@ -1136,12 +1143,13 @@ class _VideoRoomState extends State<VideoRoom> {
                               //         .enabled)
                               ? RTCVideoView(
                                   widget._remoteRenderer.elementAt(2))
-                              : Icon(
-                                  Icons.mic_off,
-                                  color: (widget.myAudioMuted != true)
-                                      ? Colors.transparent
-                                      : Colors.red,
-                                  size: 18,
+                              : Align(
+                                  alignment: Alignment.center,
+                                  child: Icon(
+                                    Icons.account_circle,
+                                    color: Colors.white,
+                                    size: 120,
+                                  ),
                                 ),
                           Align(
                             alignment: Alignment.bottomLeft,
@@ -1173,13 +1181,7 @@ class _VideoRoomState extends State<VideoRoom> {
                           ),
                         ],
                       ))
-                  : Container(
-                      color: Colors.black,
-                      child: Text(
-                        "Waiting...",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    )
+                  : Container()
 
               // CarouselSlider(
               //   height: 200.0,

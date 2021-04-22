@@ -34,11 +34,15 @@ class _DashboardState extends State<Dashboard> {
 
   void handleCmdData(String msgPayload) {
     print('[Dashboard] Received message: $msgPayload');
-    var jsonCmd = JsonDecoder().convert(msgPayload);
-    switch (jsonCmd["type"]) {
-      case "client-state":
-        videoRoom.setUserState(jsonCmd["data"]["user"]);
-        break;
+    try {
+      var jsonCmd = JsonDecoder().convert(msgPayload);
+      switch (jsonCmd["type"]) {
+        case "client-state":
+          videoRoom.setUserState(jsonCmd["user"]);
+          break;
+      }
+    } on FormatException catch (e) {
+      print('The provided string is not valid JSON');
     }
   }
 
@@ -55,9 +59,11 @@ class _DashboardState extends State<Dashboard> {
     _activeRoomId = activeRoom.room.toString();
 
     if (_mqttClient == null) {
-      _mqttClient = MQTTClient(authService.getUserEmail(),
+      _mqttClient = MQTTClient(
+          authService.getUserEmail(),
           authService.getAuthToken(),
-          this.handleCmdData, this.connectedToBroker);
+          this.handleCmdData,
+          this.connectedToBroker);
       _mqttClient.connect();
       // _mqttClient.subscribe('galaxy/users/broadcast');
     }
@@ -122,13 +128,16 @@ class _DashboardState extends State<Dashboard> {
                 videoRoom.toggleVideo();
                 setState(() {
                   widget.videoMute = !widget.videoMute;
+                  var userData = activeUser.toJson();
+                  userData["cammute"] = widget.videoMute;
+                  userData["question"] = false;
+                  var message = {};
+                  message["type"] = "client-state";
+                  message["user"] = userData.toString();
+                  _mqttClient.send(
+                      "galaxy/room/" + _activeRoomId, message.toString());
                 });
-                String msg =
-                    "{"
-                        "type: client-state, "
-                        "user: " + activeUser.toString() +
-                    "}";
-                _mqttClient.send("galaxy/room/" + _activeRoomId, msg);
+
                 break;
             }
           },
