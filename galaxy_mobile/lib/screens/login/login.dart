@@ -8,35 +8,75 @@ class Login extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Welcome'),
-      ),
-      body: Center(
-          child: Column(children: [
-        ElevatedButton(
-          child: Text('Login'),
-          onPressed: () async {
-            final auth = context.read<AuthService>();
-            final authResponse = await auth.signIn();
+      backgroundColor: Colors.white,
+      // appBar: AppBar(
+      //   title: Text('Welcome'),
+      // ),
+      body: Center(child:
+      Column(children: [
+        Row(children: [
+          SizedBox(width: 10),
+          Image.asset('assets/graphics/logo_login.png',
+              width: 70, fit: BoxFit.fill),
+          SizedBox(width: 8),
+          Column(crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 25),
+                Text('OUR CONNECTION',
+                    style: TextStyle(color: Color(0xff00c6d2), fontSize: 22)),
+                Text('NETWORK',
+                    style: TextStyle(color: Color(0xff00457c), fontSize: 22)),
+          ]),
+        ]),
+        Row(mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Column(children: [
+                SizedBox(height: 50),
+                Text('Registered Users',
+                    style: TextStyle(color: Colors.black, fontSize: 26,
+                        fontWeight: FontWeight.bold)),
+                SizedBox(height: 10),
+                ButtonTheme(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0)),
+                    minWidth: 140.0,
+                    height: 60.0,
+                    child: RaisedButton(
+                        child: Text("Login",
+                            style: TextStyle(color: Colors.white, fontSize: 24)),
 
-            final api = context.read<Api>();
-            api.setAccessToken(authResponse.accessToken);
+                        onPressed: () async {
+                          final auth = context.read<AuthService>();
+                          final authResponse = await auth.signIn();
+                          final api = context.read<Api>();
+                          api.setAccessToken(authResponse.accessToken);
+                          await context.read<MainStore>().init();
+                          Navigator.pushNamed(context, '/settings');
+                        })
+                ),
 
-            await context.read<MainStore>().init();
+            // ElevatedButton(
+            //   child: Text('Login'),
+            //   onPressed: () async {
+            //     final auth = context.read<AuthService>();
+            //     final authResponse = await auth.signIn();
+            //     final api = context.read<Api>();
+            //     api.setAccessToken(authResponse.accessToken);
+            //     await context.read<MainStore>().init();
+            //     Navigator.pushNamed(context, '/settings');
+            //     },
+            // ),
+              ])
+            // ElevatedButton(
+            //   child: Text('log out'),
+            //   onPressed: () async {
+            //     final auth = context.read<AuthService>();
+            //     auth.logout();
+            //     })
 
-
-            Navigator.pushNamed(context, '/settings');
-          },
-        ),
-         ElevatedButton(
-          child: Text('log out'),
-          onPressed: () async {
-            final auth = context.read<AuthService>();
-            auth.logout();
-          },
-        ),
-
-      ])),
+            ]
+        )])
+      )
     );
   }
 }

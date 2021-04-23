@@ -9,17 +9,15 @@ import 'package:flutter_logs/flutter_logs.dart';
 import 'models/sharedPref.dart';
 
 
-/* Compile notes:
-- to generate luncher icons run:
-flutter pub run flutter_launcher_icons:main
-
-*/
+// Compile notes:
+// - to generate luncher icons run:
+// flutter pub run flutter_launcher_icons:main
 
 void main() async {
    WidgetsFlutterBinding.ensureInitialized();
   await SharedPrefs().init();
 
-   //Initialize Logging
+   // initialize logging
    await FlutterLogs.initLogs(
        logLevelsEnabled: [
          LogLevel.INFO,
