@@ -17,6 +17,7 @@ import 'dart:async';
 
 import 'package:synchronized/synchronized.dart';
 
+typedef BoolCallback = Function(bool);
 final int PAGE_SIZE = 3;
 
 class VideoRoom extends StatefulWidget {
@@ -38,6 +39,13 @@ class VideoRoom extends StatefulWidget {
   MediaStream myStream;
   var remoteStream;
   var state;
+
+  int myid;
+
+  int mypvtid;
+
+  BoolCallback updateVideoState;
+
   // VideoRoom(String serverUrl, String token, int roomNumber)
   //     : this.roomNumber = roomNumber,
   //       this.token = token,
@@ -57,6 +65,10 @@ class VideoRoom extends StatefulWidget {
 
   @override
   _VideoRoomState createState() => _VideoRoomState();
+
+  int getMyFeedId() {
+    return myid;
+  }
 
   void mute() {
     myStream
@@ -350,6 +362,9 @@ class _VideoRoomState extends State<VideoRoom> {
               var event = msg['videoroom'];
               if (event != null) {
                 if (event == 'joined') {
+                  widget.myid = msg["id"];
+                  widget.mypvtid = msg["private_id"];
+
                   if (msg["publishers"] != null) {
                     print('publisher on msg');
                     var list = msg["publishers"];
@@ -551,6 +566,7 @@ class _VideoRoomState extends State<VideoRoom> {
               widget.myStream.getAudioTracks().first.setMicrophoneMute(true);
               widget.myStream.getVideoTracks().first.enabled = false;
               widget.myAudioMuted = true;
+              widget.updateVideoState(true);
               // });
               setState(() {
                 widget._localRenderer.srcObject = widget.myStream;
@@ -559,9 +575,7 @@ class _VideoRoomState extends State<VideoRoom> {
                 "request": "join",
                 "room": widget.roomNumber,
                 "ptype": "publisher",
-                "display": //"igal test"
-
-                    jsonEncode({
+                "display": jsonEncode({
                   "id": widget.user.sub,
                   "timestamp": DateTime.now().millisecond,
                   "role": "user",

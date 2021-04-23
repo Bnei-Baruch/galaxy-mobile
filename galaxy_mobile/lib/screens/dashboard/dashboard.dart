@@ -21,6 +21,7 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   var stream = StreamingUnified();
   var videoRoom = VideoRoom();
+  var activeUser;
 
   MQTTClient _mqttClient;
 
@@ -29,13 +30,33 @@ class _DashboardState extends State<Dashboard> {
   @override
   void initState() {
     // TODO: implement initState
+    activeUser = context.read<MainStore>().activeUser;
+    final authService = context.read<AuthService>();
+
     widget.audioMute = true;
     widget.videoMute = true;
+
+    if (_mqttClient == null) {
+      _mqttClient = MQTTClient(
+          authService.getUserEmail(),
+          authService.getAuthToken(),
+          this.handleCmdData,
+          this.connectedToBroker);
+      _mqttClient.connect();
+    }
+
+    videoRoom.updateVideoState = (mute) {
+      FlutterLogs.logInfo("Dashboard", "updateVideoState", "value $mute");
+      setState(() {
+        widget.videoMute = mute;
+        updateRoomWithMyVideoState();
+      });
+    };
   }
 
   void handleCmdData(String msgPayload) {
-    FlutterLogs.logInfo("Dashboard", "handleCmdData",
-        "Received message: $msgPayload");
+    FlutterLogs.logInfo(
+        "Dashboard", "handleCmdData", "Received message: $msgPayload");
     try {
       var jsonCmd = JsonDecoder().convert(msgPayload);
       switch (jsonCmd["type"]) {
@@ -53,22 +74,23 @@ class _DashboardState extends State<Dashboard> {
     _mqttClient.subscribe("galaxy/room/" + _activeRoomId);
   }
 
+  void updateRoomWithMyVideoState() {
+    var userData = activeUser.toJson();
+    userData["camera"] = !widget.videoMute;
+    userData["question"] = false;
+    userData["rfid"] = videoRoom.getMyFeedId();
+    var message = {};
+    message["type"] = "client-state";
+    message["user"] = userData;
+    JsonEncoder encoder = JsonEncoder();
+    _mqttClient.send("galaxy/room/" + _activeRoomId, encoder.convert(message));
+  }
+
   @override
   Widget build(BuildContext context) {
     final activeRoom = context.select((MainStore s) => s.activeRoom);
-    final authService = context.read<AuthService>();
-    final activeUser = context.select((MainStore s) => s.activeUser);
 
     _activeRoomId = activeRoom.room.toString();
-
-    if (_mqttClient == null) {
-      _mqttClient = MQTTClient(
-          authService.getUserEmail(),
-          authService.getAuthToken(),
-          this.handleCmdData,
-          this.connectedToBroker);
-      _mqttClient.connect();
-    }
 
     return WillPopScope(
       onWillPop: () {
@@ -130,14 +152,7 @@ class _DashboardState extends State<Dashboard> {
                 videoRoom.toggleVideo();
                 setState(() {
                   widget.videoMute = !widget.videoMute;
-                  var userData = activeUser.toJson();
-                  userData["cammute"] = widget.videoMute;
-                  userData["question"] = false;
-                  var message = {};
-                  message["type"] = "client-state";
-                  message["user"] = userData.toString();
-                  _mqttClient.send(
-                      "galaxy/room/" + _activeRoomId, message.toString());
+                  updateRoomWithMyVideoState();
                 });
                 break;
             }

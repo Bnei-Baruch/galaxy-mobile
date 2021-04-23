@@ -19,6 +19,7 @@ final List<String> _scopes = <String>[
 // TOOD: replace flutter_auth with https://pub.dev/packages/openid_client
 
 class User {
+  final String id;
   final String sub;
   final String name;
   final String title;
@@ -28,9 +29,12 @@ class User {
   final String givenName;
   final String familyName;
   final String group;
+  final int rfid;
 
   User.fromJson(Map<String, dynamic> json)
       : sub = json['sub'],
+        id = json['sub'],
+        rfid = json['rfid'],
         name = json['name'],
         title = json['title'],
         emailVerified = json['email_verified'],
@@ -41,29 +45,30 @@ class User {
         group = json['group'];
 
   Map<String, dynamic> toJson() => {
-    'sub': sub,
-    'name': name,
-    'title': title,
-    'emailVerified': emailVerified,
-    'email': email,
-    'preferredUsername': preferredUsername,
-    'givenName': givenName,
-    'familyName': familyName,
-    'group': group,
-  };
+        'sub': sub,
+        'id': sub,
+        'name': name,
+        'title': title,
+        'emailVerified': emailVerified,
+        'email': email,
+        'preferredUsername': preferredUsername,
+        'givenName': givenName,
+        'familyName': familyName,
+        'rfid': rfid,
+        'group': group,
+      };
 
   @override
   String toString() {
-    return
-      '{sub: ${this.sub}, '
-          'name: ${this.name} ,'
-          'title: ${this.title} ,'
-          'emailVerified: ${this.emailVerified} ,'
-          'email: ${this.email} ,'
-          'preferredUsername: ${this.preferredUsername} ,'
-          'givenName: ${this.givenName} ,'
-          'familyName: ${this.familyName} ,'
-          'group: ${this.group}}';
+    return '{sub: ${this.sub}, '
+        'name: ${this.name} ,'
+        'title: ${this.title} ,'
+        'emailVerified: ${this.emailVerified} ,'
+        'email: ${this.email} ,'
+        'preferredUsername: ${this.preferredUsername} ,'
+        'givenName: ${this.givenName} ,'
+        'familyName: ${this.familyName} ,'
+        'group: ${this.group}}';
   }
 }
 
@@ -105,15 +110,19 @@ class AuthService {
     return User.fromJson(response.data);
   }
 
-  String getUserEmail() { return _authEmail; }
-  String getAuthToken() { return _authToken; }
+  String getUserEmail() {
+    return _authEmail;
+  }
+
+  String getAuthToken() {
+    return _authToken;
+  }
 
   Future<void> logout() async {
     FlutterLogs.logInfo("AuthService", "signIn", "logout");
     await _dio.get(APP_OPENID_END_SESSION_ENDPOINT);
   }
 }
-
 
 // @immutable
 // class MyAppUser {
