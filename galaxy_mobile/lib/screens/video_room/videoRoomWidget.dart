@@ -99,17 +99,20 @@ class VideoRoom extends StatefulWidget {
     List roomFeeds = state.getFeeds();
     for (var feed in roomFeeds) {
       if (feed != null && feed['id'] == user['rfid']) {
-        state.setState(() {
-          feed['cammute'] = !user['camera'];
-          feed['question'] = user['question'];
-        });
-        break;
+        if (state != null && state.mounted) {
+          state.setState(() {
+            feed['cammute'] = !user['camera'];
+            feed['question'] = user['question'];
+          });
+        }
       }
+
+      break;
     }
   }
 }
 
-class _VideoRoomState extends State<VideoRoom> {
+class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
   List<MediaStream> remoteStream = new List<MediaStream>();
 
   List<Map> roomFeeds;
@@ -153,9 +156,16 @@ class _VideoRoomState extends State<VideoRoom> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     switcher = SwitchPageHelper(unsubscribeFrom, makeSubscription,
         switchVideoSlots, PAGE_SIZE, muteOtherCams);
     widget.state = this;
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   Future<void> initInfra() async {
@@ -675,23 +685,6 @@ class _VideoRoomState extends State<VideoRoom> {
         subscription
             .toString()); //, !!this.state.remoteFeed, this.state.creatingFeed);
     if (widget.subscriberHandle != null) {
-      // var register = {
-      //   "request": "join",
-      //   "room": widget.roomNumber,
-      //   "ptype": "subscriber",
-      //   "streams": subscription,
-      // };
-      // print("Requesting to subscribe to publishers...");
-      // widget.subscriberHandle.send(
-      //   message: register,
-      //   onSuccess: () async {
-      //     print("onSuccess subscribe to publishers...");
-      //   },
-      //   onError: (error) {
-      //     print("onError subscribe to publishers..." + error);
-      //   },
-      // );
-
       widget.subscriberHandle.send(
         message: {"request": 'subscribe', "streams": subscription},
         onSuccess: () {
@@ -779,10 +772,6 @@ class _VideoRoomState extends State<VideoRoom> {
         .map((index) => {if (index != -1) newFeeds.elementAt(index)})
         .toList();
 
-    // Update video slots.
-    // oldVideoFeeds.forEach((feed) => {
-    //       if (feed != null) {feed["videoSlot"] = -1}
-    //     });
     oldVideoFeeds.isNotEmpty
         ? oldVideoFeeds.forEach((feed) {
             if (feed != null) {
@@ -1311,6 +1300,25 @@ class _VideoRoomState extends State<VideoRoom> {
     // Janus.log(`Switching stream from ${from} to ${to}`, stream, fromRemoteVideo, toRemoteVideo);
     // Janus.attachMediaStream(toRemoteVideo, stream);
     // Janus.attachMediaStream(fromRemoteVideo, null);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    switch (state) {
+      case AppLifecycleState.inactive:
+        print('xxx videoroom inactive');
+        break;
+      case AppLifecycleState.resumed:
+        print('xxx videoroom resumed');
+        break;
+      case AppLifecycleState.paused:
+        print('xxx videoroom paused');
+        break;
+      case AppLifecycleState.detached:
+        print('xxx videoroom detached');
+        break;
+    }
   }
 }
 

@@ -97,6 +97,7 @@ class _DashboardState extends State<Dashboard> {
         Navigator.of(context).pop(true);
         stream.exit();
         videoRoom.exitRoom();
+        _mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
       },
       child: Scaffold(
         appBar: AppBar(

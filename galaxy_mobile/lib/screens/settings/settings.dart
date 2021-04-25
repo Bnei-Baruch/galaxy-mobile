@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_logs/flutter_logs.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/widgets/audioMode.dart';
 import 'package:galaxy_mobile/widgets/drawer.dart';
@@ -16,6 +17,14 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
+  SelfViewWidget selfWidget;
+  @override
+  void initState() {
+    super.initState();
+    FlutterLogs.logInfo("Settings", "initState", "starting settings");
+    selfWidget = SelfViewWidget();
+  }
+
   @override
   Widget build(BuildContext context) {
     final activeUser = context.select((MainStore s) => s.activeUser);
@@ -30,7 +39,7 @@ class _SettingsState extends State<Settings> {
           ),
           drawer: AppDrawer(),
           body: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-            SelfViewWidget(),
+            selfWidget,
             Text(
               "Hello ${activeUser.givenName}",
               style: Theme.of(context).textTheme.headline4,
@@ -50,7 +59,10 @@ class _SettingsState extends State<Settings> {
             AudioMode(),
             ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/dashboard');
+                Navigator.pushNamed(context, '/dashboard')
+                    .then((value) => setState(() {
+                          selfWidget.restartCamera();
+                        }));
               },
               child: Text('Join Room'),
             )
