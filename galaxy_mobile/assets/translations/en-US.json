@@ -1,0 +1,18 @@
+{
+  "msg1":"Hello world",
+  "msg2":"Hi there",
+  "msg3":"beer time",
+  "language": "English",
+  "english": "English",
+  "russian": "Russian",
+
+  "our_connection": "OUR CONNECTION",
+  "network": "NETWORK",
+  "hello_user": "Hello {}",
+  "login": "Login",
+  "settings": "Settings",
+  "settings_desc": "Before connecting with the TEN, please check your settings and device setup:",
+  "audio_mode": "Audio Mode",
+  "join_room": "Join Room",
+  "registered_users": "Registered Users"
+}

@@ -7,6 +7,7 @@ import 'package:galaxy_mobile/themes/default.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'models/sharedPref.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 
 // Compile notes:
@@ -15,9 +16,8 @@ import 'models/sharedPref.dart';
 
 void main() async {
    WidgetsFlutterBinding.ensureInitialized();
-  await SharedPrefs().init();
-
-   // initialize logging
+   await SharedPrefs().init();
+   // await EasyLocalization.ensureInitialized();
    await FlutterLogs.initLogs(
        logLevelsEnabled: [
          LogLevel.INFO,
@@ -46,7 +46,13 @@ void main() async {
           update: (_, auth, api, model) => model..update(auth, api)
         ),
       ],
-      child: MyApp()
+      child: EasyLocalization(
+          supportedLocales: [Locale('en', 'US'), Locale('ru', 'RU')],
+          path: 'assets/translations',
+          fallbackLocale: Locale('en', 'US'),
+          child: MyApp()
+      )
+        //MyApp()
     ),
   );
 }
@@ -55,6 +61,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
       theme: appTheme(),
       initialRoute: '/',
       routes: routes,

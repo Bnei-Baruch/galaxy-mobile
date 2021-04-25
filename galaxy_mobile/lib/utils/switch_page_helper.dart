@@ -1,4 +1,4 @@
-import 'package:dio/dio.dart';
+import 'package:flutter_logs/flutter_logs.dart';
 
 typedef unsub = Function(List<dynamic>, bool);
 
@@ -13,8 +13,10 @@ class SwitchPageHelper {
   make makeSubscription;
   switcher switchVideoSlots;
   unsub unsubscribeFrom;
+
   SwitchPageHelper(unsub unsubscriber, make makeSub, switcher Switcher,
-      int pageSize, bool mute) {
+      int pageSize, bool mute)
+  {
     PAGE_SIZE = pageSize;
     muteOtherCams = mute;
     makeSubscription = makeSub;
@@ -23,29 +25,25 @@ class SwitchPageHelper {
 
     if (unsubscribeFrom == null) {
       unsubscribeFrom = (list, camOnly) {
-        print("unsubscribing : ${list.toString()}");
+        FlutterLogs.logInfo("SwitchPageHelper", "SwitchPageHelper",
+            "unsubscribe from: ${list.toString()}");
       };
     }
 
     if (makeSub == null) {
       makeSubscription = (list, bool1, bool2, bool3, bool4) {
-        print("subscribing : ${list.toString()}");
+        FlutterLogs.logInfo("SwitchPageHelper", "SwitchPageHelper",
+            "subscribing top: ${list.toString()}");
       };
     }
   }
-  void switchVideos(
-    int page,
-    List oldFeeds,
-    List newFeeds,
-  ) {
-    print('xxx switchVideos: page ' +
-        page.toString() +
-        ' PAGE_SIZE: ' +
-        PAGE_SIZE.toString() +
-        ' old  ' +
-        oldFeeds.length.toString() +
-        'new ' +
-        newFeeds.length.toString());
+
+  void switchVideos(int page, List oldFeeds, List newFeeds,) {
+    FlutterLogs.logInfo("SwitchPageHelper", "switchVideos",
+        "switchVideos >> page: ${page.toString()} | "
+            "pageSize: ${PAGE_SIZE.toString()} | "
+            "old feeds: ${oldFeeds.length.toString()} | "
+            "new feeds: ${newFeeds.length.toString()}");
 
     List oldVideoSlots = List();
     for (int index = 0; index < PAGE_SIZE; index++) {
@@ -65,8 +63,10 @@ class SwitchPageHelper {
           ? -1
           : (page * PAGE_SIZE) + index);
     }
-    print("xxx oldvideoSlots: " + oldVideoSlots.toString());
-    print("xxx newvideoslots: " + newVideoSlots.toString());
+
+    FlutterLogs.logInfo("SwitchPageHelper", "switchVideos",
+        "oldVideoSlots: ${oldVideoSlots.toString()} | "
+            "newVideoSlots: ${newVideoSlots.toString()}");
 
     List newVideoFeeds = newVideoSlots
         .map((index) => (index != -1) ? newFeeds[index] : null)
@@ -90,10 +90,10 @@ class SwitchPageHelper {
           })
         : null;
 
-    print("xxx oldVideoFeeds: " +
-        oldVideoFeeds.toString() +
-        " newVideoFeeds: " +
-        newVideoFeeds.toString());
+    FlutterLogs.logInfo("SwitchPageHelper", "switchVideos",
+        "oldVideoSlots: ${oldVideoSlots.toString()} | "
+            "newVideoSlots: ${newVideoSlots.toString()}");
+
     // Cases:
     // old: [0, 1, 2] [f0, f1, f2], new: [3, 4, 5] [f3, f4, f5]                  Simple next page switch.
     // old: [3, 4, 5] [f3, f4, f5], new: [0, 1, 2] [f0, f1, f2]                  Simple prev page switch.
@@ -135,13 +135,13 @@ class SwitchPageHelper {
         }
       }); //forEach((oldFeed, oldIndex) => {
     }
+
     if (!muteOtherCams) {
-      print('xxx subscribeFeeds:' +
-          subscribeFeeds.toString() +
-          ' unsubscribeFeeds' +
-          unsubscribeFeeds.toString() +
-          'switchFeeds' +
-          switchFeeds.toString());
+      FlutterLogs.logInfo("SwitchPageHelper", "switchVideos",
+          "subscribeFeeds: ${subscribeFeeds.toString()} | "
+              "unsubscribeFeeds: ${unsubscribeFeeds.toString()} | "
+              "switchFeeds: ${switchFeeds.toString()}");
+
       (this.makeSubscription != null)
           ? this.makeSubscription(
               subscribeFeeds,
@@ -161,8 +161,8 @@ class SwitchPageHelper {
             : null;
       }); //first(({ from, to }) => this.switchVideoSlots(from, to));
     } else {
-      print(
-          'Ignoring subscribe/unsubscribe/switch, we are at mute other cams mode.');
+      FlutterLogs.logWarn("SwitchPageHelper", "switchVideos",
+          "ignoring subscribe/unsubscribe/switch; other cams on mute mode");
     }
   }
 }

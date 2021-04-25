@@ -3,15 +3,13 @@ import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/services/api.dart';
 import 'package:galaxy_mobile/services/authService.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class Login extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      // appBar: AppBar(
-      //   title: Text('Welcome'),
-      // ),
       body: Center(child:
       Column(children: [
         Row(children: [
@@ -22,9 +20,9 @@ class Login extends StatelessWidget {
           Column(crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: 25),
-                Text('OUR CONNECTION',
+                Text('our_connection'.tr(),
                     style: TextStyle(color: Color(0xff00c6d2), fontSize: 22)),
-                Text('NETWORK',
+                Text('network'.tr(),
                     style: TextStyle(color: Color(0xff00457c), fontSize: 22)),
           ]),
         ]),
@@ -32,9 +30,16 @@ class Login extends StatelessWidget {
             children: [
               Column(children: [
                 SizedBox(height: 50),
-                Text('Registered Users',
-                    style: TextStyle(color: Colors.black, fontSize: 26,
-                        fontWeight: FontWeight.bold)),
+                Container(
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.only(right: 13.0),
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    child: Text('registered_users'.tr(),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.black, fontSize: 26,
+                            fontWeight: FontWeight.bold)
+                    )
+                ),
                 SizedBox(height: 10),
                 ButtonTheme(
                     shape: RoundedRectangleBorder(
@@ -42,7 +47,7 @@ class Login extends StatelessWidget {
                     minWidth: 140.0,
                     height: 60.0,
                     child: RaisedButton(
-                        child: Text("Login",
+                        child: Text("login".tr(),
                             style: TextStyle(color: Colors.white, fontSize: 24)),
 
                         onPressed: () async {
@@ -54,26 +59,7 @@ class Login extends StatelessWidget {
                           Navigator.pushNamed(context, '/settings');
                         })
                 ),
-
-            // ElevatedButton(
-            //   child: Text('Login'),
-            //   onPressed: () async {
-            //     final auth = context.read<AuthService>();
-            //     final authResponse = await auth.signIn();
-            //     final api = context.read<Api>();
-            //     api.setAccessToken(authResponse.accessToken);
-            //     await context.read<MainStore>().init();
-            //     Navigator.pushNamed(context, '/settings');
-            //     },
-            // ),
               ])
-            // ElevatedButton(
-            //   child: Text('log out'),
-            //   onPressed: () async {
-            //     final auth = context.read<AuthService>();
-            //     auth.logout();
-            //     })
-
             ]
         )])
       )

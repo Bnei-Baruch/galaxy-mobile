@@ -9,7 +9,6 @@ class ScreenName extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return TextFormField(
         enabled: false,
         initialValue: name,

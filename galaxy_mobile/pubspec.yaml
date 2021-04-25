@@ -43,6 +43,7 @@ dependencies:
   archive: ^2.0.13
   flutter_email_sender: ^4.0.0
   fluttertoast: ^7.1.8
+  easy_localization: ^2.3.3
 
   janus_client: #^0.0.4
     git:
@@ -86,6 +87,7 @@ flutter:
   assets:
     - assets/graphics/
     - assets/json/
+    - assets/translations/
 
   #   - images/a_dot_ham.jpeg
 

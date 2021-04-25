@@ -1,8 +1,5 @@
 import 'dart:collection';
 import 'dart:convert';
-import 'dart:ffi';
-import 'package:carousel_slider/carousel_slider.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/services/authService.dart';
@@ -12,6 +9,8 @@ import 'package:janus_client/utils.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:janus_client/Plugin.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_logs/flutter_logs.dart';
+
 
 import 'dart:async';
 
@@ -177,7 +176,8 @@ class _VideoRoomState extends State<VideoRoom> {
 
   void switchPage(int page) {
     // Normalize page, e.g., if it is -1 or too large...
-    print("xxx switch page to : " + page.toString());
+    FlutterLogs.logInfo("VideoRoom", "switchPage",
+        "switch page to: ${page.toString()}");
     int numPages = (feeds.length / PAGE_SIZE).ceil();
     this.page = numPages == 0 ? 0 : (numPages + page) % numPages;
     switcher.switchVideos(this.page, feeds, feeds);
@@ -192,12 +192,14 @@ class _VideoRoomState extends State<VideoRoom> {
 
   _newRemoteFeed(JanusClient j, List<Map> feeds) async {
     roomFeeds = feeds;
-    print('remote plugin attached');
+    FlutterLogs.logInfo("VideoRoom", "_newRemoteFeed",
+        "remote plugin attached");
     j.attach(Plugin(
         opaqueId: 'remotefeed_user',
         plugin: 'janus.plugin.videoroom',
         onMessage: (msg, jsep) async {
-          print("xxx message: $msg");
+          FlutterLogs.logInfo("VideoRoom", "_newRemoteFeed",
+              "message: ${msg.toString()}");
           //update feed
           var event = msg["videoroom"];
           if (event == 'attached' ||
@@ -211,7 +213,8 @@ class _VideoRoomState extends State<VideoRoom> {
                     })
                 .toList();
             // newStreamsMids.addAll(midslist);
-            print("xxx got newStreamsMids ${midslist.toString()}");
+            FlutterLogs.logInfo("VideoRoom", "_newRemoteFeed",
+                "got newStreamsMids ${midslist.toString()}");
             newStreamsMids = midslist;
           }
 
@@ -226,14 +229,16 @@ class _VideoRoomState extends State<VideoRoom> {
                 message: body,
                 jsep: await widget.subscriberHandle.createAnswer(),
                 onSuccess: () {
-                  print(
-                      " xxx subscribe Handle onSuccess create answer and start");
+                  FlutterLogs.logInfo("VideoRoom", "_newRemoteFeed",
+                      "subscribe Handle onSuccess create answer and start");
                   creatingFeed = false;
                 },
                 onError: (error) =>
-                    {print(" xxx could not create answer: $error")});
+                    {FlutterLogs.logError("VideoRoom", "_newRemoteFeed",
+                        "could not create answer: ${error.toString()}")});
           } else {
-            print("xxx no jsep to answer");
+            FlutterLogs.logWarn("VideoRoom", "_newRemoteFeed",
+                "no jsep to answer");
           }
         },
         onSuccess: (plugin) {
@@ -244,25 +249,41 @@ class _VideoRoomState extends State<VideoRoom> {
             "ptype": "subscriber",
             "streams": feeds,
           };
-          print("Requesting to subscribe to publishers...");
+
+          FlutterLogs.logInfo("VideoRoom", "_newRemoteFeed",
+              "requesting subscription to publishers...");
           widget.subscriberHandle.send(
             message: register,
             onSuccess: () async {
-              print("xxx onSuccess subscribe to publishers...");
+              FlutterLogs.logInfo("VideoRoom", "_newRemoteFeed",
+                  "subscription to publishers successful");
             },
             onError: (error) {
-              print("xxx onError subscribe to publishers..." + error);
+              FlutterLogs.logError("VideoRoom", "_newRemoteFeed",
+                  "subscription to publishers FAILED: ${error.toString()}");
             },
           );
         },
         onRemoteTrack: (stream, track, mid, on) {
-          print(
-              'xxx got remote track with mid=$mid trackid=${track.toString()} , is on = $on stream with id=${stream.id} has tracks = ${(stream as MediaStream).getVideoTracks().length} with ids=${(stream as MediaStream).getVideoTracks().map((e) => e.toString())}');
+          FlutterLogs.logInfo("VideoRoom", "_newRemoteFeed",
+              "got remote track with "
+                  "mid: ${mid.toString()} | "
+                  "trackId: ${track.toString()} | "
+                  "isOn: ${on.toString()} | "
+                  "streamId: ${stream.id.toString()} | "
+                  "hasTracks: ${(stream as MediaStream)
+                  .getVideoTracks().length.toString()} | "
+                  "Ids: ${(stream as MediaStream).getVideoTracks().map((e) =>
+                  e.toString())}");
+          // print(
+          //     'xxx got remote track with mid=$mid trackid=${track.toString()} , is on = $on stream with id=${stream.id} has tracks = ${(stream as MediaStream).getVideoTracks().length} with ids=${(stream as MediaStream).getVideoTracks().map((e) => e.toString())}');
 
           (stream as MediaStream).getVideoTracks().forEach((element) => {
-                print(
-                    "xxx track ${element.id} is enabled=${element.enabled} and muted=${element.muted}")
-              });
+            FlutterLogs.logInfo("VideoRoom", "_newRemoteFeed",
+                "track ${element.id} | "
+                    "isEnabled: ${element.enabled.toString()} |"
+                    "isMuted: ${element.muted.toString()}")
+          });
           if ((track as MediaStreamTrack).kind == "video" &&
               (track as MediaStreamTrack).enabled &&
               on) {
@@ -276,12 +297,12 @@ class _VideoRoomState extends State<VideoRoom> {
                   .getVideoTracks()
                   .indexWhere((element) => element.id == track.id);
 
-              print("xxx video slot is: " +
-                  feed["videoSlot"].toString() +
-                  "track index : ${trackIndex}");
+              FlutterLogs.logInfo("VideoRoom", "_newRemoteFeed",
+                  "video slot is: ${feed["videoSlot"].toString()} | "
+                      "track index : ${trackIndex.toString()}");
+
               feed["trackIndex"] = trackIndex;
               int slot = feed["videoSlot"];
-
               var lock = Lock();
               lock.synchronized(() async {
                 Future.delayed(const Duration(milliseconds: 100), () {
@@ -290,8 +311,10 @@ class _VideoRoomState extends State<VideoRoom> {
                         trackIndex;
                     widget._remoteRenderer.elementAt(slot).srcObject =
                         stream; //remoteStream.elementAt(slot);
-                    print("xxx done set renderer stream for video slot: " +
-                        slot.toString());
+
+                    FlutterLogs.logInfo("VideoRoom", "_newRemoteFeed",
+                        "done set renderer stream for video slot: "
+                            "${slot.toString()}");
                     // }
 
                     //check if mids changed place
@@ -300,13 +323,15 @@ class _VideoRoomState extends State<VideoRoom> {
                         element["videoSlot"] != slot &&
                         element["videoSlot"] != null &&
                         element["videoSlot"] != -1);
-                    print(
-                        "xxx other feeds ${otherFeeds.toString()} and all feeds ${feeds.toString()}");
+
+                    FlutterLogs.logInfo("VideoRoom", "_newRemoteFeed",
+                        "other feeds ${otherFeeds.toString()} "
+                            "and all feeds ${feeds.toString()}");
+
                     otherFeeds.forEach((element) {
-                      int index = element["videoSlot"];
+                      // int index = element["videoSlot"];
                       // if (widget._remoteRenderer.elementAt(index).trackIndex !=
                       //     element["trackIndex"]) {
-                      //   print("xxx retracking video");
                       //   widget._remoteRenderer.elementAt(index).trackIndex =
                       //       element["trackIndex"];
                       //   widget._remoteRenderer.elementAt(slot).srcObject =
@@ -335,7 +360,6 @@ class _VideoRoomState extends State<VideoRoom> {
               // }
             });
           }
-
           //});
         }));
   }
@@ -349,11 +373,12 @@ class _VideoRoomState extends State<VideoRoom> {
         widget.server,
       ], withCredentials: true, isUnifiedPlan: true, token: widget.token);
       widget.j.connect(onSuccess: (sessionId) async {
-        debugPrint('voilla! connection established with session id as' +
-            sessionId.toString());
-        Map<String, dynamic> configuration = {
-          "iceServers": widget.j.iceServers.map((e) => e.toMap()).toList()
-        };
+        FlutterLogs.logInfo("VideoRoom", "initPlatformState",
+            "voila! connection established with session id as "
+                "${sessionId.toString()}");
+        // Map<String, dynamic> configuration = {
+        //   "iceServers": widget.j.iceServers.map((e) => e.toMap()).toList()
+        // };
 
         widget.j.attach(Plugin(
             opaqueId: widget.user.sub,
@@ -366,10 +391,13 @@ class _VideoRoomState extends State<VideoRoom> {
                   widget.mypvtid = msg["private_id"];
 
                   if (msg["publishers"] != null) {
-                    print('publisher on msg');
+                    FlutterLogs.logInfo("VideoRoom", "initPlatformState",
+                        "publisher on msg");
+
                     var list = msg["publishers"];
-                    print('got publihers');
-                    print(list);
+                    FlutterLogs.logInfo("VideoRoom", "initPlatformState",
+                        "got publishers: ${list.toString()}");
+
                     List<Map> subscription = new List<Map>();
                     //    _newRemoteFeed(j, list[0]["id"]);
                     final filtereList = List.from(list);
@@ -395,18 +423,19 @@ class _VideoRoomState extends State<VideoRoom> {
                     //( (l)  => l["display"] = (jsonDecode(l["display"])) as Map);
                     //          List newFeeds = sortAndFilterFeeds();
                     List newFeeds = msg['publishers'];
-                    print('New list of available publishers/feeds:' +
-                        newFeeds.toString());
+                    FlutterLogs.logInfo("VideoRoom", "initPlatformState",
+                        "New list of available publishers/feeds: "
+                            "${newFeeds.toString()}");
                     Set newFeedsIds = new Set();
-                    var tempset = newFeeds.map((feed) => feed["id"]).toSet();
+                    // var tempset = newFeeds.map((feed) => feed["id"]).toSet();
                     newFeedsIds
                         .addAll(newFeeds.map((feed) => feed["id"]).toSet());
                     if (feeds != null &&
-                        feeds.any((feed) => newFeedsIds.lookup(feed["id"]))) {
-                      print(
-                          "New feed joining but one of the feeds already exist" +
-                              newFeeds.toString() +
-                              list.toString());
+                        feeds.any((feed) => newFeedsIds.lookup(feed["id"])))
+                    {
+                      FlutterLogs.logInfo("VideoRoom", "initPlatformState",
+                          "New feed joining but one of the feeds already exist: "
+                              "${newFeeds.toString()} | ${list.toString()}");
                       return;
                     }
                     // Merge new feed with existing feeds and sort.
@@ -429,27 +458,34 @@ class _VideoRoomState extends State<VideoRoom> {
                     // this.setState({feeds: feedsNewState});
                   }
                 } else if (event == 'talking') {
-                  print("xxx talking");
+                  FlutterLogs.logInfo("VideoRoom", "initPlatformState",
+                      "talking");
                   final id = msg['id'];
-                  print("User: ${id} - stop talking");
+
+                  FlutterLogs.logInfo("VideoRoom", "initPlatformState",
+                      "user ${id.toString()} - stop talking");
                   final feed = feeds.firstWhere((feed) => feed["id"] == id,
                       orElse: () => null);
                   if (feed == null) {
-                    print("xxx Did not find user ${id}.");
+                    FlutterLogs.logWarn("VideoRoom", "initPlatformState",
+                        "user ${id.toString()} not found");
                     return;
                   }
                   setState(() {
                     feed["talking"] = true;
                   });
                 } else if (event == 'stopped-talking') {
-                  print("xxx stopped-talking");
+                  FlutterLogs.logInfo("VideoRoom", "initPlatformState",
+                      "stopped-talking");
                   // const feeds = Object.assign([], this.state.feeds);
                   final id = msg['id'];
-                  print("User: ${id} - stop talking");
+                  FlutterLogs.logInfo("VideoRoom", "initPlatformState",
+                      "user ${id.toString()} - stop talking");
                   final feed = feeds.firstWhere((feed) => feed["id"] == id,
                       orElse: () => null);
                   if (feed == null) {
-                    print("xxx Did not find user ${id}.");
+                    FlutterLogs.logWarn("VideoRoom", "initPlatformState",
+                        "user ${id.toString()} not found");
                     return;
                   }
                   setState(() {
@@ -458,13 +494,15 @@ class _VideoRoomState extends State<VideoRoom> {
 
                   // this.setState({ feeds });
                 } else if (event == 'destroyed') {
-                  print("destroyed");
+                  FlutterLogs.logInfo("VideoRoom", "initPlatformState",
+                      "destroyed");
 
                   // The room has been destroyed
                   // Janus.warn('The room has been destroyed!');
                 } else if (event == 'event') {
                   if (msg['configured'] == 'ok') {
-                    print("configured");
+                    FlutterLogs.logInfo("VideoRoom", "initPlatformState",
+                        "configured");
                     // User published own feed successfully.
                     // const user = {
                     //   ...this.state.user,
@@ -481,22 +519,25 @@ class _VideoRoomState extends State<VideoRoom> {
                     // }
                   } else if (msg['publishers'] != null &&
                       msg['publishers'] != null) {
-                    print("xxx just joined");
+                    FlutterLogs.logInfo("VideoRoom", "initPlatformState",
+                        "just joined");
                     // User just joined the room.
                     (msg['publishers'] as List).forEach((value) {
                       value["display"] = (jsonDecode(value["display"]));
                     });
                     var newFeeds = msg['publishers']
                         as List; //sortAndFilterFeeds(msg['publishers'] as List);
-                    print('xxx New list of available publishers/feeds:' +
-                        newFeeds.toString());
+                    FlutterLogs.logInfo("VideoRoom", "initPlatformState",
+                        "new list of available publishers/feeds: "
+                            "${newFeeds.toString()}");
+
                     Set newFeedsIds = new Set();
                     newFeedsIds
                         .addAll(newFeeds.map((feed) => feed["id"]).toSet());
                     if (feeds.any((feed) => newFeedsIds.contains(feed["id"]))) {
-                      print(
-                          "xxx New feed joining but one of the feeds already exist" +
-                              newFeeds.toString());
+                      FlutterLogs.logWarn("VideoRoom", "initPlatformState",
+                          "new feed joining but one of the feeds already exist: "
+                              "${newFeeds.toString()}");
                       return;
                     }
                     // Merge new feed with existing feeds and sort.
@@ -516,8 +557,8 @@ class _VideoRoomState extends State<VideoRoom> {
                     // User leaving the room which is same as publishers gone.
 
                     final leaving = msg["leaving"];
-                    print("${leaving.toString()} leaving");
-                    print('Publisher leaving: ' + leaving.toString());
+                    FlutterLogs.logInfo("VideoRoom", "initPlatformState",
+                        "publisher: ${leaving.toString()} is leaving");
                     // const { feeds } = this.state;
                     switcher.unsubscribeFrom([leaving], /* onlyVideo= */ false);
                     List feedsNewState =
@@ -532,10 +573,13 @@ class _VideoRoomState extends State<VideoRoom> {
                       this.switchPage(page - 1);
                     }
 
-                    print("${leaving.toString()} left");
+                    FlutterLogs.logInfo("VideoRoom", "initPlatformState",
+                        "publisher: ${leaving.toString()} left");
                   } else if (msg['unpublished'] != null &&
-                      msg['unpublished'] != null) {
-                    print("unpublished");
+                      msg['unpublished'] != null)
+                  {
+                    FlutterLogs.logInfo("VideoRoom", "initPlatformState",
+                        "unpublished");
                     // const unpublished = msg['unpublished'];
                     // Janus.log('Publisher unpublished: ', unpublished);
                     // if (unpublished === 'ok') {
@@ -545,7 +589,8 @@ class _VideoRoomState extends State<VideoRoom> {
                     // }
 
                   } else if (msg['error'] != null && msg['error'] != null) {
-                    print("error");
+                    FlutterLogs.logError("VideoRoom", "initPlatformState",
+                        "error message");
                     // if (msg['error_code'] === 426) {
                     // Janus.log('This is a no such room');
                     // } else {
@@ -603,7 +648,8 @@ class _VideoRoomState extends State<VideoRoom> {
                   });
             }));
       }, onError: (e) {
-        debugPrint('some error occured');
+        FlutterLogs.logError("VideoRoom", "initPlatformState",
+            "some error occurred: ${e.toString()}");
       });
     });
   }
@@ -671,9 +717,9 @@ class _VideoRoomState extends State<VideoRoom> {
 
   void subscribeTo(List<Map> subscription) {
     // New feeds are available, do we need create a new plugin handle first?
-    print('xxx :: Got subscribtion: ' +
-        subscription
-            .toString()); //, !!this.state.remoteFeed, this.state.creatingFeed);
+    FlutterLogs.logInfo("VideoRoom", "subscribeTo",
+        "got subscription: ${subscription.toString()}");
+
     if (widget.subscriberHandle != null) {
       // var register = {
       //   "request": "join",
@@ -681,25 +727,23 @@ class _VideoRoomState extends State<VideoRoom> {
       //   "ptype": "subscriber",
       //   "streams": subscription,
       // };
-      // print("Requesting to subscribe to publishers...");
       // widget.subscriberHandle.send(
       //   message: register,
       //   onSuccess: () async {
-      //     print("onSuccess subscribe to publishers...");
       //   },
       //   onError: (error) {
-      //     print("onError subscribe to publishers..." + error);
       //   },
       // );
 
       widget.subscriberHandle.send(
         message: {"request": 'subscribe', "streams": subscription},
         onSuccess: () {
-          print(
-              "xxx onSuccess subscribe to streams " + subscription.toString());
+          FlutterLogs.logInfo("VideoRoom", "subscribeTo",
+              "successfully subscribed to streams: ${subscription.toString()}");
         },
         onError: (error) {
-          print("xxx error subscribe to streams : " + error);
+          FlutterLogs.logError("VideoRoom", "subscribeTo",
+              "failed to subscribe to streams: ${error.toString()}");
         },
       );
       return;
@@ -745,14 +789,11 @@ class _VideoRoomState extends State<VideoRoom> {
   // }
 
   void switchVideos(int page, List oldFeeds, List newFeeds) {
-    print('xxx switchVideos: page ' +
-        page.toString() +
-        ' PAGE_SIZE: ' +
-        PAGE_SIZE.toString() +
-        ' old  ' +
-        oldFeeds.length.toString() +
-        'new ' +
-        newFeeds.length.toString());
+    FlutterLogs.logInfo("VideoRoom", "switchVideos",
+        "switchVideos >> page: ${page.toString()} | "
+            "pageSize: ${PAGE_SIZE.toString()} | "
+            "old feeds: ${oldFeeds.length.toString()} | "
+            "new feeds: ${newFeeds.length.toString()}");
 
     List oldVideoSlots = List();
     for (int index = 0; index < PAGE_SIZE; index++) {
@@ -772,8 +813,10 @@ class _VideoRoomState extends State<VideoRoom> {
           ? -1
           : (page * PAGE_SIZE) + index);
     }
-    print("xxx oldvideoSlots: " + oldVideoSlots.toString());
-    print("xxx newvideoslots: " + newVideoSlots.toString());
+
+    FlutterLogs.logInfo("VideoRoom", "switchVideos",
+        "oldVideoSlots: ${oldVideoSlots.toString()} | "
+            "newVideoSlots: ${newVideoSlots.toString()}");
 
     List newVideoFeeds = newVideoSlots
         .map((index) => {if (index != -1) newFeeds.elementAt(index)})
@@ -790,16 +833,16 @@ class _VideoRoomState extends State<VideoRoom> {
             }
           })
         : null;
+
     newVideoFeeds.isNotEmpty
         ? newVideoFeeds.asMap().forEach((index, feed) {
             if (feed != null) feed["videoSlot"] = index;
           })
         : null;
 
-    print("xxx oldVideoFeeds: " +
-        oldVideoFeeds.toString() +
-        " newVideoFeeds: " +
-        newVideoFeeds.toString());
+    FlutterLogs.logInfo("VideoRoom", "switchVideos",
+        "oldVideoSlots: ${oldVideoSlots.toString()} | "
+            "newVideoSlots: ${newVideoSlots.toString()}");
     // Cases:
     // old: [0, 1, 2] [f0, f1, f2], new: [3, 4, 5] [f3, f4, f5]                  Simple next page switch.
     // old: [3, 4, 5] [f3, f4, f5], new: [0, 1, 2] [f0, f1, f2]                  Simple prev page switch.
@@ -841,13 +884,13 @@ class _VideoRoomState extends State<VideoRoom> {
         }
       }); //forEach((oldFeed, oldIndex) => {
     }
+
     if (!muteOtherCams) {
-      print('xxx subscribeFeeds:' +
-          subscribeFeeds.toString() +
-          ' unsubscribeFeeds' +
-          unsubscribeFeeds.toString() +
-          'switchFeeds' +
-          switchFeeds.toString());
+      FlutterLogs.logInfo("VideoRoom", "switchVideos",
+          "subscribeFeeds: ${subscribeFeeds.toString()} | "
+              "unsubscribeFeeds: ${unsubscribeFeeds.toString()} | "
+              "switchFeeds: ${switchFeeds.toString()}");
+
       this.makeSubscription(
           subscribeFeeds,
           /* feedsJustJoined= */ false,
@@ -861,8 +904,8 @@ class _VideoRoomState extends State<VideoRoom> {
         this.switchVideoSlots(element["from"], element["to"]);
       }); //first(({ from, to }) => this.switchVideoSlots(from, to));
     } else {
-      print(
-          'Ignoring subscribe/unsubscribe/switch, we are at mute other cams mode.');
+      FlutterLogs.logWarn("VideoRoom", "switchVideos",
+          "ignoring subscribe/unsubscribe/switch; other cams on mute mode");
     }
   }
 
@@ -1288,16 +1331,20 @@ class _VideoRoomState extends State<VideoRoom> {
 
     if (widget.subscriberHandle != null &&
         (unsubscribe["streams"] as List) != null &&
-        (unsubscribe["streams"] as List).length > 0) {
-      print("xxx unsubscribing streams: $unsubscribe");
+        (unsubscribe["streams"] as List).length > 0)
+    {
+      FlutterLogs.logInfo("VideoRoom", "unsubscribeFrom",
+          "unsubscribe streams: ${unsubscribe.toString()}");
       widget.subscriberHandle.send(
           message: unsubscribe,
           onSuccess: () {
-            print("xxx unsubscribed success" + unsubscribe.toString());
+            FlutterLogs.logInfo("VideoRoom", "unsubscribeFrom",
+                "unsubscribed successfully: ${unsubscribe.toString()}");
             if ((widget.state as State).mounted) setState(() {});
           },
           onError: (error) {
-            print("xxx unsubcribed failed $error");
+            FlutterLogs.logError("VideoRoom", "unsubscribeFrom",
+                "unsubscribe failed: ${error.toString()}");
           });
     }
   }
