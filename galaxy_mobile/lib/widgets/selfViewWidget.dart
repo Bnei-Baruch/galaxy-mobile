@@ -7,9 +7,17 @@ import 'dart:async';
 class SelfViewWidget extends StatefulWidget {
   @override
   _SelfViewWidgetState createState() => _SelfViewWidgetState();
+
+  var state;
+  restartCamera() {
+    if (state != null && state.mounted) {
+      state.initRenderers();
+    }
+  }
 }
 
-class _SelfViewWidgetState extends State<SelfViewWidget> {
+class _SelfViewWidgetState extends State<SelfViewWidget>
+    with WidgetsBindingObserver {
   RTCVideoRenderer _localRenderer = new RTCVideoRenderer();
   Plugin pluginHandle;
   Plugin subscriberHandle;
@@ -24,8 +32,18 @@ class _SelfViewWidgetState extends State<SelfViewWidget> {
   @override
   void initState() {
     super.initState();
+    widget.state = this;
+    print('xxx SelfViewWidget initstate');
+    WidgetsBinding.instance.addObserver(this);
     _localRenderer.initialize();
     initRenderers();
+  }
+
+  @override
+  void dispose() {
+    _localRenderer.srcObject = null;
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   initRenderers() {
@@ -42,7 +60,8 @@ class _SelfViewWidgetState extends State<SelfViewWidget> {
         "optional": [],
       }
     };
-    Future<MediaStream> stream = navigator.getUserMedia(mediaConstraints);
+    Future<MediaStream> stream =
+        navigator.mediaDevices.getUserMedia(mediaConstraints);
 
     stream.then((value) => setState(() {
           _localRenderer.srcObject = value;
@@ -58,5 +77,24 @@ class _SelfViewWidgetState extends State<SelfViewWidget> {
       height: 200,
       width: 200,
     );
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    switch (state) {
+      case AppLifecycleState.inactive:
+        print('xxx appLifeCycleState inactive');
+        break;
+      case AppLifecycleState.resumed:
+        print('xxx appLifeCycleState resumed');
+        break;
+      case AppLifecycleState.paused:
+        print('xxx appLifeCycleState paused');
+        break;
+      case AppLifecycleState.detached:
+        print('xxx appLifeCycleState detached');
+        break;
+    }
   }
 }

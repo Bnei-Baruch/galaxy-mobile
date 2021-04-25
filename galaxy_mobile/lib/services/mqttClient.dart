@@ -2,7 +2,6 @@ import 'package:flutter_logs/flutter_logs.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 
-
 class MQTTClient {
   String _username;
   String _password;
@@ -12,9 +11,8 @@ class MQTTClient {
   final void Function() _onConnectedcallback;
   final void Function(String) _onMsgReceivedcallback;
 
-  MQTTClient(this._username, this._password,
-      this._onMsgReceivedcallback, this._onConnectedcallback)
-  {
+  MQTTClient(this._username, this._password, this._onMsgReceivedcallback,
+      this._onConnectedcallback) {
     _client =
         MqttServerClient.withPort('mqtt.kli.one', 'mobile_test_clientid', 9001);
   }
@@ -43,7 +41,8 @@ class MQTTClient {
     try {
       await _client.connect();
     } catch (e) {
-      FlutterLogs.logError("MQTTClient", "connect", "Exception during connection to broker: $e");
+      FlutterLogs.logError(
+          "MQTTClient", "connect", "Exception during connection to broker: $e");
       _client.disconnect();
       return null;
     }
@@ -51,7 +50,7 @@ class MQTTClient {
     _client.updates.listen((List<MqttReceivedMessage<MqttMessage>> c) {
       final MqttPublishMessage message = c[0].payload;
       final payload =
-      MqttPublishPayload.bytesToStringAsString(message.payload.message);
+          MqttPublishPayload.bytesToStringAsString(message.payload.message);
 
       FlutterLogs.logInfo("MQTTClient", "listen",
           "Received message: $payload from topic: ${c[0].topic}>");
@@ -63,6 +62,10 @@ class MQTTClient {
 
   void subscribe(String topic) {
     _client.subscribe(topic, MqttQos.atMostOnce);
+  }
+
+  void unsubscribe(String topic) {
+    _client.unsubscribe(topic);
   }
 
   void send(String topic, String content) {
@@ -81,18 +84,18 @@ class MQTTClient {
   }
 
   void onSubscribed(String topic) {
-    FlutterLogs.logInfo("MQTTClient", "onSubscribed",
-        "Subscribed to topic: $topic");
+    FlutterLogs.logInfo(
+        "MQTTClient", "onSubscribed", "Subscribed to topic: $topic");
   }
 
   void onSubscribeFail(String topic) {
-    FlutterLogs.logWarn("MQTTClient", "onSubscribeFail",
-        "Failed to subscribe to $topic");
+    FlutterLogs.logWarn(
+        "MQTTClient", "onSubscribeFail", "Failed to subscribe to $topic");
   }
 
   void onUnsubscribed(String topic) {
-    FlutterLogs.logInfo("MQTTClient", "onUnsubscribed",
-        "Unsubscribed from topic: $topic");
+    FlutterLogs.logInfo(
+        "MQTTClient", "onUnsubscribed", "Unsubscribed from topic: $topic");
   }
 
   void pong() {

@@ -276,7 +276,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
 
           if (jsep != null) {
             String jsepStr = jsep.toString();
-            FlutterLogs.logInfo("Streaming", "initAudioStream",
+            FlutterLogs.logInfo("Streaming", "initVideoStream",
                 "Handling SDP as well... $jsepStr");
             // debugPrint("Handling SDP as well..." + jsep.toString());
             await widget.videoStreamingPlugin.handleRemoteJsep(jsep);

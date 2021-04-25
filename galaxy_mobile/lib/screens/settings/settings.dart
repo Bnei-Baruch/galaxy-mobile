@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_logs/flutter_logs.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/widgets/audioMode.dart';
 import 'package:galaxy_mobile/widgets/drawer.dart';
@@ -19,6 +20,14 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
+  SelfViewWidget selfWidget;
+  @override
+  void initState() {
+    super.initState();
+    FlutterLogs.logInfo("Settings", "initState", "starting settings");
+    selfWidget = SelfViewWidget();
+  }
+
   @override
   Widget build(BuildContext context) {
     final activeUser = context.select((MainStore s) => s.activeUser);
@@ -79,7 +88,7 @@ class _SettingsState extends State<Settings> {
 
                 Row(mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [SelfViewWidget()]),
+                    children: [selfWidget]),
                 SizedBox(height: 20),
 
                 AudioMode(),
@@ -99,7 +108,9 @@ class _SettingsState extends State<Settings> {
                               style: TextStyle(color: Colors.white, fontSize: 20)),
 
                           onPressed: ()  {
-                            Navigator.pushNamed(context, '/dashboard');
+                            Navigator.pushNamed(context, '/dashboard').then((value) => setState(() {
+                              selfWidget.restartCamera();
+                            }));
                           })
                   ),
                   SizedBox(width: 10)
