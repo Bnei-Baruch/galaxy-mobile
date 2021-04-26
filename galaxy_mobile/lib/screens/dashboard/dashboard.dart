@@ -30,26 +30,26 @@ class _DashboardState extends State<Dashboard> {
   @override
   void initState() {
     // TODO: implement initState
+    videoRoom.RoomReady = () {
+      final authService = context.read<AuthService>();
+      if (_mqttClient == null) {
+        _mqttClient = MQTTClient(
+            authService.getUserEmail(),
+            authService.getAuthToken(),
+            this.handleCmdData,
+            this.connectedToBroker);
+        _mqttClient.connect();
+      }
+    };
     activeUser = context.read<MainStore>().activeUser;
-    final authService = context.read<AuthService>();
 
     widget.audioMute = true;
     widget.videoMute = true;
-
-    if (_mqttClient == null) {
-      _mqttClient = MQTTClient(
-          authService.getUserEmail(),
-          authService.getAuthToken(),
-          this.handleCmdData,
-          this.connectedToBroker);
-      _mqttClient.connect();
-    }
 
     videoRoom.updateVideoState = (mute) {
       FlutterLogs.logInfo("Dashboard", "updateVideoState", "value $mute");
       setState(() {
         widget.videoMute = mute;
-        updateRoomWithMyVideoState();
       });
     };
   }
@@ -72,6 +72,7 @@ class _DashboardState extends State<Dashboard> {
 
   void connectedToBroker() {
     _mqttClient.subscribe("galaxy/room/" + _activeRoomId);
+    updateRoomWithMyVideoState();
   }
 
   void updateRoomWithMyVideoState() {
