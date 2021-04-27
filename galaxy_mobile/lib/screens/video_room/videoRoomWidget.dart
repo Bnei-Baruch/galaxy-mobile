@@ -1348,8 +1348,8 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         break;
       case AppLifecycleState.resumed:
         print('xxx videoroom resumed');
-        widget.pluginHandle.initializeMediaDevices().then((value) =>
-            {widget.myStream = value, widget._localRenderer.srcObject = value});
+        // widget.pluginHandle.initializeMediaDevices().then((value) =>
+        //     {widget.myStream = value, widget._localRenderer.srcObject = value});
 
         break;
       case AppLifecycleState.paused:
