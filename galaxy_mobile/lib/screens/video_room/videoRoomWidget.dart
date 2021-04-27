@@ -646,7 +646,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                   "id": widget.user.sub,
                   "timestamp": DateTime.now().millisecond,
                   "role": "user",
-                  "display": widget.user.name
+                  "display": widget.user.givenName
                 }) //'User test'
               };
               plugin.send(
@@ -955,53 +955,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
       initialized = true;
       initInfra();
     }
-    return
-//         appBar: AppBar(
-//           actions: [
-//             IconButton(
-//                 icon: Icon(
-//                   Icons.call,
-//                   color: Colors.greenAccent,
-//                 ),
-//                 onPressed: () async {
-//                   await this.initRenderers();
-//                   await this.initPlatformState();
-// //                  -_localRenderer.
-//                 }),
-//             IconButton(
-//                 icon: Icon(
-//                   Icons.call_end,
-//                   color: Colors.red,
-//                 ),
-//                 onPressed: () {
-//                   j.destroy();
-//                   pluginHandle.hangup();
-//                   subscriberHandle.hangup();
-//                   _localRenderer.srcObject = null;
-//                   _localRenderer.dispose();
-//                   _remoteRenderer.map((e) => e.srcObject = null);
-//                   _remoteRenderer.map((e) => e.dispose());
-//                   setState(() {
-//                     pluginHandle = null;
-//                     subscriberHandle = null;
-//                   });
-//                 }),
-//             IconButton(
-//                 icon: Icon(
-//                   Icons.switch_camera,
-//                   color: Colors.white,
-//                 ),
-//                 onPressed: () {
-//                   if (pluginHandle != null) {
-//                     pluginHandle.switchCamera();
-//                   }
-//                 })
-//           ],
-//           title: const Text('janus_client'),
-//         ),
-
-        // Row(children: [
-        Container(
+    return Container(
       alignment: Alignment.topCenter,
       height: MediaQuery.of(context).size.height / 3 * 2 - 140,
       child: Stack(
@@ -1037,7 +991,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                                   : Colors.red,
                               size: 18,
                             ),
-                            Text(widget.user.name),
+                            Text(widget.user.givenName),
                           ],
                         ),
                       ),
@@ -1394,6 +1348,9 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         break;
       case AppLifecycleState.resumed:
         print('xxx videoroom resumed');
+        widget.pluginHandle.initializeMediaDevices().then((value) =>
+            {widget.myStream = value, widget._localRenderer.srcObject = value});
+
         break;
       case AppLifecycleState.paused:
         print('xxx videoroom paused');
@@ -1412,32 +1369,3 @@ class RoomArguments {
   final User user;
   RoomArguments(this.server, this.token, this.roomNumber, this.user);
 }
-
-// CarouselSlider(
-// height: 200.0,
-// autoPlay: true,
-// autoPlayInterval: Duration(seconds: 3),
-// autoPlayAnimationDuration: Duration(milliseconds: 800),
-// autoPlayCurve: Curves.fastOutSlowIn,
-// pauseAutoPlayOnTouch: Duration(seconds: 10),
-// aspectRatio: 2.0,
-// onPageChanged: (index) {
-// setState(() {
-// _currentIndex = index;
-// });
-// },
-// items: cardList.map((card){
-// return Builder(
-// builder:(BuildContext context){
-// return Container(
-// height: MediaQuery.of(context).size.height*0.30,
-// width: MediaQuery.of(context).size.width,
-// child: Card(
-// color: Colors.blueAccent,
-// child: card,
-// ),
-// );
-// }
-// );
-// }).toList(),
-// ),
