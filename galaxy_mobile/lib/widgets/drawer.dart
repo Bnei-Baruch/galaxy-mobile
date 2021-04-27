@@ -4,6 +4,7 @@ import 'package:galaxy_mobile/services/authService.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:package_info/package_info.dart';
 
 import 'dart:io';
 import 'package:archive/archive_io.dart';
@@ -11,15 +12,27 @@ import 'package:archive/archive_io.dart';
 class AppDrawer extends StatelessWidget {
   void archiveLogs() async {
     var encoder = ZipFileEncoder();
-    encoder.create('/sdcard/Android/data/com.galaxy_mobile/files/galaxyLogs.zip');
-    encoder.addDirectory(Directory('/sdcard/Android/data/com.galaxy_mobile/files/galaxyLogs'));
+    encoder
+        .create('/sdcard/Android/data/com.galaxy_mobile/files/galaxyLogs.zip');
+    encoder.addDirectory(
+        Directory('/sdcard/Android/data/com.galaxy_mobile/files/galaxyLogs'));
     encoder.close();
 
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+
+    String appName = packageInfo.appName;
+    String packageName = packageInfo.packageName;
+    String version = packageInfo.version;
+    String buildNumber = packageInfo.buildNumber;
+
     final Email email = Email(
-        body: 'body',
-        subject: 'galaxy_logs',
-        recipients: ['kirilsagoth2@gmail.com'],
-        attachmentPaths: ['/sdcard/Android/data/com.galaxy_mobile/files/galaxyLogs.zip'],
+        body:
+            '<-------------please write above this line-----------> \n appName=${packageInfo.appName}\n packageName = ${packageInfo.packageName} \n version = ${packageInfo.version} \n buildNumber = ${packageInfo.buildNumber}',
+        subject: 'Send logs to developer',
+        recipients: ['igal.avraham@gmail.com'],
+        attachmentPaths: [
+          '/sdcard/Android/data/com.galaxy_mobile/files/galaxyLogs.zip'
+        ],
         isHTML: false);
 
     await FlutterEmailSender.send(email);
@@ -30,8 +43,7 @@ class AppDrawer extends StatelessWidget {
         timeInSecForIosWeb: 1,
         backgroundColor: Colors.white,
         textColor: Colors.black,
-        fontSize: 16.0
-    );
+        fontSize: 16.0);
   }
 
   @override

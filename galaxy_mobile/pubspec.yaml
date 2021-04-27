@@ -44,6 +44,8 @@ dependencies:
   flutter_email_sender: ^4.0.0
   fluttertoast: ^7.1.8
   easy_localization: ^2.3.3
+  package_info: ^0.4.0+16
+
 
   janus_client: #^0.0.4
     git:

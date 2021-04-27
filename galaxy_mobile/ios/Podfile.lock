@@ -8,12 +8,20 @@ PODS:
   - flutter_appauth (0.0.1):
     - AppAuth (= 1.3.1)
     - Flutter
+  - flutter_email_sender (0.0.1):
+    - Flutter
+  - flutter_logs (0.0.1):
+    - Flutter
+    - ZIPFoundation
   - flutter_volume_slider (1.0.0):
     - Flutter
   - flutter_webrtc (0.5.8):
     - Flutter
     - GoogleWebRTC (= 1.1.31999)
     - Libyuv (= 1703)
+  - fluttertoast (0.0.2):
+    - Flutter
+    - Toast
   - GoogleWebRTC (1.1.31999)
   - janus_client (0.0.1):
     - Flutter
@@ -24,12 +32,17 @@ PODS:
     - Flutter
   - shared_preferences (0.0.1):
     - Flutter
+  - Toast (4.0.0)
+  - ZIPFoundation (0.9.11)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_appauth (from `.symlinks/plugins/flutter_appauth/ios`)
+  - flutter_email_sender (from `.symlinks/plugins/flutter_email_sender/ios`)
+  - flutter_logs (from `.symlinks/plugins/flutter_logs/ios`)
   - flutter_volume_slider (from `.symlinks/plugins/flutter_volume_slider/ios`)
   - flutter_webrtc (from `.symlinks/plugins/flutter_webrtc/ios`)
+  - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - janus_client (from `.symlinks/plugins/janus_client/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - searchable_dropdown (from `.symlinks/plugins/searchable_dropdown/ios`)
@@ -40,16 +53,24 @@ SPEC REPOS:
     - AppAuth
     - GoogleWebRTC
     - Libyuv
+    - Toast
+    - ZIPFoundation
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
   flutter_appauth:
     :path: ".symlinks/plugins/flutter_appauth/ios"
+  flutter_email_sender:
+    :path: ".symlinks/plugins/flutter_email_sender/ios"
+  flutter_logs:
+    :path: ".symlinks/plugins/flutter_logs/ios"
   flutter_volume_slider:
     :path: ".symlinks/plugins/flutter_volume_slider/ios"
   flutter_webrtc:
     :path: ".symlinks/plugins/flutter_webrtc/ios"
+  fluttertoast:
+    :path: ".symlinks/plugins/fluttertoast/ios"
   janus_client:
     :path: ".symlinks/plugins/janus_client/ios"
   path_provider:
@@ -63,14 +84,19 @@ SPEC CHECKSUMS:
   AppAuth: 8803ba1aec6d00d9afd30093f82e600307eaa6ea
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_appauth: a6bf9fa3192a14a981475c4cbe3bcebd3b563144
+  flutter_email_sender: 02d7443217d8c41483223627972bfdc09f74276b
+  flutter_logs: 5d0dca26963e0f30b11a995a764744ef77d5d428
   flutter_volume_slider: 626493356983f02af6b984b596b071c90171002d
-  flutter_webrtc: 39898454258b54ba51996850d5da8d5d53bf1524
+  flutter_webrtc: df1bbf337481ed0e1f95f998f5db0fa55d748305
+  fluttertoast: 6122fa75143e992b1d3470f61000f591a798cc58
   GoogleWebRTC: b39a78c4f5cc6b0323415b9233db03a2faa7b0f0
   janus_client: d77ae8ecd25551407740931f9506f1a64ba067a3
   Libyuv: 5f79ced0ee66e60a612ca97de1e6ccacd187a437
   path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
   searchable_dropdown: 5058be32fdc5e0481d300ff2087129072e71bd62
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
+  Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
+  ZIPFoundation: b1f0de4eed33e74a676f76e12559ab6b75990197
 
 PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
 
