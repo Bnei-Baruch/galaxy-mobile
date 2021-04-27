@@ -1,13 +1,10 @@
 {
-  "msg1":"Hello world",
-  "msg2":"Hi there",
-  "msg3":"beer time",
   "language": "English",
   "english": "English",
   "russian": "Russian",
 
-  "our_connection": "OUR CONNECTION",
-  "network": "NETWORK",
+  "logo_text_1": "OUR CONNECTION",
+  "logo_text_2": "NETWORK",
   "hello_user": "Hello {}",
   "login": "Login",
   "settings": "Settings",

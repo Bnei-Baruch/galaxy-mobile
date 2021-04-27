@@ -20,9 +20,9 @@ class Login extends StatelessWidget {
           Column(crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: 25),
-                Text('our_connection'.tr(),
+                Text('logo_text_1'.tr(),
                     style: TextStyle(color: Color(0xff00c6d2), fontSize: 22)),
-                Text('network'.tr(),
+                Text('logo_text_2'.tr(),
                     style: TextStyle(color: Color(0xff00457c), fontSize: 22)),
           ]),
         ]),
