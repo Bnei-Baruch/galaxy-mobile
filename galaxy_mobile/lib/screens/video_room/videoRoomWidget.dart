@@ -46,6 +46,8 @@ class VideoRoom extends StatefulWidget {
 
   VoidCallback RoomReady;
 
+  bool myVideoNeedsRecreation = false;
+
   // VideoRoom(String serverUrl, String token, int roomNumber)
   //     : this.roomNumber = roomNumber,
   //       this.token = token,
@@ -84,6 +86,7 @@ class VideoRoom extends StatefulWidget {
   }
 
   void toggleVideo() {
+    FlutterLogs.logInfo("VideoRoom", "toggleVideo", "entering");
     myStream.getVideoTracks().first.enabled =
         !myStream.getVideoTracks().first.enabled;
 
@@ -93,6 +96,9 @@ class VideoRoom extends StatefulWidget {
       });
     else
       myVideoMuted = !myVideoMuted;
+    // }
+    FlutterLogs.logInfo("VideoRoom", "toggleVideo",
+        "${myStream.getVideoTracks().first.toString()}");
   }
 
   void setUserState(var user) {
@@ -1344,19 +1350,28 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     super.didChangeAppLifecycleState(state);
     switch (state) {
       case AppLifecycleState.inactive:
-        print('xxx videoroom inactive');
+        FlutterLogs.logInfo(
+            "videoRoom", "didChangeAppLifecycleState", 'inactive');
+        if (widget.myVideoMuted) {
+          widget.toggleVideo();
+          widget.updateVideoState(!widget.myVideoMuted);
+        }
         break;
       case AppLifecycleState.resumed:
-        print('xxx videoroom resumed');
-        // widget.pluginHandle.initializeMediaDevices().then((value) =>
-        //     {widget.myStream = value, widget._localRenderer.srcObject = value});
+        FlutterLogs.logInfo(
+            "videoRoom", "didChangeAppLifecycleState", 'resumed');
+        FlutterLogs.logInfo("videoRoom", "didChangeAppLifecycleState",
+            'pluginHandle is present = ${widget.pluginHandle != null}');
 
         break;
       case AppLifecycleState.paused:
-        print('xxx videoroom paused');
+        FlutterLogs.logInfo(
+            "videoRoom", "didChangeAppLifecycleState", 'paused');
+
         break;
       case AppLifecycleState.detached:
-        print('xxx videoroom  detached');
+        FlutterLogs.logInfo(
+            "videoRoom", "didChangeAppLifecycleState", 'detached');
         break;
     }
   }
