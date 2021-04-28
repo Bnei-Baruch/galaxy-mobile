@@ -37,7 +37,8 @@ class _DashboardState extends State<Dashboard> {
             authService.getUserEmail(),
             authService.getAuthToken(),
             this.handleCmdData,
-            this.connectedToBroker);
+            this.connectedToBroker,
+            this.subscribedToTopic);
         _mqttClient.connect();
       }
     };
@@ -66,13 +67,21 @@ class _DashboardState extends State<Dashboard> {
       }
     } on FormatException catch (e) {
       FlutterLogs.logError("Dashboard", "handleCmdData",
-          "The provided string is not valid JSON");
+          "The provided string is not valid JSON: ${e.toString()}");
     }
   }
 
   void connectedToBroker() {
     _mqttClient.subscribe("galaxy/room/" + _activeRoomId);
-    updateRoomWithMyVideoState();
+    // updateRoomWithMyVideoState();
+  }
+
+  void subscribedToTopic(String topic) {
+    if (topic == "galaxy/room/" + _activeRoomId) {
+      FlutterLogs.logInfo(
+          "Dashboard", "subscribedToTopic", "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+      updateRoomWithMyVideoState();
+    }
   }
 
   void updateRoomWithMyVideoState() {
@@ -132,10 +141,13 @@ class _DashboardState extends State<Dashboard> {
                       )
                     : Icon(Icons.videocam),
                 label: "Video"),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.live_help),
-              label: 'Ask Question',
-            ),
+
+            // todo: uncomment upon Q logic implemented
+            // BottomNavigationBarItem(
+            //   icon: Icon(Icons.live_help),
+            //   label: 'Ask Question',
+            // )
+            // todo <<<
           ],
           // currentIndex: _selectedIndex,
           // selectedItemColor: Colors.amber[800],

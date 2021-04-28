@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 class AudioMode extends StatelessWidget {
+  final bool enabled = false;
   @override
   Widget build(BuildContext context) {
     final audioMode = context.select((MainStore s) => s.audioMode);
@@ -13,8 +14,12 @@ class AudioMode extends StatelessWidget {
       value: audioMode,
       secondary: const Icon(Icons.videocam_off),
       onChanged: (bool value) => {
-        context.read<MainStore>().setAudioMode(value)
+        if (enabled) {
+          context.read<MainStore>().setAudioMode(value)
+        }
       },
     );
   }
+
+  bool isEnabled() { return enabled; }
 }

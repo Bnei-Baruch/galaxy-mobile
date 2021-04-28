@@ -9,10 +9,14 @@ class MQTTClient {
   MqttServerClient _client;
 
   final void Function() _onConnectedcallback;
+  final void Function(String) _onSubscribedcallback;
   final void Function(String) _onMsgReceivedcallback;
 
-  MQTTClient(this._username, this._password, this._onMsgReceivedcallback,
-      this._onConnectedcallback) {
+  MQTTClient(this._username, this._password,
+      this._onMsgReceivedcallback,
+      this._onConnectedcallback,
+      this._onSubscribedcallback)
+  {
     _client =
         MqttServerClient.withPort('mqtt.kli.one', 'mobile_test_clientid', 9001);
   }
@@ -27,7 +31,6 @@ class MQTTClient {
     _client.pongCallback = pong;
     _client.secure = true;
     _client.connectionMessage = MqttConnectMessage()
-        // .authenticateAs('kirilsagoth2@gmail.com', _password)
         .authenticateAs(_username, _password)
         .withClientIdentifier('mobile_test_clientid')
         .keepAliveFor(60)
@@ -86,6 +89,7 @@ class MQTTClient {
   void onSubscribed(String topic) {
     FlutterLogs.logInfo(
         "MQTTClient", "onSubscribed", "Subscribed to topic: $topic");
+    _onSubscribedcallback(topic);
   }
 
   void onSubscribeFail(String topic) {

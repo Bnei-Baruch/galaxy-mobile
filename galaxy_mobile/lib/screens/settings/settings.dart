@@ -54,7 +54,8 @@ class _SettingsState extends State<Settings> {
                           child: Text("hello_user".tr(args:
                           ['${activeUser.name}']),
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(color: Colors.white, fontSize: 30,
+                              style: TextStyle(color: Colors.white,
+                                  fontSize: 30,
                                   fontWeight: FontWeight.normal)
                           )
                       )
@@ -90,8 +91,10 @@ class _SettingsState extends State<Settings> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [selfWidget]),
                 SizedBox(height: 20),
-
-                AudioMode(),
+                Opacity(
+                  opacity: 0.3,
+                  child: AudioMode(),
+                ),
                 SizedBox(height: 10),
 
                 Row(children: [
@@ -105,12 +108,15 @@ class _SettingsState extends State<Settings> {
                       height: 60.0,
                       child: RaisedButton(
                           child: Text("join_room".tr(),
-                              style: TextStyle(color: Colors.white, fontSize: 20)),
+                              style: TextStyle(color: Colors.white,
+                                  fontSize: 20)),
 
                           onPressed: ()  {
-                            Navigator.pushNamed(context, '/dashboard').then((value) => setState(() {
-                              selfWidget.restartCamera();
-                            }));
+                            Navigator.pushNamed(context, '/dashboard')
+                                .then((value) => setState(() {
+                                  selfWidget.restartCamera();
+                                })
+                            );
                           })
                   ),
                   SizedBox(width: 10)
