@@ -48,11 +48,6 @@ class VideoRoom extends StatefulWidget {
 
   bool myVideoNeedsRecreation = false;
 
-  // VideoRoom(String serverUrl, String token, int roomNumber)
-  //     : this.roomNumber = roomNumber,
-  //       this.token = token,
-  //       this.server = serverUrl;
-
   void exitRoom() {
     j.destroy();
     pluginHandle.hangup();
@@ -416,6 +411,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
               var event = msg['videoroom'];
               if (event != null) {
                 if (event == 'joined') {
+                  // widget._onUpdateVideoStateCallback();
                   widget.myid = msg["id"];
                   widget.mypvtid = msg["private_id"];
 
@@ -650,7 +646,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                 "ptype": "publisher",
                 "display": jsonEncode({
                   "id": widget.user.sub,
-                  "timestamp": DateTime.now().millisecond,
+                  "timestamp": DateTime.now().millisecondsSinceEpoch,
                   "role": "user",
                   "display": widget.user.givenName
                 }) //'User test'

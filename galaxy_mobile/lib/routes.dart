@@ -12,5 +12,5 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
   '/dashboard': (BuildContext context) => Dashboard(),
   '/streaming': (BuildContext context) => StreamingUnified(),
   '/play_widget': (BuildContext context) => PlayerWidget(),
-  '/roomWidget': (BuildContext context) => VideoRoom(),
+  // '/roomWidget': (BuildContext context) => VideoRoom(),
 };

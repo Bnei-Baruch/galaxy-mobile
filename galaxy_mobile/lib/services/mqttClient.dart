@@ -8,14 +8,14 @@ class MQTTClient {
 
   MqttServerClient _client;
 
-  final void Function() _onConnectedcallback;
-  final void Function(String) _onSubscribedcallback;
-  final void Function(String) _onMsgReceivedcallback;
+  final void Function() _onConnectedCallback;
+  final void Function(String) _onSubscribedCallback;
+  final void Function(String) _onMsgReceivedCallback;
 
   MQTTClient(this._username, this._password,
-      this._onMsgReceivedcallback,
-      this._onConnectedcallback,
-      this._onSubscribedcallback)
+      this._onMsgReceivedCallback,
+      this._onConnectedCallback,
+      this._onSubscribedCallback)
   {
     _client =
         MqttServerClient.withPort('mqtt.kli.one', 'mobile_test_clientid', 9001);
@@ -39,7 +39,7 @@ class MQTTClient {
         .withWillTopic('galaxy/service/user')
         .withWillMessage('{ type: \'event\', user: false }')
         .withWillRetain()
-        .withWillQos(MqttQos.atMostOnce);
+        .withWillQos(MqttQos.exactlyOnce);
 
     try {
       await _client.connect();
@@ -57,14 +57,14 @@ class MQTTClient {
 
       FlutterLogs.logInfo("MQTTClient", "listen",
           "Received message: $payload from topic: ${c[0].topic}>");
-      _onMsgReceivedcallback(payload);
+      _onMsgReceivedCallback(payload);
     });
 
     return _client;
   }
 
   void subscribe(String topic) {
-    _client.subscribe(topic, MqttQos.atMostOnce);
+    _client.subscribe(topic, MqttQos.exactlyOnce);
   }
 
   void unsubscribe(String topic) {
@@ -74,12 +74,12 @@ class MQTTClient {
   void send(String topic, String content) {
     final builder = MqttClientPayloadBuilder();
     builder.addString(content);
-    _client.publishMessage(topic, MqttQos.atLeastOnce, builder.payload);
+    _client.publishMessage(topic, MqttQos.exactlyOnce, builder.payload);
   }
 
   void onConnected() {
     FlutterLogs.logInfo("MQTTClient", "onConnected", "Connected");
-    _onConnectedcallback();
+    _onConnectedCallback();
   }
 
   void onDisconnected() {
@@ -89,7 +89,7 @@ class MQTTClient {
   void onSubscribed(String topic) {
     FlutterLogs.logInfo(
         "MQTTClient", "onSubscribed", "Subscribed to topic: $topic");
-    _onSubscribedcallback(topic);
+    _onSubscribedCallback(topic);
   }
 
   void onSubscribeFail(String topic) {

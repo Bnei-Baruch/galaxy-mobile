@@ -78,13 +78,15 @@ class _DashboardState extends State<Dashboard> {
 
   void subscribedToTopic(String topic) {
     if (topic == "galaxy/room/" + _activeRoomId) {
-      FlutterLogs.logInfo(
-          "Dashboard", "subscribedToTopic", "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-      updateRoomWithMyVideoState();
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        updateRoomWithMyVideoState();
+      });
     }
   }
 
   void updateRoomWithMyVideoState() {
+    FlutterLogs.logInfo(
+        "Dashboard", "updateRoomWithMyVideoState", "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
     var userData = activeUser.toJson();
     userData["camera"] = !widget.videoMute;
     userData["question"] = false;
