@@ -45,8 +45,8 @@ dependencies:
   fluttertoast: ^7.1.8
   easy_localization: ^2.3.3
   package_info: ^0.4.0+16
-
-
+  firebase_core: ^0.4.0+9
+  firebase_analytics: ^5.0.2
   janus_client: #^0.0.4
     git:
       url: https://github.com/igala/flutter_janus_client.git
