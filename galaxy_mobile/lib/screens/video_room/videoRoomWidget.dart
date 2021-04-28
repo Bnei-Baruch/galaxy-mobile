@@ -46,6 +46,8 @@ class VideoRoom extends StatefulWidget {
 
   VoidCallback RoomReady;
 
+  bool myVideoNeedsRecreation = false;
+
   // VideoRoom(String serverUrl, String token, int roomNumber)
   //     : this.roomNumber = roomNumber,
   //       this.token = token,
@@ -84,6 +86,7 @@ class VideoRoom extends StatefulWidget {
   }
 
   void toggleVideo() {
+    FlutterLogs.logInfo("VideoRoom", "toggleVideo", "entering");
     myStream.getVideoTracks().first.enabled =
         !myStream.getVideoTracks().first.enabled;
 
@@ -93,6 +96,9 @@ class VideoRoom extends StatefulWidget {
       });
     else
       myVideoMuted = !myVideoMuted;
+    // }
+    FlutterLogs.logInfo("VideoRoom", "toggleVideo",
+        "${myStream.getVideoTracks().first.toString()}");
   }
 
   void setUserState(var user) {
@@ -646,7 +652,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                   "id": widget.user.sub,
                   "timestamp": DateTime.now().millisecond,
                   "role": "user",
-                  "display": widget.user.name
+                  "display": widget.user.givenName
                 }) //'User test'
               };
               plugin.send(
@@ -955,53 +961,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
       initialized = true;
       initInfra();
     }
-    return
-//         appBar: AppBar(
-//           actions: [
-//             IconButton(
-//                 icon: Icon(
-//                   Icons.call,
-//                   color: Colors.greenAccent,
-//                 ),
-//                 onPressed: () async {
-//                   await this.initRenderers();
-//                   await this.initPlatformState();
-// //                  -_localRenderer.
-//                 }),
-//             IconButton(
-//                 icon: Icon(
-//                   Icons.call_end,
-//                   color: Colors.red,
-//                 ),
-//                 onPressed: () {
-//                   j.destroy();
-//                   pluginHandle.hangup();
-//                   subscriberHandle.hangup();
-//                   _localRenderer.srcObject = null;
-//                   _localRenderer.dispose();
-//                   _remoteRenderer.map((e) => e.srcObject = null);
-//                   _remoteRenderer.map((e) => e.dispose());
-//                   setState(() {
-//                     pluginHandle = null;
-//                     subscriberHandle = null;
-//                   });
-//                 }),
-//             IconButton(
-//                 icon: Icon(
-//                   Icons.switch_camera,
-//                   color: Colors.white,
-//                 ),
-//                 onPressed: () {
-//                   if (pluginHandle != null) {
-//                     pluginHandle.switchCamera();
-//                   }
-//                 })
-//           ],
-//           title: const Text('janus_client'),
-//         ),
-
-        // Row(children: [
-        Container(
+    return Container(
       alignment: Alignment.topCenter,
       height: MediaQuery.of(context).size.height / 3 * 2 - 140,
       child: Stack(
@@ -1037,7 +997,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                                   : Colors.red,
                               size: 18,
                             ),
-                            Text(widget.user.name),
+                            Text(widget.user.givenName),
                           ],
                         ),
                       ),
@@ -1390,16 +1350,28 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     super.didChangeAppLifecycleState(state);
     switch (state) {
       case AppLifecycleState.inactive:
-        print('xxx videoroom inactive');
+        FlutterLogs.logInfo(
+            "videoRoom", "didChangeAppLifecycleState", 'inactive');
+        if (widget.myVideoMuted) {
+          widget.toggleVideo();
+          widget.updateVideoState(!widget.myVideoMuted);
+        }
         break;
       case AppLifecycleState.resumed:
-        print('xxx videoroom resumed');
+        FlutterLogs.logInfo(
+            "videoRoom", "didChangeAppLifecycleState", 'resumed');
+        FlutterLogs.logInfo("videoRoom", "didChangeAppLifecycleState",
+            'pluginHandle is present = ${widget.pluginHandle != null}');
+
         break;
       case AppLifecycleState.paused:
-        print('xxx videoroom paused');
+        FlutterLogs.logInfo(
+            "videoRoom", "didChangeAppLifecycleState", 'paused');
+
         break;
       case AppLifecycleState.detached:
-        print('xxx videoroom  detached');
+        FlutterLogs.logInfo(
+            "videoRoom", "didChangeAppLifecycleState", 'detached');
         break;
     }
   }
@@ -1412,32 +1384,3 @@ class RoomArguments {
   final User user;
   RoomArguments(this.server, this.token, this.roomNumber, this.user);
 }
-
-// CarouselSlider(
-// height: 200.0,
-// autoPlay: true,
-// autoPlayInterval: Duration(seconds: 3),
-// autoPlayAnimationDuration: Duration(milliseconds: 800),
-// autoPlayCurve: Curves.fastOutSlowIn,
-// pauseAutoPlayOnTouch: Duration(seconds: 10),
-// aspectRatio: 2.0,
-// onPageChanged: (index) {
-// setState(() {
-// _currentIndex = index;
-// });
-// },
-// items: cardList.map((card){
-// return Builder(
-// builder:(BuildContext context){
-// return Container(
-// height: MediaQuery.of(context).size.height*0.30,
-// width: MediaQuery.of(context).size.width,
-// child: Card(
-// color: Colors.blueAccent,
-// child: card,
-// ),
-// );
-// }
-// );
-// }).toList(),
-// ),

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "892662773397",
+    "project_id": "galaxy-mobile-a9387",
+    "storage_bucket": "galaxy-mobile-a9387.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:892662773397:android:d0d9b1fec14302276c8d9c",
+        "android_client_info": {
+          "package_name": "com.galaxy_mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "892662773397-12jkd0jbivfd79qm1pgg48bgne9gvnqv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwysOx9g4zpg9w1UHKsM7zQNg_txYDfdE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "892662773397-12jkd0jbivfd79qm1pgg48bgne9gvnqv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

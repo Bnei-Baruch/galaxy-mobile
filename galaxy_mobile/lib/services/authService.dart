@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
+import 'package:dio_http_cache/dio_http_cache.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:galaxy_mobile/config/env.dart';
@@ -75,10 +76,14 @@ class User {
 class AuthService {
   final FlutterAppAuth _appAuth = FlutterAppAuth();
   final Dio _dio = Dio();
+  DioCacheManager _dioCacheManager = DioCacheManager(CacheConfig());
+
+  Options _cacheOptions = buildCacheOptions(Duration(days: 7));
   String _authEmail;
   String _authToken;
 
   AuthService() {
+    _dio.interceptors.add(_dioCacheManager.interceptor);
     this._dio.interceptors.add(LogInterceptors());
   }
 
@@ -89,6 +94,7 @@ class AuthService {
       AuthorizationTokenRequest(
         _clientId,
         _redirectUrl,
+        promptValues: _authToken == null ? ['login'] : [],
         discoveryUrl: _discoveryUrl,
         scopes: _scopes,
       ),
@@ -120,6 +126,7 @@ class AuthService {
 
   Future<void> logout() async {
     FlutterLogs.logInfo("AuthService", "signIn", "logout");
+    _authToken = null;
     await _dio.get(APP_OPENID_END_SESSION_ENDPOINT);
   }
 }

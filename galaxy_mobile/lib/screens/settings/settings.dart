@@ -41,7 +41,8 @@ class _SettingsState extends State<Settings> {
             title: Text("settings".tr()),
           ),
           drawer: AppDrawer(),
-          body: Column(mainAxisAlignment: MainAxisAlignment.start,
+          body: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: 20),
@@ -51,19 +52,17 @@ class _SettingsState extends State<Settings> {
                       child: Container(
                           padding: EdgeInsets.only(right: 13.0),
                           width: MediaQuery.of(context).size.width * 0.9,
-                          child: Text("hello_user".tr(args:
-                          ['${activeUser.name}']),
+                          child: Text(
+                              "hello_user"
+                                  .tr(args: ['${activeUser.givenName}']),
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(color: Colors.white,
+                              style: TextStyle(
+                                  color: Colors.white,
                                   fontSize: 30,
-                                  fontWeight: FontWeight.normal)
-                          )
-                      )
-                  ),
+                                  fontWeight: FontWeight.normal)))),
                   SizedBox(width: 10)
                 ]),
                 SizedBox(height: 10),
-
                 Row(children: [
                   SizedBox(width: 10),
                   Flexible(
@@ -71,13 +70,11 @@ class _SettingsState extends State<Settings> {
                           padding: EdgeInsets.only(right: 13.0),
                           width: MediaQuery.of(context).size.width * 0.9,
                           child: Text("settings_desc".tr(),
-                              style: TextStyle(color: Colors.white, fontSize: 20))
-                      )
-                  ),
+                              style: TextStyle(
+                                  color: Colors.white, fontSize: 20)))),
                   SizedBox(width: 10)
                 ]),
                 SizedBox(height: 20),
-
                 Row(children: [
                   SizedBox(width: 10),
                   Flexible(child: ScreenName(activeUser.givenName)),
@@ -86,8 +83,8 @@ class _SettingsState extends State<Settings> {
                   SizedBox(width: 10)
                 ]),
                 SizedBox(height: 20),
-
-                Row(mainAxisAlignment: MainAxisAlignment.center,
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [selfWidget]),
                 SizedBox(height: 20),
@@ -96,7 +93,6 @@ class _SettingsState extends State<Settings> {
                   child: AudioMode(),
                 ),
                 SizedBox(height: 10),
-
                 Row(children: [
                   SizedBox(width: 10),
                   Flexible(child: RoomSelector()),
@@ -108,22 +104,17 @@ class _SettingsState extends State<Settings> {
                       height: 60.0,
                       child: RaisedButton(
                           child: Text("join_room".tr(),
-                              style: TextStyle(color: Colors.white,
-                                  fontSize: 20)),
-
-                          onPressed: ()  {
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 20)),
+                          onPressed: () {
                             Navigator.pushNamed(context, '/dashboard')
                                 .then((value) => setState(() {
-                                  selfWidget.restartCamera();
-                                })
-                            );
-                          })
-                  ),
+                                      selfWidget.restartCamera();
+                                    }));
+                          })),
                   SizedBox(width: 10)
                 ]),
-              ]
-          )
-      );
+              ]));
     }
   }
 }
