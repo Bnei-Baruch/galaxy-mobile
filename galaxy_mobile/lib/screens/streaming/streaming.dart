@@ -38,11 +38,12 @@ class StreamingUnified extends StatefulWidget {
 }
 
 class _StreamingUnifiedState extends State<StreamingUnified> {
-  JanusClient janusClient = JanusClient(iceServers: [
+  JanusClient janusClient =
+  JanusClient(iceServers: [
     RTCIceServer(url: "stun:stream.kli.one:3478", username: "", credential: "")
-  ], server: [
-    "https://str2.kli.one/janustrl"
-  ], withCredentials: false, apiSecret: "secret", isUnifiedPlan: true);
+  ],
+      server: ["https://str2.kli.one/janustrl"],
+      withCredentials: false, apiSecret: "secret", isUnifiedPlan: true);
 
   TextEditingController nameController = TextEditingController();
   RTCVideoRenderer _remoteRenderer = new RTCVideoRenderer();
@@ -118,10 +119,11 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
     playerOverlay.mute = (muted) {
       FlutterLogs.logInfo("Streaming", "&&&&&&&&&&&&&&&&",
           "playerOverlay.mute: ${muted.toString()}");
-      if (muted)
+      if (muted) {
         _remoteStreamAudio.getAudioTracks().first.setVolume(0);
-      else
+      } else {
         _remoteStreamAudio.getAudioTracks().first.setVolume(0.5);
+      }
     };
     playerOverlay.audioChange = () {
       context

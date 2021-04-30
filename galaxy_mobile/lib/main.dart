@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/routes.dart';
 import 'package:galaxy_mobile/services/api.dart';
@@ -60,13 +61,18 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      localizationsDelegates: context.localizationDelegates,
-      supportedLocales: context.supportedLocales,
-      locale: context.locale,
-      theme: appTheme(),
-      initialRoute: '/',
-      routes: routes,
+    return ScreenUtilInit(
+        designSize: Size(412, 732),
+        allowFontScaling: false,
+        builder: () =>
+            MaterialApp(
+              localizationsDelegates: context.localizationDelegates,
+              supportedLocales: context.supportedLocales,
+              locale: context.locale,
+              theme: appTheme(),
+              initialRoute: '/',
+              routes: routes,
+            )
     );
   }
 }

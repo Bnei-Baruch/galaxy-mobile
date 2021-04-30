@@ -22,8 +22,6 @@ class UILanguageSelector extends StatelessWidget {
   }
 
   String getLanguage(BuildContext context) {
-    FlutterLogs.logInfo("UILanguageSelector", "getLanguage",
-        ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ${EasyLocalization.of(context).locale.languageCode}");
     switch (EasyLocalization.of(context).locale.languageCode) {
       case "en":
         return "English";

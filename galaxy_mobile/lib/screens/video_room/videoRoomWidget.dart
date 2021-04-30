@@ -414,19 +414,14 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                   // widget._onUpdateVideoStateCallback();
                   widget.myid = msg["id"];
                   widget.mypvtid = msg["private_id"];
-
-                  if (msg["publishers"] != null) {
-                    FlutterLogs.logInfo(
-                        "VideoRoom", "initPlatformState", "publisher on msg");
-
-                    var list = msg["publishers"];
+                  var publishersList = msg['publishers'];
+                  if (publishersList != null) {
                     FlutterLogs.logInfo("VideoRoom", "initPlatformState",
-                        "got publishers: ${list.toString()}");
+                        "got publishers: ${publishersList.toString()}");
 
                     List<Map> subscription = new List<Map>();
-                    //    _newRemoteFeed(j, list[0]["id"]);
-                    final filtereList = List.from(list);
-                    filtereList.forEach((item) => {
+                    final filteredList = List.from(publishersList);
+                    filteredList.forEach((item) => {
                           if ((item["streams"] as List).length == 2)
                             {
                               subscription.add({
@@ -436,11 +431,11 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                             }
                         });
 
-                    (msg['publishers'] as List).forEach((value) =>
+                    (publishersList as List).forEach((value) =>
                         value["display"] = (jsonDecode(value["display"])));
                     //( (l)  => l["display"] = (jsonDecode(l["display"])) as Map);
                     //          List newFeeds = sortAndFilterFeeds();
-                    List newFeeds = msg['publishers'];
+                    List newFeeds = publishersList;
                     FlutterLogs.logInfo(
                         "VideoRoom",
                         "initPlatformState",
@@ -451,12 +446,14 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                     newFeedsIds
                         .addAll(newFeeds.map((feed) => feed["id"]).toSet());
                     if (feeds != null &&
-                        feeds.any((feed) => newFeedsIds.lookup(feed["id"]))) {
+                        feeds.any((feed) => newFeedsIds.lookup(feed["id"])))
+                    {
                       FlutterLogs.logInfo(
                           "VideoRoom",
                           "initPlatformState",
-                          "New feed joining but one of the feeds already exist: "
-                              "${newFeeds.toString()} | ${list.toString()}");
+                          "new feed joining but one of the feeds already exist: "
+                              "${newFeeds.toString()} | "
+                              "${publishersList.toString()}");
                       return;
                     }
                     // Merge new feed with existing feeds and sort.
@@ -539,7 +536,8 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                     //   this.state.virtualStreamingJanus.setVideo(NO_VIDEO_OPTION_VALUE);
                     // }
                   } else if (msg['publishers'] != null &&
-                      msg['publishers'] != null) {
+                      msg['publishers'] != null)
+                  {
                     FlutterLogs.logInfo(
                         "VideoRoom", "initPlatformState", "just joined");
                     // User just joined the room.
@@ -581,7 +579,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                   } else if (msg['leaving'] != null && msg['leaving'] != null) {
                     // User leaving the room which is same as publishers gone.
 
-                    final leaving = msg["leaving"];
+                    final leaving = msg['leaving'];
                     FlutterLogs.logInfo("VideoRoom", "initPlatformState",
                         "publisher: ${leaving.toString()} is leaving");
                     // const { feeds } = this.state;

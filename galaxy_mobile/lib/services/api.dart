@@ -89,7 +89,6 @@ class Api {
         .get('/groups', queryParameters: {'with_num_users': withNumUsers});
     List<Object> rooms = response.data['rooms'];
     FlutterLogs.logInfo("Api", "fetchAvailableRooms", "rooms: " + response.data['rooms'].toString());
-    // print(response.data['rooms']);
     return rooms.map((dynamic e) => Room.fromJson(e)).toList();
   }
 
