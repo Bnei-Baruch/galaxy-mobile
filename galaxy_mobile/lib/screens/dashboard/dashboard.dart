@@ -14,6 +14,8 @@ class Dashboard extends StatefulWidget {
   bool audioMute = true;
   bool videoMute = true;
 
+  _DashboardState state;
+
   @override
   State createState() => _DashboardState();
 }
@@ -30,6 +32,7 @@ class _DashboardState extends State<Dashboard> {
   @override
   void initState() {
     // TODO: implement initState
+    widget.state = this;
     videoRoom.RoomReady = () {
       final authService = context.read<AuthService>();
       if (_mqttClient == null) {
@@ -41,6 +44,31 @@ class _DashboardState extends State<Dashboard> {
             this.subscribedToTopic);
         _mqttClient.connect();
       }
+    };
+    videoRoom.callExitRoomUserExists = () {
+      stream.exit();
+      videoRoom.exitRoom();
+      if (_mqttClient != null)
+        _mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
+      showDialog(
+        context: context,
+        builder: (context) => new AlertDialog(
+          title: new Text('Room Message'),
+          content: Text('Your user is already in the room'),
+          actions: <Widget>[
+            new FlatButton(
+              onPressed: () {
+                Navigator.of(context, rootNavigator: true).pop();
+
+                Navigator.of(widget.state.context).pop();
+
+                // dismisses only the dialog and returns nothing
+              },
+              child: new Text('OK'),
+            ),
+          ],
+        ),
+      );
     };
     activeUser = context.read<MainStore>().activeUser;
 
@@ -85,8 +113,8 @@ class _DashboardState extends State<Dashboard> {
   }
 
   void updateRoomWithMyVideoState() {
-    FlutterLogs.logInfo(
-        "Dashboard", "updateRoomWithMyVideoState", "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+    FlutterLogs.logInfo("Dashboard", "updateRoomWithMyVideoState",
+        "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
     var userData = activeUser.toJson();
     userData["camera"] = !widget.videoMute;
     userData["question"] = false;

@@ -26,4 +26,7 @@ class SharedPrefs {
 
   int get videoPreset => _sharedPrefs.getInt('videoPreset') ?? 1;
   set videoPreset(int value) => _sharedPrefs.setInt('videoPreset', value);
+
+  int get sessionDate => _sharedPrefs.getInt('sessionDate') ?? 0;
+  set sessionDate(int value) => _sharedPrefs.setInt('sessionDate', value);
 }

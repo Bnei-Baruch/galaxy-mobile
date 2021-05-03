@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_foreground_plugin/flutter_foreground_plugin.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/services/authService.dart';
 import 'package:galaxy_mobile/utils/switch_page_helper.dart';
@@ -15,6 +16,8 @@ import 'dart:async';
 
 import 'package:synchronized/synchronized.dart';
 
+import '../../main.dart';
+
 typedef BoolCallback = Function(bool);
 final int PAGE_SIZE = 3;
 
@@ -23,7 +26,7 @@ class VideoRoom extends StatefulWidget {
   String server;
   String token;
   int roomNumber;
-
+  VoidCallback callExitRoomUserExists;
   User user;
 
   JanusClient j;
@@ -48,10 +51,12 @@ class VideoRoom extends StatefulWidget {
 
   bool myVideoNeedsRecreation = false;
 
+  Plugin chatHandle;
+
   void exitRoom() {
-    j.destroy();
-    pluginHandle.hangup();
-    subscriberHandle.destroy();
+    if (j != null) j.destroy();
+    if (pluginHandle != null) pluginHandle.hangup();
+    if (subscriberHandle != null) subscriberHandle.destroy();
     _localRenderer.srcObject = null;
     _localRenderer.dispose();
     _remoteRenderer.map((e) => e.srcObject = null);
@@ -246,10 +251,10 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                       "subscribe Handle onSuccess create answer and start");
                   creatingFeed = false;
                 },
-                onError: (error) => {
-                      FlutterLogs.logError("VideoRoom", "_newRemoteFeed",
-                          "could not create answer: ${error.toString()}")
-                    });
+                onError: (error) {
+                  FlutterLogs.logError("VideoRoom", "_newRemoteFeed",
+                      "could not create answer: ${error.toString()}");
+                });
           } else {
             FlutterLogs.logWarn(
                 "VideoRoom", "_newRemoteFeed", "no jsep to answer");
@@ -441,13 +446,21 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                         "initPlatformState",
                         "New list of available publishers/feeds: "
                             "${newFeeds.toString()}");
+
+                    //check if mhy user id is already in the room
+                    newFeeds.forEach((element) {
+                      if (element["display"]["id"] == widget.user.id) {
+                        //notify on exit room
+                        widget.callExitRoomUserExists();
+                      }
+                    });
+
                     Set newFeedsIds = new Set();
                     // var tempset = newFeeds.map((feed) => feed["id"]).toSet();
                     newFeedsIds
                         .addAll(newFeeds.map((feed) => feed["id"]).toSet());
                     if (feeds != null &&
-                        feeds.any((feed) => newFeedsIds.lookup(feed["id"])))
-                    {
+                        feeds.any((feed) => newFeedsIds.lookup(feed["id"]))) {
                       FlutterLogs.logInfo(
                           "VideoRoom",
                           "initPlatformState",
@@ -536,8 +549,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                     //   this.state.virtualStreamingJanus.setVideo(NO_VIDEO_OPTION_VALUE);
                     // }
                   } else if (msg['publishers'] != null &&
-                      msg['publishers'] != null)
-                  {
+                      msg['publishers'] != null) {
                     FlutterLogs.logInfo(
                         "VideoRoom", "initPlatformState", "just joined");
                     // User just joined the room.
@@ -638,6 +650,35 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
               setState(() {
                 widget._localRenderer.srcObject = widget.myStream;
               });
+              //==> chat room can not added - infra does not support it yet == try to enter chat room, if user already exists then exit with error
+              // widget.j.attach(Plugin(
+              //     plugin: "janus.plugin.textroom",
+              //     opaqueId: widget.user.id,
+              //     onSuccess: (pluginHandle) {
+              //       var request = {"request": "setup"};
+              //       widget.chatHandle = pluginHandle;
+              //       widget.chatHandle.send(
+              //           message: request,
+              //           onSuccess: () {
+              //             FlutterLogs.logInfo("VideoRoom", "chatroom",
+              //                 "successfully subscribed to chatroom");
+              //           },
+              //           onError: (err) {
+              //             if (err == 420) {
+              //               //user already in room
+              //               showDialog(
+              //                   context: context,
+              //                   child: AlertDialog(
+              //                     title: Text("User Already In Room"),
+              //                   ));
+              //               widget.exitRoom();
+              //             }
+              //           });
+              //     },
+              //     onError: (err){
+              // FlutterLogs.logInfo("VideoRoom", "chatroom",
+              // "error subscribed to chatroom ${err.toString()}");
+              // }));
               var register = {
                 "request": "join",
                 "room": widget.roomNumber,
@@ -1356,16 +1397,18 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
             "videoRoom", "didChangeAppLifecycleState", 'resumed');
         FlutterLogs.logInfo("videoRoom", "didChangeAppLifecycleState",
             'pluginHandle is present = ${widget.pluginHandle != null}');
-
+        stopForegroundService();
         break;
       case AppLifecycleState.paused:
         FlutterLogs.logInfo(
             "videoRoom", "didChangeAppLifecycleState", 'paused');
+        startForegroundService();
 
         break;
       case AppLifecycleState.detached:
         FlutterLogs.logInfo(
             "videoRoom", "didChangeAppLifecycleState", 'detached');
+        stopForegroundService();
         break;
     }
   }

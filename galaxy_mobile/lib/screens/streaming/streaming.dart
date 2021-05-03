@@ -31,19 +31,23 @@ class StreamingUnified extends StatefulWidget {
   _StreamingUnifiedState createState() => _StreamingUnifiedState();
 
   void exit() {
-    if (videoStreamingPlugin != null)
+    if (videoStreamingPlugin != null) {
       videoStreamingPlugin.send(message: {"request": "stop"});
+      videoStreamingPlugin.hangup();
+      videoStreamingPlugin.destroy();
+    }
     audioStreamingPlugin.send(message: {"request": "stop"});
+    audioStreamingPlugin.hangup();
+    audioStreamingPlugin.destroy();
   }
 }
 
 class _StreamingUnifiedState extends State<StreamingUnified> {
-  JanusClient janusClient =
-  JanusClient(iceServers: [
+  JanusClient janusClient = JanusClient(iceServers: [
     RTCIceServer(url: "stun:stream.kli.one:3478", username: "", credential: "")
-  ],
-      server: ["https://str2.kli.one/janustrl"],
-      withCredentials: false, apiSecret: "secret", isUnifiedPlan: true);
+  ], server: [
+    "https://str2.kli.one/janustrl"
+  ], withCredentials: false, apiSecret: "secret", isUnifiedPlan: true);
 
   TextEditingController nameController = TextEditingController();
   RTCVideoRenderer _remoteRenderer = new RTCVideoRenderer();

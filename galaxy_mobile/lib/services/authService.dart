@@ -5,6 +5,7 @@ import 'package:dio_http_cache/dio_http_cache.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:galaxy_mobile/config/env.dart';
+import 'package:galaxy_mobile/models/sharedPref.dart';
 import 'package:galaxy_mobile/utils/dio_log.dart';
 import 'package:jwt_decode/jwt_decode.dart';
 
@@ -94,7 +95,8 @@ class AuthService {
       AuthorizationTokenRequest(
         _clientId,
         _redirectUrl,
-        promptValues: _authToken == null ? ['login'] : [],
+        promptValues:
+            (_authToken == null && checkSessionExpired()) ? ['login'] : [],
         discoveryUrl: _discoveryUrl,
         scopes: _scopes,
       ),
@@ -128,6 +130,23 @@ class AuthService {
     FlutterLogs.logInfo("AuthService", "signIn", "logout");
     _authToken = null;
     await _dio.get(APP_OPENID_END_SESSION_ENDPOINT);
+  }
+
+  bool checkSessionExpired() {
+    var date = SharedPrefs().sessionDate;
+    if (date == 0) {
+      var now = DateTime.now().millisecondsSinceEpoch;
+      SharedPrefs().sessionDate = now;
+      return true;
+    } else {
+      var now = DateTime.now();
+      var session = DateTime.fromMillisecondsSinceEpoch(date);
+      if (session.difference(now).inDays > 30) {
+        return true;
+      } else {
+        return false;
+      }
+    }
   }
 }
 
