@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'dart:convert';
+import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_plugin/flutter_foreground_plugin.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
@@ -11,6 +12,8 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:janus_client/Plugin.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_logs/flutter_logs.dart';
+import 'package:flutter/services.dart';
+
 
 import 'dart:async';
 
@@ -978,6 +981,10 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown
+    ]);
     final s = context.read<MainStore>();
 
     final args = RoomArguments(s.activeGateway.url, s.activeGateway.token,
@@ -1316,6 +1323,14 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                   switchPage(page - 1);
                 });
               },
+            ),
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: DotsIndicator(
+                dotsCount: (feeds.length / PAGE_SIZE).ceil() > 0 ?
+                (feeds.length / PAGE_SIZE).ceil() : 1,
+                position: page.toDouble()
             ),
           ),
         ],

@@ -7,6 +7,7 @@ import 'package:galaxy_mobile/screens/streaming/streaming.dart';
 import 'package:galaxy_mobile/screens/video_room/videoRoomWidget.dart';
 import 'package:galaxy_mobile/services/mqttClient.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 
 import '../../services/authService.dart';
 
@@ -138,6 +139,12 @@ class _DashboardState extends State<Dashboard> {
         stream.exit();
         videoRoom.exitRoom();
         _mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+          DeviceOrientation.portraitDown,
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight
+        ]);
       },
       child: Scaffold(
         appBar: AppBar(
