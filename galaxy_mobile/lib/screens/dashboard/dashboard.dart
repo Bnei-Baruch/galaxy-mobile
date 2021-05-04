@@ -160,24 +160,35 @@ class _DashboardState extends State<Dashboard> {
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
                 // IconButton()
-                icon: widget.audioMute
-                    ? Icon(
-                        Icons.mic_off,
-                        color: Colors.red,
-                      )
-                    : Icon(
-                        Icons.mic,
-                        color: Colors.white,
-                      ),
+                icon: GestureDetector(
+                    onLongPress: () {
+                      FlutterLogs.logInfo("Dashboard", "bottomNavigationBar",
+                          "microphone MUTE: ${widget.audioMute}");
+                      videoRoom.mute();
+                      setState(() {
+                        widget.audioMute = !widget.audioMute;
+                      });
+                    },
+                    child: widget.audioMute
+                        ? Icon(Icons.mic_off, color: Colors.red)
+                        : Icon(Icons.mic, color: Colors.white)),
                 label: "Mic"),
+
             BottomNavigationBarItem(
-                icon: widget.videoMute
-                    ? Icon(
-                        Icons.videocam_off,
-                        color: Colors.red,
-                      )
-                    : Icon(Icons.videocam),
-                label: "Video"),
+                icon: GestureDetector(
+                    onLongPress: () {
+                      FlutterLogs.logInfo("Dashboard", "bottomNavigationBar",
+                          "microphone MUTE: ${widget.audioMute}");
+                      videoRoom.toggleVideo();
+                      setState(() {
+                        widget.videoMute = !widget.videoMute;
+                        updateRoomWithMyVideoState();
+                      });
+                    },
+                    child: widget.videoMute
+                        ? Icon(Icons.videocam_off, color: Colors.red)
+                        : Icon(Icons.videocam)),
+                label: "Video")
 
             // todo: uncomment upon Q logic implemented
             // BottomNavigationBarItem(
@@ -188,26 +199,26 @@ class _DashboardState extends State<Dashboard> {
           ],
           // currentIndex: _selectedIndex,
           // selectedItemColor: Colors.amber[800],
-          onTap: (value) {
-            //only for debugging purposes
-            FlutterLogs.logInfo("Dashboard", "onTap", value.toString());
-            switch (value) {
-              case 0:
-                videoRoom.mute();
-                setState(() {
-                  widget.audioMute = !widget.audioMute;
-                });
-
-                break;
-              case 1:
-                videoRoom.toggleVideo();
-                setState(() {
-                  widget.videoMute = !widget.videoMute;
-                  updateRoomWithMyVideoState();
-                });
-                break;
-            }
-          },
+          // onTap: (value) {
+          //   //only for debugging purposes
+          //   FlutterLogs.logInfo("Dashboard", "onTap", value.toString());
+          //   switch (value) {
+          //     case 0:
+          //       videoRoom.mute();
+          //       setState(() {
+          //         widget.audioMute = !widget.audioMute;
+          //       });
+          //
+          //       break;
+          //     case 1:
+          //       videoRoom.toggleVideo();
+          //       setState(() {
+          //         widget.videoMute = !widget.videoMute;
+          //         updateRoomWithMyVideoState();
+          //       });
+          //       break;
+          //   }
+          // },
         ),
       ),
     );

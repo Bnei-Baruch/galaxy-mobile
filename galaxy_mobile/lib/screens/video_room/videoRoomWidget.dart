@@ -1003,15 +1003,20 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
       initialized = true;
       initInfra();
     }
+
+    final double itemHeight = 100;
+    final double itemWidth = 150;
+
     return Container(
       alignment: Alignment.topCenter,
       height: MediaQuery.of(context).size.height / 3 * 2 - 140,
       child: Stack(
         children: [
           GridView.count(
+            childAspectRatio: (itemWidth / itemHeight),
             children: [
               Container(
-                  decoration: BoxDecoration(
+                decoration: BoxDecoration(
                       border: Border.all(
                           color: (widget.myAudioMuted != true)
                               ? Colors.lightGreen
@@ -1025,8 +1030,8 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                               child: Icon(
                                 Icons.account_circle,
                                 color: Colors.white,
-                                size: 120,
-                              ),
+                                size: 120
+                              )
                             ), // Icon widget changed with FaIcon),
                       Align(
                         alignment: Alignment.bottomLeft,
@@ -1039,19 +1044,20 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                                   : Colors.red,
                               size: 18,
                             ),
+                            SizedBox(width: 5),
                             Text(widget.user.givenName),
                           ],
                         ),
                       ),
                     ],
-                  )
+                  ),
 
                   // RTCVideoView(
                   //   widget._localRenderer,  //widget.user.name
                   // ),
                   // height: 200,
                   // width: 200,
-                  ),
+              ),
               (widget._remoteRenderer != null &&
                       widget._remoteRenderer.elementAt(0) != null &&
                       widget._remoteRenderer.elementAt(0).srcObject != null &&
