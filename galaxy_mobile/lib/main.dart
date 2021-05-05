@@ -95,6 +95,7 @@ class MyApp extends StatelessWidget {
               theme: appTheme(),
               initialRoute: '/',
               routes: routes,
-            ));
+            )
+    );
   }
 }

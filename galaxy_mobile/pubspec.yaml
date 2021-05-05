@@ -54,6 +54,7 @@ dependencies:
     #https://github.com/shivanshtalwar0/flutter_janus_client.git
       ref: 0.6.0_taskRemovedFix
   #    path: ../../Documents/Github/flutter_foreground_service_plugin/
+  dots_indicator: ^1.2.0
 
   janus_client: #^0.0.4
     git:
