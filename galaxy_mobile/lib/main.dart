@@ -61,14 +61,15 @@ void startForegroundService() async {
   await FlutterForegroundPlugin.setServiceMethod(globalForegroundService);
   await FlutterForegroundPlugin.startForegroundService(
     holdWakeLock: false,
+    // keepRunning: true,
     onStarted: () {
       print("Foreground on Started");
     },
     onStopped: () {
       print("Foreground on Stopped");
     },
-    title: "Flutter Foreground Service",
-    content: "This is Content",
+    title: "Arvut Mobile",
+    content: "Playing in the background",
     iconName: "ic_stat_hot_tub",
   );
 }
