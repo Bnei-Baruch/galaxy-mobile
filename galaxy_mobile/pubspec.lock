@@ -289,9 +289,11 @@ packages:
   flutter_foreground_plugin:
     dependency: "direct main"
     description:
-      name: flutter_foreground_plugin
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "."
+      ref: "0.6.0_taskRemovedFix"
+      resolved-ref: "50bf13e32f44f9903e8d77464f85589bf385d5f9"
+      url: "https://github.com/igala/flutter_foreground_service_plugin.git"
+    source: git
     version: "0.6.0"
   flutter_launcher_icons:
     dependency: "direct dev"
