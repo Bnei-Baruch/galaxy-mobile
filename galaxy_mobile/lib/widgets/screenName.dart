@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:galaxy_mobile/services/authService.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 typedef UserCallback = void Function(User user);
 
@@ -13,7 +14,7 @@ class ScreenName extends StatelessWidget {
         enabled: false,
         initialValue: name,
         decoration: InputDecoration(
-          labelText: 'Screen Name',
+          labelText: 'screen_name'.tr(),
           // errorText: 'Error message'v          ,
           border: OutlineInputBorder(),
         ));

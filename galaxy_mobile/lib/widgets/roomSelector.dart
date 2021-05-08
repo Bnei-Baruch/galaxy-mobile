@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/services/api.dart';
 import 'package:provider/provider.dart';
-// import 'package:searchable_dropdown/searchable_dropdown.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class RoomSelector extends StatelessWidget {
   @override
@@ -28,8 +28,8 @@ class RoomSelector extends StatelessWidget {
     // TODO: the dropdown is slow, consider replace with another package.
     return DropdownSearch<Room>(
       mode: Mode.DIALOG,
-      label: "Room",
-      hint: "Select Room",
+      label: 'room'.tr(),
+      hint: 'select_room'.tr(),
       items: rooms,
       selectedItem: activeRoom,
       // onFind: (String filter) => getData(filter),
@@ -37,6 +37,12 @@ class RoomSelector extends StatelessWidget {
       onChanged: (Room room) => {
         context.read<MainStore>().setActiveRoom(room.description)
       },
+      dropdownSearchDecoration: InputDecoration(
+        filled: true,
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.fromLTRB(12, 12, 8, 0),
+        fillColor: Colors.transparent //Theme.of(context).inputDecorationTheme.fillColor,
+      ),
       showClearButton: true,
       showSearchBox: true,
       searchBoxDecoration: InputDecoration(

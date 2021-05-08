@@ -8,7 +8,6 @@ import 'package:galaxy_mobile/widgets/roomSelector.dart';
 import 'package:galaxy_mobile/widgets/screenLoader.dart';
 import 'package:galaxy_mobile/widgets/uiLanguageSelector.dart';
 
-import 'package:flutter_logs/flutter_logs.dart';
 import 'package:provider/provider.dart';
 import 'package:galaxy_mobile/widgets/screenName.dart';
 import 'package:galaxy_mobile/widgets/selfViewWidget.dart';
@@ -91,7 +90,7 @@ class _SettingsState extends State<Settings> {
                             SizedBox(width: 10.w),
                             Flexible(child: ScreenName(activeUser.givenName)),
                             SizedBox(width: 10.w),
-                            Flexible(child: UILanguageSelector()),
+                            Flexible(child: UILanguageSelector(true)),
                             SizedBox(width: 10.w)
                           ]),
                           SizedBox(height: 20.h),

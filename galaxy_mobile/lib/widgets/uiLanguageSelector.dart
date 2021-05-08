@@ -4,6 +4,10 @@ import 'package:flutter_logs/flutter_logs.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 class UILanguageSelector extends StatelessWidget {
+  bool _withLabel;
+
+  UILanguageSelector(bool withLabel) { _withLabel = withLabel; }
+
   void setLanguage(BuildContext context, String language) {
     switch (language) {
       case "English":
@@ -12,6 +16,10 @@ class UILanguageSelector extends StatelessWidget {
 
       case "Русский":
         EasyLocalization.of(context).locale = Locale('ru', 'RU');
+        break;
+
+      case "עברית":
+        EasyLocalization.of(context).locale = Locale('he', 'IL');
         break;
 
       default:
@@ -31,6 +39,10 @@ class UILanguageSelector extends StatelessWidget {
         return "Русский";
         break;
 
+      case "he":
+        return "עברית";
+        break;
+
       default:
         FlutterLogs.logError("UILanguageSelector", "getLanguage",
             "unsupported language: "
@@ -42,12 +54,12 @@ class UILanguageSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final languages = ['English', 'Русский'];
+    final languages = ['English', 'Русский', 'עברית'];
 
     return DropdownSearch<String>(
       mode: Mode.DIALOG,
-      label: "Interface Language",
-      hint: "Select Language",
+      label: _withLabel ? 'interface_language'.tr() : '',
+      hint: 'select_language'.tr(),
       items: languages,
       selectedItem: getLanguage(context),
       onChanged: (String language) => {
@@ -55,6 +67,12 @@ class UILanguageSelector extends StatelessWidget {
             "selected language: $language"),
         setLanguage(context, language)
       },
+        dropdownSearchDecoration: InputDecoration(
+            filled: true,
+            border: OutlineInputBorder(),
+            contentPadding: EdgeInsets.fromLTRB(12, 12, 8, 0),
+            fillColor: Colors.transparent //Theme.of(context).inputDecorationTheme.fillColor,
+        ),
       showClearButton: false,
       showSearchBox: false
     );

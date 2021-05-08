@@ -5,15 +5,23 @@ import 'package:flutter_logs/flutter_logs.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/screens/streaming/streaming.dart';
 import 'package:galaxy_mobile/screens/video_room/videoRoomWidget.dart';
+import 'package:flutter_audio_manager/flutter_audio_manager.dart';
 import 'package:galaxy_mobile/services/mqttClient.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 
 import '../../services/authService.dart';
 
+enum AudioDevice {
+  receiver,
+  speaker,
+  bluetooth
+}
+
 class Dashboard extends StatefulWidget {
   bool audioMute = true;
   bool videoMute = true;
+  AudioDevice _audioDevice = AudioDevice.receiver;
 
   _DashboardState state;
 
@@ -29,6 +37,9 @@ class _DashboardState extends State<Dashboard> {
   MQTTClient _mqttClient;
 
   String _activeRoomId;
+
+  AudioInput _currentInput = AudioInput("unknow", 0);
+  List<AudioInput> _availableInputs = [];
 
   @override
   void initState() {
@@ -82,6 +93,38 @@ class _DashboardState extends State<Dashboard> {
         widget.videoMute = mute;
       });
     };
+
+    initAudioMgr();
+  }
+
+  Future<void> initAudioMgr() async {
+    FlutterAudioManager.setListener(() async {
+      FlutterLogs.logInfo("VideoRoom", "FlutterAudioManager",
+          "######## audio device changed");
+      await getAudioInput();
+
+      setState(() {});
+    });
+
+    await getAudioInput();
+    if (!mounted) return;
+    setState(() {});
+  }
+
+  getAudioInput() async {
+    _currentInput = await FlutterAudioManager.getCurrentOutput();
+    if (_currentInput.port == AudioPort.receiver) {
+      widget._audioDevice = AudioDevice.receiver;
+    } else if (_currentInput.port == AudioPort.speaker) {
+      widget._audioDevice = AudioDevice.speaker;
+    } else if (_currentInput.port == AudioPort.bluetooth) {
+      widget._audioDevice = AudioDevice.bluetooth;
+    }
+    FlutterLogs.logInfo("VideoRoom", "getAudioInput",
+        "######## current audio device: $_currentInput");
+    _availableInputs = await FlutterAudioManager.getAvailableInputs();
+    FlutterLogs.logInfo("VideoRoom", "getAudioInput",
+        "######## available audio devices: $_availableInputs");
   }
 
   void handleCmdData(String msgPayload) {
@@ -127,6 +170,18 @@ class _DashboardState extends State<Dashboard> {
     _mqttClient.send("galaxy/room/" + _activeRoomId, encoder.convert(message));
   }
 
+  Icon setIcon() {
+    if (widget._audioDevice == AudioDevice.receiver) {
+      return Icon(Icons.phone);
+    } else if (widget._audioDevice == AudioDevice.speaker) {
+      return Icon(Icons.volume_up);
+    } else if (widget._audioDevice == AudioDevice.bluetooth) {
+      return Icon(Icons.bluetooth);
+    } else {
+      return Icon(Icons.do_not_disturb);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final activeRoom = context.select((MainStore s) => s.activeRoom);
@@ -149,6 +204,27 @@ class _DashboardState extends State<Dashboard> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(activeRoom.description),
+          actions: <Widget>[
+            Padding(
+                padding: EdgeInsets.only(right: 20.0),
+                child: GestureDetector(
+                    onTap: () async {
+                      bool res = false;
+                      if (_currentInput.port == AudioPort.receiver) {
+                        res = await FlutterAudioManager.changeToSpeaker();
+                        print(">>>>>>>>> change to speaker: $res");
+                      } else if (_currentInput.port == AudioPort.speaker) {
+                        res = await FlutterAudioManager.changeToBluetooth();
+                        print(">>>>>>>>> change to receiver: $res");
+                      } else {
+                        res = await FlutterAudioManager.changeToReceiver();
+                        print(">>>>>>>>> change to receiver: $res");
+                      }
+                      setState(() { getAudioInput(); });
+                    },
+                    child: setIcon())
+            )
+          ]
         ),
         // body: FittedBox(
         //     child: Container(child: Placeholder(), color: Colors.green),
@@ -161,7 +237,7 @@ class _DashboardState extends State<Dashboard> {
             BottomNavigationBarItem(
                 // IconButton()
                 icon: GestureDetector(
-                    onLongPress: () {
+                    onTap: () {
                       FlutterLogs.logInfo("Dashboard", "bottomNavigationBar",
                           "microphone MUTE: ${widget.audioMute}");
                       videoRoom.mute();
@@ -176,7 +252,7 @@ class _DashboardState extends State<Dashboard> {
 
             BottomNavigationBarItem(
                 icon: GestureDetector(
-                    onLongPress: () {
+                    onTap: () {
                       FlutterLogs.logInfo("Dashboard", "bottomNavigationBar",
                           "microphone MUTE: ${widget.audioMute}");
                       videoRoom.toggleVideo();
@@ -188,7 +264,7 @@ class _DashboardState extends State<Dashboard> {
                     child: widget.videoMute
                         ? Icon(Icons.videocam_off, color: Colors.red)
                         : Icon(Icons.videocam)),
-                label: "Video")
+                label: "Video"),
 
             // todo: uncomment upon Q logic implemented
             // BottomNavigationBarItem(

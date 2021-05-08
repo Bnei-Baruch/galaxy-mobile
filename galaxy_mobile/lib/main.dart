@@ -10,6 +10,8 @@ import 'package:provider/provider.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'models/sharedPref.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:wakelock/wakelock.dart';
+import 'package:flutter_fgbg/flutter_fgbg.dart';
 
 // Compile notes:
 // - to generate luncher icons run:
@@ -35,6 +37,8 @@ void main() async {
       debugFileOperations: true,
       isDebuggable: true);
 
+  Wakelock.enable();
+
   runApp(
     /// Providers are above [MyApp] instead of inside it, so that tests
     /// can use [MyApp] while mocking the providers
@@ -47,7 +51,8 @@ void main() async {
               update: (_, auth, api, model) => model..update(auth, api)),
         ],
         child: EasyLocalization(
-            supportedLocales: [Locale('en', 'US'), Locale('ru', 'RU')],
+            supportedLocales: [Locale('en', 'US'),
+              Locale('ru', 'RU'), Locale('he', 'IL')],
             path: 'assets/translations',
             fallbackLocale: Locale('en', 'US'),
             child: MyApp())
@@ -60,18 +65,19 @@ void startForegroundService() async {
   await FlutterForegroundPlugin.setServiceMethodInterval(seconds: 5);
   await FlutterForegroundPlugin.setServiceMethod(globalForegroundService);
   await FlutterForegroundPlugin.startForegroundService(
-    holdWakeLock: false,
-    // keepRunning: true,
-    onStarted: () {
-      print("Foreground on Started");
-    },
-    onStopped: () {
-      print("Foreground on Stopped");
-    },
-    title: "Arvut Mobile",
-    content: "Playing in the background",
-    iconName: "ic_stat_hot_tub",
-  );
+      holdWakeLock: false,
+      // keepRunning: true,
+      onStarted: () {
+        FlutterLogs.logInfo(
+            "main", "startForegroundService", "foreground service started");
+      },
+      onStopped: () {
+        FlutterLogs.logInfo(
+            "main", "startForegroundService", "foreground service stopped");
+      },
+      title: "Arvut Mobile",
+      content: "Playing in the background",
+      iconName: "ic_stat_hot_tub");
 }
 
 void stopForegroundService() async {
@@ -79,23 +85,37 @@ void stopForegroundService() async {
 }
 
 void globalForegroundService() {
-  debugPrint("current datetime is ${DateTime.now()}");
+  FlutterLogs.logInfo("main", "globalForegroundService",
+      "current datetime is ${DateTime.now()}");
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatelessWidget with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
-    return ScreenUtilInit(
-        designSize: Size(412, 732),
-        allowFontScaling: false,
-        builder: () => MaterialApp(
-              localizationsDelegates: context.localizationDelegates,
-              supportedLocales: context.supportedLocales,
-              locale: context.locale,
-              theme: appTheme(),
-              initialRoute: '/',
-              routes: routes,
-            )
-    );
+    WidgetsBinding.instance?.addObserver(this);
+    return FGBGNotifier(
+        onEvent: (event) {
+          if (event == FGBGType.background) {
+            FlutterLogs.logInfo(
+                "MyApp", "FGBGNotifier",
+                ">>> application sent to background");
+            Wakelock.disable();
+          } else if (event == FGBGType.foreground) {
+            FlutterLogs.logInfo(
+                "MyApp", "FGBGNotifier",
+                ">>> application returned to foreground");
+            Wakelock.enable();
+          }
+        },
+        child: ScreenUtilInit(
+            designSize: Size(412, 732),
+            allowFontScaling: false,
+            builder: () => MaterialApp(
+                localizationsDelegates: context.localizationDelegates,
+                supportedLocales: context.supportedLocales,
+                locale: context.locale,
+                theme: appTheme(),
+                initialRoute: '/',
+                routes: routes)));
   }
 }

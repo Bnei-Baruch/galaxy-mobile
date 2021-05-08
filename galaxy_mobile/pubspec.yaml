@@ -48,6 +48,9 @@ dependencies:
   package_info: ^0.4.0+16
   firebase_core: ^0.4.0+9
   firebase_analytics: ^5.0.2
+  wakelock: ^0.2.1+1
+  flutter_fgbg: ^0.0.1
+  url_launcher: ^5.7.10
   flutter_foreground_plugin: #^0.6.0
     git:
       url: https://github.com/igala/flutter_foreground_service_plugin.git
@@ -55,6 +58,7 @@ dependencies:
       ref: 0.6.0_taskRemovedFix
   #    path: ../../Documents/Github/flutter_foreground_service_plugin/
   dots_indicator: ^1.2.0
+  flutter_audio_manager: ^0.2.3
 
   janus_client: #^0.0.4
     git:
@@ -100,6 +104,9 @@ flutter:
     - assets/graphics/
     - assets/json/
     - assets/translations/
+    - assets/res/t_and_c_en.txt
+    - assets/res/t_and_c_he.txt
+    - assets/res/t_and_c_ru.txt
 
   #   - images/a_dot_ham.jpeg
 

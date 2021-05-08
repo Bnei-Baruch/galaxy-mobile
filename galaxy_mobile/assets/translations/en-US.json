@@ -11,5 +11,15 @@
   "settings_desc": "Before connecting with the TEN, please check your settings and device setup:",
   "audio_mode": "Audio Mode",
   "join_room": "Join Room",
-  "registered_users": "Registered Users"
+  "registered_users": "Registered Users",
+  "room": "Room",
+  "select_room": "Select Room",
+  "screen_name": "Screen Name",
+  "interface_language": "Interface Language",
+  "select_language": "Select Language",
+  "user_fee": "Pay User Fee",
+  "t_and_c": "Arvut Terms of Use",
+  "terms_of_use": "Terms of use",
+  "close": "Close",
+  "login_desc": "Our Virtual Home, developed by the Bnei Baruch Kabbalah La’am Association, is a worldwide headquarters and virtual space for spiritual advancement, providing an interactive environment that feels like physical learning—watch live lessons, ask questions and receive real-time answers, conduct workshop discussions, and listen to a wide selection of translations."
 }
