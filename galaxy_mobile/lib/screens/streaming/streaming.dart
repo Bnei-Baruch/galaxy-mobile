@@ -120,15 +120,14 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
         initVideoStream();
       }
     };
+
     playerOverlay.mute = (muted) {
       FlutterLogs.logInfo("Streaming", "&&&&&&&&&&&&&&&&",
           "playerOverlay.mute: ${muted.toString()}");
-      if (muted) {
-        _remoteStreamAudio.getAudioTracks().first.setVolume(0);
-      } else {
-        _remoteStreamAudio.getAudioTracks().first.setVolume(0.5);
-      }
+      // _remoteStreamAudio.getAudioTracks().first.setMicrophoneMute(muted);
+      _remoteStreamAudio.getAudioTracks().first.setVolume(muted ? 0 : 0.5);
     };
+
     playerOverlay.audioChange = () {
       context
           .read<MainStore>()
