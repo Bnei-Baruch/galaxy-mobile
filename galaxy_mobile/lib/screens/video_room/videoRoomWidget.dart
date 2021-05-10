@@ -14,7 +14,6 @@ import 'package:provider/provider.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter/services.dart';
 
-
 import 'dart:async';
 
 import 'package:synchronized/synchronized.dart';
@@ -981,10 +980,8 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown
-    ]);
+    SystemChrome.setPreferredOrientations(
+        [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
     final s = context.read<MainStore>();
 
     final args = RoomArguments(s.activeGateway.url, s.activeGateway.token,
@@ -1017,46 +1014,44 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
             children: [
               Container(
                 decoration: BoxDecoration(
-                      border: Border.all(
-                          color: (widget.myAudioMuted != true)
-                              ? Colors.lightGreen
-                              : Colors.black)), //Colors.lightGreenAccent
-                  child: Stack(
-                    children: [
-                      (widget.myVideoMuted)
-                          ? RTCVideoView(widget._localRenderer)
-                          : Align(
-                              alignment: Alignment.center,
-                              child: Icon(
-                                Icons.account_circle,
+                    border: Border.all(
+                        color: (widget.myAudioMuted != true)
+                            ? Colors.lightGreen
+                            : Colors.black)), //Colors.lightGreenAccent
+                child: Stack(
+                  children: [
+                    (widget.myVideoMuted)
+                        ? RTCVideoView(widget._localRenderer)
+                        : Align(
+                            alignment: Alignment.center,
+                            child: Icon(Icons.account_circle,
                                 color: Colors.white,
-                                size: 120
-                              )
-                            ), // Icon widget changed with FaIcon),
-                      Align(
-                        alignment: Alignment.bottomLeft,
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.mic_off,
-                              color: (widget.myAudioMuted != true)
-                                  ? Colors.transparent
-                                  : Colors.red,
-                              size: 18,
-                            ),
-                            SizedBox(width: 5),
-                            Text(widget.user.givenName),
-                          ],
-                        ),
+                                size:
+                                    120)), // Icon widget changed with FaIcon),
+                    Align(
+                      alignment: Alignment.bottomLeft,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.mic_off,
+                            color: (widget.myAudioMuted != true)
+                                ? Colors.transparent
+                                : Colors.red,
+                            size: 18,
+                          ),
+                          SizedBox(width: 5),
+                          Text(widget.user.givenName),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
+                ),
 
-                  // RTCVideoView(
-                  //   widget._localRenderer,  //widget.user.name
-                  // ),
-                  // height: 200,
-                  // width: 200,
+                // RTCVideoView(
+                //   widget._localRenderer,  //widget.user.name
+                // ),
+                // height: 200,
+                // width: 200,
               ),
               (widget._remoteRenderer != null &&
                       widget._remoteRenderer.elementAt(0) != null &&
@@ -1334,10 +1329,10 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
           Align(
             alignment: Alignment.bottomCenter,
             child: DotsIndicator(
-                dotsCount: (feeds.length / PAGE_SIZE).ceil() > 0 ?
-                (feeds.length / PAGE_SIZE).ceil() : 1,
-                position: page.toDouble()
-            ),
+                dotsCount: (feeds.length / PAGE_SIZE).ceil() > 0
+                    ? (feeds.length / PAGE_SIZE).ceil()
+                    : 1,
+                position: page.toDouble()),
           ),
         ],
       ),
@@ -1442,3 +1437,32 @@ class RoomArguments {
   final User user;
   RoomArguments(this.server, this.token, this.roomNumber, this.user);
 }
+
+//audio only mode
+// otherCamsMuteToggle = () => {
+// const {feeds, muteOtherCams} = this.state;
+// const activeFeeds = feeds.filter((feed) => feed.videoSlot !== undefined);
+// if (!muteOtherCams) {
+// // Should hide/mute now all videos.
+// this.unsubscribeFrom(
+// activeFeeds.map((feed) => feed.id),
+// /* onlyVideo= */ true
+// );
+// this.camMute(/* cammuted= */ false);
+// this.setState({videos: NO_VIDEO_OPTION_VALUE});
+// this.state.virtualStreamingJanus.setVideo(NO_VIDEO_OPTION_VALUE);
+// } else {
+// // Should unmute/show now all videos.false,
+// this.makeSubscription(
+// activeFeeds,
+// /* feedsJustJoined= */ false,
+// /* subscribeToVideo= */ true,
+// /* subscribeToAudio= */ false,
+// /* subscribeToData= */ false
+// );
+// this.camMute(/* cammuted= */ true);
+// this.setState({videos: VIDEO_240P_OPTION_VALUE});
+// this.state.virtualStreamingJanus.setVideo(VIDEO_240P_OPTION_VALUE);
+// }
+// this.setState({muteOtherCams: !muteOtherCams});
+// };

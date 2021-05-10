@@ -384,3 +384,78 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
     super.dispose();
   }
 }
+//code for handlking audio out command -- during question
+// streamGalaxy = (talk, col, name) => {
+// console.log("streamGalaxy", talk, col, name);
+// if (!this.isInitialized_()) {
+// return;
+// }
+// if (talk) {
+// this.mixvolume = this.audioElement.volume;
+// this.talking = true;
+// this.trlAudioElement.volume = this.mixvolume;
+// this.trlAudioElement.muted = false;
+//
+// this.prevAudioVolume = this.audioElement.volume;
+// this.prevMuted = this.audioElement.muted;
+//
+// console.log(" :: Switch STR Stream: ", gxycol[col]);
+// this.audioJanusStream.send({message: {request: "switch", id: gxycol[col]}});
+// const id = trllang[localStorage.getItem("vrt_langtext")];
+// console.log(":: Select TRL: ", localStorage.getItem("vrt_langtext"), id);
+// if (!id) {
+// console.log(" :: Not TRL Stream attach");
+// } else {
+// this.trlAudioJanusStream.send({message: {request: "switch", id: id}});
+// this.talking = setInterval(this.ducerMixaudio, 200);
+// console.log(" :: Init TRL Stream: ", localStorage.getItem("vrt_langtext"), id);
+// }
+// Janus.log("You now talking");
+// } else if (this.talking) {
+// Janus.log("Stop talking");
+// if (this.talking) {
+// clearInterval(this.talking);
+// }
+// this.audioElement.volume = this.mixvolume;
+// const id = Number(localStorage.getItem("vrt_lang")) || 2;
+// console.log(" :: Switch STR Stream: ", localStorage.getItem("vrt_lang"), id);
+// this.audioJanusStream.send({message: {request: "switch", id: id}});
+// console.log(" :: Stop TRL Stream: ");
+// this.trlAudioElement.muted = true;
+// this.talking = null;
+// this.mixvolume = null;
+// }
+// if (this.onTalkingCallback) {
+// this.onTalkingCallback(this.talking);
+// }
+// };
+//
+// ducerMixaudio = () => {
+// if (this.isInitialized_()) {
+// // Get remote volume of translator stream (FYI in case of Hebrew, this will be 0 - no translation).
+// this.trlAudioJanusStream.getVolume(null, (volume) => {
+// if (volume === -1) {
+// if (this.talking) {
+// clearInterval(this.talking);
+// return;
+// }
+// }
+// if (this.prevAudioVolume !== this.audioElement.volume || this.prevMuted !== this.audioElement.muted) {
+// // This happens only when user changes audio, update mixvolume.
+// this.mixvolume = this.audioElement.muted ? 0 : this.audioElement.volume;
+// this.trlAudioElement.volume = this.mixvolume;
+// }
+// if (volume > 0.05) {
+// // If translator is talking (remote volume > 0.05) we want to reduce Rav to 5%.
+// this.audioElement.volume = this.mixvolume * 0.05;
+// } else if (this.audioElement.volume + 0.01 <= this.mixvolume) {
+// // If translator is not talking or no translation (Hebrew) we want to slowly raise
+// // sound levels of original source up to original this.mixvolume.
+// this.audioElement.volume = this.audioElement.volume + 0.01;
+// }
+// // Store volume and mute values to be able to detect user volume change.
+// this.prevAudioVolume = this.audioElement.volume;
+// this.prevMuted = this.audioElement.muted;
+// });
+// }
+// };

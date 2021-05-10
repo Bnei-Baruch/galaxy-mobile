@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/services/authService.dart';
+import 'package:logcat/logcat.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -14,8 +15,17 @@ class AppDrawer extends StatelessWidget {
     var encoder = ZipFileEncoder();
     encoder
         .create('/sdcard/Android/data/com.galaxy_mobile/files/galaxyLogs.zip');
+    File logcat = File(
+        '/sdcard/Android/data/com.galaxy_mobile/files/galaxyLogs/logcat.txt');
+    final String logs = await Logcat.execute();
+
+    if (!logcat.existsSync()) logcat.create();
+    logcat.openWrite();
+    logcat.writeAsString(logs);
+
     encoder.addDirectory(
         Directory('/sdcard/Android/data/com.galaxy_mobile/files/galaxyLogs'));
+
     encoder.close();
 
     PackageInfo packageInfo = await PackageInfo.fromPlatform();

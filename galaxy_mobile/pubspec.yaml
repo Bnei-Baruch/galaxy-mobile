@@ -51,6 +51,10 @@ dependencies:
   wakelock: ^0.2.1+1
   flutter_fgbg: ^0.0.1
   url_launcher: ^5.7.10
+  logcat: #^1.0.2
+    git:
+      url: https://github.com/igala/logcat.git
+#    path: ../../Documents/GitHub/logcat-fork/
   flutter_foreground_plugin: #^0.6.0
     git:
       url: https://github.com/igala/flutter_foreground_service_plugin.git
