@@ -57,6 +57,7 @@ class UILanguageSelector extends StatelessWidget {
     final languages = ['English', 'Русский', 'עברית'];
 
     return DropdownSearch<String>(
+      showSelectedItem: true,
       mode: Mode.DIALOG,
       label: _withLabel ? 'interface_language'.tr() : '',
       hint: 'select_language'.tr(),

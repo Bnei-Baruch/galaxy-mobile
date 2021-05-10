@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:package_info/package_info.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import 'dart:io';
 import 'package:archive/archive_io.dart';
@@ -76,7 +77,7 @@ class AppDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: Icon(Icons.home),
-            title: Text('My Account'),
+            title: Text('my_account'.tr()),
             onTap: () {
               // Update the state of the app.
               // ...
@@ -84,14 +85,14 @@ class AppDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: Icon(Icons.home),
-            title: Text('Settings'),
+            title: Text('settings'.tr()),
             onTap: () async {
               Navigator.pushNamed(context, '/settings');
             },
           ),
           ListTile(
             leading: Icon(Icons.email),
-            title: Text('Send Logs'),
+            title: Text('send_logs'.tr()),
             onTap: () async {
               archiveLogs();
               Navigator.pushNamed(context, '/settings');
@@ -99,7 +100,7 @@ class AppDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: Icon(Icons.home),
-            title: Text('Sign Out'),
+            title: Text('sign_out'.tr()),
             onTap: () async {
               final auth = context.read<AuthService>();
               await auth.logout();
