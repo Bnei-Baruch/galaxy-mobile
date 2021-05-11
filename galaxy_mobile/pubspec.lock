@@ -475,6 +475,15 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.2.0"
+  logcat:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: e2cff9d026a5ca32d8eece95bf9adfa4f6cd708f
+      url: "https://github.com/igala/logcat.git"
+    source: git
+    version: "1.0.2"
   logger:
     dependency: transitive
     description:

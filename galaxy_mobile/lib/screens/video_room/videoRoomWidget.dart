@@ -1001,12 +1001,17 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
       initInfra();
     }
 
-    final double itemHeight = 100;
-    final double itemWidth = 150;
+    final double userGridHeight =
+        MediaQuery.of(context).size.height / 3 * 2 - 140;
+    final double itemHeight = userGridHeight / 2;
+    final double itemWidth = MediaQuery.of(context).size.width / 2;
 
+    FlutterLogs.logInfo("VideoRoom", "VideoRoomWidget",
+        "### itemWidth: $itemWidth | "
+            "### itemHeight: $itemHeight");
     return Container(
       alignment: Alignment.topCenter,
-      height: MediaQuery.of(context).size.height / 3 * 2 - 140,
+      height: userGridHeight,
       child: Stack(
         children: [
           GridView.count(
@@ -1026,8 +1031,8 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                             alignment: Alignment.center,
                             child: Icon(Icons.account_circle,
                                 color: Colors.white,
-                                size:
-                                    120)), // Icon widget changed with FaIcon),
+                                size: itemHeight - 40)),
+                                // size: 120)), // Icon widget changed with FaIcon),
                     Align(
                       alignment: Alignment.bottomLeft,
                       child: Row(
