@@ -79,7 +79,8 @@ class AuthService {
   final Dio _dio = Dio();
   DioCacheManager _dioCacheManager = DioCacheManager(CacheConfig());
 
-  Options _cacheOptions = buildCacheOptions(Duration(days: 7));
+
+  AuthorizationTokenResponse authResponse;
   String _authEmail;
   String _authToken;
 
@@ -91,7 +92,7 @@ class AuthService {
   Future<AuthorizationTokenResponse> signIn() async {
     FlutterLogs.logInfo("AuthService", "signIn", "Signed in");
 
-    final result = await _appAuth.authorizeAndExchangeCode(
+    this.authResponse = await _appAuth.authorizeAndExchangeCode(
       AuthorizationTokenRequest(
         _clientId,
         _redirectUrl,
@@ -101,15 +102,15 @@ class AuthService {
         scopes: _scopes,
       ),
     );
-    this._dio.options.headers["Authorization"] = "Bearer ${result.accessToken}";
-    this._authToken = result.accessToken;
+    this._dio.options.headers["Authorization"] = "Bearer ${this.authResponse.accessToken}";
+    this._authToken = this.authResponse.accessToken;
 
-    Map<String, dynamic> payload = Jwt.parseJwt(this._authToken);
+    // TODO: why can't you take the preferred_username from getUser ?
+    Map<String, dynamic> payload = Jwt.parseJwt(this.authResponse.accessToken);
     FlutterLogs.logInfo("AuthService", "signIn", "parsed token: $payload");
-
     _authEmail = payload['preferred_username'];
 
-    return result;
+    return this.authResponse;
   }
 
   Future<User> getUser() async {
@@ -129,7 +130,7 @@ class AuthService {
   Future<void> logout() async {
     FlutterLogs.logInfo("AuthService", "signIn", "logout");
     _authToken = null;
-    await _dio.get(APP_OPENID_END_SESSION_ENDPOINT);
+    await _dio.get("$APP_OPENID_END_SESSION_ENDPOINT?id_token_hint=${authResponse.idToken}");
   }
 
   bool checkSessionExpired() {
