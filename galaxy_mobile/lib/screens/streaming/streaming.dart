@@ -79,7 +79,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
     // TODO: implement didChangeDependencies
     super.didChangeDependencies();
     await _remoteRenderer.initialize();
-    _remoteStreamAudio = await createLocalMediaStream("local");
+    // _remoteStreamAudio = await createLocalMediaStream("local");
   }
 
   @override
@@ -100,6 +100,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
         if (widget.videoStreamingPlugin != null)
           widget.videoStreamingPlugin.send(message: {"request": "stop"});
         widget.audioStreamingPlugin.send(message: {"request": "stop"});
+        _remoteStreamAudio = null;
         setState(() {
           widget.isVideoPlaying = playing;
         });
@@ -125,7 +126,8 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
       FlutterLogs.logInfo("Streaming", "&&&&&&&&&&&&&&&&",
           "playerOverlay.mute: ${muted.toString()}");
       // _remoteStreamAudio.getAudioTracks().first.setMicrophoneMute(muted);
-      _remoteStreamAudio.getAudioTracks().first.setVolume(muted ? 0 : 0.5);
+      _remoteStreamAudio.getAudioTracks().last.enabled =
+          !muted; //.setVolume(muted ? 0 : 0.5);
     };
 
     playerOverlay.audioChange = () {
@@ -192,7 +194,8 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
           FlutterLogs.logInfo(
               "Streaming", "initAudioStream", "got remote stream");
           widget.audioTrack = track;
-          _remoteStreamAudio.addTrack(track);
+          _remoteStreamAudio = stream;
+          // _remoteStreamAudio.addTrack(track);
           // widget.audioStream = stream;
           playerOverlay.isPlaying = true;
         },

@@ -22,7 +22,7 @@ class AppDrawer extends StatelessWidget {
 
     if (!logcat.existsSync()) logcat.create();
     logcat.openWrite();
-    logcat.writeAsString(logs);
+    logcat.writeAsStringSync(logs);
 
     encoder.addDirectory(
         Directory('/sdcard/Android/data/com.galaxy_mobile/files/galaxyLogs'));
