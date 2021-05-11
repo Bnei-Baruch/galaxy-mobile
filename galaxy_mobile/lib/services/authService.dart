@@ -9,14 +9,6 @@ import 'package:galaxy_mobile/models/sharedPref.dart';
 import 'package:galaxy_mobile/utils/dio_log.dart';
 import 'package:jwt_decode/jwt_decode.dart';
 
-final String _clientId = APP_AUTH_CLIENT_ID;
-final String _redirectUrl = 'galaxy.mobile://login-callback';
-final String _discoveryUrl = APP_AUTH_DISCOVERY_URL;
-final List<String> _scopes = <String>[
-  "openid",
-  "profile",
-  "email",
-];
 
 // TOOD: replace flutter_auth with https://pub.dev/packages/openid_client
 
@@ -94,12 +86,12 @@ class AuthService {
 
     this.authResponse = await _appAuth.authorizeAndExchangeCode(
       AuthorizationTokenRequest(
-        _clientId,
-        _redirectUrl,
+        APP_AUTH_CLIENT_ID,
+        APP_AUTH_REDIRECT_URL,
         promptValues:
             (_authToken == null && checkSessionExpired()) ? ['login'] : [],
-        discoveryUrl: _discoveryUrl,
-        scopes: _scopes,
+        discoveryUrl: APP_AUTH_DISCOVERY_URL,
+        scopes: ["openid", "profile","email"],
       ),
     );
     this._dio.options.headers["Authorization"] = "Bearer ${this.authResponse.accessToken}";
@@ -150,44 +142,3 @@ class AuthService {
     }
   }
 }
-
-// @immutable
-// class MyAppUser {
-//   const MyAppUser({
-//     @required this.uid,
-//     this.email,
-//     this.photoUrl,
-//     this.displayName,
-//   });
-
-//   final String uid;
-//   final String email;
-//   final String photoUrl;
-//   final String displayName;
-// }
-
-// abstract class AuthService {
-//   Future<MyAppUser> currentUser();
-//   Future<MyAppUser> signInAnonymously();
-//   Future<MyAppUser> signInWithEmailAndPassword(String email, String password);
-//   Future<MyAppUser> createUserWithEmailAndPassword(
-//       String email, String password);
-//   Future<void> sendPasswordResetEmail(String email);
-//   Future<MyAppUser> signInWithEmailAndLink({String email, String link});
-//   bool isSignInWithEmailLink(String link);
-//   Future<void> sendSignInWithEmailLink({
-//     @required String email,
-//     @required String url,
-//     @required bool handleCodeInApp,
-//     @required String iOSBundleId,
-//     @required String androidPackageName,
-//     @required bool androidInstallApp,
-//     @required String androidMinimumVersion,
-//   });
-//   Future<MyAppUser> signInWithGoogle();
-//   Future<MyAppUser> signInWithFacebook();
-//   // Future<MyAppUser> signInWithApple({List<Scope> scopes});
-//   Future<void> signOut();
-//   Stream<MyAppUser> get onAuthStateChanged;
-//   void dispose();
-// }
