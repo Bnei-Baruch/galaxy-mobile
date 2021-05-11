@@ -1032,7 +1032,6 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                             child: Icon(Icons.account_circle,
                                 color: Colors.white,
                                 size: itemHeight - 40)),
-                                // size: 120)), // Icon widget changed with FaIcon),
                     Align(
                       alignment: Alignment.bottomLeft,
                       child: Row(

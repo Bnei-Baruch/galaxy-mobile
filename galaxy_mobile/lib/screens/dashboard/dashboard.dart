@@ -185,7 +185,6 @@ class _DashboardState extends State<Dashboard> {
   @override
   Widget build(BuildContext context) {
     final activeRoom = context.select((MainStore s) => s.activeRoom);
-
     _activeRoomId = activeRoom.room.toString();
 
     return WillPopScope(
@@ -200,6 +199,7 @@ class _DashboardState extends State<Dashboard> {
           DeviceOrientation.landscapeLeft,
           DeviceOrientation.landscapeRight
         ]);
+        return;
       },
       child: Scaffold(
         appBar: AppBar(
@@ -226,45 +226,23 @@ class _DashboardState extends State<Dashboard> {
             )
           ]
         ),
-        // body: FittedBox(
-        //     child: Container(child: Placeholder(), color: Colors.green),
-        //     fit: BoxFit.fill),
+
         body: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [stream, videoRoom]),
         bottomNavigationBar: BottomNavigationBar(
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-                // IconButton()
-                icon: GestureDetector(
-                    onTap: () {
-                      FlutterLogs.logInfo("Dashboard", "bottomNavigationBar",
-                          "microphone MUTE: ${widget.audioMute}");
-                      videoRoom.mute();
-                      setState(() {
-                        widget.audioMute = !widget.audioMute;
-                      });
-                    },
-                    child: widget.audioMute
+                label: "Mic",
+                icon: widget.audioMute
                         ? Icon(Icons.mic_off, color: Colors.red)
                         : Icon(Icons.mic, color: Colors.white)),
-                label: "Mic"),
 
             BottomNavigationBarItem(
-                icon: GestureDetector(
-                    onTap: () {
-                      FlutterLogs.logInfo("Dashboard", "bottomNavigationBar",
-                          "microphone MUTE: ${widget.audioMute}");
-                      videoRoom.toggleVideo();
-                      setState(() {
-                        widget.videoMute = !widget.videoMute;
-                        updateRoomWithMyVideoState();
-                      });
-                    },
-                    child: widget.videoMute
+                label: "Video",
+                icon: widget.videoMute
                         ? Icon(Icons.videocam_off, color: Colors.red)
                         : Icon(Icons.videocam)),
-                label: "Video"),
 
             // todo: uncomment upon Q logic implemented
             // BottomNavigationBarItem(
@@ -273,28 +251,25 @@ class _DashboardState extends State<Dashboard> {
             // )
             // todo <<<
           ],
-          // currentIndex: _selectedIndex,
-          // selectedItemColor: Colors.amber[800],
-          // onTap: (value) {
-          //   //only for debugging purposes
-          //   FlutterLogs.logInfo("Dashboard", "onTap", value.toString());
-          //   switch (value) {
-          //     case 0:
-          //       videoRoom.mute();
-          //       setState(() {
-          //         widget.audioMute = !widget.audioMute;
-          //       });
-          //
-          //       break;
-          //     case 1:
-          //       videoRoom.toggleVideo();
-          //       setState(() {
-          //         widget.videoMute = !widget.videoMute;
-          //         updateRoomWithMyVideoState();
-          //       });
-          //       break;
-          //   }
-          // },
+          onTap: (value) {
+            FlutterLogs.logInfo("Dashboard", "onTap", value.toString());
+            switch (value) {
+              case 0:
+                videoRoom.mute();
+                setState(() {
+                  widget.audioMute = !widget.audioMute;
+                });
+
+                break;
+              case 1:
+                videoRoom.toggleVideo();
+                setState(() {
+                  widget.videoMute = !widget.videoMute;
+                  updateRoomWithMyVideoState();
+                });
+                break;
+            }
+          },
         ),
       ),
     );
