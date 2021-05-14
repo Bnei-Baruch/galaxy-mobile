@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
@@ -12,11 +14,7 @@ import 'package:flutter/services.dart';
 
 import '../../services/authService.dart';
 
-enum AudioDevice {
-  receiver,
-  speaker,
-  bluetooth
-}
+enum AudioDevice { receiver, speaker, bluetooth }
 
 class Dashboard extends StatefulWidget {
   bool audioMute = true;
@@ -24,6 +22,8 @@ class Dashboard extends StatefulWidget {
   AudioDevice _audioDevice = AudioDevice.receiver;
 
   _DashboardState state;
+
+  bool hadNoConnection = false;
 
   @override
   State createState() => _DashboardState();
@@ -41,10 +41,59 @@ class _DashboardState extends State<Dashboard> {
   AudioInput _currentInput = AudioInput("unknow", 0);
   List<AudioInput> _availableInputs = [];
 
+  StreamSubscription<ConnectivityResult> subscription;
+
   @override
   void initState() {
     // TODO: implement initState
     widget.state = this;
+    subscription = Connectivity()
+        .onConnectivityChanged
+        .listen((ConnectivityResult result) {
+      // Got a new connectivity status!
+      FlutterLogs.logInfo("Dashboard", "ConnectivityResult", result.toString());
+      //if connection is none or type has changed we restart the room
+      if (result == ConnectivityResult.none) {
+        //mark no connection
+        FlutterLogs.logInfo("Dashboard", "ConnectivityResult", "no connection");
+
+        widget.hadNoConnection = true;
+        //show message on screen
+      } else {
+        //if marked no connection then reneter room
+        FlutterLogs.logInfo("Dashboard", "ConnectivityResult", "connection");
+        if (widget.hadNoConnection) {
+          FlutterLogs.logInfo(
+              "Dashboard", "ConnectivityResult", "reconnecting - exit room");
+          // stream.exit();
+          videoRoom.exitRoom();
+          if (_mqttClient != null) {
+            _mqttClient.disconnect();
+          }
+          FlutterLogs.logInfo(
+              "Dashboard", "ConnectivityResult", "reconnecting - enter room");
+          //enter room
+          setState(() {
+            final authService = context.read<AuthService>();
+
+            // stream = StreamingUnified();
+            // videoRoom = VideoRoom();
+            stream.reconnect();
+            _mqttClient = MQTTClient(
+                authService.getUserEmail(),
+                authService.getAuthToken(),
+                this.handleCmdData,
+                this.connectedToBroker,
+                this.subscribedToTopic);
+            _mqttClient.connect();
+          });
+          widget.hadNoConnection = false;
+        }
+      }
+      //exit room
+      //reneter with the same room number
+    });
+
     videoRoom.RoomReady = () {
       final authService = context.read<AuthService>();
       if (_mqttClient == null) {
@@ -99,8 +148,8 @@ class _DashboardState extends State<Dashboard> {
 
   Future<void> initAudioMgr() async {
     FlutterAudioManager.setListener(() async {
-      FlutterLogs.logInfo("VideoRoom", "FlutterAudioManager",
-          "######## audio device changed");
+      FlutterLogs.logInfo(
+          "VideoRoom", "FlutterAudioManager", "######## audio device changed");
       await getAudioInput();
 
       setState(() {});
@@ -202,31 +251,28 @@ class _DashboardState extends State<Dashboard> {
         return;
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(activeRoom.description),
-          actions: <Widget>[
-            Padding(
-                padding: EdgeInsets.only(right: 20.0),
-                child: GestureDetector(
-                    onTap: () async {
-                      bool res = false;
-                      if (_currentInput.port == AudioPort.receiver) {
-                        res = await FlutterAudioManager.changeToSpeaker();
-                        print(">>>>>>>>> change to speaker: $res");
-                      } else if (_currentInput.port == AudioPort.speaker) {
-                        res = await FlutterAudioManager.changeToBluetooth();
-                        print(">>>>>>>>> change to receiver: $res");
-                      } else {
-                        res = await FlutterAudioManager.changeToReceiver();
-                        print(">>>>>>>>> change to receiver: $res");
-                      }
-                      setState(() { getAudioInput(); });
-                    },
-                    child: setIcon())
-            )
-          ]
-        ),
-
+        appBar: AppBar(title: Text(activeRoom.description), actions: <Widget>[
+          Padding(
+              padding: EdgeInsets.only(right: 20.0),
+              child: GestureDetector(
+                  onTap: () async {
+                    bool res = false;
+                    if (_currentInput.port == AudioPort.receiver) {
+                      res = await FlutterAudioManager.changeToSpeaker();
+                      print(">>>>>>>>> change to speaker: $res");
+                    } else if (_currentInput.port == AudioPort.speaker) {
+                      res = await FlutterAudioManager.changeToBluetooth();
+                      print(">>>>>>>>> change to receiver: $res");
+                    } else {
+                      res = await FlutterAudioManager.changeToReceiver();
+                      print(">>>>>>>>> change to receiver: $res");
+                    }
+                    setState(() {
+                      getAudioInput();
+                    });
+                  },
+                  child: setIcon()))
+        ]),
         body: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [stream, videoRoom]),
@@ -235,14 +281,14 @@ class _DashboardState extends State<Dashboard> {
             BottomNavigationBarItem(
                 label: "Mic",
                 icon: widget.audioMute
-                        ? Icon(Icons.mic_off, color: Colors.red)
-                        : Icon(Icons.mic, color: Colors.white)),
+                    ? Icon(Icons.mic_off, color: Colors.red)
+                    : Icon(Icons.mic, color: Colors.white)),
 
             BottomNavigationBarItem(
                 label: "Video",
                 icon: widget.videoMute
-                        ? Icon(Icons.videocam_off, color: Colors.red)
-                        : Icon(Icons.videocam)),
+                    ? Icon(Icons.videocam_off, color: Colors.red)
+                    : Icon(Icons.videocam)),
 
             // todo: uncomment upon Q logic implemented
             // BottomNavigationBarItem(
