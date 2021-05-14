@@ -13,11 +13,8 @@ class MQTTClient {
   final void Function(String) _onSubscribedCallback;
   final void Function(String) _onMsgReceivedCallback;
 
-  MQTTClient(this._username, this._password,
-      this._onMsgReceivedCallback,
-      this._onConnectedCallback,
-      this._onSubscribedCallback)
-  {
+  MQTTClient(this._username, this._password, this._onMsgReceivedCallback,
+      this._onConnectedCallback, this._onSubscribedCallback) {
     _client =
         MqttServerClient.withPort(APP_MQTT_HOST,
             APP_MQTT_CLIENT_ID, APP_MQTT_PORT);
@@ -106,5 +103,9 @@ class MQTTClient {
 
   void pong() {
     FlutterLogs.logInfo("MQTTClient", "pong", "Ping response received");
+  }
+
+  void disconnect() {
+    _client.disconnect();
   }
 }

@@ -27,6 +27,8 @@ class StreamingUnified extends StatefulWidget {
   bool initialized = false;
   bool connected = false;
 
+  _StreamingUnifiedState state;
+
   @override
   _StreamingUnifiedState createState() => _StreamingUnifiedState();
 
@@ -39,6 +41,14 @@ class StreamingUnified extends StatefulWidget {
     audioStreamingPlugin.send(message: {"request": "stop"});
     audioStreamingPlugin.hangup();
     audioStreamingPlugin.destroy();
+  }
+
+  void reconnect() {
+    if (state != null && state.mounted) {
+      state.setState(() {
+        initialized = false;
+      });
+    }
   }
 }
 
@@ -86,6 +96,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    widget.state = this;
 //set user preset of audio and video
     final int audio =
         Provider.of<MainStore>(context, listen: false).audioPreset;
@@ -125,7 +136,6 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
     playerOverlay.mute = (muted) {
       FlutterLogs.logInfo("Streaming", "&&&&&&&&&&&&&&&&",
           "playerOverlay.mute: ${muted.toString()}");
-      // _remoteStreamAudio.getAudioTracks().first.setMicrophoneMute(muted);
       _remoteStreamAudio.getAudioTracks().last.enabled =
           !muted; //.setVolume(muted ? 0 : 0.5);
     };
@@ -328,11 +338,12 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
   @override
   Widget build(BuildContext context) {
     if (widget.connected && !widget.initialized) {
+      FlutterLogs.logInfo("Streaming", "build", "initializing");
+      widget.initialized = true;
       //video plugin init
       initVideoStream();
       //audio plugin init
       initAudioStream();
-      widget.initialized = true;
     }
     return GestureDetector(
         dragStartBehavior: DragStartBehavior.down,
