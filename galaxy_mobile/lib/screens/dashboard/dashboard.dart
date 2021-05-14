@@ -9,6 +9,7 @@ import 'package:galaxy_mobile/screens/streaming/streaming.dart';
 import 'package:galaxy_mobile/screens/video_room/videoRoomWidget.dart';
 import 'package:flutter_audio_manager/flutter_audio_manager.dart';
 import 'package:galaxy_mobile/services/mqttClient.dart';
+import 'package:galaxy_mobile/widgets/loading_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 
@@ -24,6 +25,8 @@ class Dashboard extends StatefulWidget {
   _DashboardState state;
 
   bool hadNoConnection = false;
+
+  BuildContext dialogPleaseWaitContext;
 
   @override
   State createState() => _DashboardState();
@@ -58,15 +61,27 @@ class _DashboardState extends State<Dashboard> {
         FlutterLogs.logInfo("Dashboard", "ConnectivityResult", "no connection");
 
         widget.hadNoConnection = true;
+        showDialog(
+            context: context,
+            useRootNavigator: false,
+            barrierDismissible: false,
+            builder: (BuildContext context) {
+              widget.dialogPleaseWaitContext = context;
+              return WillPopScope(
+                  onWillPop: () {},
+                  child: Dialog(
+                      backgroundColor: Colors.transparent,
+                      child: LoadingIndicator(
+                          text: "No Internet...reconnecting")));
+            });
         //show message on screen
       } else {
         //if marked no connection then reneter room
+        Navigator.pop(widget.dialogPleaseWaitContext);
         FlutterLogs.logInfo("Dashboard", "ConnectivityResult", "connection");
         if (widget.hadNoConnection) {
           FlutterLogs.logInfo(
               "Dashboard", "ConnectivityResult", "reconnecting - exit room");
-          // stream.exit();
-          videoRoom.exitRoom();
           if (_mqttClient != null) {
             _mqttClient.disconnect();
           }
@@ -79,6 +94,7 @@ class _DashboardState extends State<Dashboard> {
             // stream = StreamingUnified();
             // videoRoom = VideoRoom();
             stream.reconnect();
+            videoRoom.reconnect();
             _mqttClient = MQTTClient(
                 authService.getUserEmail(),
                 authService.getAuthToken(),

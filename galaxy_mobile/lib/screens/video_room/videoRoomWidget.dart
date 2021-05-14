@@ -41,7 +41,7 @@ class VideoRoom extends StatefulWidget {
 
   MediaStream myStream;
   var remoteStream;
-  var state;
+  _VideoRoomState state;
 
   int myid;
 
@@ -117,6 +117,18 @@ class VideoRoom extends StatefulWidget {
         break;
       } else
         FlutterLogs.logInfo("VideoRoom", "setUserState", "could not find user");
+    }
+  }
+
+  void reconnect() {
+    if (state != null && state.mounted) {
+      state.setState(() {
+        // if (j != null) j.destroy();
+        //  if (pluginHandle != null) pluginHandle.hangup();
+        // if (subscriberHandle != null) subscriberHandle.destroy();
+        //  updateVideoState(myVideoMuted);
+        //  state.initPlatformState();
+      });
     }
   }
 }
@@ -645,7 +657,8 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
               MediaStream stream = await plugin.initializeMediaDevices();
               widget.myStream = stream;
               widget.myStream.getAudioTracks().first.setMicrophoneMute(true);
-              widget.myStream.getVideoTracks().first.enabled = false;
+              widget.myStream.getVideoTracks().first.enabled =
+                  widget.myVideoMuted;
               widget.myAudioMuted = true;
               widget.updateVideoState(true);
               // });
@@ -1006,7 +1019,9 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     final double itemHeight = userGridHeight / 2;
     final double itemWidth = MediaQuery.of(context).size.width / 2;
 
-    FlutterLogs.logInfo("VideoRoom", "VideoRoomWidget",
+    FlutterLogs.logInfo(
+        "VideoRoom",
+        "VideoRoomWidget",
         "### itemWidth: $itemWidth | "
             "### itemHeight: $itemHeight");
     return Container(
@@ -1030,8 +1045,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                         : Align(
                             alignment: Alignment.center,
                             child: Icon(Icons.account_circle,
-                                color: Colors.white,
-                                size: itemHeight - 40)),
+                                color: Colors.white, size: itemHeight - 40)),
                     Align(
                       alignment: Alignment.bottomLeft,
                       child: Row(

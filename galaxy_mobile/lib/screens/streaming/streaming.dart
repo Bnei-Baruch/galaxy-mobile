@@ -46,6 +46,10 @@ class StreamingUnified extends StatefulWidget {
   void reconnect() {
     if (state != null && state.mounted) {
       state.setState(() {
+        if (videoStreamingPlugin != null) {
+          videoStreamingPlugin.send(message: {"request": "stop"});
+          audioStreamingPlugin.send(message: {"request": "stop"});
+        }
         initialized = false;
       });
     }
