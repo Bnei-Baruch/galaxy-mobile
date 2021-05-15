@@ -28,6 +28,7 @@ class Dashboard extends StatefulWidget {
 
   BuildContext dialogPleaseWaitContext;
 
+  VoidCallback callReneter;
   @override
   State createState() => _DashboardState();
 }
@@ -68,16 +69,29 @@ class _DashboardState extends State<Dashboard> {
             builder: (BuildContext context) {
               widget.dialogPleaseWaitContext = context;
               return WillPopScope(
-                  onWillPop: () {},
+                  onWillPop: () {
+                    Navigator.of(widget.state.context).pop();
+                    return Future.value(true);
+                  },
                   child: Dialog(
                       backgroundColor: Colors.transparent,
                       child: LoadingIndicator(
                           text: "No Internet...reconnecting")));
             });
+        Future.delayed(const Duration(seconds: 30), () {
+          if (widget.dialogPleaseWaitContext != null) {
+            stream.exit();
+            videoRoom.exitRoom();
+            if (_mqttClient != null) _mqttClient.disconnect();
+            Navigator.pop(widget.dialogPleaseWaitContext);
+            Navigator.of(widget.state.context).pop();
+          }
+        });
         //show message on screen
       } else {
         //if marked no connection then reneter room
         Navigator.pop(widget.dialogPleaseWaitContext);
+        widget.dialogPleaseWaitContext = null;
         FlutterLogs.logInfo("Dashboard", "ConnectivityResult", "connection");
         if (widget.hadNoConnection) {
           FlutterLogs.logInfo(
@@ -89,19 +103,12 @@ class _DashboardState extends State<Dashboard> {
               "Dashboard", "ConnectivityResult", "reconnecting - enter room");
           //enter room
           setState(() {
-            final authService = context.read<AuthService>();
-
-            // stream = StreamingUnified();
-            // videoRoom = VideoRoom();
-            stream.reconnect();
-            videoRoom.reconnect();
-            _mqttClient = MQTTClient(
-                authService.getUserEmail(),
-                authService.getAuthToken(),
-                this.handleCmdData,
-                this.connectedToBroker,
-                this.subscribedToTopic);
-            _mqttClient.connect();
+            stream.exit();
+            videoRoom.exitRoom();
+            _mqttClient.disconnect();
+            //go out of the room and re-enter , since jauns doesn't have a reconnect infra to do it right
+            Navigator.of(widget.state.context).pop(false);
+            widget.callReneter();
           });
           widget.hadNoConnection = false;
         }
@@ -337,58 +344,3 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 }
-
-//         drawer: Drawer(
-//   // Add a List View to the drawer. This ensures the user can scroll
-//   // through the options in the drawer if there isn't enough vertical
-//   // space to fit everything.
-//   child: ListView(
-//     // Important: Remove any padding from the ListView.
-//     padding: EdgeInsets.zero,
-//     children: <Widget>[
-//       DrawerHeader(
-//         child: Text('Drawer Header'),
-//         decoration: BoxDecoration(
-//           color: Colors.blue,
-//         ),
-//       ),
-//       ListTile(
-//         leading: Icon(Icons.home),
-//         title: Text('My Account'),
-//         onTap: () {
-//           // Update the state of the app.
-//           // ...
-//         },
-//       ),
-//       ListTile(
-//         title: Text('Settings'),
-//         onTap: () {
-//           // Update the state of the app.
-//           // ...
-//         },
-//       ),
-//       ListTile(
-//         title: Text('Sign out'),
-//         onTap: () {
-//           // Update the state of the app.
-//           // ...
-//         },
-//       ),
-//       Divider(),
-//       ListTile(
-//         title: Text('Feedback'),
-//         onTap: () {
-//           // Update the state of the app.
-//           // ...
-//         },
-//       ),
-//       ListTile(
-//         title: Text('Help'),
-//         onTap: () {
-//           // Update the state of the app.
-//           // ...
-//         },
-//       ),
-//     ],
-//   ),
-// ),

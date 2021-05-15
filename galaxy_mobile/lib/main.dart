@@ -51,8 +51,11 @@ void main() async {
               update: (_, auth, api, model) => model..update(auth, api)),
         ],
         child: EasyLocalization(
-            supportedLocales: [Locale('en', 'US'),
-              Locale('ru', 'RU'), Locale('he', 'IL')],
+            supportedLocales: [
+              Locale('en', 'US'),
+              Locale('ru', 'RU'),
+              Locale('he', 'IL')
+            ],
             path: 'assets/translations',
             fallbackLocale: Locale('en', 'US'),
             child: MyApp())
@@ -77,7 +80,7 @@ void startForegroundService() async {
       },
       title: "Arvut Mobile",
       content: "Playing in the background",
-      iconName: "ic_stat_hot_tub");
+      iconName: "ic_launcher_foreground");
 }
 
 void stopForegroundService() async {
@@ -97,12 +100,10 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
         onEvent: (event) {
           if (event == FGBGType.background) {
             FlutterLogs.logInfo(
-                "MyApp", "FGBGNotifier",
-                ">>> application sent to background");
+                "MyApp", "FGBGNotifier", ">>> application sent to background");
             Wakelock.disable();
           } else if (event == FGBGType.foreground) {
-            FlutterLogs.logInfo(
-                "MyApp", "FGBGNotifier",
+            FlutterLogs.logInfo("MyApp", "FGBGNotifier",
                 ">>> application returned to foreground");
             Wakelock.enable();
           }

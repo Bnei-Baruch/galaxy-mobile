@@ -59,10 +59,14 @@ class VideoRoom extends StatefulWidget {
     if (j != null) j.destroy();
     if (pluginHandle != null) pluginHandle.hangup();
     if (subscriberHandle != null) subscriberHandle.destroy();
-    _localRenderer.srcObject = null;
-    _localRenderer.dispose();
-    _remoteRenderer.map((e) => e.srcObject = null);
-    _remoteRenderer.map((e) => e.dispose());
+    if (_localRenderer != null) {
+      _localRenderer.srcObject = null;
+      _localRenderer.dispose();
+    }
+    if (_remoteRenderer != null && _remoteRenderer.isNotEmpty) {
+      _remoteRenderer.map((e) => e.srcObject = null);
+      _remoteRenderer.map((e) => e.dispose());
+    }
     pluginHandle = null;
     subscriberHandle = null;
   }
@@ -117,18 +121,6 @@ class VideoRoom extends StatefulWidget {
         break;
       } else
         FlutterLogs.logInfo("VideoRoom", "setUserState", "could not find user");
-    }
-  }
-
-  void reconnect() {
-    if (state != null && state.mounted) {
-      state.setState(() {
-        // if (j != null) j.destroy();
-        //  if (pluginHandle != null) pluginHandle.hangup();
-        // if (subscriberHandle != null) subscriberHandle.destroy();
-        //  updateVideoState(myVideoMuted);
-        //  state.initPlatformState();
-      });
     }
   }
 }
