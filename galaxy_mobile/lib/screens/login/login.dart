@@ -24,7 +24,7 @@ class _LoginState extends State<Login> {
   }
 
   Future<void> showTAndCDialog(BuildContext context) async {
-    String tAndCText= await getFileData('assets/res/t_and_c_'
+    String tAndCText = await getFileData('assets/res/t_and_c_'
         '${EasyLocalization.of(context).locale.languageCode}.txt');
 
     return showDialog<void>(
@@ -35,9 +35,7 @@ class _LoginState extends State<Login> {
           title: Text('terms_of_use'.tr()),
           content: SingleChildScrollView(
             child: ListBody(
-              children: <Widget>[
-                Text(tAndCText)
-              ],
+              children: <Widget>[Text(tAndCText)],
             ),
           ),
           actions: <Widget>[
@@ -53,14 +51,13 @@ class _LoginState extends State<Login> {
     );
   }
 
-  SingleChildScrollView getView(BuildContext context,
-      BoxConstraints viewportConstraints)
-  {
+  SingleChildScrollView getView(
+      BuildContext context, BoxConstraints viewportConstraints) {
     if (_isThinScreen) {
       return SingleChildScrollView(
           child: ConstrainedBox(
               constraints:
-              BoxConstraints(minHeight: viewportConstraints.maxHeight),
+                  BoxConstraints(minHeight: viewportConstraints.maxHeight),
               child: Container(
                   decoration: BoxDecoration(
                       image: DecorationImage(
@@ -93,13 +90,11 @@ class _LoginState extends State<Login> {
                               ]),
                           SizedBox(width: 10.w)
                         ]),
-
                     Row(children: [
                       SizedBox(width: 70.w),
                       Flexible(child: UILanguageSelector(false)),
                       SizedBox(width: 70.w)
                     ]),
-
                     Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                       Column(children: [
                         SizedBox(height: 20),
@@ -120,13 +115,13 @@ class _LoginState extends State<Login> {
                             minWidth: 140.0,
                             height: 60.0,
                             child: RaisedButton(
-                                child:
-                                Text("login".tr(),
+                                child: Text("login".tr(),
                                     style: TextStyle(
                                         color: Colors.white, fontSize: 24)),
                                 onPressed: () async {
                                   final auth = context.read<AuthService>();
                                   final authResponse = await auth.signIn();
+
                                   final api = context.read<Api>();
                                   api.setAccessToken(authResponse.accessToken);
                                   await context.read<MainStore>().init();
@@ -171,15 +166,12 @@ class _LoginState extends State<Login> {
                         SizedBox(height: 20)
                       ])
                     ])
-                  ])
-              )
-          )
-      );
+                  ]))));
     } else {
       return SingleChildScrollView(
           child: ConstrainedBox(
               constraints:
-              BoxConstraints(minHeight: viewportConstraints.maxHeight),
+                  BoxConstraints(minHeight: viewportConstraints.maxHeight),
               child: Container(
                   decoration: BoxDecoration(
                       image: DecorationImage(
@@ -234,8 +226,7 @@ class _LoginState extends State<Login> {
                             minWidth: 140.0,
                             height: 60.0,
                             child: RaisedButton(
-                                child:
-                                Text("login".tr(),
+                                child: Text("login".tr(),
                                     style: TextStyle(
                                         color: Colors.white, fontSize: 24)),
                                 onPressed: () async {
@@ -310,10 +301,7 @@ class _LoginState extends State<Login> {
                         SizedBox(height: 20)
                       ])
                     ])
-                  ])
-              )
-          )
-      );
+                  ]))));
     }
   }
 

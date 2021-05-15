@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/screens/dashboard/dashboard.dart';
+import 'package:galaxy_mobile/services/authService.dart';
 import 'package:galaxy_mobile/widgets/audioMode.dart';
 import 'package:galaxy_mobile/widgets/drawer.dart';
 import 'package:galaxy_mobile/widgets/roomSelector.dart';

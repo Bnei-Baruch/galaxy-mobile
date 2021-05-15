@@ -122,7 +122,7 @@ class _DashboardState extends State<Dashboard> {
       if (_mqttClient == null) {
         _mqttClient = MQTTClient(
             authService.getUserEmail(),
-            authService.getAuthToken(),
+            authService.getToken().accessToken,
             this.handleCmdData,
             this.connectedToBroker,
             this.subscribedToTopic);
