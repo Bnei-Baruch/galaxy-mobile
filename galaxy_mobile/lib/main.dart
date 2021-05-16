@@ -5,6 +5,7 @@ import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/routes.dart';
 import 'package:galaxy_mobile/services/api.dart';
 import 'package:galaxy_mobile/services/authService.dart';
+import 'package:galaxy_mobile/services/logger.dart';
 import 'package:galaxy_mobile/themes/default.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_logs/flutter_logs.dart';
@@ -17,10 +18,9 @@ import 'package:flutter_fgbg/flutter_fgbg.dart';
 // - to generate luncher icons run:
 // flutter pub run flutter_launcher_icons:main
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await SharedPrefs().init();
-  // await EasyLocalization.ensureInitialized();
+final logger = new Logger("main");
+
+Future<void> initLogs() async {
   await FlutterLogs.initLogs(
       logLevelsEnabled: [
         LogLevel.INFO,
@@ -36,6 +36,12 @@ void main() async {
       logsExportDirectoryName: "galaxyLogs/exported",
       debugFileOperations: true,
       isDebuggable: true);
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SharedPrefs().init();
+  await initLogs();
 
   Wakelock.enable();
 
@@ -62,34 +68,6 @@ void main() async {
         //MyApp()
         ),
   );
-}
-
-void startForegroundService() async {
-  await FlutterForegroundPlugin.setServiceMethodInterval(seconds: 5);
-  await FlutterForegroundPlugin.setServiceMethod(globalForegroundService);
-  await FlutterForegroundPlugin.startForegroundService(
-      holdWakeLock: false,
-      // keepRunning: true,
-      onStarted: () {
-        FlutterLogs.logInfo(
-            "main", "startForegroundService", "foreground service started");
-      },
-      onStopped: () {
-        FlutterLogs.logInfo(
-            "main", "startForegroundService", "foreground service stopped");
-      },
-      title: "Arvut Mobile",
-      content: "Playing in the background",
-      iconName: "ic_launcher_foreground");
-}
-
-void stopForegroundService() async {
-  await FlutterForegroundPlugin.stopForegroundService();
-}
-
-void globalForegroundService() {
-  FlutterLogs.logInfo("main", "globalForegroundService",
-      "current datetime is ${DateTime.now()}");
 }
 
 class MyApp extends StatelessWidget with WidgetsBindingObserver {
