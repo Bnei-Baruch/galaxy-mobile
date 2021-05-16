@@ -3,10 +3,8 @@ import 'dart:async';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_logs/flutter_logs.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
-import 'package:galaxy_mobile/screens/dashboard/dashboard.dart';
-import 'package:galaxy_mobile/services/authService.dart';
+import 'package:galaxy_mobile/services/logger.dart';
 import 'package:galaxy_mobile/widgets/audioMode.dart';
 import 'package:galaxy_mobile/widgets/drawer.dart';
 import 'package:galaxy_mobile/widgets/roomSelector.dart';
@@ -18,6 +16,8 @@ import 'package:galaxy_mobile/widgets/screenName.dart';
 import 'package:galaxy_mobile/widgets/selfViewWidget.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+final logger = new Logger("settings");
 
 class Settings extends StatefulWidget {
   @override
@@ -35,7 +35,7 @@ class _SettingsState extends State<Settings> {
   @override
   void initState() {
     super.initState();
-    FlutterLogs.logInfo("Settings", "initState", "starting settings");
+    logger.info("starting settings");
     selfWidget = SelfViewWidget();
 
     subscription = Connectivity()
