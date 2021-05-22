@@ -1,7 +1,7 @@
 import 'package:flutter_foreground_plugin/flutter_foreground_plugin.dart';
 import 'package:galaxy_mobile/services/logger.dart';
 
-final logger = new Logger("ForgroundService");
+final logger = new Logger("ForegroundService");
 
 void startForegroundService() async {
   await FlutterForegroundPlugin.setServiceMethodInterval(seconds: 5);

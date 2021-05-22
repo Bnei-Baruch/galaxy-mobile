@@ -14,6 +14,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 
 import '../../services/authService.dart';
+import 'package:phone_state_i/phone_state_i.dart';
 
 enum AudioDevice { receiver, speaker, bluetooth }
 
@@ -29,6 +30,7 @@ class Dashboard extends StatefulWidget {
   BuildContext dialogPleaseWaitContext;
 
   VoidCallback callReneter;
+
   @override
   State createState() => _DashboardState();
 }
@@ -37,7 +39,7 @@ class _DashboardState extends State<Dashboard> {
   var stream = StreamingUnified();
   var videoRoom = VideoRoom();
   var activeUser;
-
+  bool callInProgress;
   MQTTClient _mqttClient;
 
   String _activeRoomId;
@@ -47,10 +49,13 @@ class _DashboardState extends State<Dashboard> {
 
   StreamSubscription<ConnectivityResult> subscription;
 
+  StreamSubscription streamSubscription;
+
   @override
   void initState() {
     // TODO: implement initState
     widget.state = this;
+    callInProgress = false;
     subscription = Connectivity()
         .onConnectivityChanged
         .listen((ConnectivityResult result) {
@@ -117,6 +122,30 @@ class _DashboardState extends State<Dashboard> {
       //reneter with the same room number
     });
 
+    streamSubscription =
+        phoneStateCallEvent.listen((PhoneStateCallEvent event) {
+      print('Call is Incoming or Connected' + event.stateC);
+      //event.stateC has values "true" or "false"
+      //if had a ring or connected need to re-enter
+      if (event.stateC == true) {
+        //mark re-enter
+        FlutterLogs.logInfo("Dashboard", "phoneCall", "mark re-enter");
+        callInProgress = true;
+      } else if (callInProgress) {
+        callInProgress = false;
+        FlutterLogs.logInfo(
+            "Dashboard", "phoneCall", "reconnecting - enter room");
+        //enter room
+        setState(() {
+          stream.exit();
+          videoRoom.exitRoom();
+          _mqttClient.disconnect();
+          //go out of the room and re-enter , since jauns doesn't have a reconnect infra to do it right
+          Navigator.of(widget.state.context).pop(false);
+          widget.callReneter();
+        });
+      }
+    });
     videoRoom.RoomReady = () {
       final authService = context.read<AuthService>();
       if (_mqttClient == null) {

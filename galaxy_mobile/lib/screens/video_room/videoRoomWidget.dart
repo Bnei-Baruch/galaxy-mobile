@@ -17,7 +17,7 @@ import 'dart:async';
 
 import 'package:synchronized/synchronized.dart';
 
-import '../../forground.dart';
+import '../../foreground.dart';
 
 typedef BoolCallback = Function(bool);
 final int PAGE_SIZE = 3;
