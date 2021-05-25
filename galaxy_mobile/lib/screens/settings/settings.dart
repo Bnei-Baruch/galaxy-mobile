@@ -1,7 +1,10 @@
+import 'dart:async';
+
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_logs/flutter_logs.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
+import 'package:galaxy_mobile/services/logger.dart';
 import 'package:galaxy_mobile/widgets/audioMode.dart';
 import 'package:galaxy_mobile/widgets/drawer.dart';
 import 'package:galaxy_mobile/widgets/roomSelector.dart';
@@ -14,6 +17,8 @@ import 'package:galaxy_mobile/widgets/selfViewWidget.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+final logger = new Logger("settings");
+
 class Settings extends StatefulWidget {
   @override
   State createState() => _SettingsState();
@@ -23,11 +28,21 @@ class _SettingsState extends State<Settings> {
   SelfViewWidget selfWidget;
   bool _isThinScreen;
 
+  StreamSubscription<ConnectivityResult> subscription;
+
+  ConnectivityResult connectionStatus;
+
   @override
   void initState() {
     super.initState();
-    FlutterLogs.logInfo("Settings", "initState", "starting settings");
+    logger.info("starting settings");
     selfWidget = SelfViewWidget();
+
+    subscription = Connectivity()
+        .onConnectivityChanged
+        .listen((ConnectivityResult result) {
+      connectionStatus = result;
+    });
   }
 
   @override
@@ -120,26 +135,50 @@ class _SettingsState extends State<Settings> {
                                       //         fontSize: 20)),
                                       child: Row(
                                           crossAxisAlignment:
-                                          CrossAxisAlignment.center,
+                                              CrossAxisAlignment.center,
                                           mainAxisAlignment:
-                                          MainAxisAlignment.center,
+                                              MainAxisAlignment.center,
                                           children: [
-                                            Text(_isThinScreen ? '' : 'join_room'.tr(),
+                                            Text(
+                                                _isThinScreen
+                                                    ? ''
+                                                    : 'join_room'.tr(),
                                                 style: TextStyle(
                                                     color: Colors.white,
                                                     fontSize: 20)),
-                                            SizedBox(width: _isThinScreen ? 0 : 10.w),
+                                            SizedBox(
+                                                width:
+                                                    _isThinScreen ? 0 : 10.w),
                                             Icon(Icons.double_arrow,
                                                 color: Colors.white)
                                           ]),
                                       onPressed: () {
-                                        Navigator.pushNamed(
-                                                context,
-                                                ''
-                                                '/dashboard')
-                                            .then((value) => setState(() {
-                                                  selfWidget.restartCamera();
-                                                }));
+                                        if (connectionStatus ==
+                                            ConnectivityResult.none) {
+                                          showDialog(
+                                              context: context,
+                                              child: AlertDialog(
+                                                title: Text("No Internet"),
+                                                content:
+                                                    Text("Please reconnect"),
+                                              ));
+                                        } else {
+                                          Navigator.pushNamed(
+                                                  context,
+                                                  ''
+                                                  '/dashboard')
+                                              .then((value) {
+                                            if (value == false) {
+                                              Navigator.pushNamed(
+                                                  context,
+                                                  ''
+                                                  '/dashboard');
+                                            }
+                                            setState(() {
+                                              selfWidget.restartCamera();
+                                            });
+                                          });
+                                        }
                                       })),
                               SizedBox(width: 10.w)
                             ]),
@@ -149,3 +188,13 @@ class _SettingsState extends State<Settings> {
             }));
   }
 }
+//
+//
+// (value as Dashboard).callReneter =
+// () {
+// FlutterLogs.logInfo("Settings", "callReneter", "executing");
+// Navigator.pushNamed(
+// context,
+// ''
+// '/dashboard');
+// };

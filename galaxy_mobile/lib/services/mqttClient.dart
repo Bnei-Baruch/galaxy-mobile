@@ -3,6 +3,10 @@ import 'package:galaxy_mobile/config/env.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 
+import 'logger.dart';
+
+final logger = new Logger("MQTTClient");
+
 class MQTTClient {
   String _username;
   String _password;
@@ -43,8 +47,7 @@ class MQTTClient {
     try {
       await _client.connect();
     } catch (e) {
-      FlutterLogs.logError(
-          "MQTTClient", "connect", "Exception during connection to broker: $e");
+      logger.trace("Exception during connection to broker", e);
       _client.disconnect();
       return null;
     }
@@ -54,8 +57,7 @@ class MQTTClient {
       final payload =
           MqttPublishPayload.bytesToStringAsString(message.payload.message);
 
-      FlutterLogs.logInfo("MQTTClient", "listen",
-          "Received message: $payload from topic: ${c[0].topic}>");
+      logger.info("Received message: $payload from topic: ${c[0].topic}>");
       _onMsgReceivedCallback(payload);
     });
 
@@ -77,32 +79,29 @@ class MQTTClient {
   }
 
   void onConnected() {
-    FlutterLogs.logInfo("MQTTClient", "onConnected", "Connected");
+    logger.info("Connected");
     _onConnectedCallback();
   }
 
   void onDisconnected() {
-    FlutterLogs.logInfo("MQTTClient", "onDisconnected", "Disconnected");
+    logger.info("Disconnected");
   }
 
   void onSubscribed(String topic) {
-    FlutterLogs.logInfo(
-        "MQTTClient", "onSubscribed", "Subscribed to topic: $topic");
+    logger.info("Subscribed to topic: $topic");
     _onSubscribedCallback(topic);
   }
 
   void onSubscribeFail(String topic) {
-    FlutterLogs.logWarn(
-        "MQTTClient", "onSubscribeFail", "Failed to subscribe to $topic");
+    logger.warn("Failed to subscribe to $topic");
   }
 
   void onUnsubscribed(String topic) {
-    FlutterLogs.logInfo(
-        "MQTTClient", "onUnsubscribed", "Unsubscribed from topic: $topic");
+    logger.info("Unsubscribed from topic: $topic");
   }
 
   void pong() {
-    FlutterLogs.logInfo("MQTTClient", "pong", "Ping response received");
+    logger.info("Ping response received");
   }
 
   void disconnect() {

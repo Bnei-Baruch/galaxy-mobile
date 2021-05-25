@@ -57,13 +57,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.4.6"
-  carousel_slider:
-    dependency: "direct main"
-    description:
-      name: carousel_slider
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.4.1"
   characters:
     dependency: transitive
     description:
@@ -652,6 +645,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.1.0"
+  phone_state_i:
+    dependency: "direct main"
+    description:
+      name: phone_state_i
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.3"
   platform:
     dependency: transitive
     description:

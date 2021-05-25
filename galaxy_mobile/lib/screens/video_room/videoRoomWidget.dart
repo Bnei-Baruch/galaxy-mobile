@@ -2,9 +2,8 @@ import 'dart:collection';
 import 'dart:convert';
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_foreground_plugin/flutter_foreground_plugin.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
-import 'package:galaxy_mobile/services/authService.dart';
+import 'package:galaxy_mobile/services/keycloak.dart';
 import 'package:galaxy_mobile/utils/switch_page_helper.dart';
 import 'package:janus_client/janus_client.dart';
 import 'package:janus_client/utils.dart';
@@ -18,7 +17,7 @@ import 'dart:async';
 
 import 'package:synchronized/synchronized.dart';
 
-import '../../main.dart';
+import '../../foreground.dart';
 
 typedef BoolCallback = Function(bool);
 final int PAGE_SIZE = 3;
@@ -41,7 +40,7 @@ class VideoRoom extends StatefulWidget {
 
   MediaStream myStream;
   var remoteStream;
-  var state;
+  _VideoRoomState state;
 
   int myid;
 
@@ -59,10 +58,14 @@ class VideoRoom extends StatefulWidget {
     if (j != null) j.destroy();
     if (pluginHandle != null) pluginHandle.hangup();
     if (subscriberHandle != null) subscriberHandle.destroy();
-    _localRenderer.srcObject = null;
-    _localRenderer.dispose();
-    _remoteRenderer.map((e) => e.srcObject = null);
-    _remoteRenderer.map((e) => e.dispose());
+    if (_localRenderer != null) {
+      _localRenderer.srcObject = null;
+      _localRenderer.dispose();
+    }
+    if (_remoteRenderer != null && _remoteRenderer.isNotEmpty) {
+      _remoteRenderer.map((e) => e.srcObject = null);
+      _remoteRenderer.map((e) => e.dispose());
+    }
     pluginHandle = null;
     subscriberHandle = null;
   }
@@ -645,7 +648,8 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
               MediaStream stream = await plugin.initializeMediaDevices();
               widget.myStream = stream;
               widget.myStream.getAudioTracks().first.setMicrophoneMute(true);
-              widget.myStream.getVideoTracks().first.enabled = false;
+              widget.myStream.getVideoTracks().first.enabled =
+                  widget.myVideoMuted;
               widget.myAudioMuted = true;
               widget.updateVideoState(true);
               // });
@@ -1006,7 +1010,9 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     final double itemHeight = userGridHeight / 2;
     final double itemWidth = MediaQuery.of(context).size.width / 2;
 
-    FlutterLogs.logInfo("VideoRoom", "VideoRoomWidget",
+    FlutterLogs.logInfo(
+        "VideoRoom",
+        "VideoRoomWidget",
         "### itemWidth: $itemWidth | "
             "### itemHeight: $itemHeight");
     return Container(
@@ -1030,8 +1036,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                         : Align(
                             alignment: Alignment.center,
                             child: Icon(Icons.account_circle,
-                                color: Colors.white,
-                                size: itemHeight - 40)),
+                                color: Colors.white, size: itemHeight - 40)),
                     Align(
                       alignment: Alignment.bottomLeft,
                       child: Row(

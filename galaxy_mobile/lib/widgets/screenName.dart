@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:galaxy_mobile/services/authService.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:galaxy_mobile/services/keycloak.dart';
 
 typedef UserCallback = void Function(User user);
 
