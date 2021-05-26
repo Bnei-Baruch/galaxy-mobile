@@ -122,6 +122,10 @@ class VideoRoom extends StatefulWidget {
         FlutterLogs.logInfo("VideoRoom", "setUserState", "could not find user");
     }
   }
+
+  void toggleAudioMode() {
+    state.toggleAudioMode();
+  }
 }
 
 class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
@@ -168,6 +172,8 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    final s = context.read<MainStore>();
+    muteOtherCams = s.audioMode;
     WidgetsBinding.instance.addObserver(this);
     switcher = SwitchPageHelper(unsubscribeFrom, makeSubscription,
         switchVideoSlots, PAGE_SIZE, muteOtherCams);
@@ -1082,8 +1088,10 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                       child: Stack(
                         children: [
                           (feeds.firstWhere((element) =>
-                                      element["videoSlot"] == 0)["cammute"] ==
-                                  false)
+                                          element["videoSlot"] ==
+                                          0)["cammute"] ==
+                                      false &&
+                                  !muteOtherCams)
                               // (true)
                               // (widget._remoteRenderer
                               //         .elementAt(0)
@@ -1155,8 +1163,10 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                       child: Stack(
                         children: [
                           (feeds.firstWhere((element) =>
-                                      element["videoSlot"] == 1)["cammute"] ==
-                                  false)
+                                          element["videoSlot"] ==
+                                          1)["cammute"] ==
+                                      false &&
+                                  !muteOtherCams)
                               // (widget._remoteRenderer
                               //         .elementAt(1)
                               //         .srcObject
@@ -1226,8 +1236,10 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                       child: Stack(
                         children: [
                           (feeds.firstWhere((element) =>
-                                      element["videoSlot"] == 2)["cammute"] ==
-                                  false)
+                                          element["videoSlot"] ==
+                                          2)["cammute"] ==
+                                      false &&
+                                  !muteOtherCams)
                               // (widget._remoteRenderer
                               //         .elementAt(2)
                               //         .srcObject
@@ -1436,6 +1448,37 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         stopForegroundService();
         break;
     }
+  }
+
+  void toggleAudioMode() {
+    FlutterLogs.logInfo(
+        "videoRoom", "toggleAudioMode", 'changing to ${!muteOtherCams}');
+    var activeFeeds = feeds.where((feed) => feed["videoSlot"] != null).toList();
+    if (!muteOtherCams) {
+// Should hide/mute now all videos.
+      switcher.muteOtherCams = true;
+      muteOtherCams = true;
+      // widget.myStream.getVideoTracks().first.enabled = false;
+      // widget.myVideoMuted = true;
+      switcher.unsubscribeFrom(
+          activeFeeds.map((feed) => feed["id"]).toList(),
+/* onlyVideo= */ true);
+    } else {
+      switcher.muteOtherCams = false;
+      muteOtherCams = false;
+      // widget.myStream.getVideoTracks().first.enabled = true;
+      // widget.myVideoMuted = false;
+// Should unmute/show now all videos.false,
+      switcher.makeSubscription(
+          activeFeeds,
+/* feedsJustJoined= */ false,
+/* subscribeToVideo= */ true,
+/* subscribeToAudio= */ false,
+/* subscribeToData= */ false);
+//       switcher.switchVideos(this.page, feeds, feeds);
+
+    }
+    setState(() {});
   }
 }
 

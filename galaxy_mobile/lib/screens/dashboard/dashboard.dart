@@ -31,6 +31,8 @@ class Dashboard extends StatefulWidget {
 
   VoidCallback callReneter;
 
+  bool audioMode = false;
+
   @override
   State createState() => _DashboardState();
 }
@@ -342,6 +344,12 @@ class _DashboardState extends State<Dashboard> {
                     ? Icon(Icons.videocam_off, color: Colors.red)
                     : Icon(Icons.videocam)),
 
+            BottomNavigationBarItem(
+                label: "Audio Mode",
+                icon: widget.audioMode
+                    ? Icon(Icons.supervised_user_circle_outlined,
+                        color: Colors.red)
+                    : Icon(Icons.supervised_user_circle_outlined)),
             // todo: uncomment upon Q logic implemented
             // BottomNavigationBarItem(
             //   icon: Icon(Icons.live_help),
@@ -365,6 +373,16 @@ class _DashboardState extends State<Dashboard> {
                   widget.videoMute = !widget.videoMute;
                   updateRoomWithMyVideoState();
                 });
+                break;
+              case 2:
+                setState(() {
+                  widget.audioMode = !widget.audioMode;
+                  // widget.videoMute = widget.audioMode;
+                  // updateRoomWithMyVideoState();
+                  stream.toggleAudioMode();
+                });
+                videoRoom.toggleAudioMode();
+
                 break;
             }
           },

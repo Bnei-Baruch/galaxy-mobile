@@ -26,6 +26,7 @@ class StreamingUnified extends StatefulWidget {
 
   bool initialized = false;
   bool connected = false;
+  bool audioMode = false;
 
   _StreamingUnifiedState state;
 
@@ -42,6 +43,23 @@ class StreamingUnified extends StatefulWidget {
       audioStreamingPlugin.send(message: {"request": "stop"});
       audioStreamingPlugin.hangup();
       audioStreamingPlugin.destroy();
+    }
+  }
+
+  void toggleAudioMode() {
+    if (!audioMode) {
+      if (videoStreamingPlugin != null) {
+        videoStreamingPlugin.send(message: {"request": "stop"});
+        videoStreamingPlugin.destroy();
+        videoStreamingPlugin = null;
+        audioMode = true;
+        state.setState(() {
+          isVideoPlaying = false;
+        });
+      }
+    } else {
+      state.initVideoStream();
+      audioMode = false;
     }
   }
 }
@@ -90,6 +108,8 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    final s = context.read<MainStore>();
+    widget.audioMode = s.audioMode;
     widget.state = this;
 //set user preset of audio and video
     final int audio =
