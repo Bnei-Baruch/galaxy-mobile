@@ -268,6 +268,12 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
               "offer_video": true,
             });
           });
+        },
+        slowLink: (uplink, lost, mid) {
+          FlutterLogs.logWarn(
+              "Streaming",
+              "plugin: audio janus.plugin.streaming",
+              "slowLink: uplink ${uplink} lost ${lost} mid ${mid}");
         }));
   }
 
@@ -335,6 +341,12 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
               "offer_video": true,
             });
           });
+        },
+        slowLink: (uplink, lost, mid) {
+          FlutterLogs.logWarn(
+              "Streaming",
+              "plugin: video janus.plugin.streaming",
+              "slowLink: uplink ${uplink} lost ${lost} mid ${mid}");
         }));
   }
 
