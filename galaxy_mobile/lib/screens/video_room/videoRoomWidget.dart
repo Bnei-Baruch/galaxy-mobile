@@ -37,6 +37,7 @@ class VideoRoom extends StatefulWidget {
   Plugin subscriberHandle;
   bool myAudioMuted = false;
   bool myVideoMuted = false;
+  bool isQuestion = false;
 
   MediaStream myStream;
   var remoteStream;
@@ -95,15 +96,26 @@ class VideoRoom extends StatefulWidget {
     myStream.getVideoTracks().first.enabled =
         !myStream.getVideoTracks().first.enabled;
 
-    if (state != null && state.mounted)
+    if (state != null && state.mounted) {
       state.setState(() {
         myVideoMuted = !myVideoMuted;
       });
-    else
+    } else {
       myVideoMuted = !myVideoMuted;
-    // }
+    }
     FlutterLogs.logInfo("VideoRoom", "toggleVideo",
         "${myStream.getVideoTracks().first.toString()}");
+  }
+
+  void toggleQuestion() {
+    FlutterLogs.logInfo("VideoRoom", "toggleQuestion", "");
+    if (state != null && state.mounted) {
+      state.setState(() {
+        isQuestion = !isQuestion;
+      });
+    } else {
+      isQuestion = !isQuestion;
+    }
   }
 
   void setUserState(var user) {
@@ -1053,6 +1065,18 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                         ],
                       ),
                     ),
+                    Align(
+                        alignment: Alignment.topRight,
+                        child: Container(
+                            margin:
+                                const EdgeInsets.only(top: 8.0, right: 8.0),
+                            child: Icon(
+                              Icons.live_help_rounded,
+                              color: widget.isQuestion
+                                  ? Colors.red
+                                  : Colors.transparent,
+                              size: 50,
+                            )))
                   ],
                 ),
 
@@ -1131,7 +1155,19 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                               ],
                             ),
                           ),
-                        ],
+                          Align(
+                              alignment: Alignment.topRight,
+                              child: Container(
+                                  margin:
+                                  const EdgeInsets.only(top: 8.0, right: 8.0),
+                                  child: Icon(
+                                    Icons.live_help_rounded,
+                                    color: widget.isQuestion
+                                        ? Colors.red
+                                        : Colors.transparent,
+                                    size: 50,
+                                  )))
+                        ]
                       ))
                   : Container(),
 

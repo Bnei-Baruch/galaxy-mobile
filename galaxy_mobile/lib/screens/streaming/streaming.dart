@@ -15,6 +15,7 @@ class StreamingUnified extends StatefulWidget {
   int defaultVideo = 15;
   int defaultAudio = 1;
   bool isPlayerShown = false;
+  bool isOnAir = false;
 
   var videoTrack;
   var audioTrack;
@@ -31,6 +32,16 @@ class StreamingUnified extends StatefulWidget {
 
   @override
   _StreamingUnifiedState createState() => _StreamingUnifiedState();
+
+  void toggleOnAir() {
+    if (state != null && state.mounted) {
+      state.setState(() {
+        isOnAir = !isOnAir;
+      });
+    } else {
+      isOnAir = !isOnAir;
+    }
+  }
 
   void exit() {
     if (videoStreamingPlugin != null) {
@@ -348,6 +359,12 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
             children: [
               Container(
                 height: MediaQuery.of(context).size.height / 3,
+                decoration: BoxDecoration(
+                    border: Border.all(
+                        color:
+                        widget.isOnAir ?
+                        Colors.redAccent : Colors.transparent,
+                        width: 3)),
                 child:
                     (_remoteRenderer.srcObject != null && widget.isVideoPlaying)
                         ? RTCVideoView(
@@ -375,6 +392,13 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
             ],
           ),
           widget.isPlayerShown ? playerOverlay : Container(),
+          Align(
+              alignment: Alignment.topRight,
+              child: Container(
+                  margin: const EdgeInsets.only(top: 8.0, right: 8.0),
+                  child: Opacity(opacity: widget.isOnAir ? 1.0 : 0.0,
+                      child: Image.asset('assets/graphics/onAir.png',
+                          height: 50, fit: BoxFit.fill))))
         ]),
         onTap: () {
           setState(() {

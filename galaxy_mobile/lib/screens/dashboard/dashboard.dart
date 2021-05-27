@@ -21,6 +21,7 @@ enum AudioDevice { receiver, speaker, bluetooth }
 class Dashboard extends StatefulWidget {
   bool audioMute = true;
   bool videoMute = true;
+  bool isQuestion = false;
   AudioDevice _audioDevice = AudioDevice.receiver;
 
   _DashboardState state;
@@ -82,7 +83,7 @@ class _DashboardState extends State<Dashboard> {
                   child: Dialog(
                       backgroundColor: Colors.transparent,
                       child: LoadingIndicator(
-                          text: "No Internet...reconnecting")));
+                          text: "No Internet... reconnecting")));
             });
         Future.delayed(const Duration(seconds: 30), () {
           if (widget.dialogPleaseWaitContext != null) {
@@ -304,6 +305,10 @@ class _DashboardState extends State<Dashboard> {
         case "client-state":
           videoRoom.setUserState(jsonCmd["user"]);
           break;
+
+        case "client-question":
+          stream.toggleOnAir();
+          break;
       }
     } on FormatException catch (e) {
       FlutterLogs.logError("Dashboard", "handleCmdData",
@@ -319,23 +324,21 @@ class _DashboardState extends State<Dashboard> {
   void subscribedToTopic(String topic) {
     if (topic == "galaxy/room/" + _activeRoomId) {
       Future.delayed(const Duration(milliseconds: 1000), () {
-        updateRoomWithMyVideoState();
+        updateRoomWithMyState(false);
       });
     }
   }
 
-  void updateRoomWithMyVideoState() {
-    FlutterLogs.logInfo("Dashboard", "updateRoomWithMyVideoState",
-        "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+  void updateRoomWithMyState(bool isQuestion) {
     var userData = activeUser.toJson();
     userData["camera"] = !widget.videoMute;
-    userData["question"] = false;
+    userData["question"] = isQuestion;
     userData["rfid"] = videoRoom.getMyFeedId();
     var message = {};
     message["type"] = "client-state";
     message["user"] = userData;
-    JsonEncoder encoder = JsonEncoder();
-    _mqttClient.send("galaxy/room/" + _activeRoomId, encoder.convert(message));
+    _mqttClient.send("galaxy/room/" + _activeRoomId,
+        JsonEncoder().convert(message));
   }
 
   Icon setIcon() {
@@ -400,19 +403,16 @@ class _DashboardState extends State<Dashboard> {
                 icon: widget.audioMute
                     ? Icon(Icons.mic_off, color: Colors.red)
                     : Icon(Icons.mic, color: Colors.white)),
-
             BottomNavigationBarItem(
                 label: "Video",
                 icon: widget.videoMute
                     ? Icon(Icons.videocam_off, color: Colors.red)
                     : Icon(Icons.videocam)),
-
-            // todo: uncomment upon Q logic implemented
-            // BottomNavigationBarItem(
-            //   icon: Icon(Icons.live_help),
-            //   label: 'Ask Question',
-            // )
-            // todo <<<
+            BottomNavigationBarItem(
+              label: 'Ask Question',
+              icon: widget.isQuestion
+                  ? Icon(Icons.live_help)
+                  : Icon(Icons.live_help_outlined))
           ],
           onTap: (value) {
             FlutterLogs.logInfo("Dashboard", "onTap", value.toString());
@@ -428,7 +428,15 @@ class _DashboardState extends State<Dashboard> {
                 videoRoom.toggleVideo();
                 setState(() {
                   widget.videoMute = !widget.videoMute;
-                  updateRoomWithMyVideoState();
+                  updateRoomWithMyState(false);
+                });
+                break;
+
+              case 2:
+                videoRoom.toggleQuestion();
+                updateRoomWithMyState(true);
+                setState(() {
+                  widget.isQuestion = !widget.isQuestion;
                 });
                 break;
             }
