@@ -134,6 +134,10 @@ class VideoRoom extends StatefulWidget {
         FlutterLogs.logInfo("VideoRoom", "setUserState", "could not find user");
     }
   }
+
+  void toggleAudioMode() {
+    state.toggleAudioMode();
+  }
 }
 
 class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
@@ -180,6 +184,8 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    final s = context.read<MainStore>();
+    muteOtherCams = s.audioMode;
     WidgetsBinding.instance.addObserver(this);
     switcher = SwitchPageHelper(unsubscribeFrom, makeSubscription,
         switchVideoSlots, PAGE_SIZE, muteOtherCams);
@@ -300,6 +306,9 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
             },
           );
         },
+        onError: (error) {
+          FlutterLogs.logError("VideoRoom", "plugin:'remotefeed_user", error);
+        },
         onRemoteTrack: (stream, track, mid, on) {
           FlutterLogs.logInfo(
               "VideoRoom",
@@ -405,6 +414,10 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
             });
           }
           //});
+        },
+        slowLink: (uplink, lost, mid) {
+          FlutterLogs.logWarn("VideoRoom", "plugin: remotefeed_user",
+              "slowLink: uplink ${uplink} lost ${lost} mid ${mid}");
         }));
   }
 
@@ -587,7 +600,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                     if (feeds.any((feed) => newFeedsIds.contains(feed["id"]))) {
                       FlutterLogs.logWarn(
                           "VideoRoom",
-                          "initPlatformState",
+                          "joinning",
                           "new feed joining but one of the feeds already exist: "
                               "${newFeeds.toString()}");
                       return;
@@ -609,7 +622,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                     // User leaving the room which is same as publishers gone.
 
                     final leaving = msg['leaving'];
-                    FlutterLogs.logInfo("VideoRoom", "initPlatformState",
+                    FlutterLogs.logInfo("VideoRoom", "leaving",
                         "publisher: ${leaving.toString()} is leaving");
                     // const { feeds } = this.state;
                     switcher.unsubscribeFrom([leaving], /* onlyVideo= */ false);
@@ -641,7 +654,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
 
                   } else if (msg['error'] != null && msg['error'] != null) {
                     FlutterLogs.logError(
-                        "VideoRoom", "initPlatformState", "error message");
+                        "VideoRoom", "initPlatformState", msg['error']);
                     // if (msg['error_code'] === 426) {
                     // Janus.log('This is a no such room');
                     // } else {
@@ -727,9 +740,13 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                     plugin.send(
                         message: publish, jsep: offer, onSuccess: () {});
                   });
+            },
+            slowLink: (uplink, lost, mid) {
+              FlutterLogs.logWarn("VideoRoom", "plugin: janus.plugin.videoroom",
+                  "slowLink: uplink ${uplink} lost ${lost} mid ${mid}");
             }));
       }, onError: (e) {
-        FlutterLogs.logError("VideoRoom", "initPlatformState",
+        FlutterLogs.logError("VideoRoom", "plugin: janus.plugin.videoroom",
             "some error occurred: ${e.toString()}");
       });
     });
@@ -1106,8 +1123,10 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                       child: Stack(
                         children: [
                           (feeds.firstWhere((element) =>
-                                      element["videoSlot"] == 0)["cammute"] ==
-                                  false)
+                                          element["videoSlot"] ==
+                                          0)["cammute"] ==
+                                      false &&
+                                  !muteOtherCams)
                               // (true)
                               // (widget._remoteRenderer
                               //         .elementAt(0)
@@ -1162,7 +1181,14 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                                   const EdgeInsets.only(top: 8.0, right: 8.0),
                                   child: Icon(
                                     Icons.live_help_rounded,
-                                    color: widget.isQuestion
+                                    color: (feeds.firstWhere((element) =>
+                                    element["videoSlot"] ==
+                                        0)["question"] !=
+                                        null &&
+                                        feeds.firstWhere((element) =>
+                                        element["videoSlot"] ==
+                                            0)["question"] ==
+                                            true)
                                         ? Colors.red
                                         : Colors.transparent,
                                     size: 50,
@@ -1191,8 +1217,10 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                       child: Stack(
                         children: [
                           (feeds.firstWhere((element) =>
-                                      element["videoSlot"] == 1)["cammute"] ==
-                                  false)
+                                          element["videoSlot"] ==
+                                          1)["cammute"] ==
+                                      false &&
+                                  !muteOtherCams)
                               // (widget._remoteRenderer
                               //         .elementAt(1)
                               //         .srcObject
@@ -1262,8 +1290,10 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                       child: Stack(
                         children: [
                           (feeds.firstWhere((element) =>
-                                      element["videoSlot"] == 2)["cammute"] ==
-                                  false)
+                                          element["videoSlot"] ==
+                                          2)["cammute"] ==
+                                      false &&
+                                  !muteOtherCams)
                               // (widget._remoteRenderer
                               //         .elementAt(2)
                               //         .srcObject
@@ -1472,6 +1502,37 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         stopForegroundService();
         break;
     }
+  }
+
+  void toggleAudioMode() {
+    FlutterLogs.logInfo(
+        "videoRoom", "toggleAudioMode", 'changing to ${!muteOtherCams}');
+    var activeFeeds = feeds.where((feed) => feed["videoSlot"] != null).toList();
+    if (!muteOtherCams) {
+// Should hide/mute now all videos.
+      switcher.muteOtherCams = true;
+      muteOtherCams = true;
+      // widget.myStream.getVideoTracks().first.enabled = false;
+      // widget.myVideoMuted = true;
+      switcher.unsubscribeFrom(
+          activeFeeds.map((feed) => feed["id"]).toList(),
+/* onlyVideo= */ true);
+    } else {
+      switcher.muteOtherCams = false;
+      muteOtherCams = false;
+      // widget.myStream.getVideoTracks().first.enabled = true;
+      // widget.myVideoMuted = false;
+// Should unmute/show now all videos.false,
+      switcher.makeSubscription(
+          activeFeeds,
+/* feedsJustJoined= */ false,
+/* subscribeToVideo= */ true,
+/* subscribeToAudio= */ false,
+/* subscribeToData= */ false);
+//       switcher.switchVideos(this.page, feeds, feeds);
+
+    }
+    setState(() {});
   }
 }
 

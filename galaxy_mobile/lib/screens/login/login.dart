@@ -6,6 +6,7 @@ import 'package:galaxy_mobile/widgets/uiLanguageSelector.dart';
 import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:readmore/readmore.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 
@@ -49,6 +50,15 @@ class _LoginState extends State<Login> {
         );
       },
     );
+  }
+
+  void login() async {
+    final auth = context.read<AuthService>();
+    final authResponse = await auth.signIn();
+    final api = context.read<Api>();
+    api.setAccessToken(authResponse.accessToken);
+    await context.read<MainStore>().init();
+    Navigator.pushNamed(context, '/settings');
   }
 
   SingleChildScrollView getView(
@@ -226,17 +236,14 @@ class _LoginState extends State<Login> {
                             minWidth: 140.0,
                             height: 60.0,
                             child: RaisedButton(
+                                elevation: 5.0,
+                                // color: Color(0xff0062b0),
+                                highlightColor: Color(0xff00c6d2),
                                 child: Text("login".tr(),
                                     style: TextStyle(
                                         color: Colors.white, fontSize: 24)),
-                                onPressed: () async {
-                                  final auth = context.read<AuthService>();
-                                  final authResponse = await auth.signIn();
-                                  final api = context.read<Api>();
-                                  api.setAccessToken(authResponse.accessToken);
-                                  await context.read<MainStore>().init();
-                                  Navigator.pushNamed(context, '/settings');
-                                })),
+                                onPressed: () async { login(); }
+                                )),
                         SizedBox(height: 20),
                         // RaisedButton(
                         //       onPressed: () {},
@@ -269,10 +276,26 @@ class _LoginState extends State<Login> {
                         Container(
                             color: Colors.transparent,
                             width: MediaQuery.of(context).size.width * 0.8,
-                            child: Text('login_desc'.tr(),
+                            child:
+                            ReadMoreText(
+                                'login_desc'.tr(),
+                                trimLines: 3,
+                                colorClickableText: Color(0xff00c6d2),
+                                trimMode: TrimMode.Line,
+                                trimCollapsedText: 'Read more',
+                                trimExpandedText: 'Read less',
                                 textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    color: Colors.white70, fontSize: 16))),
+                                style: TextStyle(color: Colors.white,
+                                    fontSize: 16),
+                                lessStyle: TextStyle(color: Color(0xff00c6d2),
+                                    fontSize: 18),
+                                moreStyle: TextStyle(color: Color(0xff00c6d2),
+                                    fontSize: 18))
+                            // Text('login_desc'.tr(),
+                            //     textAlign: TextAlign.center,
+                            //     style: TextStyle(
+                            //         color: Colors.white70, fontSize: 16))
+                        ),
                         SizedBox(height: 20),
                         ButtonTheme(
                             shape: RoundedRectangleBorder(
@@ -296,7 +319,10 @@ class _LoginState extends State<Login> {
                                 })),
                         SizedBox(height: 20),
                         InkWell(
-                            child: new Text('t_and_c'.tr()),
+                            child: Text('t_and_c'.tr(),
+                              style: TextStyle(
+                                decoration: TextDecoration.underline,
+                              )),
                             onTap: () => showTAndCDialog(context)),
                         SizedBox(height: 20)
                       ])

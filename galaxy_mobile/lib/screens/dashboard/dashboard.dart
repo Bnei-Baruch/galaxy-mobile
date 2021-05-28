@@ -32,6 +32,8 @@ class Dashboard extends StatefulWidget {
 
   VoidCallback callReneter;
 
+  bool audioMode = false;
+
   @override
   State createState() => _DashboardState();
 }
@@ -297,8 +299,8 @@ class _DashboardState extends State<Dashboard> {
   // }
 
   void handleCmdData(String msgPayload) {
-    FlutterLogs.logInfo(
-        "Dashboard", "handleCmdData", "Received message: $msgPayload");
+    // FlutterLogs.logInfo(
+    //     "Dashboard", "handleCmdData", "Received message: $msgPayload");
     try {
       var jsonCmd = JsonDecoder().convert(msgPayload);
       switch (jsonCmd["type"]) {
@@ -411,8 +413,13 @@ class _DashboardState extends State<Dashboard> {
             BottomNavigationBarItem(
               label: 'Ask Question',
               icon: widget.isQuestion
-                  ? Icon(Icons.live_help)
-                  : Icon(Icons.live_help_outlined))
+                  ? Icon(Icons.live_help, color: Colors.red)
+                  : Icon(Icons.live_help)),
+            BottomNavigationBarItem(
+                label: "Audio Mode",
+                icon: widget.audioMode
+                    ? Icon(Icons.supervised_user_circle_outlined, color: Colors.red)
+                    : Icon(Icons.supervised_user_circle_outlined)),
           ],
           onTap: (value) {
             FlutterLogs.logInfo("Dashboard", "onTap", value.toString());
@@ -431,13 +438,19 @@ class _DashboardState extends State<Dashboard> {
                   updateRoomWithMyState(false);
                 });
                 break;
-
               case 2:
                 videoRoom.toggleQuestion();
-                updateRoomWithMyState(true);
+                updateRoomWithMyState(!widget.isQuestion);
                 setState(() {
                   widget.isQuestion = !widget.isQuestion;
                 });
+                break;
+              case 3:
+                setState(() {
+                  widget.audioMode = !widget.audioMode;
+                  stream.toggleAudioMode();
+                });
+                videoRoom.toggleAudioMode();
                 break;
             }
           },
