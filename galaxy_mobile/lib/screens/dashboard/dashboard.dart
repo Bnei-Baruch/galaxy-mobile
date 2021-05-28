@@ -439,11 +439,12 @@ class _DashboardState extends State<Dashboard> {
                 });
                 break;
               case 2:
-                videoRoom.toggleQuestion();
-                updateRoomWithMyState(!widget.isQuestion);
-                setState(() {
-                  widget.isQuestion = !widget.isQuestion;
-                });
+                if (videoRoom.toggleQuestion()) {
+                  updateRoomWithMyState(!widget.isQuestion);
+                  setState(() {
+                    widget.isQuestion = !widget.isQuestion;
+                  });
+                }
                 break;
               case 3:
                 setState(() {

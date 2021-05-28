@@ -39,6 +39,8 @@ class VideoRoom extends StatefulWidget {
   bool myVideoMuted = false;
   bool isQuestion = false;
 
+  var questionInRoom;
+
   MediaStream myStream;
   var remoteStream;
   _VideoRoomState state;
@@ -107,14 +109,21 @@ class VideoRoom extends StatefulWidget {
         "${myStream.getVideoTracks().first.toString()}");
   }
 
-  void toggleQuestion() {
-    FlutterLogs.logInfo("VideoRoom", "toggleQuestion", "");
-    if (state != null && state.mounted) {
-      state.setState(() {
+  bool toggleQuestion() {
+    if (questionInRoom == null) {
+      FlutterLogs.logInfo("VideoRoom", "toggleQuestion", "toggling...");
+      if (state != null && state.mounted) {
+        state.setState(() {
+          isQuestion = !isQuestion;
+        });
+      } else {
         isQuestion = !isQuestion;
-      });
+      }
+      return true;
     } else {
-      isQuestion = !isQuestion;
+      FlutterLogs.logWarn("VideoRoom", "toggleQuestion",
+          "question already set in room");
+      return false;
     }
   }
 
@@ -126,12 +135,23 @@ class VideoRoom extends StatefulWidget {
         FlutterLogs.logInfo("VideoRoom", "setUserState", "found user in feed");
         feed['cammute'] = !user['camera'];
         feed['question'] = user['question'];
+        setUserQuestionInRoom(user);
         if (state != null) {
           state.setState(() {});
         }
         break;
       } else
         FlutterLogs.logInfo("VideoRoom", "setUserState", "could not find user");
+    }
+  }
+
+  void setUserQuestionInRoom(var user) {
+    if (user['question']) {
+      questionInRoom = {'rfid': user['rfid']};
+    } else if (questionInRoom != null &&
+        questionInRoom['rfid'] == user['rfid'])
+    {
+      questionInRoom = null;
     }
   }
 
