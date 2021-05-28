@@ -71,6 +71,7 @@ class VideoRoom extends StatefulWidget {
     }
     pluginHandle = null;
     subscriberHandle = null;
+    questionInRoom = null;
   }
 
   @override
