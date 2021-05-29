@@ -11,6 +11,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'dart:io';
 import 'package:archive/archive_io.dart';
 
+// ignore: must_be_immutable
 class AppDrawer extends StatelessWidget {
   void archiveLogs() async {
     var encoder = ZipFileEncoder();
@@ -55,6 +56,11 @@ class AppDrawer extends StatelessWidget {
         backgroundColor: Colors.white,
         textColor: Colors.black,
         fontSize: 16.0);
+  }
+
+  String version;
+  AppDrawer({Key key}) : super(key: key) {
+    PackageInfo.fromPlatform().then((value) => version = value.version);
   }
 
   @override
@@ -106,6 +112,10 @@ class AppDrawer extends StatelessWidget {
               await auth.logout();
               Navigator.pushNamed(context, '/');
             },
+          ),
+          ListTile(
+            leading: Icon(Icons.info),
+            title: Text('version'.tr() + ": ${version}"),
           ),
         ],
       ),
