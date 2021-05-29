@@ -1,3 +1,5 @@
+import 'package:flutter_logs/flutter_logs.dart';
+import 'package:galaxy_mobile/config/env.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 
@@ -17,9 +19,9 @@ class MQTTClient {
 
   MQTTClient(this._username, this._password, this._onMsgReceivedCallback,
       this._onConnectedCallback, this._onSubscribedCallback) {
-        // TODO: move params to env.
     _client =
-        MqttServerClient.withPort('mqtt.kli.one', 'mobile_test_clientid', 9001);
+        MqttServerClient.withPort(APP_MQTT_HOST,
+            APP_MQTT_CLIENT_ID, APP_MQTT_PORT);
   }
 
   Future<MqttServerClient> connect() async {
@@ -33,12 +35,12 @@ class MQTTClient {
     _client.secure = true;
     _client.connectionMessage = MqttConnectMessage()
         .authenticateAs(_username, _password)
-        .withClientIdentifier('mobile_test_clientid')
+        .withClientIdentifier(APP_MQTT_CLIENT_ID)
         .keepAliveFor(60)
         .startClean()
         .will()
-        .withWillTopic('galaxy/service/user')
-        .withWillMessage('{ type: \'event\', user: false }')
+        .withWillTopic(APP_MQTT_WILL_TOPIC)
+        .withWillMessage(APP_MQTT_WILL_MESSAGE)
         .withWillRetain()
         .withWillQos(MqttQos.exactlyOnce);
 

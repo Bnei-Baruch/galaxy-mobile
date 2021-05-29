@@ -37,6 +37,9 @@ class VideoRoom extends StatefulWidget {
   Plugin subscriberHandle;
   bool myAudioMuted = false;
   bool myVideoMuted = false;
+  bool isQuestion = false;
+
+  var questionInRoom;
 
   MediaStream myStream;
   var remoteStream;
@@ -68,6 +71,7 @@ class VideoRoom extends StatefulWidget {
     }
     pluginHandle = null;
     subscriberHandle = null;
+    questionInRoom = null;
   }
 
   @override
@@ -95,15 +99,33 @@ class VideoRoom extends StatefulWidget {
     myStream.getVideoTracks().first.enabled =
         !myStream.getVideoTracks().first.enabled;
 
-    if (state != null && state.mounted)
+    if (state != null && state.mounted) {
       state.setState(() {
         myVideoMuted = !myVideoMuted;
       });
-    else
+    } else {
       myVideoMuted = !myVideoMuted;
-    // }
+    }
     FlutterLogs.logInfo("VideoRoom", "toggleVideo",
         "${myStream.getVideoTracks().first.toString()}");
+  }
+
+  bool toggleQuestion() {
+    if (questionInRoom == null) {
+      FlutterLogs.logInfo("VideoRoom", "toggleQuestion", "toggling...");
+      if (state != null && state.mounted) {
+        state.setState(() {
+          isQuestion = !isQuestion;
+        });
+      } else {
+        isQuestion = !isQuestion;
+      }
+      return true;
+    } else {
+      FlutterLogs.logWarn("VideoRoom", "toggleQuestion",
+          "question already set in room");
+      return false;
+    }
   }
 
   void setUserState(var user) {
@@ -114,12 +136,23 @@ class VideoRoom extends StatefulWidget {
         FlutterLogs.logInfo("VideoRoom", "setUserState", "found user in feed");
         feed['cammute'] = !user['camera'];
         feed['question'] = user['question'];
+        setUserQuestionInRoom(user);
         if (state != null) {
           state.setState(() {});
         }
         break;
       } else
         FlutterLogs.logInfo("VideoRoom", "setUserState", "could not find user");
+    }
+  }
+
+  void setUserQuestionInRoom(var user) {
+    if (user['question']) {
+      questionInRoom = {'rfid': user['rfid']};
+    } else if (questionInRoom != null &&
+        questionInRoom['rfid'] == user['rfid'])
+    {
+      questionInRoom = null;
     }
   }
 
@@ -1070,6 +1103,18 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                         ],
                       ),
                     ),
+                    Align(
+                        alignment: Alignment.topRight,
+                        child: Container(
+                            margin:
+                                const EdgeInsets.only(top: 8.0, right: 8.0),
+                            child: Icon(
+                              Icons.live_help_rounded,
+                              color: widget.isQuestion
+                                  ? Colors.red
+                                  : Colors.transparent,
+                              size: 50,
+                            )))
                   ],
                 ),
 
@@ -1150,7 +1195,26 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                               ],
                             ),
                           ),
-                        ],
+                          Align(
+                              alignment: Alignment.topRight,
+                              child: Container(
+                                  margin:
+                                  const EdgeInsets.only(top: 8.0, right: 8.0),
+                                  child: Icon(
+                                    Icons.live_help_rounded,
+                                    color: (feeds.firstWhere((element) =>
+                                    element["videoSlot"] ==
+                                        0)["question"] !=
+                                        null &&
+                                        feeds.firstWhere((element) =>
+                                        element["videoSlot"] ==
+                                            0)["question"] ==
+                                            true)
+                                        ? Colors.red
+                                        : Colors.transparent,
+                                    size: 50,
+                                  )))
+                        ]
                       ))
                   : Container(),
 
