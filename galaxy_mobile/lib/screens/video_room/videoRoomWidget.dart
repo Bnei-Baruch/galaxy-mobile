@@ -1288,6 +1288,25 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                               ],
                             ),
                           ),
+                          Align(
+                              alignment: Alignment.topRight,
+                              child: Container(
+                                  margin:
+                                  const EdgeInsets.only(top: 8.0, right: 8.0),
+                                  child: Icon(
+                                    Icons.live_help_rounded,
+                                    color: (feeds.firstWhere((element) =>
+                                    element["videoSlot"] ==
+                                        1)["question"] !=
+                                        null &&
+                                        feeds.firstWhere((element) =>
+                                        element["videoSlot"] ==
+                                            1)["question"] ==
+                                            true)
+                                        ? Colors.red
+                                        : Colors.transparent,
+                                    size: 50,
+                                  )))
                         ],
                       ))
                   : Container(),
@@ -1361,6 +1380,25 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                               ],
                             ),
                           ),
+                          Align(
+                              alignment: Alignment.topRight,
+                              child: Container(
+                                  margin:
+                                  const EdgeInsets.only(top: 8.0, right: 8.0),
+                                  child: Icon(
+                                    Icons.live_help_rounded,
+                                    color: (feeds.firstWhere((element) =>
+                                    element["videoSlot"] ==
+                                        2)["question"] !=
+                                        null &&
+                                        feeds.firstWhere((element) =>
+                                        element["videoSlot"] ==
+                                            2)["question"] ==
+                                            true)
+                                        ? Colors.red
+                                        : Colors.transparent,
+                                    size: 50,
+                                  )))
                         ],
                       ))
                   : Container()
