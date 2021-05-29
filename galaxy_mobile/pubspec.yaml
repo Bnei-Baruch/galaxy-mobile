@@ -45,8 +45,10 @@ dependencies:
   fluttertoast: ^7.1.8
   easy_localization: ^2.3.3
   package_info: ^0.4.0+16
-  firebase_core: ^0.4.0+9
+  firebase_core: ^0.7.0
   firebase_analytics: ^5.0.2
+  firebase_crashlytics: ^0.4.0+1
+
   wakelock: ^0.2.1+1
   flutter_fgbg: ^0.0.1
   url_launcher: ^5.7.10
