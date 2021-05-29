@@ -25,5 +25,7 @@
   "my_account": "Мой аккаунт",
   "settings": "Настройки",
   "send_logs": "Отправить протокол",
-  "sign_out": "Выход"
+  "sign_out": "Выход",
+  "version": "Version"
+
 }

@@ -25,5 +25,7 @@
   "my_account": "החשבון שלי",
   "settings": "הגדרות",
   "send_logs": "לשלוח לוג",
-  "sign_out": "יציאה"
+  "sign_out": "יציאה",
+  "version": "גרסה"
+
 }

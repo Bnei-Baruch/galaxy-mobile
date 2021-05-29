@@ -24,5 +24,6 @@
   "my_account": "My Account",
   "settings": "Settings",
   "send_logs": "Send Logs",
-  "sign_out": "Sign Out"
+  "sign_out": "Sign Out",
+  "version": "Version"
 }
