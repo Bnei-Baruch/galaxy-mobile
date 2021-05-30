@@ -34,7 +34,7 @@ class StreamingUnified extends StatefulWidget {
   @override
   _StreamingUnifiedState createState() => _StreamingUnifiedState();
 
-  void toggleOnAir() {
+  void toggleOnAir(var data) {
     if (state != null && state.mounted) {
       state.setState(() {
         isOnAir = !isOnAir;
@@ -42,6 +42,8 @@ class StreamingUnified extends StatefulWidget {
     } else {
       isOnAir = !isOnAir;
     }
+
+    // todo: handle streams
   }
 
   void exit() {

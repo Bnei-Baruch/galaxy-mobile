@@ -81,6 +81,10 @@ class VideoRoom extends StatefulWidget {
     return myid;
   }
 
+  bool getIsQuestion() { return isQuestion; }
+
+  setIsQuestion(bool isQuestion) { this.isQuestion = isQuestion; }
+
   void mute() {
     myStream
         .getAudioTracks()
@@ -110,21 +114,14 @@ class VideoRoom extends StatefulWidget {
         "${myStream.getVideoTracks().first.toString()}");
   }
 
-  bool toggleQuestion() {
-    if (questionInRoom == null) {
-      FlutterLogs.logInfo("VideoRoom", "toggleQuestion", "toggling...");
-      if (state != null && state.mounted) {
-        state.setState(() {
-          isQuestion = !isQuestion;
-        });
-      } else {
+  void toggleQuestion() {
+    FlutterLogs.logInfo("VideoRoom", "toggleQuestion", "toggling...");
+    if (state != null && state.mounted) {
+      state.setState(() {
         isQuestion = !isQuestion;
-      }
-      return true;
+      });
     } else {
-      FlutterLogs.logWarn("VideoRoom", "toggleQuestion",
-          "question already set in room");
-      return false;
+      isQuestion = !isQuestion;
     }
   }
 

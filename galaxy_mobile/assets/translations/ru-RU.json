@@ -26,6 +26,6 @@
   "settings": "Настройки",
   "send_logs": "Отправить протокол",
   "sign_out": "Выход",
-  "version": "Version"
-
+  "version": "Version",
+  "chat": "Чат"
 }
