@@ -23,7 +23,6 @@ enum AudioDevice { receiver, speaker, bluetooth }
 class Dashboard extends StatefulWidget {
   bool audioMute = true;
   bool videoMute = true;
-  // bool isQuestion = false;
   bool hadNoConnection = false;
   bool audioMode = false;
 
@@ -305,7 +304,6 @@ class _DashboardState extends State<Dashboard> {
         case "client-state":
           videoRoom.setUserState(jsonCmd["user"]);
           break;
-
         case "audio-out":
           if (videoRoom.getIsQuestion()) {
             videoRoom.toggleQuestion();
