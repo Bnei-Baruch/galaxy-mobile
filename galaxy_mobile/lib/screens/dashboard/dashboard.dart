@@ -2,38 +2,41 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:connectivity/connectivity.dart';
+import 'package:provider/provider.dart';
+import 'package:phone_state_i/phone_state_i.dart';
+
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_logs/flutter_logs.dart';
+import 'package:flutter_audio_manager/flutter_audio_manager.dart';
+
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/screens/streaming/streaming.dart';
 import 'package:galaxy_mobile/screens/video_room/videoRoomWidget.dart';
-import 'package:flutter_audio_manager/flutter_audio_manager.dart';
 import 'package:galaxy_mobile/services/mqttClient.dart';
 import 'package:galaxy_mobile/utils/utils.dart';
 import 'package:galaxy_mobile/widgets/loading_indicator.dart';
-import 'package:provider/provider.dart';
-import 'package:flutter/services.dart';
-
-import '../../services/authService.dart';
-import 'package:phone_state_i/phone_state_i.dart';
+import 'package:galaxy_mobile/widgets/videoRoomDrawer.dart';
+import 'package:galaxy_mobile/services/authService.dart';
 
 enum AudioDevice { receiver, speaker, bluetooth }
 
 class Dashboard extends StatefulWidget {
   bool audioMute = true;
   bool videoMute = true;
-  bool isQuestion = false;
-  AudioDevice _audioDevice = AudioDevice.receiver;
+  // bool isQuestion = false;
+  bool hadNoConnection = false;
+  bool audioMode = false;
 
   _DashboardState state;
-
-  bool hadNoConnection = false;
-
+  AudioDevice _audioDevice = AudioDevice.receiver;
+  MQTTClient _mqttClient;
   BuildContext dialogPleaseWaitContext;
+  VoidCallback callReEnter;
 
-  VoidCallback callReneter;
-
-  bool audioMode = false;
+  MQTTClient getMQTTClient() {
+    return _mqttClient;
+  }
 
   var stream = StreamingUnified();
   var videoRoom = VideoRoom();
@@ -49,12 +52,9 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   var activeUser;
   bool callInProgress;
-  MQTTClient _mqttClient;
-
   String _activeRoomId;
 
   StreamSubscription<ConnectivityResult> subscription;
-
   StreamSubscription streamSubscription;
 
   int formFlex;
@@ -65,8 +65,7 @@ class _DashboardState extends State<Dashboard> {
   void initState() {
     // TODO: implement initState
     FlutterAudioManager.setListener(() {
-      FlutterLogs.logInfo(
-          "dashboard", "onInputChanged", "!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+      FlutterLogs.logInfo("dashboard", "onInputChanged", "");
     });
 
     widget.state = this;
@@ -102,7 +101,8 @@ class _DashboardState extends State<Dashboard> {
           if (widget.dialogPleaseWaitContext != null) {
             widget.stream.exit();
             widget.videoRoom.exitRoom();
-            if (_mqttClient != null) _mqttClient.disconnect();
+            widget.userTimer.cancel();
+            if (widget._mqttClient != null) widget._mqttClient.disconnect();
             Navigator.pop(widget.dialogPleaseWaitContext);
             Navigator.of(widget.state.context).pop();
           }
@@ -116,8 +116,8 @@ class _DashboardState extends State<Dashboard> {
         if (widget.hadNoConnection) {
           FlutterLogs.logInfo(
               "Dashboard", "ConnectivityResult", "reconnecting - exit room");
-          if (_mqttClient != null) {
-            _mqttClient.disconnect();
+          if (widget._mqttClient != null) {
+            widget._mqttClient.disconnect();
           }
           FlutterLogs.logInfo(
               "Dashboard", "ConnectivityResult", "reconnecting - enter room");
@@ -125,10 +125,11 @@ class _DashboardState extends State<Dashboard> {
           setState(() {
             widget.stream.exit();
             widget.videoRoom.exitRoom();
-            _mqttClient.disconnect();
+            widget._mqttClient.disconnect();
+            widget.userTimer.cancel();
             //go out of the room and re-enter , since jauns doesn't have a reconnect infra to do it right
             Navigator.of(widget.state.context).pop(false);
-            widget.callReneter();
+            widget.callReEnter();
           });
           widget.hadNoConnection = false;
         }
@@ -154,30 +155,33 @@ class _DashboardState extends State<Dashboard> {
         setState(() {
           widget.stream.exit();
           widget.videoRoom.exitRoom();
-          _mqttClient.disconnect();
+          widget._mqttClient.disconnect();
+          widget.userTimer.cancel();
+
           //go out of the room and re-enter , since jauns doesn't have a reconnect infra to do it right
           Navigator.of(widget.state.context).pop(false);
-          widget.callReneter();
+          widget.callReEnter();
         });
       }
     });
     widget.videoRoom.RoomReady = () {
       final authService = context.read<AuthService>();
-      if (_mqttClient == null) {
-        _mqttClient = MQTTClient(
+      if (widget._mqttClient == null) {
+        widget._mqttClient = MQTTClient(
             authService.getUserEmail(),
             authService.getToken().accessToken,
             this.handleCmdData,
             this.connectedToBroker,
             this.subscribedToTopic);
-        _mqttClient.connect();
+        widget._mqttClient.connect();
       }
     };
     widget.videoRoom.callExitRoomUserExists = () {
       widget.stream.exit();
       widget.videoRoom.exitRoom();
-      if (_mqttClient != null)
-        _mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
+      widget.userTimer.cancel();
+      if (widget._mqttClient != null)
+        widget._mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
       showDialog(
         context: context,
         builder: (context) => new AlertDialog(
@@ -341,8 +345,12 @@ class _DashboardState extends State<Dashboard> {
           widget.videoRoom.setUserState(jsonCmd["user"]);
           break;
 
-        case "client-question":
-          widget.stream.toggleOnAir();
+        case "audio-out":
+          if (widget.videoRoom.getIsQuestion()) {
+            widget.videoRoom.toggleQuestion();
+            updateRoomWithMyState(false);
+          }
+          widget.stream.toggleOnAir(jsonCmd);
           break;
       }
     } on FormatException catch (e) {
@@ -352,7 +360,7 @@ class _DashboardState extends State<Dashboard> {
   }
 
   void connectedToBroker() {
-    _mqttClient.subscribe("galaxy/room/" + _activeRoomId);
+    widget._mqttClient.subscribe("galaxy/room/" + _activeRoomId);
     // updateRoomWithMyVideoState();
   }
 
@@ -377,10 +385,8 @@ class _DashboardState extends State<Dashboard> {
     var message = {};
     message["type"] = "client-state";
     message["user"] = userData;
-    _mqttClient.send(
-        "galaxy/room/" + _activeRoomId, JsonEncoder().convert(message));
-
-    updateGxyUser(context, userData);
+    widget._mqttClient
+        .send("galaxy/room/" + _activeRoomId, JsonEncoder().convert(message));
   }
 
   Icon setIcon() {
@@ -401,119 +407,131 @@ class _DashboardState extends State<Dashboard> {
     final activeRoom = context.select((MainStore s) => s.activeRoom);
     _activeRoomId = activeRoom.room.toString();
 
-    // if (MediaQuery.of(context).orientation == Orientation.landscape) {
-    //   formFlex = 1;
-    //   mapFlex = 1;
-    // } else if (MediaQuery.of(context).orientation == Orientation.portrait &&
-    //     formFlex == mapFlex) {
-    //   formFlex = 1;
-    //   mapFlex = 0;
-    // }
-    return WillPopScope(
-      onWillPop: () {
-        Navigator.of(context).pop(true);
-        widget.stream.exit();
-        widget.videoRoom.exitRoom();
-        widget.userTimer.cancel();
-        _mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
-        SystemChrome.setPreferredOrientations([
-          DeviceOrientation.portraitUp,
-          DeviceOrientation.portraitDown,
-          DeviceOrientation.landscapeLeft,
-          DeviceOrientation.landscapeRight
-        ]);
-        return;
-      },
-      child: Scaffold(
-        appBar: AppBar(title: Text(activeRoom.description), actions: <Widget>[
-          IconButton(
-            icon: setIcon(),
-            onPressed: () async {
-              await switchAudioDevice();
-              setState(() {});
+    return
+        // WillPopScope(
+        // onWillPop: () {
+        //   Navigator.of(context).pop(true);
+        //   stream.exit();
+        //   videoRoom.exitRoom();
+        //   widget._mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
+        //   SystemChrome.setPreferredOrientations([
+        //     DeviceOrientation.portraitUp,
+        //     DeviceOrientation.portraitDown,
+        //     DeviceOrientation.landscapeLeft,
+        //     DeviceOrientation.landscapeRight
+        //   ]);
+        //   return;
+        // },
+        // child:
+        Scaffold(
+      appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () {
+              Navigator.of(context).pop(true);
+              widget.stream.exit();
+              widget.videoRoom.exitRoom();
+              widget.userTimer.cancel();
+              widget._mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
+              SystemChrome.setPreferredOrientations([
+                DeviceOrientation.portraitUp,
+                DeviceOrientation.portraitDown,
+                DeviceOrientation.landscapeLeft,
+                DeviceOrientation.landscapeRight
+              ]);
+              return;
             },
-          )
-          // Padding(
-          //     padding: EdgeInsets.only(right: 20.0),
-          //     child: GestureDetector(
-          //         onTap: () async {
-          //           switchAudioDevice();
-          //           // setState(() {
-          //           //   getAudioInput();
-          //           // });
-          //         },
-          //         child: setIcon()))
-        ]),
-        body: OrientationBuilder(builder: (context, orientation) {
-          return orientation == Orientation.portrait
-              ? Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [widget.stream, widget.videoRoom])
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [widget.stream, widget.videoRoom]);
-        }),
-        bottomNavigationBar: BottomNavigationBar(
-          items: <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-                label: "Mic",
-                icon: widget.audioMute
-                    ? Icon(Icons.mic_off, color: Colors.red)
-                    : Icon(Icons.mic, color: Colors.white)),
-            BottomNavigationBarItem(
-                label: "Video",
-                icon: widget.videoMute
-                    ? Icon(Icons.videocam_off, color: Colors.red)
-                    : Icon(Icons.videocam)),
-            BottomNavigationBarItem(
-                label: 'Ask Question',
-                icon: widget.isQuestion
-                    ? Icon(Icons.live_help, color: Colors.red)
-                    : Icon(Icons.live_help)),
-            BottomNavigationBarItem(
-                label: "Audio Mode",
-                icon: widget.audioMode
-                    ? Icon(Icons.supervised_user_circle_outlined,
-                        color: Colors.red)
-                    : Icon(Icons.supervised_user_circle_outlined)),
-          ],
-          onTap: (value) {
-            FlutterLogs.logInfo("Dashboard", "onTap", value.toString());
-            switch (value) {
-              case 0:
-                widget.videoRoom.mute();
-                setState(() {
-                  widget.audioMute = !widget.audioMute;
-                });
+          ),
+          title: Text(activeRoom.description),
+          actions: <Widget>[
+            IconButton(
+                icon: setIcon(),
+                onPressed: () async {
+                  await switchAudioDevice();
+                  setState(() {});
+                }),
 
-                break;
-              case 1:
-                widget.videoRoom.toggleVideo();
+            // Padding(
+            //     padding: EdgeInsets.only(right: 20.0),
+            //     child: GestureDetector(
+            //         onTap: () async {
+            //           switchAudioDevice();
+            //           // setState(() {
+            //           //   getAudioInput();
+            //           // });
+            //         },
+            //         child: setIcon()))
+          ]),
+      drawer: VideoRoomDrawer(),
+      body: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [widget.stream, widget.videoRoom]),
+      bottomNavigationBar: BottomNavigationBar(
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+              label: "Mic",
+              icon: widget.audioMute
+                  ? Icon(Icons.mic_off, color: Colors.red)
+                  : Icon(Icons.mic, color: Colors.white)),
+          BottomNavigationBarItem(
+              label: "Video",
+              icon: widget.videoMute
+                  ? Icon(Icons.videocam_off, color: Colors.red)
+                  : Icon(Icons.videocam)),
+          BottomNavigationBarItem(
+              label: 'Ask Question',
+              icon: widget.videoRoom.getIsQuestion()
+                  ? Icon(Icons.live_help, color: Colors.red)
+                  : Icon(Icons.live_help)),
+          BottomNavigationBarItem(
+              label: "Audio Mode",
+              icon: widget.audioMode
+                  ? Icon(Icons.supervised_user_circle_outlined,
+                      color: Colors.red)
+                  : Icon(Icons.supervised_user_circle_outlined)),
+        ],
+        onTap: (value) {
+          FlutterLogs.logInfo("Dashboard", "onTap", value.toString());
+          switch (value) {
+            case 0:
+              widget.videoRoom.mute();
+              setState(() {
+                widget.audioMute = !widget.audioMute;
+              });
+
+              break;
+            case 1:
+              widget.videoRoom.toggleVideo();
+              setState(() {
+                widget.videoMute = !widget.videoMute;
+                updateRoomWithMyState(false);
+              });
+              break;
+            case 2:
+              if (widget.videoRoom.questionInRoom == null) {
+                bool isQ = widget.videoRoom.getIsQuestion();
+                widget.videoRoom.toggleQuestion();
+                updateRoomWithMyState(!isQ);
                 setState(() {
-                  widget.videoMute = !widget.videoMute;
-                  updateRoomWithMyState(false);
+                  widget.videoRoom.setIsQuestion(!isQ);
                 });
-                break;
-              case 2:
-                if (widget.videoRoom.toggleQuestion()) {
-                  updateRoomWithMyState(!widget.isQuestion);
-                  setState(() {
-                    widget.isQuestion = !widget.isQuestion;
-                  });
-                }
-                break;
-              case 3:
-                setState(() {
-                  widget.audioMode = !widget.audioMode;
-                  widget.stream.toggleAudioMode();
-                });
-                widget.videoRoom.toggleAudioMode();
-                break;
-            }
-          },
-        ),
+              } else {
+                FlutterLogs.logWarn("Dashboard", "toggleQuestion",
+                    "question already set in room");
+              }
+              break;
+            case 3:
+              setState(() {
+                widget.audioMode = !widget.audioMode;
+                widget.stream.toggleAudioMode();
+              });
+              widget.videoRoom.toggleAudioMode();
+              break;
+          }
+        },
       ),
     );
+    // );
   }
 }
 

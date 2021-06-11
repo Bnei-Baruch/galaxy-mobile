@@ -8,6 +8,7 @@ import 'package:galaxy_mobile/services/api.dart';
 import 'package:galaxy_mobile/services/authService.dart';
 import 'package:galaxy_mobile/services/logger.dart';
 import 'package:galaxy_mobile/themes/default.dart';
+import 'package:galaxy_mobile/screens/dashboard/dashboard.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'models/sharedPref.dart';
@@ -55,6 +56,7 @@ void main() async {
         providers: [
           Provider<AuthService>(create: (_) => AuthService()),
           Provider<Api>(create: (_) => Api()),
+          Provider<Dashboard>(create: (_) => Dashboard()),
           ChangeNotifierProxyProvider2<AuthService, Api, MainStore>(
               create: (_) => MainStore(),
               update: (_, auth, api, model) => model..update(auth, api)),
