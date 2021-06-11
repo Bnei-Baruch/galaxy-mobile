@@ -56,7 +56,7 @@ void main() async {
         providers: [
           Provider<AuthService>(create: (_) => AuthService()),
           Provider<Api>(create: (_) => Api()),
-          Provider<Dashboard>(create: (_) => Dashboard()),
+          // Provider<Dashboard>(create: (_) => Dashboard()),
           ChangeNotifierProxyProvider2<AuthService, Api, MainStore>(
               create: (_) => MainStore(),
               update: (_, auth, api, model) => model..update(auth, api)),

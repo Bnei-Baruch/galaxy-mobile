@@ -1053,9 +1053,17 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     }
 
     final double userGridHeight =
-        MediaQuery.of(context).size.height / 3 * 2 - 140;
+    MediaQuery.of(context).orientation == Orientation.portrait ?
+    (MediaQuery.of(context).size.height / 3 * 2 - 140) :
+    (MediaQuery.of(context).size.height);
+
+    final double userGridWidth =
+    MediaQuery.of(context).orientation == Orientation.portrait ?
+    MediaQuery.of(context).size.width :
+    (MediaQuery.of(context).size.width / 2);
+
     final double itemHeight = userGridHeight / 2;
-    final double itemWidth = MediaQuery.of(context).size.width / 2;
+    final double itemWidth = userGridWidth / 2;
 
     FlutterLogs.logInfo(
         "VideoRoom",
@@ -1065,10 +1073,12 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     return Container(
       alignment: Alignment.topCenter,
       height: userGridHeight,
+        width: userGridWidth,
+        // decoration: BoxDecoration(color: Colors.pink),
       child: Stack(
         children: [
           GridView.count(
-            childAspectRatio: (itemWidth / itemHeight),
+            childAspectRatio: MediaQuery.of(context).orientation == Orientation.portrait ? (itemWidth / itemHeight) : (itemHeight / itemWidth),
             children: [
               Container(
                 decoration: BoxDecoration(
@@ -1083,7 +1093,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                         : Align(
                             alignment: Alignment.center,
                             child: Icon(Icons.account_circle,
-                                color: Colors.white, size: itemHeight - 40)),
+                                color: Colors.white, size: itemWidth - 60)),
                     Align(
                       alignment: Alignment.bottomLeft,
                       child: Row(
@@ -1161,7 +1171,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                                   child: Icon(
                                     Icons.account_circle,
                                     color: Colors.white,
-                                    size: 120,
+                                    size: itemWidth - 60,
                                   ),
                                 ),
                           Align(
@@ -1254,7 +1264,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                                   child: Icon(
                                     Icons.account_circle,
                                     color: Colors.white,
-                                    size: 120,
+                                    size: itemWidth - 60,
                                   ),
                                 ),
                           Align(
@@ -1346,7 +1356,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                                   child: Icon(
                                     Icons.account_circle,
                                     color: Colors.white,
-                                    size: 120,
+                                    size: itemWidth - 60,
                                   ),
                                 ),
                           Align(

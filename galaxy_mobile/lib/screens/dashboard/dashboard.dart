@@ -209,7 +209,7 @@ class _DashboardState extends State<Dashboard> {
       setState(() {});
     });
 
-    if (changeAudioDevice(AudioDevice.receiver)) {
+    if (await changeAudioDevice(AudioDevice.receiver)) {
       FlutterLogs.logInfo("dashboard", "initAudioMgr",
           ">>> switch to RECEIVER: Success");
       widget._audioDevice = AudioDevice.receiver;
@@ -418,7 +418,7 @@ class _DashboardState extends State<Dashboard> {
         drawer: VideoRoomDrawer(),
         body: OrientationBuilder(
             builder: (context, orientation) {
-              return Flex(mainAxisAlignment: MainAxisAlignment.start,
+              return Flex(mainAxisAlignment: MainAxisAlignment.center,
                   direction: orientation == Orientation.landscape ?
                   Axis.horizontal : Axis.vertical,
                   children: [stream, videoRoom]);

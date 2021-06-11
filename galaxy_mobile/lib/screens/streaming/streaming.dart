@@ -95,6 +95,8 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
 
   StateSetter _setState;
 
+  Orientation _orientation;
+
   getStreamListing() {
     //should get this list from our server later on
     var body = {"request": "list"};
@@ -163,8 +165,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
     playerOverlay.mute = (muted) {
       FlutterLogs.logInfo("Streaming", "&&&&&&&&&&&&&&&&",
           "playerOverlay.mute: ${muted.toString()}");
-      _remoteStreamAudio.getAudioTracks().last.enabled =
-          !muted; //.setVolume(muted ? 0 : 0.5);
+      _remoteStreamAudio.getAudioTracks().last.enabled = !muted; //.setVolume(muted ? 0 : 0.5);
     };
 
     playerOverlay.audioChange = () {
@@ -374,6 +375,26 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
     Navigator.of(context).pop();
   }
 
+  double getHeight() {
+    if (_orientation == null) {
+      _orientation = MediaQuery.of(context).orientation;
+    } else if (_orientation != MediaQuery.of(context).orientation) {
+      FlutterLogs.logInfo("Streaming", "getHeight", "orientation changed");
+      _orientation = MediaQuery.of(context).orientation;
+      initVideoStream();
+    }
+
+    double height = MediaQuery.of(context).size.height;
+    return MediaQuery.of(context).orientation == Orientation.portrait ?
+    height / 3 : height / 2;
+  }
+
+  double getWidth() {
+    double width = MediaQuery.of(context).size.width;
+    return MediaQuery.of(context).orientation == Orientation.portrait ?
+    width : width / 2;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.connected && !widget.initialized) {
@@ -388,11 +409,12 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
         dragStartBehavior: DragStartBehavior.down,
         child: Stack(alignment: Alignment.topCenter, children: [
           Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
+            // mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                height: MediaQuery.of(context).size.height / (MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 4),
+                height: getHeight(),
+                width: getWidth(),
                 decoration: BoxDecoration(
                     border: Border.all(
                         color:
