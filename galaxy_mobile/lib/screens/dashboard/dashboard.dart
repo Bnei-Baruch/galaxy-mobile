@@ -386,12 +386,12 @@ class _DashboardState extends State<Dashboard> {
                 stream.exit();
                 videoRoom.exitRoom();
                 widget._mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
-                SystemChrome.setPreferredOrientations([
-                  DeviceOrientation.portraitUp,
-                  DeviceOrientation.portraitDown,
-                  DeviceOrientation.landscapeLeft,
-                  DeviceOrientation.landscapeRight
-                ]);
+                // SystemChrome.setPreferredOrientations([
+                //   DeviceOrientation.portraitUp,
+                //   DeviceOrientation.portraitDown,
+                //   DeviceOrientation.landscapeLeft,
+                //   DeviceOrientation.landscapeRight
+                // ]);
                 return;
               },
             ),
@@ -416,9 +416,13 @@ class _DashboardState extends State<Dashboard> {
           //         child: setIcon()))
         ]),
         drawer: VideoRoomDrawer(),
-        body: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [stream, videoRoom]),
+        body: OrientationBuilder(
+            builder: (context, orientation) {
+              return Flex(mainAxisAlignment: MainAxisAlignment.start,
+                  direction: orientation == Orientation.landscape ?
+                  Axis.horizontal : Axis.vertical,
+                  children: [stream, videoRoom]);
+            }),
         bottomNavigationBar: BottomNavigationBar(
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(

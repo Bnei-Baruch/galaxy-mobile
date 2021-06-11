@@ -392,7 +392,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Container(
-                height: MediaQuery.of(context).size.height / 3,
+                height: MediaQuery.of(context).size.height / (MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 4),
                 decoration: BoxDecoration(
                     border: Border.all(
                         color:

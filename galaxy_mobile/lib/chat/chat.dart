@@ -20,9 +20,7 @@ class _ChatPageState extends State<Chat> {
   @override
   Widget build(BuildContext context) {
     final mainStore = context.read<MainStore>();
-    final dashboard = context.read<Dashboard>();
-
-    _mqttClient = dashboard.getMQTTClient();
+    final mqttClient = context.read<MQTTClient>();
 
     return Scaffold(
         appBar: AppBar(
