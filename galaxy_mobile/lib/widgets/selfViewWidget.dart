@@ -73,6 +73,7 @@ class _SelfViewWidgetState extends State<SelfViewWidget>
     return Container(
       child: RTCVideoView(
         _localRenderer,
+        mirror: true,
       ),
       height: 200,
       width: 200,

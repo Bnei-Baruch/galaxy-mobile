@@ -1,7 +1,11 @@
+import 'dart:convert';
+import 'dart:io';
 
+import 'package:archive/archive.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:galaxy_mobile/config/env.dart';
+import 'package:galaxy_mobile/main.dart';
 import 'package:galaxy_mobile/utils/dio_log.dart';
 
 class Room {
@@ -57,10 +61,14 @@ class RoomData {
 
 class Api {
   Dio _dio;
+  Dio _monitor;
 
   Api() {
     this._dio = new Dio();
     this._dio.options.baseUrl = APP_API_BACKEND;
+
+    this._monitor = new Dio();
+    this._monitor.options.baseUrl = APP_MONITORING_BACKEND;
 
     this._dio.interceptors.add(LogInterceptors());
   }
@@ -88,7 +96,8 @@ class Api {
     final response = await _dio
         .get('/groups', queryParameters: {'with_num_users': withNumUsers});
     List<Object> rooms = response.data['rooms'];
-    FlutterLogs.logInfo("Api", "fetchAvailableRooms", "rooms: " + response.data['rooms'].toString());
+    FlutterLogs.logInfo("Api", "fetchAvailableRooms",
+        "rooms: " + response.data['rooms'].toString());
     return rooms.map((dynamic e) => Room.fromJson(e)).toList();
   }
 
@@ -100,6 +109,42 @@ class Api {
   Future<Room> fetchRoom(num roomId) async {
     final response = await _dio.get('/room/$roomId');
     return Room.fromJson(response.data);
+  }
+
+  Future<Response> updateMonitor(String data) async {
+    _monitor.options.headers["Content-Type"] = "application/json";
+    _monitor.options.headers["Content-Encoding"] = "gzip";
+    //zip data
+
+    var stringBytes = utf8.encode(data);
+    var gzipBytes = GZipEncoder().encode(stringBytes);
+    var compressedString = base64.encode(gzipBytes);
+
+    // var zip = gzip.encode(data.codeUnits);
+    // print("zip :" + gzipBytes);
+    final response = await _monitor.post(
+      "/update",
+      data: Stream.fromIterable(
+          gzipBytes.map((e) => [e])), //create a Stream<List<int>>
+      options: Options(
+        headers: {
+          Headers.contentLengthHeader: gzipBytes.length, // set content-length
+        },
+      ),
+    );
+    return response;
+  }
+
+  Future<Response> updateUser(String id, Map<String, dynamic> user) async {
+    _dio.options.headers["Content-Type"] = "application/json";
+
+    try {
+      final response = await _dio.put("/users/${id}", data: user);
+      return response;
+    } catch (error, requestOptions) {
+      logger.error(error.toString());
+      return Response();
+    }
   }
 
   //   fetchUsers = () =>

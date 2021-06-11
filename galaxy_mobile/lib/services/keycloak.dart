@@ -1,5 +1,3 @@
-
-
 class User {
   final String id;
   final String sub;
@@ -11,6 +9,9 @@ class User {
   final String givenName;
   final String familyName;
   final String group;
+  final bool question;
+  final bool camera;
+  final List<String> roles;
   final int rfid;
 
   User.fromJson(Map<String, dynamic> json)
@@ -24,6 +25,9 @@ class User {
         preferredUsername = json['preferred_username'],
         givenName = json['given_name'],
         familyName = json['family_name'],
+        roles = json['roles'],
+        question = json['question'],
+        camera = json['camera'],
         group = json['group'];
 
   Map<String, dynamic> toJson() => {
@@ -37,6 +41,9 @@ class User {
         'givenName': givenName,
         'familyName': familyName,
         'rfid': rfid,
+        'roles': roles,
+        'question': question,
+        'camera': camera,
         'group': group,
       };
 
@@ -50,6 +57,9 @@ class User {
         'preferredUsername: ${this.preferredUsername} ,'
         'givenName: ${this.givenName} ,'
         'familyName: ${this.familyName} ,'
+        'roles: ${this.roles},'
+        'question: ${this.question} ,'
+        'camera: ${this.camera} ,'
         'group: ${this.group}}';
   }
 }

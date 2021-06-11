@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:isolate';
 
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/services/logger.dart';
+import 'package:galaxy_mobile/services/monitoring_isolate.dart';
+import 'package:galaxy_mobile/utils/utils.dart';
 import 'package:galaxy_mobile/widgets/audioMode.dart';
 import 'package:galaxy_mobile/widgets/drawer.dart';
 import 'package:galaxy_mobile/widgets/roomSelector.dart';
@@ -32,8 +35,14 @@ class _SettingsState extends State<Settings> {
 
   ConnectivityResult connectionStatus;
 
+  SendPort mainToIsolateStream;
+
+  var userJsonExtra;
+
+  var monitorData;
+
   @override
-  void initState() {
+  Future<void> initState() {
     super.initState();
     logger.info("starting settings");
     selfWidget = SelfViewWidget();
@@ -43,12 +52,27 @@ class _SettingsState extends State<Settings> {
         .listen((ConnectivityResult result) {
       connectionStatus = result;
     });
+    Utils.parseJson("user_monitor_example.json")
+        .then((value) => userJsonExtra = value);
+    Utils.parseJson("monitor_data.json").then((value) => monitorData = value);
   }
 
   @override
   Widget build(BuildContext context) {
     final activeUser = context.select((MainStore s) => s.activeUser);
     final rooms = context.select((MainStore s) => s.availableRooms);
+
+    // initIsolate(context).then((value) => {
+    //       mainToIsolateStream = value,
+    //       mainToIsolateStream.send({
+    //         "type": 'setConnection',
+    //         "user": activeUser,
+    //         "userExtra": userJsonExtra,
+    //         "data": monitorData
+    //       }),
+    //       mainToIsolateStream.send({"type": "start"})
+    //     });
+
     _isThinScreen = MediaQuery.of(context).size.width < 400;
 
     return (activeUser == null || rooms == null)
