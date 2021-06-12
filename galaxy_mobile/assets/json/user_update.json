@@ -1,0 +1,50 @@
+{
+  "name": "igal test Avraham",
+  "email": "igal@hotmail.com",
+  "roles": [
+    "gxy_user",
+    "offline_access",
+    "uma_authorization"
+  ],
+  "id": "d044ee7b-2e2b-4ca7-a7e5-9c148889ff7b",
+  "username": "igal test",
+  "familyname": "Avraham",
+  "display": "igal test Avraham",
+  "group": "PT 30",
+  "role": "user",
+  "system": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Mobile Safari/537.36",
+  "ip": "87.68.207.131",
+  "country": "IL",
+  "room": 2157,
+  "janus": "gxy2",
+  "extra": {
+    "media": {
+      "audio": {
+        "audio_device": "default"
+      },
+      "video": {
+        "setting": {
+          "width": 320,
+          "height": 180,
+          "ideal": 15
+        },
+        "video_device": ""
+      }
+    },
+    "streams": [
+      {
+        "type": "audio",
+        "mindex": 0,
+        "mid": "0",
+        "codec": "opus"
+      }
+    ]
+  },
+  "session": 7789330998191023,
+  "handle": 3121713384095062,
+  "question": false,
+  "camera": false,
+  "timestamp": 1622854786945,
+  "textroom_handle": 3939284138848631,
+  "rfid": 1492225947681719
+}

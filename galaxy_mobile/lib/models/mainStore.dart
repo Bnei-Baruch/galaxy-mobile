@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:galaxy_mobile/main.dart';
 import 'package:galaxy_mobile/models/sharedPref.dart';
 import 'package:galaxy_mobile/services/api.dart';
 import 'package:galaxy_mobile/services/authService.dart';
@@ -81,5 +82,14 @@ class MainStore extends ChangeNotifier {
     SharedPrefs().videoPreset = videoPreset;
     this.videoPreset = videoPreset;
     notifyListeners();
+  }
+
+  void updateMonitor(String data) {
+    _api.updateMonitor(data);
+  }
+
+  void updaterUser(Map<String, dynamic> user) {
+    logger.info("updaterUser");
+    _api.updateUser(user["id"], user);
   }
 }

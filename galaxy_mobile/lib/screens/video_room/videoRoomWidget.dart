@@ -1,9 +1,13 @@
 import 'dart:collection';
 import 'dart:convert';
+import 'dart:io';
+import 'dart:isolate';
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/services/keycloak.dart';
+import 'package:galaxy_mobile/services/monitoring_data.dart';
+import 'package:galaxy_mobile/services/monitoring_isolate.dart';
 import 'package:galaxy_mobile/utils/switch_page_helper.dart';
 import 'package:janus_client/janus_client.dart';
 import 'package:janus_client/utils.dart';
@@ -20,6 +24,7 @@ import 'package:synchronized/synchronized.dart';
 import '../../foreground.dart';
 
 typedef BoolCallback = Function(bool);
+typedef UpdateUserCallback = Function(Map<String, dynamic> user);
 final int PAGE_SIZE = 3;
 
 class VideoRoom extends StatefulWidget {
@@ -28,6 +33,7 @@ class VideoRoom extends StatefulWidget {
   String token;
   int roomNumber;
   VoidCallback callExitRoomUserExists;
+  UpdateUserCallback updateGlxUserCB;
   User user;
 
   JanusClient j;
@@ -57,6 +63,10 @@ class VideoRoom extends StatefulWidget {
 
   Plugin chatHandle;
 
+  String janusName;
+
+  String groupName;
+
   void exitRoom() {
     if (j != null) j.destroy();
     if (pluginHandle != null) pluginHandle.hangup();
@@ -81,9 +91,13 @@ class VideoRoom extends StatefulWidget {
     return myid;
   }
 
-  bool getIsQuestion() { return isQuestion; }
+  bool getIsQuestion() {
+    return isQuestion;
+  }
 
-  setIsQuestion(bool isQuestion) { this.isQuestion = isQuestion; }
+  setIsQuestion(bool isQuestion) {
+    this.isQuestion = isQuestion;
+  }
 
   void mute() {
     myStream
@@ -114,14 +128,21 @@ class VideoRoom extends StatefulWidget {
         "${myStream.getVideoTracks().first.toString()}");
   }
 
-  void toggleQuestion() {
-    FlutterLogs.logInfo("VideoRoom", "toggleQuestion", "toggling...");
-    if (state != null && state.mounted) {
-      state.setState(() {
+  bool toggleQuestion() {
+    if (questionInRoom == null) {
+      FlutterLogs.logInfo("VideoRoom", "toggleQuestion", "toggling...");
+      if (state != null && state.mounted) {
+        state.setState(() {
+          isQuestion = !isQuestion;
+        });
+      } else {
         isQuestion = !isQuestion;
-      });
+      }
+      return true;
     } else {
-      isQuestion = !isQuestion;
+      FlutterLogs.logWarn(
+          "VideoRoom", "toggleQuestion", "question already set in room");
+      return false;
     }
   }
 
@@ -147,8 +168,7 @@ class VideoRoom extends StatefulWidget {
     if (user['question']) {
       questionInRoom = {'rfid': user['rfid']};
     } else if (questionInRoom != null &&
-        questionInRoom['rfid'] == user['rfid'])
-    {
+        questionInRoom['rfid'] == user['rfid']) {
       questionInRoom = null;
     }
   }
@@ -182,6 +202,8 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
   int fromVideoIndex;
 
   int toVideoIndex;
+
+  SendPort mainToIsolateStream;
 
   set id(id) {}
 
@@ -464,6 +486,8 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
               var event = msg['videoroom'];
               if (event != null) {
                 if (event == 'joined') {
+                  updateGxyUser(context, widget.user.toJson());
+
                   // widget._onUpdateVideoStateCallback();
                   widget.myid = msg["id"];
                   widget.mypvtid = msg["private_id"];
@@ -1035,14 +1059,21 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     //     [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
     final s = context.read<MainStore>();
 
-    final args = RoomArguments(s.activeGateway.url, s.activeGateway.token,
-        s.activeRoom.room.toInt(), s.activeUser);
+    final args = RoomArguments(
+        s.activeGateway.url,
+        s.activeGateway.token,
+        s.activeRoom.room.toInt(),
+        s.activeRoom.description,
+        s.activeUser,
+        s.activeGateway.name);
 
     // final RoomArguments args = ModalRoute.of(/context).settings.arguments;
     widget.roomNumber = args.roomNumber;
     widget.token = args.token;
     widget.server = args.server;
     widget.user = args.user;
+    widget.groupName = args.groupName;
+    widget.janusName = args.janusName;
     if (widget.pluginHandle == null) {
       // ignore: unnecessary_statements
       // initInfra();
@@ -1050,6 +1081,19 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     if (!initialized) {
       initialized = true;
       initInfra();
+      Map<String, dynamic> userJson = widget.user.toJson();
+      userJson["room"] = widget.roomNumber;
+      userJson["group"] = "Test Room";
+      initIsolate(context).then((value) => {
+            mainToIsolateStream = value,
+            mainToIsolateStream.send({
+              "type": 'setConnection',
+              "user": userJson,
+              // "userExtra": {},
+              // "data": {}
+            }),
+            mainToIsolateStream.send({"type": "start"})
+          });
     }
 
     final double userGridHeight =
@@ -1113,8 +1157,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                     Align(
                         alignment: Alignment.topRight,
                         child: Container(
-                            margin:
-                                const EdgeInsets.only(top: 8.0, right: 8.0),
+                            margin: const EdgeInsets.only(top: 8.0, right: 8.0),
                             child: Icon(
                               Icons.live_help_rounded,
                               color: widget.isQuestion
@@ -1148,81 +1191,77 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                                           true)
                                   ? Colors.lightGreen
                                   : Colors.black)),
-                      child: Stack(
-                        children: [
-                          (feeds.firstWhere((element) =>
-                                          element["videoSlot"] ==
-                                          0)["cammute"] ==
-                                      false &&
-                                  !muteOtherCams)
-                              // (true)
-                              // (widget._remoteRenderer
-                              //         .elementAt(0)
-                              //         .srcObject
-                              //         .getVideoTracks()
-                              //         .elementAt(widget._remoteRenderer
-                              //             .elementAt(0)
-                              //             .trackIndex)
-                              //         .enabled)
-                              ? RTCVideoView(
-                                  widget._remoteRenderer.elementAt(0))
-                              : Align(
-                                  alignment: Alignment.center,
-                                  child: Icon(
-                                    Icons.account_circle,
-                                    color: Colors.white,
-                                    size: itemWidth - 60,
-                                  ),
+                      child: Stack(children: [
+                        (feeds.firstWhere((element) =>
+                                        element["videoSlot"] == 0)["cammute"] ==
+                                    false &&
+                                !muteOtherCams)
+                            // (true)
+                            // (widget._remoteRenderer
+                            //         .elementAt(0)
+                            //         .srcObject
+                            //         .getVideoTracks()
+                            //         .elementAt(widget._remoteRenderer
+                            //             .elementAt(0)
+                            //             .trackIndex)
+                            //         .enabled)
+                            ? RTCVideoView(widget._remoteRenderer.elementAt(0))
+                            : Align(
+                                alignment: Alignment.center,
+                                child: Icon(
+                                  Icons.account_circle,
+                                  color: Colors.white,
+                                  size: itemWidth - 60,
                                 ),
-                          Align(
-                            alignment: Alignment.bottomLeft,
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.mic_off,
+                              ),
+                        Align(
+                          alignment: Alignment.bottomLeft,
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.mic_off,
+                                color: (feeds.firstWhere((element) =>
+                                                element["videoSlot"] ==
+                                                0)["talking"] !=
+                                            null &&
+                                        feeds.firstWhere((element) =>
+                                                element["videoSlot"] ==
+                                                0)["talking"] ==
+                                            true)
+                                    ? Colors.transparent
+                                    : Colors.red,
+                                size: 18,
+                              ),
+                              Text((feeds.isNotEmpty &&
+                                      feeds.any((element) =>
+                                          element["videoSlot"] == 0))
+                                  ? feeds.firstWhere((element) =>
+                                          element["videoSlot"] == 0)["display"]
+                                      ["display"]
+                                  : ""),
+                            ],
+                          ),
+                        ),
+                        Align(
+                            alignment: Alignment.topRight,
+                            child: Container(
+                                margin:
+                                    const EdgeInsets.only(top: 8.0, right: 8.0),
+                                child: Icon(
+                                  Icons.live_help_rounded,
                                   color: (feeds.firstWhere((element) =>
                                                   element["videoSlot"] ==
-                                                  0)["talking"] !=
+                                                  0)["question"] !=
                                               null &&
                                           feeds.firstWhere((element) =>
                                                   element["videoSlot"] ==
-                                                  0)["talking"] ==
+                                                  0)["question"] ==
                                               true)
-                                      ? Colors.transparent
-                                      : Colors.red,
-                                  size: 18,
-                                ),
-                                Text((feeds.isNotEmpty &&
-                                        feeds.any((element) =>
-                                            element["videoSlot"] == 0))
-                                    ? feeds.firstWhere((element) =>
-                                        element["videoSlot"] ==
-                                        0)["display"]["display"]
-                                    : ""),
-                              ],
-                            ),
-                          ),
-                          Align(
-                              alignment: Alignment.topRight,
-                              child: Container(
-                                  margin:
-                                  const EdgeInsets.only(top: 8.0, right: 8.0),
-                                  child: Icon(
-                                    Icons.live_help_rounded,
-                                    color: (feeds.firstWhere((element) =>
-                                    element["videoSlot"] ==
-                                        0)["question"] !=
-                                        null &&
-                                        feeds.firstWhere((element) =>
-                                        element["videoSlot"] ==
-                                            0)["question"] ==
-                                            true)
-                                        ? Colors.red
-                                        : Colors.transparent,
-                                    size: 50,
-                                  )))
-                        ]
-                      ))
+                                      ? Colors.red
+                                      : Colors.transparent,
+                                  size: 50,
+                                )))
+                      ]))
                   : Container(),
 
               (widget._remoteRenderer != null &&
@@ -1298,18 +1337,18 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                           Align(
                               alignment: Alignment.topRight,
                               child: Container(
-                                  margin:
-                                  const EdgeInsets.only(top: 8.0, right: 8.0),
+                                  margin: const EdgeInsets.only(
+                                      top: 8.0, right: 8.0),
                                   child: Icon(
                                     Icons.live_help_rounded,
                                     color: (feeds.firstWhere((element) =>
-                                    element["videoSlot"] ==
-                                        1)["question"] !=
-                                        null &&
-                                        feeds.firstWhere((element) =>
-                                        element["videoSlot"] ==
-                                            1)["question"] ==
-                                            true)
+                                                    element["videoSlot"] ==
+                                                    1)["question"] !=
+                                                null &&
+                                            feeds.firstWhere((element) =>
+                                                    element["videoSlot"] ==
+                                                    1)["question"] ==
+                                                true)
                                         ? Colors.red
                                         : Colors.transparent,
                                     size: 50,
@@ -1390,18 +1429,18 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                           Align(
                               alignment: Alignment.topRight,
                               child: Container(
-                                  margin:
-                                  const EdgeInsets.only(top: 8.0, right: 8.0),
+                                  margin: const EdgeInsets.only(
+                                      top: 8.0, right: 8.0),
                                   child: Icon(
                                     Icons.live_help_rounded,
                                     color: (feeds.firstWhere((element) =>
-                                    element["videoSlot"] ==
-                                        2)["question"] !=
-                                        null &&
-                                        feeds.firstWhere((element) =>
-                                        element["videoSlot"] ==
-                                            2)["question"] ==
-                                            true)
+                                                    element["videoSlot"] ==
+                                                    2)["question"] !=
+                                                null &&
+                                            feeds.firstWhere((element) =>
+                                                    element["videoSlot"] ==
+                                                    2)["question"] ==
+                                                true)
                                         ? Colors.red
                                         : Colors.transparent,
                                     size: 50,
@@ -1570,6 +1609,31 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     }
   }
 
+  Future<void> updateGxyUser(context, userData) async {
+    userData["room"] = widget.roomNumber;
+    userData["camera"] = widget.myVideoMuted;
+    userData["group"] = widget.groupName;
+    userData["role"] = "user";
+    userData["janus"] = widget.janusName;
+    userData["system"] = Platform.isAndroid ? "Android" : "iOS";
+    userData["ip"] = await printIps();
+    userData["country"] = Platform.localeName;
+    userData["session"] = widget.j.sessionId;
+    userData["handle"] = widget.pluginHandle.handleId;
+    widget.updateGlxUserCB(userData);
+  }
+
+  Future<String> printIps() async {
+    for (var interface in await NetworkInterface.list()) {
+      print('== Interface: ${interface.name} ==');
+      for (var addr in interface.addresses) {
+        print(
+            '${addr.address} ${addr.host} ${addr.isLoopback} ${addr.rawAddress} ${addr.type.name}');
+        return addr.address;
+      }
+    }
+  }
+
   void toggleAudioMode() {
     FlutterLogs.logInfo(
         "videoRoom", "toggleAudioMode", 'changing to ${!muteOtherCams}');
@@ -1603,11 +1667,14 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
 }
 
 class RoomArguments {
+  final String janusName;
   final String server;
   final String token;
   final int roomNumber;
+  final String groupName;
   final User user;
-  RoomArguments(this.server, this.token, this.roomNumber, this.user);
+  RoomArguments(this.server, this.token, this.roomNumber, this.groupName,
+      this.user, this.janusName);
 }
 
 //audio only mode

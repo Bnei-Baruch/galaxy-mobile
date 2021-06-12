@@ -1,0 +1,57 @@
+{
+  "cpu": 4,
+  "ram": 8,
+  "network": "",
+  "galaxyVersion": "3.10.0-dev",
+  "name": "igal test Avraham",
+  "email": "igal@hotmail.com",
+  "roles": [
+    "gxy_user",
+    "offline_access",
+    "uma_authorization"
+  ],
+  "id": "d044ee7b-2e2b-4ca7-a7e5-9c148889ff7b",
+  "username": "igal test",
+  "familyname": "Avraham",
+  "display": "igal test Avraham",
+  "group": "PT 30",
+  "role": "user",
+  "system": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36",
+  "ip": "87.68.207.131",
+  "country": "IL",
+  "room": 2157,
+  "janus": "gxy2",
+  "extra": {
+    "media": {
+      "audio": {
+        "audio_device": "default"
+      },
+      "video": {
+        "setting": {
+          "width": 320,
+          "height": 180,
+          "ideal": 15
+        },
+        "video_device": ""
+      }
+    },
+    "streams": [
+      {
+        "type": "audio",
+        "mindex": 0,
+        "mid": "0",
+        "codec": "opus"
+      }
+    ]
+  },
+  "session": 7521650271624197,
+  "handle": 4058629330170987,
+  "self_test": false,
+  "camera": true,
+  "sound_test": false,
+  "question": false,
+  "timestamp": 1622593932129,
+  "textroom_handle": 5736919650019628,
+  "rfid": 3565544880624222,
+  "streamingGateway": "str2"
+}

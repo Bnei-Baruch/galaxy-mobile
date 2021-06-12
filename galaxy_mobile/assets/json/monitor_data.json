@@ -1,0 +1,1563 @@
+
+[
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594059564.525,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0015416666666666667,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594059790.991
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594059790.991,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594059790.991
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594060565.265,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0006666666666666666,
+          "roundTripTime": 0.068
+        }
+      ],
+      "timestamp": 1622594060802.132
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594060802.132,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594060802.132
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594061566.497,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0003333333333333333,
+          "roundTripTime": 0.068
+        }
+      ],
+      "timestamp": 1622594061790.14
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594061790.14,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594061790.14
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594062564.625,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0008541666666666667,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594062792.79
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594062792.79,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594062792.79
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594063563.136,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.00075,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594063790.178
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594063790.178,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594063790.178
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594064563.819,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.000375,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594064790.873
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594064790.873,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594064790.873
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594065563.447,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0005,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594065793.782
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594065793.782,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594065793.782
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594066568.576,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0003125,
+          "roundTripTime": 0.071
+        }
+      ],
+      "timestamp": 1622594066790.392
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594066790.392,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594066790.392
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594067563.641,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.001,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594067790.77
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594067790.77,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594067790.77
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594068565.348,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0003541666666666667,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594068790.709
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594068790.709,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594068790.709
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594069566.974,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0004375,
+          "roundTripTime": 0.07
+        }
+      ],
+      "timestamp": 1622594069790.16
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594069790.16,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594069790.16
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594070563.655,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0003333333333333333,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594070790.899
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594070790.899,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594070790.899
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594071564.45,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0003125,
+          "roundTripTime": 0.068
+        }
+      ],
+      "timestamp": 1622594071790.244
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594071790.244,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594071790.244
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594072565.492,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0004375,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594072790.334
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594072790.334,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594072790.334
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594073562.822,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0002916666666666667,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594073790.453
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594073790.453,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594073790.453
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594074563.949,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0009791666666666666,
+          "roundTripTime": 0.068
+        }
+      ],
+      "timestamp": 1622594074801.297
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594074801.297,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594074801.297
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594075564.078,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.00047916666666666664,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594075792.531
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594075792.531,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594075792.531
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594076564.451,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0012083333333333334,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594076793.551
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594076793.551,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594076793.551
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594077574.182,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0005416666666666666,
+          "roundTripTime": 0.078
+        }
+      ],
+      "timestamp": 1622594077789.963
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594077789.963,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594077789.963
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594078563.424,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0005416666666666666,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594078790.018
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594078790.018,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594078790.018
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594079564.149,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0007916666666666666,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594079790.007
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594079790.007,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594079790.007
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594080566.554,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0010416666666666667,
+          "roundTripTime": 0.069
+        }
+      ],
+      "timestamp": 1622594080789.81
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594080789.81,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594080789.81
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594081567.903,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0006458333333333333,
+          "roundTripTime": 0.069
+        }
+      ],
+      "timestamp": 1622594081791.94
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594081791.94,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594081791.94
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594082563.93,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0003958333333333333,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594082789.927
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594082789.927,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594082789.927
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594083567.602,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0003541666666666667,
+          "roundTripTime": 0.07
+        }
+      ],
+      "timestamp": 1622594083789.71
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594083789.71,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594083789.71
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594084565.561,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0011041666666666667,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594084791.628
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594084791.628,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594084791.628
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594085566.177,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0008541666666666667,
+          "roundTripTime": 0.069
+        }
+      ],
+      "timestamp": 1622594085790.999
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594085790.999,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594085790.999
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594086564.451,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0003958333333333333,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594086797.017
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594086797.017,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594086797.017
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594087576.883,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.001,
+          "roundTripTime": 0.079
+        }
+      ],
+      "timestamp": 1622594087789.679
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594087789.679,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594087789.679
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594088563.562,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0007291666666666667,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594088789.682
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594088789.682,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594088789.682
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594089566.847,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.00075,
+          "roundTripTime": 0.071
+        }
+      ],
+      "timestamp": 1622594089790.266
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594089790.266,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594089790.266
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594090563.004,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0007916666666666666,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594090789.806
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594090789.806,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594090789.806
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594091565.716,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.00047916666666666664,
+          "roundTripTime": 0.069
+        }
+      ],
+      "timestamp": 1622594091791.318
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594091791.318,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594091791.318
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594092563.286,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0004375,
+          "roundTripTime": 0.068
+        }
+      ],
+      "timestamp": 1622594092792.02
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594092792.02,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594092792.02
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594093564.412,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0005208333333333333,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594093790.006
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594093790.006,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594093790.006
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594094566.357,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.000625,
+          "roundTripTime": 0.069
+        }
+      ],
+      "timestamp": 1622594094790.692
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594094790.692,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594094790.692
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594095564.907,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0015,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594095798.499
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594095798.499,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594095798.499
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594096565.051,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0007083333333333334,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594096791.189
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594096791.189,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594096791.189
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594097563.934,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0005,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594097789.711
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594097789.711,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594097789.711
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594098563.615,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0005625,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594098789.579
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594098789.579,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594098789.579
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594099566.134,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0005833333333333334,
+          "roundTripTime": 0.069
+        }
+      ],
+      "timestamp": 1622594099790.511
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594099790.511,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594099790.511
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594100567.268,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0008125,
+          "roundTripTime": 0.068
+        }
+      ],
+      "timestamp": 1622594100790.673
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594100790.673,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594100790.673
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594101565.574,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0018541666666666667,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594101795.162
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594101795.162,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594101795.162
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594102565.21,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0004166666666666667,
+          "roundTripTime": 0.068
+        }
+      ],
+      "timestamp": 1622594102802.669
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594102802.669,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594102802.669
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594103566.071,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0007916666666666666,
+          "roundTripTime": 0.069
+        }
+      ],
+      "timestamp": 1622594103791.504
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594103791.504,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594103791.504
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594104564.36,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0004166666666666667,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594104790.345
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594104790.345,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594104790.345
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594105564.977,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0011875,
+          "roundTripTime": 0.069
+        }
+      ],
+      "timestamp": 1622594105789.526
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594105789.526,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594105789.526
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594106563.07,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0006041666666666667,
+          "roundTripTime": 0.069
+        }
+      ],
+      "timestamp": 1622594106789.608
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594106789.608,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594106789.608
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594107576.654,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0006458333333333333,
+          "roundTripTime": 0.081
+        }
+      ],
+      "timestamp": 1622594107794.828
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594107794.828,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594107794.828
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594108565.565,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0005,
+          "roundTripTime": 0.071
+        }
+      ],
+      "timestamp": 1622594108789.44
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594108789.44,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594108789.44
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594109563.434,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0005416666666666666,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594109789.589
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594109789.589,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594109789.589
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594110563.724,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0005833333333333334,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594110793.745
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594110793.745,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594110793.745
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594111564.501,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0010833333333333333,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594111791.198
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594111791.198,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594111791.198
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594112565.252,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0008958333333333333,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594112790.333
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594112790.333,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594112790.333
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594113563.439,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0005625,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594113789.291
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594113789.291,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594113789.291
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594114566.975,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0008958333333333333,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594114789.911
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594114789.911,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594114789.911
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594115566.45,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0016458333333333333,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594115790.396
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594115790.396,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594115790.396
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594116563.483,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.000875,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594116790.637
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594116790.637,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594116790.637
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594117568.516,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0007291666666666667,
+          "roundTripTime": 0.07
+        }
+      ],
+      "timestamp": 1622594117789.094
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594117789.094,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594117789.094
+    }
+  ],
+  [
+    {
+      "name": "audio",
+      "reports": [
+        {
+          "timestamp": 1622594118563.215,
+          "type": "remote-inbound-rtp",
+          "packetsLost": 0,
+          "jitter": 0.0008958333333333333,
+          "roundTripTime": 0.067
+        }
+      ],
+      "timestamp": 1622594118792.375
+    },
+    {
+      "name": "Misc",
+      "reports": [
+        {
+          "timestamp": 1622594118792.375,
+          "type": "misc",
+          "iceState": "connected"
+        }
+      ],
+      "timestamp": 1622594118792.375
+    }
+  ]
+]
