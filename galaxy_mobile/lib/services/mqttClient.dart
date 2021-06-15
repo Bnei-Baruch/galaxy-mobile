@@ -13,16 +13,46 @@ class MQTTClient {
 
   MqttServerClient _client;
 
-  final void Function() _onConnectedCallback;
-  final void Function(String) _onSubscribedCallback;
-  final void Function(String) _onMsgReceivedCallback;
+  // void Function() _onConnectedCallback;
+  // void Function(String) _onSubscribedCallback;
+  // void Function(String) _onMsgReceivedCallback;
 
-  MQTTClient(this._username, this._password, this._onMsgReceivedCallback,
-      this._onConnectedCallback, this._onSubscribedCallback) {
+  var _onConnectedCallbackList = new List();
+  var _onSubscribedCallbackList = new List();
+  var _onMsgReceivedCallbackList = new List();
+
+  MQTTClient() {
     _client =
         MqttServerClient.withPort(APP_MQTT_HOST,
             APP_MQTT_CLIENT_ID, APP_MQTT_PORT);
   }
+
+  void init(String username, String password) {
+    _username = username;
+    _password = password;
+    // _onConnectedCallback = onConnectedCallback;
+    // _onSubscribedCallback = onSubscribedCallback;
+    // _onMsgReceivedCallback = onMsgReceivedCallback;
+  }
+
+  void addOnConnectedCallback(Function() onConnectedCallback) {
+    _onConnectedCallbackList.add(onConnectedCallback);
+  }
+
+  void addOnSubscribedCallback(Function(String) onSubscribedCallback) {
+    _onSubscribedCallbackList.add(onSubscribedCallback);
+  }
+
+  void addOnMsgReceivedCallback(Function(String) onMsgReceivedCallback) {
+    _onMsgReceivedCallbackList.add(onMsgReceivedCallback);
+  }
+
+  // MQTTClient(this._username, this._password, this._onMsgReceivedCallback,
+  //     this._onConnectedCallback, this._onSubscribedCallback) {
+  //   _client =
+  //       MqttServerClient.withPort(APP_MQTT_HOST,
+  //           APP_MQTT_CLIENT_ID, APP_MQTT_PORT);
+  // }
 
   Future<MqttServerClient> connect() async {
     _client.logging(on: true);
@@ -58,7 +88,11 @@ class MQTTClient {
           MqttPublishPayload.bytesToStringAsString(message.payload.message);
 
       logger.info("Received message: $payload from topic: ${c[0].topic}>");
-      _onMsgReceivedCallback(payload);
+      for (Function(String) msgReceivedCallback in _onMsgReceivedCallbackList)
+      {
+        msgReceivedCallback(payload);
+      }
+      // _onMsgReceivedCallback(payload);
     });
 
     return _client;
@@ -80,7 +114,10 @@ class MQTTClient {
 
   void onConnected() {
     logger.info("Connected");
-    _onConnectedCallback();
+    for (Function() connectedCallback in _onConnectedCallbackList) {
+      connectedCallback();
+    }
+    // _onConnectedCallback();
   }
 
   void onDisconnected() {
@@ -89,7 +126,10 @@ class MQTTClient {
 
   void onSubscribed(String topic) {
     logger.info("Subscribed to topic: $topic");
-    _onSubscribedCallback(topic);
+    for (Function(String) subscribedCallback in _onSubscribedCallbackList) {
+      subscribedCallback(topic);
+    }
+    // _onSubscribedCallback(topic);
   }
 
   void onSubscribeFail(String topic) {

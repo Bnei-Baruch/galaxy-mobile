@@ -8,7 +8,6 @@ import 'package:galaxy_mobile/services/api.dart';
 import 'package:galaxy_mobile/services/authService.dart';
 import 'package:galaxy_mobile/services/logger.dart';
 import 'package:galaxy_mobile/themes/default.dart';
-import 'package:galaxy_mobile/screens/dashboard/dashboard.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'models/sharedPref.dart';
@@ -16,6 +15,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:flutter_fgbg/flutter_fgbg.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:galaxy_mobile/services/mqttClient.dart';
 
 // Compile notes:
 // - to generate luncher icons run:
@@ -56,10 +56,14 @@ void main() async {
         providers: [
           Provider<AuthService>(create: (_) => AuthService()),
           Provider<Api>(create: (_) => Api()),
+          Provider<MQTTClient>(create: (_) => MQTTClient()),
+
           // Provider<Dashboard>(create: (_) => Dashboard()),
-          ChangeNotifierProxyProvider2<AuthService, Api, MainStore>(
+          ChangeNotifierProxyProvider3
+          <AuthService, Api, MQTTClient, MainStore>(
               create: (_) => MainStore(),
-              update: (_, auth, api, model) => model..update(auth, api)),
+              update: (_, auth, api, mqttClient, model) =>
+              model..update(auth, api, mqttClient)),
         ],
         child: EasyLocalization(
             supportedLocales: [

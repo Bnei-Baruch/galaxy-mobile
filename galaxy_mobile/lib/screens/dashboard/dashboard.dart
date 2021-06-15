@@ -21,8 +21,6 @@ import 'package:galaxy_mobile/services/authService.dart';
 enum AudioDevice { receiver, speaker, bluetooth }
 
 class Dashboard extends StatefulWidget {
-  // _DashboardState state;
-
   @override
   State createState() => _DashboardState();
 }
@@ -33,7 +31,6 @@ class _DashboardState extends State<Dashboard> {
   var activeUser;
   bool callInProgress;
   String _activeRoomId;
-  MQTTClient _mqttClient;
   AudioDevice _audioDevice = AudioDevice.receiver;
 
   BuildContext dialogPleaseWaitContext;
@@ -45,15 +42,12 @@ class _DashboardState extends State<Dashboard> {
   bool audioMode = false;
 
   Map<String, dynamic> userMap;
-
   Timer userTimer;
+  int formFlex;
+  int mapFlex;
 
   StreamSubscription<ConnectivityResult> subscription;
   StreamSubscription streamSubscription;
-
-  int formFlex;
-
-  int mapFlex;
 
   @override
   void initState() {
@@ -61,6 +55,8 @@ class _DashboardState extends State<Dashboard> {
     FlutterAudioManager.setListener(() {
       FlutterLogs.logInfo("dashboard", "onInputChanged", "");
     });
+
+    final mqttClient = context.read<MQTTClient>();
 
     // widget.state = this;
     callInProgress = false;
@@ -96,7 +92,7 @@ class _DashboardState extends State<Dashboard> {
             stream.exit();
             videoRoom.exitRoom();
             userTimer.cancel();
-            if (_mqttClient != null) _mqttClient.disconnect();
+            if (mqttClient != null) mqttClient.disconnect();
             Navigator.pop(dialogPleaseWaitContext);
             Navigator.of(this.context).pop();
           }
@@ -110,8 +106,8 @@ class _DashboardState extends State<Dashboard> {
         if (hadNoConnection) {
           FlutterLogs.logInfo(
               "Dashboard", "ConnectivityResult", "reconnecting - exit room");
-          if (_mqttClient != null) {
-            _mqttClient.disconnect();
+          if (mqttClient != null) {
+            mqttClient.disconnect();
           }
           FlutterLogs.logInfo(
               "Dashboard", "ConnectivityResult", "reconnecting - enter room");
@@ -119,7 +115,7 @@ class _DashboardState extends State<Dashboard> {
           setState(() {
             stream.exit();
             videoRoom.exitRoom();
-            _mqttClient.disconnect();
+            mqttClient.disconnect();
             userTimer.cancel();
             //go out of the room and re-enter , since jauns doesn't have a reconnect infra to do it right
             Navigator.of(this.context).pop(false);
@@ -149,7 +145,7 @@ class _DashboardState extends State<Dashboard> {
         setState(() {
           stream.exit();
           videoRoom.exitRoom();
-          _mqttClient.disconnect();
+          mqttClient.disconnect();
           userTimer.cancel();
 
           //go out of the room and re-enter , since jauns doesn't have a reconnect infra to do it right
@@ -160,22 +156,21 @@ class _DashboardState extends State<Dashboard> {
     });
     videoRoom.RoomReady = () {
       final authService = context.read<AuthService>();
-      if (_mqttClient == null) {
-        _mqttClient = MQTTClient(
-            authService.getUserEmail(),
-            authService.getToken().accessToken,
-            this.handleCmdData,
-            this.connectedToBroker,
-            this.subscribedToTopic);
-        _mqttClient.connect();
-      }
+        mqttClient.init(
+              authService.getUserEmail(),
+              authService.getToken().accessToken);
+
+        mqttClient.addOnConnectedCallback(() => connectedToBroker());
+        mqttClient.addOnSubscribedCallback((topic) => subscribedToTopic(topic));
+        mqttClient.addOnMsgReceivedCallback((payload) => handleCmdData(payload));
+        mqttClient.connect();
     };
     videoRoom.callExitRoomUserExists = () {
       stream.exit();
       videoRoom.exitRoom();
       userTimer.cancel();
-      if (_mqttClient != null)
-        _mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
+      if (mqttClient != null)
+        mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
       showDialog(
         context: context,
         builder: (context) => new AlertDialog(
@@ -351,7 +346,8 @@ class _DashboardState extends State<Dashboard> {
   }
 
   void connectedToBroker() {
-    _mqttClient.subscribe("galaxy/room/" + _activeRoomId);
+    final mqttClient = context.read<MQTTClient>();
+    mqttClient.subscribe("galaxy/room/" + _activeRoomId);
     // updateRoomWithMyVideoState();
   }
 
@@ -364,6 +360,7 @@ class _DashboardState extends State<Dashboard> {
   }
 
   void updateRoomWithMyState(bool isQuestion) {
+    final mqttClient = context.read<MQTTClient>();
     var userData;
     if (userMap != null)
       userData = userMap;
@@ -376,7 +373,7 @@ class _DashboardState extends State<Dashboard> {
     var message = {};
     message["type"] = "client-state";
     message["user"] = userData;
-    _mqttClient
+    mqttClient
         .send("galaxy/room/" + _activeRoomId, JsonEncoder().convert(message));
     userMap = userData;
   }
@@ -401,11 +398,12 @@ class _DashboardState extends State<Dashboard> {
 
     return WillPopScope(
       onWillPop: () {
+        final mqttClient = context.read<MQTTClient>();
         Navigator.of(context).pop(true);
         stream.exit();
         videoRoom.exitRoom();
         userTimer.cancel();
-        _mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
+        mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
         SystemChrome.setPreferredOrientations([
           DeviceOrientation.portraitUp,
           DeviceOrientation.portraitDown,
@@ -415,45 +413,27 @@ class _DashboardState extends State<Dashboard> {
         return;
       },
       child: Scaffold(
+        drawer: VideoRoomDrawer(),
         appBar: AppBar(
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () {
-                Navigator.of(context).pop(true);
-                stream.exit();
-                videoRoom.exitRoom();
-                userTimer.cancel();
-                _mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
-                // SystemChrome.setPreferredOrientations([
-                //   DeviceOrientation.portraitUp,
-                //   DeviceOrientation.portraitDown,
-                //   DeviceOrientation.landscapeLeft,
-                //   DeviceOrientation.landscapeRight
-                // ]);
-                return;
-              },
-            ),
             title: Text(activeRoom.description),
             actions: <Widget>[
+              IconButton(
+                  icon: Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () {
+                    final mqttClient = context.read<MQTTClient>();
+                    Navigator.of(context).pop(true);
+                    stream.exit();
+                    videoRoom.exitRoom();
+                    userTimer.cancel();
+                    mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
+                  }),
               IconButton(
                   icon: setIcon(),
                   onPressed: () async {
                     await switchAudioDevice();
                     setState(() {});
-                  }),
-
-              // Padding(
-              //     padding: EdgeInsets.only(right: 20.0),
-              //     child: GestureDetector(
-              //         onTap: () async {
-              //           switchAudioDevice();
-              //           // setState(() {
-              //           //   getAudioInput();
-              //           // });
-              //         },
-              //         child: setIcon()))
+                  })
             ]),
-        drawer: VideoRoomDrawer(),
         body: OrientationBuilder(
             builder: (context, orientation) {
               return Flex(mainAxisAlignment: MainAxisAlignment.center,
