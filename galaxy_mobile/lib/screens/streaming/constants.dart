@@ -1,4 +1,3 @@
-
 class StreamConstants {
   static const NO_VIDEO_OPTION_VALUE = -1;
   static const VIDEO_240P_OPTION_VALUE = 11;
@@ -74,4 +73,38 @@ class StreamConstants {
     {"key": 'heru', "value": 10, "text": 'Heb-Rus'},
     {"key": 'heen', "value": 17, "text": 'Heb-Eng'},
   ];
+
+  static const gxycol = [0, 201, 203, 202, 204];
+
+  static const trllang = {
+    "Hebrew": 301,
+    "Russian": 302,
+    "English": 303,
+    "Spanish": 304,
+    "French": 305,
+    "Italian": 306,
+    "German": 307,
+    "Turkish": 308,
+    "Portuguese": 309,
+    "Bulgarian": 310,
+    "Georgian": 311,
+    "Romanian": 312,
+    "Hungarian": 313,
+    "Swedish": 314,
+    "Lithuanian": 315,
+    "Croatian": 316,
+    "Japanese": 317,
+    "Slovenian": 318,
+    "Polish": 319,
+    "Norwegian": 320,
+    "Latvian": 321,
+    "Ukrainian": 322,
+    "Dutch": 323,
+    "Chinese": 324,
+    "Amharic": 325,
+    "Hindi": 326,
+    "Persian": 327,
+    "Heb-Eng": 303,
+    "Heb-Rus": 302,
+  };
 }
