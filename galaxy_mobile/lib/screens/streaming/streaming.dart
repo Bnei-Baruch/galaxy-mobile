@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/gestures.dart';
@@ -47,6 +48,13 @@ class StreamingUnified extends StatefulWidget {
   bool prevMuted;
 
   var audioTrlTrack;
+  Timer ducerMix;
+
+  double audioElementVolume = 0.6;
+
+  bool audioElementMuted = false;
+
+  double trlAudioElementVolume = 0.6;
 
   @override
   _StreamingUnifiedState createState() => _StreamingUnifiedState();
@@ -101,7 +109,7 @@ class StreamingUnified extends StatefulWidget {
 
   void handleStreamWhenOnAir(bool isOnAir) {
     FlutterLogs.logInfo(
-        "Streaming", "handle question", "handleStreamWhenOnAir");
+        "Streaming", "handle question", "handleStreamWhenOnAir $isOnAir");
 
     if (isOnAir) {
       this.mixvolume = DEFAULT_VOLUME; // getting current volume
@@ -116,8 +124,8 @@ class StreamingUnified extends StatefulWidget {
           .first
           .enabled; // keeping mute state for recover
 
-      FlutterLogs.logInfo(
-          "Streaming", " Switch STR Stream:", "${StreamConstants.gxycol[4]}");
+      FlutterLogs.logInfo("Streaming", "handle question ",
+          "Switch STR Stream:${StreamConstants.gxycol[4]}");
       audioStreamingPlugin.send(message: {
         "request": "switch",
         "id": StreamConstants.gxycol[4]
@@ -128,21 +136,82 @@ class StreamingUnified extends StatefulWidget {
       }); //setting trl stream
       state._remoteTrlStreamAudio.getAudioTracks().first.enabled =
           !trlAudioMuted;
+
+      ducerMix = Timer.periodic(Duration(milliseconds: 200), (timer) {
+        ducerMixaudio();
+      });
     } else {
+      FlutterLogs.logInfo(
+          "Streaming", "handle question ", "Switc back to original streams");
+      ducerMix.cancel();
       audioStreamingPlugin.send(message: {
         "request": "switch",
         "id": state.playerOverlay.audioTypeValue["value"]
       }); //set
-      this.trlAudioMuted = true; // enabling translation
+      this.trlAudioMuted = true; // disbaling translation
       state._remoteTrlStreamAudio.getAudioTracks().first.enabled =
           !trlAudioMuted;
+      state._remoteStreamAudio.getAudioTracks().last.setVolume(DEFAULT_VOLUME);
     }
   }
 
   int getTrlLang() {
     return StreamConstants.trllang[state.playerOverlay.audioTypeValue["text"]];
   }
+
+  void ducerMixaudio() async {
+    FlutterLogs.logInfo("Streaming", "handle question ", "ducerMixaudio");
+
+    // This happens only when user changes audio, update mixvolume.
+    var reports = await audioTrlStreamingPlugin
+        .getStats(state._remoteTrlStreamAudio.getAudioTracks().first);
+
+    // .then((reports) => () {
+    FlutterLogs.logInfo("Streaming", "handle question ", "got reports");
+    reports.forEach((element) {
+      if (element.values.keys.contains("audioOutputLevel")) {
+        double audioLevel =
+            (double.parse(element.values["audioOutputLevel"])) / 32768.0;
+        FlutterLogs.logInfo("Streaming", "handle question ",
+            "ducerMixaudio _remoteTrlStreamAudio=$audioLevel");
+        trlAudioElementVolume = audioLevel;
+      }
+    });
+
+    if (this.prevAudioVolume != this.audioElementVolume ||
+        this.prevMuted != this.audioElementMuted) {
+      this.mixvolume = this.audioElementMuted ? 0 : this.audioElementVolume;
+      // this.trlAudioElementVolume = this.mixvolume;
+      // state._remoteTrlStreamAudio
+      //     .getAudioTracks()
+      //     .last
+      //     .setVolume(trlAudioElementVolume);
+    }
+    if (trlAudioElementVolume > 0.05) {
+      // If translator is talking (remote volume > 0.05) we want to reduce Rav to 5%.
+      this.audioElementVolume = this.mixvolume * 0.05;
+    } else if (this.audioElementVolume + 0.01 <= this.mixvolume) {
+      // If translator is not talking or no translation (Hebrew) we want to slowly raise
+      // sound levels of original source up to original this.mixvolume.
+      this.audioElementVolume = this.audioElementVolume + 0.01;
+    }
+    // Store volume and mute values to be able to detect user volume change.
+    this.prevAudioVolume = this.audioElementVolume;
+    this.prevMuted = this.audioElementMuted;
+
+    FlutterLogs.logInfo("Streaming", "handle question ",
+        "ducerMixaudio audioElementVolume=$audioElementVolume");
+    state._remoteStreamAudio
+        .getAudioTracks()
+        .last
+        .setVolume(audioElementVolume);
+    // state._remoteTrlStreamAudio.getAudioTracks().first.setVolume(0.6);
+    // state._remoteStreamAudio.getAudioTracks().first.setVolume(0.06);
+    // });
+  }
 }
+
+double getAudioLevelofTrack(MediaStreamTrack track) {}
 
 class _StreamingUnifiedState extends State<StreamingUnified> {
   JanusClient janusClient = JanusClient(iceServers: [
@@ -382,8 +451,6 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
               "got remote trl stream enabling : ${!widget.trlAudioMuted}");
           widget.audioTrlTrack = track;
           _remoteTrlStreamAudio = stream;
-          _remoteTrlStreamAudio.getAudioTracks().last.enabled =
-              !widget.trlAudioMuted;
         },
         plugin: "janus.plugin.streaming",
         opaqueId: "trlstream-" + randomString(12),
@@ -397,6 +464,14 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
             }
             if (msg['streaming'] == 'event' &&
                 msg['result']['status'] == 'switched') {
+              _remoteTrlStreamAudio.getAudioTracks().last.enabled =
+                  !widget.trlAudioMuted;
+            }
+            if (msg['streaming'] == 'event' &&
+                msg['result']['status'] == 'started') {
+              // await this.destroy();
+              FlutterLogs.logInfo(
+                  "Streaming", "initTrlAudioStream", "disabling trl stream");
               _remoteTrlStreamAudio.getAudioTracks().last.enabled =
                   !widget.trlAudioMuted;
             }
@@ -631,78 +706,3 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
     super.dispose();
   }
 }
-//code for handlking audio out command -- during question
-// streamGalaxy = (talk, col, name) => {
-// console.log("streamGalaxy", talk, col, name);
-// if (!this.isInitialized_()) {
-// return;
-// }
-// if (talk) {
-// this.mixvolume = this.audioElement.volume;
-// this.talking = true;
-// this.trlAudioElement.volume = this.mixvolume;
-// this.trlAudioElement.muted = false;
-//
-// this.prevAudioVolume = this.audioElement.volume;
-// this.prevMuted = this.audioElement.muted;
-//
-// console.log(" :: Switch STR Stream: ", gxycol[col]);
-// this.audioJanusStream.send({message: {request: "switch", id: gxycol[col]}});
-// const id = trllang[localStorage.getItem("vrt_langtext")];
-// console.log(":: Select TRL: ", localStorage.getItem("vrt_langtext"), id);
-// if (!id) {
-// console.log(" :: Not TRL Stream attach");
-// } else {
-// this.trlAudioJanusStream.send({message: {request: "switch", id: id}});
-// this.talking = setInterval(this.ducerMixaudio, 200);
-// console.log(" :: Init TRL Stream: ", localStorage.getItem("vrt_langtext"), id);
-// }
-// Janus.log("You now talking");
-// } else if (this.talking) {
-// Janus.log("Stop talking");
-// if (this.talking) {
-// clearInterval(this.talking);
-// }
-// this.audioElement.volume = this.mixvolume;
-// const id = Number(localStorage.getItem("vrt_lang")) || 2;
-// console.log(" :: Switch STR Stream: ", localStorage.getItem("vrt_lang"), id);
-// this.audioJanusStream.send({message: {request: "switch", id: id}});
-// console.log(" :: Stop TRL Stream: ");
-// this.trlAudioElement.muted = true;
-// this.talking = null;
-// this.mixvolume = null;
-// }
-// if (this.onTalkingCallback) {
-// this.onTalkingCallback(this.talking);
-// }
-// };
-//
-// ducerMixaudio = () => {
-// if (this.isInitialized_()) {
-// // Get remote volume of translator stream (FYI in case of Hebrew, this will be 0 - no translation).
-// this.trlAudioJanusStream.getVolume(null, (volume) => {
-// if (volume === -1) {
-// if (this.talking) {
-// clearInterval(this.talking);
-// return;
-// }
-// }
-// if (this.prevAudioVolume !== this.audioElement.volume || this.prevMuted !== this.audioElement.muted) {
-// // This happens only when user changes audio, update mixvolume.
-// this.mixvolume = this.audioElement.muted ? 0 : this.audioElement.volume;
-// this.trlAudioElement.volume = this.mixvolume;
-// }
-// if (volume > 0.05) {
-// // If translator is talking (remote volume > 0.05) we want to reduce Rav to 5%.
-// this.audioElement.volume = this.mixvolume * 0.05;
-// } else if (this.audioElement.volume + 0.01 <= this.mixvolume) {
-// // If translator is not talking or no translation (Hebrew) we want to slowly raise
-// // sound levels of original source up to original this.mixvolume.
-// this.audioElement.volume = this.audioElement.volume + 0.01;
-// }
-// // Store volume and mute values to be able to detect user volume change.
-// this.prevAudioVolume = this.audioElement.volume;
-// this.prevMuted = this.audioElement.muted;
-// });
-// }
-// };
