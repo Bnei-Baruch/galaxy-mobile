@@ -40,6 +40,7 @@ class _DashboardState extends State<Dashboard> {
   bool videoMute = true;
   bool hadNoConnection = false;
   bool audioMode = false;
+  bool questionDisbaled = false;
 
   Map<String, dynamic> userMap;
   Timer userTimer;
@@ -331,6 +332,12 @@ class _DashboardState extends State<Dashboard> {
       switch (jsonCmd["type"]) {
         case "client-state":
           videoRoom.setUserState(jsonCmd["user"]);
+          setState(() {
+            //disable question at bottom in case other friends ask question
+            if (jsonCmd["user"]["id"] != userMap["id"]) {
+              questionDisbaled = jsonCmd["user"]["question"];
+            }
+          });
           break;
         case "audio-out":
           if (videoRoom.getIsQuestion()) {
@@ -455,9 +462,11 @@ class _DashboardState extends State<Dashboard> {
                     : Icon(Icons.videocam, color: Colors.white)),
             BottomNavigationBarItem(
                 label: 'Ask Question',
-                icon: videoRoom.getIsQuestion()
-                    ? Icon(Icons.live_help, color: Colors.red)
-                    : Icon(Icons.live_help, color: Colors.white)),
+                icon: !questionDisbaled
+                    ? (videoRoom.getIsQuestion()
+                        ? Icon(Icons.live_help, color: Colors.red)
+                        : Icon(Icons.live_help, color: Colors.white))
+                    : Icon(Icons.live_help, color: Colors.grey)),
             BottomNavigationBarItem(
                 label: "Audio Mode",
                 icon: audioMode
