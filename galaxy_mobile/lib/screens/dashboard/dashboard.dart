@@ -452,18 +452,19 @@ class _DashboardState extends State<Dashboard> {
                 label: "Video",
                 icon: videoMute
                     ? Icon(Icons.videocam_off, color: Colors.red)
-                    : Icon(Icons.videocam)),
+                    : Icon(Icons.videocam, color: Colors.white)),
             BottomNavigationBarItem(
                 label: 'Ask Question',
                 icon: videoRoom.getIsQuestion()
                     ? Icon(Icons.live_help, color: Colors.red)
-                    : Icon(Icons.live_help)),
+                    : Icon(Icons.live_help, color: Colors.white)),
             BottomNavigationBarItem(
                 label: "Audio Mode",
                 icon: audioMode
                     ? Icon(Icons.supervised_user_circle_outlined,
                         color: Colors.red)
-                    : Icon(Icons.supervised_user_circle_outlined)),
+                    : Icon(Icons.supervised_user_circle_outlined,
+                        color: Colors.white)),
           ],
           onTap: (value) {
             FlutterLogs.logInfo("Dashboard", "onTap", value.toString());
