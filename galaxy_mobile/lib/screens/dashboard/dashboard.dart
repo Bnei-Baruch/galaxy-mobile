@@ -156,14 +156,13 @@ class _DashboardState extends State<Dashboard> {
     });
     videoRoom.RoomReady = () {
       final authService = context.read<AuthService>();
-        mqttClient.init(
-              authService.getUserEmail(),
-              authService.getToken().accessToken);
+      mqttClient.init(
+          authService.getUserEmail(), authService.getToken().accessToken);
 
-        mqttClient.addOnConnectedCallback(() => connectedToBroker());
-        mqttClient.addOnSubscribedCallback((topic) => subscribedToTopic(topic));
-        mqttClient.addOnMsgReceivedCallback((payload) => handleCmdData(payload));
-        mqttClient.connect();
+      mqttClient.addOnConnectedCallback(() => connectedToBroker());
+      mqttClient.addOnSubscribedCallback((topic) => subscribedToTopic(topic));
+      mqttClient.addOnMsgReceivedCallback((payload) => handleCmdData(payload));
+      mqttClient.connect();
     };
     videoRoom.callExitRoomUserExists = () {
       stream.exit();
@@ -202,7 +201,9 @@ class _DashboardState extends State<Dashboard> {
 
     videoRoom.updateVideoState = (mute) {
       FlutterLogs.logInfo("Dashboard", "updateVideoState", "value $mute");
-      setState(() { videoMute = mute; });
+      setState(() {
+        videoMute = mute;
+      });
     };
 
     initAudioMgr();
@@ -373,8 +374,8 @@ class _DashboardState extends State<Dashboard> {
     var message = {};
     message["type"] = "client-state";
     message["user"] = userData;
-    mqttClient
-        .send("galaxy/room/" + _activeRoomId, JsonEncoder().convert(message));
+    mqttClient.send(
+        "galaxy/room/" + _activeRoomId, JsonEncoder().convert(message));
     userMap = userData;
   }
 
@@ -414,33 +415,32 @@ class _DashboardState extends State<Dashboard> {
       },
       child: Scaffold(
         drawer: VideoRoomDrawer(),
-        appBar: AppBar(
-            title: Text(activeRoom.description),
-            actions: <Widget>[
-              IconButton(
-                  icon: Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () {
-                    final mqttClient = context.read<MQTTClient>();
-                    Navigator.of(context).pop(true);
-                    stream.exit();
-                    videoRoom.exitRoom();
-                    userTimer.cancel();
-                    mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
-                  }),
-              IconButton(
-                  icon: setIcon(),
-                  onPressed: () async {
-                    await switchAudioDevice();
-                    setState(() {});
-                  })
-            ]),
-        body: OrientationBuilder(
-            builder: (context, orientation) {
-              return Flex(mainAxisAlignment: MainAxisAlignment.center,
-                  direction: orientation == Orientation.landscape ?
-                  Axis.horizontal : Axis.vertical,
-                  children: [stream, videoRoom]);
-            }),
+        appBar: AppBar(title: Text(activeRoom.description), actions: <Widget>[
+          IconButton(
+              icon: Icon(Icons.logout, color: Colors.white),
+              onPressed: () {
+                final mqttClient = context.read<MQTTClient>();
+                Navigator.of(context).pop(true);
+                stream.exit();
+                videoRoom.exitRoom();
+                userTimer.cancel();
+                mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
+              }),
+          IconButton(
+              icon: setIcon(),
+              onPressed: () async {
+                await switchAudioDevice();
+                setState(() {});
+              })
+        ]),
+        body: OrientationBuilder(builder: (context, orientation) {
+          return Flex(
+              mainAxisAlignment: MainAxisAlignment.center,
+              direction: orientation == Orientation.landscape
+                  ? Axis.horizontal
+                  : Axis.vertical,
+              children: [stream, videoRoom]);
+        }),
         bottomNavigationBar: BottomNavigationBar(
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
