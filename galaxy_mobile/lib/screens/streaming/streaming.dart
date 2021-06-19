@@ -149,7 +149,7 @@ class StreamingUnified extends StatefulWidget {
         "id": state.playerOverlay.audioTypeValue["value"]
       }); //set
       this.trlAudioMuted = true; // disbaling translation
-      state._remoteTrlStreamAudio.getAudioTracks().first.enabled =
+      state._remoteTrlStreamAudio.getAudioTracks().last.enabled =
           !trlAudioMuted;
       state._remoteStreamAudio.getAudioTracks().last.setVolume(DEFAULT_VOLUME);
     }
@@ -181,11 +181,11 @@ class StreamingUnified extends StatefulWidget {
     if (this.prevAudioVolume != this.audioElementVolume ||
         this.prevMuted != this.audioElementMuted) {
       this.mixvolume = this.audioElementMuted ? 0 : this.audioElementVolume;
-      // this.trlAudioElementVolume = this.mixvolume;
-      // state._remoteTrlStreamAudio
-      //     .getAudioTracks()
-      //     .last
-      //     .setVolume(trlAudioElementVolume);
+      this.trlAudioElementVolume = this.mixvolume;
+      state._remoteTrlStreamAudio
+          .getAudioTracks()
+          .last
+          .setVolume(trlAudioElementVolume);
     }
     if (trlAudioElementVolume > 0.05) {
       // If translator is talking (remote volume > 0.05) we want to reduce Rav to 5%.
