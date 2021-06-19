@@ -62,10 +62,10 @@ class StreamingUnified extends StatefulWidget {
   void toggleOnAir(var data) {
     if (state != null && state.mounted) {
       state.setState(() {
-        isOnAir = !isOnAir;
+        isOnAir = data["status"];
       });
     } else {
-      isOnAir = !isOnAir;
+      isOnAir = data["status"];
     }
 
     // todo: handle streams
