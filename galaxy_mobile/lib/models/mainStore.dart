@@ -4,10 +4,13 @@ import 'package:galaxy_mobile/models/sharedPref.dart';
 import 'package:galaxy_mobile/services/api.dart';
 import 'package:galaxy_mobile/services/authService.dart';
 import 'package:galaxy_mobile/services/keycloak.dart';
+import 'package:galaxy_mobile/services/mqttClient.dart';
+import 'package:flutter_logs/flutter_logs.dart';
 
 class MainStore extends ChangeNotifier {
   Api _api;
   AuthService _auth;
+  MQTTClient _mqttClient;
 
   List<RoomData> config; // TODO: available gatways
   List<Room> availableRooms;
@@ -26,11 +29,14 @@ class MainStore extends ChangeNotifier {
     setAudioMode(SharedPrefs().audioMode);
     setAudioPreset(SharedPrefs().audioPreset);
     setVideoPreset(SharedPrefs().videoPreset);
+
+    _mqttClient = MQTTClient();
   }
 
-  void update(AuthService auth, Api api) {
+  void update(AuthService auth, Api api, MQTTClient mqttClient) {
     _auth = auth;
     _api = api;
+    _mqttClient = mqttClient;
   }
 
   void setActiveRoom(String roomName) {
@@ -89,7 +95,7 @@ class MainStore extends ChangeNotifier {
   }
 
   void updaterUser(Map<String, dynamic> user) {
-    logger.info("updaterUser");
+    FlutterLogs.logInfo("MainStore", "updaterUser", "");
     _api.updateUser(user["id"], user);
   }
 }
