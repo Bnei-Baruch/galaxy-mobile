@@ -187,6 +187,7 @@ class _SettingsState extends State<Settings> {
                                                     Text("Please reconnect"),
                                               ));
                                         } else {
+                                          selfWidget.stopCamera();
                                           Navigator.pushNamed(
                                                   context,
                                                   ''

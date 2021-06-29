@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:janus_client/Plugin.dart';
 
@@ -14,6 +15,16 @@ class SelfViewWidget extends StatefulWidget {
       state.initRenderers();
     }
   }
+
+  void stopCamera() {
+    FlutterLogs.logInfo("SelfViewWidget", "stopCamera", "");
+    if (state != null && state.mounted) {
+      (state.myStream as MediaStream).getVideoTracks().first.enabled = false;
+      (state.myStream as MediaStream).getVideoTracks().first.stop();
+      (state.myStream as MediaStream).getAudioTracks().first.enabled = false;
+      (state.myStream as MediaStream).getAudioTracks().first.stop();
+    }
+  }
 }
 
 class _SelfViewWidgetState extends State<SelfViewWidget>
@@ -25,6 +36,8 @@ class _SelfViewWidgetState extends State<SelfViewWidget>
 
   @override
   void didChangeDependencies() async {
+    FlutterLogs.logInfo("SelfViewWidget", "didChangeDependencies", "");
+
     // TODO: implement didChangeDependencies
     super.didChangeDependencies();
   }
@@ -33,7 +46,7 @@ class _SelfViewWidgetState extends State<SelfViewWidget>
   void initState() {
     super.initState();
     widget.state = this;
-    print('xxx SelfViewWidget initstate');
+    FlutterLogs.logInfo("SelfViewWidget", "initState", "");
     WidgetsBinding.instance.addObserver(this);
     _localRenderer.initialize();
     initRenderers();
@@ -41,6 +54,7 @@ class _SelfViewWidgetState extends State<SelfViewWidget>
 
   @override
   void dispose() {
+    FlutterLogs.logInfo("SelfViewWidget", "dispose", "");
     _localRenderer.srcObject = null;
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -64,6 +78,7 @@ class _SelfViewWidgetState extends State<SelfViewWidget>
         navigator.mediaDevices.getUserMedia(mediaConstraints);
 
     stream.then((value) => setState(() {
+          myStream = value;
           _localRenderer.srcObject = value;
         }));
   }
@@ -85,16 +100,17 @@ class _SelfViewWidgetState extends State<SelfViewWidget>
     super.didChangeAppLifecycleState(state);
     switch (state) {
       case AppLifecycleState.inactive:
-        print('xxx appLifeCycleState inactive');
+        FlutterLogs.logInfo("SelfViewWidget", "appLifeCycleState", "inactive");
         break;
       case AppLifecycleState.resumed:
-        print('xxx appLifeCycleState resumed');
+        FlutterLogs.logInfo("SelfViewWidget", "appLifeCycleState", "resumed");
+
         break;
       case AppLifecycleState.paused:
-        print('xxx appLifeCycleState paused');
+        FlutterLogs.logInfo("SelfViewWidget", "appLifeCycleState", "paused");
         break;
       case AppLifecycleState.detached:
-        print('xxx appLifeCycleState detached');
+        FlutterLogs.logInfo("SelfViewWidget", "appLifeCycleState", "detached");
         break;
     }
   }
