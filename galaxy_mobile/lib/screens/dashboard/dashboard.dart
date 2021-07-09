@@ -460,13 +460,13 @@ class _DashboardState extends State<Dashboard> {
                 icon: videoMute
                     ? Icon(Icons.videocam_off, color: Colors.red)
                     : Icon(Icons.videocam, color: Colors.white)),
-            BottomNavigationBarItem(
-                label: 'Ask Question',
-                icon: !questionDisbaled
-                    ? (videoRoom.getIsQuestion()
-                        ? Icon(Icons.live_help, color: Colors.red)
-                        : Icon(Icons.live_help, color: Colors.white))
-                    : Icon(Icons.live_help, color: Colors.grey)),
+            // BottomNavigationBarItem(
+            //     label: 'Ask Question',
+            //     icon: !questionDisbaled
+            //         ? (videoRoom.getIsQuestion()
+            //             ? Icon(Icons.live_help, color: Colors.red)
+            //             : Icon(Icons.live_help, color: Colors.white))
+            //         : Icon(Icons.live_help, color: Colors.grey)),
             BottomNavigationBarItem(
                 label: "Audio Mode",
                 icon: audioMode
