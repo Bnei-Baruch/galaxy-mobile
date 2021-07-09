@@ -413,7 +413,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "1972488811d6c34d031728ec4cf026f5a16101f5"
+      resolved-ref: "39cce7a4a9011ea4a83113d3df21d233a8e8c07a"
       url: "https://github.com/igala/flutter-webrtc.git"
     source: git
     version: "0.5.8"
@@ -478,7 +478,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: "75d5f0604479307bd3c6120c6b67549a34c9857f"
+      resolved-ref: "75b7e43bf887e56d9077e3c6fb5f764d03ec5ee3"
       url: "https://github.com/igala/flutter_janus_client.git"
     source: git
     version: "0.0.4"

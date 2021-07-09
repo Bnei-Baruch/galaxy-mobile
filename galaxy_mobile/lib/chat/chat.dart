@@ -15,7 +15,7 @@ class Chat extends StatefulWidget {
 
 class _ChatPageState extends State<Chat> {
   final inputFieldController = TextEditingController();
-  List<ChatMessage> _messageList = [];
+
   bool isFirst = true;
   // [
   //   ChatMessage(
@@ -71,7 +71,7 @@ class _ChatPageState extends State<Chat> {
       var jsonCmd = JsonDecoder().convert(msgPayload);
       if (jsonCmd["type"] == "client-chat") {
         setState(() {
-          _messageList.add(ChatMessage(
+          context.read<MainStore>().addChatMessage(ChatMessage(
               senderName: jsonCmd["user"]["givenName"],
               messageContent: jsonCmd["msg"],
               messageType: "receiver"));
@@ -98,7 +98,14 @@ class _ChatPageState extends State<Chat> {
     _activeRoomId = activeRoom.room.toString();
     _activeUser = context.read<MainStore>().activeUser;
 
-    return Scaffold(
+    return WillPopScope(
+        onWillPop: ()
+    {
+      dispose();
+      Navigator.of(context).pop(true);
+      return;
+    },
+    child: Scaffold(
         appBar: AppBar(title: Text('chat'.tr())),
         body: LayoutBuilder(builder:
             (BuildContext context, BoxConstraints viewportConstraints) {
@@ -112,7 +119,8 @@ class _ChatPageState extends State<Chat> {
                         alignment: Alignment.topCenter,
                         child: ListView.builder(
                             controller: _controller,
-                            itemCount: _messageList.length,
+                            itemCount: context.read<MainStore>()
+                                .getChatMessages().length,
                             shrinkWrap: true,
                             scrollDirection: Axis.vertical,
                             padding: EdgeInsets.only(top: 10, bottom: 10),
@@ -126,7 +134,8 @@ class _ChatPageState extends State<Chat> {
                                                 0.3),
                                     padding: EdgeInsets.only(
                                         left: 14, right: 14, top: 0, bottom: 0),
-                                    child: Text(_messageList[index].senderName,
+                                    child: Text(context.read<MainStore>()
+                                        .getChatMessages()[index].senderName,
                                         style: TextStyle(fontSize: 15))),
                                 Container(
                                     constraints: BoxConstraints(
@@ -140,7 +149,9 @@ class _ChatPageState extends State<Chat> {
                                         bottom: 10),
                                     child: Align(
                                         alignment:
-                                        _messageList[index].messageType ==
+                                        context.read<MainStore>()
+                                            .getChatMessages()[index]
+                                            .messageType ==
                                                     "receiver"
                                                 ? Alignment.topLeft
                                                 : Alignment.topRight,
@@ -149,14 +160,18 @@ class _ChatPageState extends State<Chat> {
                                               borderRadius:
                                                   BorderRadius.circular(20),
                                               color:
-                                              _messageList[index].messageType ==
+                                              context.read<MainStore>()
+                                                  .getChatMessages()[index]
+                                                  .messageType ==
                                                           "receiver"
                                                       ? Colors.blue
                                                       : Colors.lightGreen,
                                             ),
                                             padding: EdgeInsets.all(16),
                                             child: Text(
-                                                _messageList[index].messageContent,
+                                                context.read<MainStore>()
+                                                    .getChatMessages()[index]
+                                                    .messageContent,
                                                 style:
                                                     TextStyle(fontSize: 15)))))
                               ]);
@@ -221,9 +236,12 @@ class _ChatPageState extends State<Chat> {
                           ),
                           backgroundColor: Colors.blue,
                           elevation: 0)
-                    ])))
+                    ])
+                )
+            )
           ]);
-        }));
+        })
+    ));
   }
 
   @override

@@ -1055,10 +1055,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    // SystemChrome.setPreferredOrientations(
-    //     [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
     final s = context.read<MainStore>();
-
     final args = RoomArguments(
         s.activeGateway.url,
         s.activeGateway.token,

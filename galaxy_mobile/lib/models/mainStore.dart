@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:galaxy_mobile/main.dart';
+import 'package:galaxy_mobile/chat/chatMessage.dart';
 import 'package:galaxy_mobile/models/sharedPref.dart';
 import 'package:galaxy_mobile/services/api.dart';
 import 'package:galaxy_mobile/services/authService.dart';
@@ -14,6 +14,7 @@ class MainStore extends ChangeNotifier {
 
   List<RoomData> config; // TODO: available gatways
   List<Room> availableRooms;
+  List<ChatMessage> chatMessageList = [];
 
   User activeUser;
   Room activeRoom;
@@ -98,4 +99,8 @@ class MainStore extends ChangeNotifier {
     FlutterLogs.logInfo("MainStore", "updaterUser", "");
     _api.updateUser(user["id"], user);
   }
+
+  List<ChatMessage> getChatMessages() { return chatMessageList; }
+
+  void addChatMessage(ChatMessage msg) { chatMessageList.add(msg); }
 }
