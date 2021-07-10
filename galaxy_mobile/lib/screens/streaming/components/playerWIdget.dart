@@ -9,6 +9,7 @@ class PlayerWidget extends StatefulWidget {
   bool isPlaying = false;
   BooleanCallback play;
   BooleanCallback mute;
+  BooleanCallback fullScreen;
   VoidCallback audioChange;
   VoidCallback videoChange;
 
@@ -16,6 +17,7 @@ class PlayerWidget extends StatefulWidget {
   Map<String, Object> videoTypeValue;
 
   bool isMuted = false;
+  bool isFullScreen = false;
 
   int audioPreset;
 
@@ -26,6 +28,11 @@ class PlayerWidget extends StatefulWidget {
         .firstWhere((element) => element["value"] == video);
     audioTypeValue = StreamConstants.audiog_options
         .firstWhere((element) => element["value"] == audio);
+  }
+
+  toggleFullScreen() {
+    isFullScreen = !isFullScreen;
+    fullScreen(isFullScreen);
   }
 
   @override
@@ -51,9 +58,7 @@ class _PlayerStateWidget extends State<PlayerWidget> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Padding(
-            padding: EdgeInsets.only(top: 40),
-          ),
+          Padding(padding: EdgeInsets.only(top: 40)),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.max,
@@ -104,6 +109,27 @@ class _PlayerStateWidget extends State<PlayerWidget> {
                       color: Colors.black,
                       // size: 24.0,
                       semanticLabel: 'Play/Stop button',
+                    ),
+                  ),
+                ),
+              ),
+              Center(
+                child: Ink(
+                  decoration: const ShapeDecoration(
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(),
+                  ),
+                  child: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        widget.toggleFullScreen();
+                      });
+                    },
+                    icon: Icon(
+                      widget.isFullScreen ? Icons.fullscreen_exit : Icons.fullscreen,
+                      color: Colors.black,
+                      // size: 24.0,
+                      semanticLabel: 'Fullscreen button',
                     ),
                   ),
                 ),

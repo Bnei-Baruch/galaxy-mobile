@@ -5,7 +5,6 @@ import 'package:connectivity/connectivity.dart';
 import 'package:provider/provider.dart';
 import 'package:phone_state_i/phone_state_i.dart';
 
-import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_audio_manager/flutter_audio_manager.dart';
@@ -43,6 +42,7 @@ class _DashboardState extends State<Dashboard> {
   bool hadNoConnection = false;
   bool audioMode = false;
   bool questionDisabled = false;
+  bool isFullScreen = false;
   // bool isChatVisible = false;
 
   Map<String, dynamic> userMap;
@@ -227,6 +227,12 @@ class _DashboardState extends State<Dashboard> {
         });
       }
     });
+
+    stream.fullscreen = (fullscreen) {
+      isFullScreen = fullscreen;
+      videoRoom.setFullScreen(fullscreen);
+      setState(() {});
+    };
   }
 
   Future<void> initAudioMgr() async {
@@ -419,17 +425,11 @@ class _DashboardState extends State<Dashboard> {
         videoRoom.exitRoom();
         userTimer.cancel();
         mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
-        // SystemChrome.setPreferredOrientations([
-        //   DeviceOrientation.portraitUp,
-        //   DeviceOrientation.portraitDown,
-        //   DeviceOrientation.landscapeLeft,
-        //   DeviceOrientation.landscapeRight
-        // ]);
         return;
       },
       child: Scaffold(
-        drawer: VideoRoomDrawer(),
-        appBar: AppBar(title: Text(activeRoom.description), actions: <Widget>[
+        drawer: isFullScreen ? null : VideoRoomDrawer(),
+        appBar: isFullScreen ? null : AppBar(title: Text(activeRoom.description), actions: <Widget>[
           // IconButton(
           //     icon: Icon(Icons.chat, color: Colors.white),
           //     onPressed: () {
@@ -461,11 +461,10 @@ class _DashboardState extends State<Dashboard> {
                 direction: orientation == Orientation.landscape
                     ? Axis.horizontal
                     : Axis.vertical,
-                children: [stream, videoRoom]),
-            // Visibility(child: chat, visible: isChatVisible)
+                children: [stream, videoRoom])
           ]);
         }),
-        bottomNavigationBar: BottomNavigationBar(
+        bottomNavigationBar: isFullScreen ? null : BottomNavigationBar(
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
                 label: "Mic",
@@ -539,6 +538,5 @@ class _DashboardState extends State<Dashboard> {
 }
 
 void updateGxyUser(context, userData) async {
-  // var user_data = await Utils.parseJson("user_update.json");
   Provider.of<MainStore>(context, listen: false).updaterUser(userData);
 }

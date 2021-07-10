@@ -20,6 +20,8 @@ class StreamingUnified extends StatefulWidget {
   bool isPlayerShown = false;
   bool isOnAir = false;
 
+  BooleanCallback fullscreen;
+
   final double DEFAULT_VOLUME = 0.6;
 
   var videoTrack;
@@ -34,6 +36,7 @@ class StreamingUnified extends StatefulWidget {
   bool initialized = false;
   bool connected = false;
   bool audioMode = false;
+  bool isFullScreen = false;
 
   _StreamingUnifiedState state;
 
@@ -300,6 +303,13 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
         initTrlAudioStream();
         initVideoStream();
       }
+    };
+
+    playerOverlay.fullScreen = (fullscreen) {
+      widget.fullscreen(fullscreen);
+      widget.isFullScreen = fullscreen;
+      initVideoStream();
+      setState(() {});
     };
 
     playerOverlay.mute = (muted) {
@@ -617,14 +627,14 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
     double height = MediaQuery.of(context).size.height;
     return MediaQuery.of(context).orientation == Orientation.portrait
         ? height / 3
-        : height / 2;
+        : widget.isFullScreen ? height : height / 2;
   }
 
   double getWidth() {
     double width = MediaQuery.of(context).size.width;
     return MediaQuery.of(context).orientation == Orientation.portrait
         ? width
-        : width / 2;
+        : widget.isFullScreen ? width : width / 2;
   }
 
   @override
