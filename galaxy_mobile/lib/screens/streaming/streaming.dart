@@ -50,7 +50,7 @@ class StreamingUnified extends StatefulWidget {
 
   bool prevMuted;
 
-  var audioTrlTrack;
+  MediaStreamTrack audioTrlTrack;
   Timer ducerMix;
 
   double audioElementVolume = 0.6;
@@ -78,17 +78,14 @@ class StreamingUnified extends StatefulWidget {
   void exit() {
     if (videoStreamingPlugin != null) {
       videoStreamingPlugin.send(message: {"request": "stop"});
-      videoStreamingPlugin.hangup();
       videoStreamingPlugin.destroy();
     }
     if (audioStreamingPlugin != null) {
       audioStreamingPlugin.send(message: {"request": "stop"});
-      audioStreamingPlugin.hangup();
       audioStreamingPlugin.destroy();
     }
     if (audioTrlStreamingPlugin != null) {
       audioTrlStreamingPlugin.send(message: {"request": "stop"});
-      audioTrlStreamingPlugin.hangup();
       audioTrlStreamingPlugin.destroy();
     }
   }
@@ -146,15 +143,22 @@ class StreamingUnified extends StatefulWidget {
     } else {
       FlutterLogs.logInfo(
           "Streaming", "handle question ", "Switc back to original streams");
-      ducerMix.cancel();
-      audioStreamingPlugin.send(message: {
-        "request": "switch",
-        "id": state.playerOverlay.audioTypeValue["value"]
-      }); //set
-      this.trlAudioMuted = true; // disbaling translation
-      state._remoteTrlStreamAudio.getAudioTracks().last.enabled =
-          !trlAudioMuted;
-      state._remoteStreamAudio.getAudioTracks().last.setVolume(DEFAULT_VOLUME);
+      if (ducerMix != null) {
+        ducerMix.cancel();
+        audioStreamingPlugin.send(message: {
+          "request": "switch",
+          "id": state.playerOverlay.audioTypeValue["value"]
+        }); //set
+        this.trlAudioMuted = true; // disbaling translation
+        state._remoteTrlStreamAudio.getAudioTracks().last.enabled = false;
+        trlAudioMuted = true;
+        state._remoteStreamAudio
+            .getAudioTracks()
+            .last
+            .setVolume(DEFAULT_VOLUME);
+        audioTrlStreamingPlugin.send(message: {"request": "stop"});
+        audioTrlStreamingPlugin.destroy();
+      }
     }
   }
 
@@ -278,10 +282,12 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
     playerOverlay.setStreamPresets(audio, video);
 
     playerOverlay.play = (playing) {
+      FlutterLogs.logInfo("Streaming", "play", "request to $playing");
       if (!playing) {
         if (widget.videoStreamingPlugin != null)
           widget.videoStreamingPlugin.send(message: {"request": "stop"});
         widget.audioStreamingPlugin.send(message: {"request": "stop"});
+        //  widget.audioTrlStreamingPlugin.send(message: {"request": "stop"});
         _remoteStreamAudio = null;
         setState(() {
           widget.isVideoPlaying = playing;
@@ -300,7 +306,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
         //   "offer_video": true,
         // });
         initAudioStream();
-        initTrlAudioStream();
+        // initTrlAudioStream();
         initVideoStream();
       }
     };
@@ -317,6 +323,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
           "playerOverlay.mute: ${muted.toString()}");
       _remoteStreamAudio.getAudioTracks().last.enabled =
           !muted; //.setVolume(muted ? 0 : 0.5);
+      // FlutterLogs.logInfo("Streaming", "&&&&&&&&&&&&&&&&", "audio trl");
     };
 
     playerOverlay.audioChange = () {
@@ -381,7 +388,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
     janusClient.attach(Plugin(
         onRemoteTrack: (stream, track, mid, on) {
           FlutterLogs.logInfo(
-              "Streaming", "initAudioStream", "got remote stream");
+              "Streaming", "initAudioStream", "got remote stream $track");
           widget.audioTrack = track;
           _remoteStreamAudio = stream;
           // _remoteStreamAudio.addTrack(track);
@@ -458,12 +465,12 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
     janusClient.attach(Plugin(
         onRemoteTrack: (stream, track, mid, on) {
           FlutterLogs.logInfo("Streaming", "initTrlAudioStream",
-              "got remote trl stream enabling : ${!widget.trlAudioMuted}");
+              "got remote trl stream enabling : ${!widget.trlAudioMuted}, track:$track");
           widget.audioTrlTrack = track;
           _remoteTrlStreamAudio = stream;
         },
         plugin: "janus.plugin.streaming",
-        opaqueId: "trlstream-" + randomString(12),
+        opaqueId: "trlstream", //+ randomString(12),
         onMessage: (msg, jsep) async {
           FlutterLogs.logInfo(
               "Streaming", "initTrlAudioStream", "got onmsg: $msg");
@@ -479,11 +486,11 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
             }
             if (msg['streaming'] == 'event' &&
                 msg['result']['status'] == 'started') {
-              // await this.destroy();
-              FlutterLogs.logInfo(
-                  "Streaming", "initTrlAudioStream", "disabling trl stream");
-              _remoteTrlStreamAudio.getAudioTracks().last.enabled =
-                  !widget.trlAudioMuted;
+              FlutterLogs.logInfo("Streaming", "initTrlAudioStream",
+                  "disabling trl stream track count ${_remoteTrlStreamAudio.getAudioTracks().length}");
+              _remoteTrlStreamAudio.getAudioTracks().last.enabled = false;
+              _remoteTrlStreamAudio.getAudioTracks().last.setVolume(0);
+              _remoteTrlStreamAudio.getAudioTracks().last.stop();
             }
           }
 
@@ -647,7 +654,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
       //audio plugin init
       initAudioStream();
       //audio trl init
-      initTrlAudioStream();
+      // initTrlAudioStream();
     }
     return GestureDetector(
         dragStartBehavior: DragStartBehavior.down,

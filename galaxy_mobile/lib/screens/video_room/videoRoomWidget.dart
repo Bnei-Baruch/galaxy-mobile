@@ -75,11 +75,11 @@ class VideoRoom extends StatefulWidget {
     if (subscriberHandle != null) subscriberHandle.destroy();
     if (_localRenderer != null) {
       _localRenderer.srcObject = null;
-      _localRenderer.dispose();
+      // _localRenderer.dispose();
     }
     if (_remoteRenderer != null && _remoteRenderer.isNotEmpty) {
       _remoteRenderer.map((e) => e.srcObject = null);
-      _remoteRenderer.map((e) => e.dispose());
+      //_remoteRenderer.map((e) => e.dispose());
     }
     pluginHandle = null;
     subscriberHandle = null;
@@ -1103,14 +1103,14 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     }
 
     final double userGridHeight =
-    MediaQuery.of(context).orientation == Orientation.portrait ?
-    (MediaQuery.of(context).size.height / 3 * 2 - 140) :
-    (MediaQuery.of(context).size.height);
+        MediaQuery.of(context).orientation == Orientation.portrait
+            ? (MediaQuery.of(context).size.height / 3 * 2 - 140)
+            : (MediaQuery.of(context).size.height);
 
     final double userGridWidth =
-    MediaQuery.of(context).orientation == Orientation.portrait ?
-    MediaQuery.of(context).size.width :
-    (MediaQuery.of(context).size.width / 2);
+        MediaQuery.of(context).orientation == Orientation.portrait
+            ? MediaQuery.of(context).size.width
+            : (MediaQuery.of(context).size.width / 2);
 
     final double itemHeight = userGridHeight / 2;
     final double itemWidth = userGridWidth / 2;
@@ -1127,7 +1127,10 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
       child: Stack(
         children: [
           GridView.count(
-            childAspectRatio: MediaQuery.of(context).orientation == Orientation.portrait ? (itemWidth / itemHeight) : (itemHeight / itemWidth),
+            childAspectRatio:
+                MediaQuery.of(context).orientation == Orientation.portrait
+                    ? (itemWidth / itemHeight)
+                    : (itemHeight / itemWidth),
             children: [
               Container(
                 decoration: BoxDecoration(

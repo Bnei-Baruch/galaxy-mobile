@@ -5,6 +5,7 @@ import 'package:connectivity/connectivity.dart';
 import 'package:provider/provider.dart';
 import 'package:phone_state_i/phone_state_i.dart';
 
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_audio_manager/flutter_audio_manager.dart';
@@ -476,13 +477,13 @@ class _DashboardState extends State<Dashboard> {
                 icon: videoMute
                     ? Icon(Icons.videocam_off, color: Colors.red)
                     : Icon(Icons.videocam, color: Colors.white)),
-            BottomNavigationBarItem(
-                label: 'Ask Question',
-                icon: !questionDisabled
-                    ? (videoRoom.getIsQuestion()
-                        ? Icon(Icons.live_help, color: Colors.red)
-                        : Icon(Icons.live_help, color: Colors.white))
-                    : Icon(Icons.live_help, color: Colors.grey)),
+            // BottomNavigationBarItem(
+            //     label: 'Ask Question',
+            //     icon: !questionDisabled
+            //         ? (videoRoom.getIsQuestion()
+            //             ? Icon(Icons.live_help, color: Colors.red)
+            //             : Icon(Icons.live_help, color: Colors.white))
+            //         : Icon(Icons.live_help, color: Colors.grey)),
             BottomNavigationBarItem(
                 label: "Audio Mode",
                 icon: audioMode

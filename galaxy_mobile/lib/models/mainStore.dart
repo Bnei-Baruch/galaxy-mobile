@@ -41,15 +41,19 @@ class MainStore extends ChangeNotifier {
   }
 
   void setActiveRoom(String roomName) {
-    if (roomName.isEmpty) return;
+    if (roomName == null) {
+      activeRoom = null;
+      activeGateway = null;
+      SharedPrefs().roomName = null;
+    } else if (roomName.isNotEmpty) {
+      activeRoom =
+          availableRooms.firstWhere((element) => element.description == roomName);
+      activeGateway = config.firstWhere((e) => e.name == activeRoom.janus);
 
-    activeRoom =
-        availableRooms.firstWhere((element) => element.description == roomName);
-    activeGateway = config.firstWhere((e) => e.name == activeRoom.janus);
-
-    // TODO: what if the room doesn't exists anymore ?
-    SharedPrefs().roomName = roomName;
-    notifyListeners();
+      // TODO: what if the room doesn't exists anymore ?
+      SharedPrefs().roomName = roomName;
+      notifyListeners();
+    }
   }
 
   void setAudioMode(bool value) {
