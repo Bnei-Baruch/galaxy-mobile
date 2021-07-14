@@ -17,6 +17,7 @@ import 'package:galaxy_mobile/services/mqttClient.dart';
 import 'package:galaxy_mobile/widgets/loading_indicator.dart';
 import 'package:galaxy_mobile/widgets/videoRoomDrawer.dart';
 import 'package:galaxy_mobile/services/authService.dart';
+import 'package:galaxy_mobile/chat/chat.dart';
 
 enum AudioDevice { receiver, speaker, bluetooth }
 
@@ -28,6 +29,7 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   var stream = StreamingUnified();
   var videoRoom = VideoRoom();
+  // var chat = Chat();
   var activeUser;
   bool callInProgress;
   String _activeRoomId;
@@ -40,7 +42,9 @@ class _DashboardState extends State<Dashboard> {
   bool videoMute = true;
   bool hadNoConnection = false;
   bool audioMode = false;
-  bool questionDisbaled = false;
+  bool questionDisabled = false;
+  bool isFullScreen = false;
+  // bool isChatVisible = false;
 
   Map<String, dynamic> userMap;
   Timer userTimer;
@@ -224,6 +228,12 @@ class _DashboardState extends State<Dashboard> {
         });
       }
     });
+
+    stream.fullscreen = (fullscreen) {
+      isFullScreen = fullscreen;
+      videoRoom.setFullScreen(fullscreen);
+      setState(() {});
+    };
   }
 
   Future<void> initAudioMgr() async {
@@ -335,7 +345,7 @@ class _DashboardState extends State<Dashboard> {
           setState(() {
             //disable question at bottom in case other friends ask question
             if (jsonCmd["user"]["id"] != userMap["id"]) {
-              questionDisbaled = jsonCmd["user"]["question"];
+              questionDisabled = jsonCmd["user"]["question"];
             }
           });
           break;
@@ -399,6 +409,10 @@ class _DashboardState extends State<Dashboard> {
     }
   }
 
+  // getChatWidget() {
+  //     return isChatVisible ? chat : null;
+  // }
+
   @override
   Widget build(BuildContext context) {
     final activeRoom = context.select((MainStore s) => s.activeRoom);
@@ -412,17 +426,24 @@ class _DashboardState extends State<Dashboard> {
         videoRoom.exitRoom();
         userTimer.cancel();
         mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
-        SystemChrome.setPreferredOrientations([
-          DeviceOrientation.portraitUp,
-          DeviceOrientation.portraitDown,
-          DeviceOrientation.landscapeLeft,
-          DeviceOrientation.landscapeRight
-        ]);
         return;
       },
       child: Scaffold(
-        drawer: VideoRoomDrawer(),
-        appBar: AppBar(title: Text(activeRoom.description), actions: <Widget>[
+        drawer: isFullScreen ? null : VideoRoomDrawer(),
+        appBar: isFullScreen ? null : AppBar(title: Text(activeRoom.description), actions: <Widget>[
+          // IconButton(
+          //     icon: Icon(Icons.chat, color: Colors.white),
+          //     onPressed: () {
+          //       setState(() {
+          //         isChatVisible = !isChatVisible;
+          //       });
+          //     }),
+          IconButton(
+              icon: setIcon(),
+              onPressed: () async {
+                await switchAudioDevice();
+                setState(() {});
+              }),
           IconButton(
               icon: Icon(Icons.logout, color: Colors.white),
               onPressed: () {
@@ -432,23 +453,19 @@ class _DashboardState extends State<Dashboard> {
                 videoRoom.exitRoom();
                 userTimer.cancel();
                 mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
-              }),
-          IconButton(
-              icon: setIcon(),
-              onPressed: () async {
-                await switchAudioDevice();
-                setState(() {});
               })
         ]),
         body: OrientationBuilder(builder: (context, orientation) {
-          return Flex(
-              mainAxisAlignment: MainAxisAlignment.center,
-              direction: orientation == Orientation.landscape
-                  ? Axis.horizontal
-                  : Axis.vertical,
-              children: [stream, videoRoom]);
+          return Stack(children: <Widget>[
+            Flex(
+                mainAxisAlignment: MainAxisAlignment.center,
+                direction: orientation == Orientation.landscape
+                    ? Axis.horizontal
+                    : Axis.vertical,
+                children: [stream, videoRoom])
+          ]);
         }),
-        bottomNavigationBar: BottomNavigationBar(
+        bottomNavigationBar: isFullScreen ? null : BottomNavigationBar(
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
                 label: "Mic",
@@ -462,7 +479,7 @@ class _DashboardState extends State<Dashboard> {
                     : Icon(Icons.videocam, color: Colors.white)),
             // BottomNavigationBarItem(
             //     label: 'Ask Question',
-            //     icon: !questionDisbaled
+            //     icon: !questionDisabled
             //         ? (videoRoom.getIsQuestion()
             //             ? Icon(Icons.live_help, color: Colors.red)
             //             : Icon(Icons.live_help, color: Colors.white))
@@ -522,6 +539,5 @@ class _DashboardState extends State<Dashboard> {
 }
 
 void updateGxyUser(context, userData) async {
-  // var user_data = await Utils.parseJson("user_update.json");
   Provider.of<MainStore>(context, listen: false).updaterUser(userData);
 }

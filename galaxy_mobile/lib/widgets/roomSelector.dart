@@ -35,7 +35,11 @@ class RoomSelector extends StatelessWidget {
       // onFind: (String filter) => getData(filter),
       itemAsString: (Room room) => room.description,
       onChanged: (Room room) => {
-        context.read<MainStore>().setActiveRoom(room.description)
+        if (room == null) {
+          context.read<MainStore>().setActiveRoom(null)
+        } else {
+          context.read<MainStore>().setActiveRoom(room.description)
+        }
       },
       dropdownSearchDecoration: InputDecoration(
         filled: true,

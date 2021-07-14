@@ -67,6 +67,8 @@ class VideoRoom extends StatefulWidget {
 
   String groupName;
 
+  bool isFullScreen = false;
+
   void exitRoom() {
     if (j != null) j.destroy();
     if (pluginHandle != null) pluginHandle.hangup();
@@ -175,6 +177,13 @@ class VideoRoom extends StatefulWidget {
 
   void toggleAudioMode() {
     state.toggleAudioMode();
+  }
+
+  void setFullScreen(bool isFullScreen) {
+    this.isFullScreen = isFullScreen;
+    if (state != null) {
+      state.setState(() {});
+    }
   }
 }
 
@@ -1055,10 +1064,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    // SystemChrome.setPreferredOrientations(
-    //     [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
     final s = context.read<MainStore>();
-
     final args = RoomArguments(
         s.activeGateway.url,
         s.activeGateway.token,
@@ -1114,11 +1120,10 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         "VideoRoomWidget",
         "### itemWidth: $itemWidth | "
             "### itemHeight: $itemHeight");
-    return Container(
+    return widget.isFullScreen ? Container() : Container(
       alignment: Alignment.topCenter,
       height: userGridHeight,
-      width: userGridWidth,
-      // decoration: BoxDecoration(color: Colors.pink),
+        width: userGridWidth,
       child: Stack(
         children: [
           GridView.count(
@@ -1170,12 +1175,6 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                             )))
                   ],
                 ),
-
-                // RTCVideoView(
-                //   widget._localRenderer,  //widget.user.name
-                // ),
-                // height: 200,
-                // width: 200,
               ),
               (widget._remoteRenderer != null &&
                       widget._remoteRenderer.elementAt(0) != null &&

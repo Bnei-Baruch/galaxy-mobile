@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:galaxy_mobile/main.dart';
+import 'package:galaxy_mobile/chat/chatMessage.dart';
 import 'package:galaxy_mobile/models/sharedPref.dart';
 import 'package:galaxy_mobile/services/api.dart';
 import 'package:galaxy_mobile/services/authService.dart';
@@ -14,6 +14,7 @@ class MainStore extends ChangeNotifier {
 
   List<RoomData> config; // TODO: available gatways
   List<Room> availableRooms;
+  List<ChatMessage> chatMessageList = [];
 
   User activeUser;
   Room activeRoom;
@@ -40,15 +41,19 @@ class MainStore extends ChangeNotifier {
   }
 
   void setActiveRoom(String roomName) {
-    if (roomName.isEmpty) return;
+    if (roomName == null) {
+      activeRoom = null;
+      activeGateway = null;
+      SharedPrefs().roomName = null;
+    } else if (roomName.isNotEmpty) {
+      activeRoom =
+          availableRooms.firstWhere((element) => element.description == roomName);
+      activeGateway = config.firstWhere((e) => e.name == activeRoom.janus);
 
-    activeRoom =
-        availableRooms.firstWhere((element) => element.description == roomName);
-    activeGateway = config.firstWhere((e) => e.name == activeRoom.janus);
-
-    // TODO: what if the room doesn't exists anymore ?
-    SharedPrefs().roomName = roomName;
-    notifyListeners();
+      // TODO: what if the room doesn't exists anymore ?
+      SharedPrefs().roomName = roomName;
+      notifyListeners();
+    }
   }
 
   void setAudioMode(bool value) {
@@ -98,4 +103,8 @@ class MainStore extends ChangeNotifier {
     FlutterLogs.logInfo("MainStore", "updaterUser", "");
     _api.updateUser(user["id"], user);
   }
+
+  List<ChatMessage> getChatMessages() { return chatMessageList; }
+
+  void addChatMessage(ChatMessage msg) { chatMessageList.add(msg); }
 }
