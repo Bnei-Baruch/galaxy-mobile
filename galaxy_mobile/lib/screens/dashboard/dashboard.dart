@@ -492,20 +492,20 @@ class _DashboardState extends State<Dashboard> {
                   updateRoomWithMyState(false);
                 });
                 break;
+              // case 2:
+              //   if (videoRoom.questionInRoom == null) {
+              //     bool isQ = videoRoom.getIsQuestion();
+              //     videoRoom.toggleQuestion();
+              //     updateRoomWithMyState(!isQ);
+              //     setState(() {
+              //       videoRoom.setIsQuestion(!isQ);
+              //     });
+              //   } else {
+              //     FlutterLogs.logWarn("Dashboard", "toggleQuestion",
+              //         "question already set in room");
+              //   }
+              //   break;
               case 2:
-                if (videoRoom.questionInRoom == null) {
-                  bool isQ = videoRoom.getIsQuestion();
-                  videoRoom.toggleQuestion();
-                  updateRoomWithMyState(!isQ);
-                  setState(() {
-                    videoRoom.setIsQuestion(!isQ);
-                  });
-                } else {
-                  FlutterLogs.logWarn("Dashboard", "toggleQuestion",
-                      "question already set in room");
-                }
-                break;
-              case 3:
                 setState(() {
                   audioMode = !audioMode;
                   stream.toggleAudioMode();
