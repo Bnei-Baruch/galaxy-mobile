@@ -97,7 +97,9 @@ class _DashboardState extends State<Dashboard> {
             stream.exit();
             videoRoom.exitRoom();
             userTimer.cancel();
-            if (mqttClient != null) mqttClient.disconnect();
+            if (mqttClient != null) {
+              mqttClient.disconnect();
+            }
             Navigator.pop(dialogPleaseWaitContext);
             Navigator.of(this.context).pop();
           }
@@ -120,7 +122,9 @@ class _DashboardState extends State<Dashboard> {
           setState(() {
             stream.exit();
             videoRoom.exitRoom();
-            mqttClient.disconnect();
+            if (mqttClient != null) {
+              mqttClient.disconnect();
+            }
             userTimer.cancel();
             //go out of the room and re-enter , since jauns doesn't have a reconnect infra to do it right
             Navigator.of(this.context).pop(false);
@@ -150,7 +154,9 @@ class _DashboardState extends State<Dashboard> {
         setState(() {
           stream.exit();
           videoRoom.exitRoom();
-          mqttClient.disconnect();
+          if (mqttClient != null) {
+            mqttClient.disconnect();
+          }
           userTimer.cancel();
 
           //go out of the room and re-enter , since jauns doesn't have a reconnect infra to do it right
@@ -164,17 +170,20 @@ class _DashboardState extends State<Dashboard> {
       mqttClient.init(
           authService.getUserEmail(), authService.getToken().accessToken);
 
-      mqttClient.addOnConnectedCallback(() => connectedToBroker());
+      mqttClient.addOnConnectedCallback(() => {mqttClient.subscribe("galaxy/room/" + _activeRoomId)}); // connectedToBroker());
       mqttClient.addOnSubscribedCallback((topic) => subscribedToTopic(topic));
       mqttClient.addOnMsgReceivedCallback((payload) => handleCmdData(payload));
+      mqttClient.addOnConnectionFailedCallback(() => handleConnectionFailed());
       mqttClient.connect();
     };
     videoRoom.callExitRoomUserExists = () {
       stream.exit();
       videoRoom.exitRoom();
       userTimer.cancel();
-      if (mqttClient != null)
+      if (mqttClient != null) {
         mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
+        mqttClient.disconnect();
+      }
       showDialog(
         context: context,
         builder: (context) => new AlertDialog(
@@ -184,9 +193,7 @@ class _DashboardState extends State<Dashboard> {
             new FlatButton(
               onPressed: () {
                 Navigator.of(context, rootNavigator: true).pop();
-
                 Navigator.of(this.context).pop();
-
                 // dismisses only the dialog and returns nothing
               },
               child: new Text('OK'),
@@ -363,10 +370,32 @@ class _DashboardState extends State<Dashboard> {
     }
   }
 
+  void handleConnectionFailed() {
+    stream.exit();
+    videoRoom.exitRoom();
+    userTimer.cancel();
+    showDialog(
+      context: context,
+      builder: (context) => new AlertDialog(
+        title: new Text('Room Message'),
+        content: Text('Connection to server failure'),
+        actions: <Widget>[
+          new FlatButton(
+            onPressed: () {
+              Navigator.of(context, rootNavigator: true).pop();
+              Navigator.of(this.context).pop();
+              // dismisses only the dialog and returns nothing
+            },
+            child: new Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void connectedToBroker() {
     final mqttClient = context.read<MQTTClient>();
     mqttClient.subscribe("galaxy/room/" + _activeRoomId);
-    // updateRoomWithMyVideoState();
   }
 
   void subscribedToTopic(String topic) {
@@ -425,7 +454,10 @@ class _DashboardState extends State<Dashboard> {
         stream.exit();
         videoRoom.exitRoom();
         userTimer.cancel();
-        mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
+        if (mqttClient != null) {
+          mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
+          mqttClient.disconnect();
+        }
         return;
       },
       child: Scaffold(
@@ -452,7 +484,10 @@ class _DashboardState extends State<Dashboard> {
                 stream.exit();
                 videoRoom.exitRoom();
                 userTimer.cancel();
-                mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
+                if (mqttClient != null) {
+                  mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
+                  mqttClient.disconnect();
+                }
               })
         ]),
         body: OrientationBuilder(builder: (context, orientation) {

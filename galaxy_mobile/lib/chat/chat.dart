@@ -17,48 +17,6 @@ class _ChatPageState extends State<Chat> {
   final inputFieldController = TextEditingController();
 
   bool isFirst = true;
-  // [
-  //   ChatMessage(
-  //       senderName: "KirillR",
-  //       messageContent: "xruk!",
-  //       messageType: "receiver"),
-  //   ChatMessage(
-  //       senderName: "KirillR",
-  //       messageContent: "xruk!",
-  //       messageType: "receiver"),
-  //   ChatMessage(
-  //       senderName: "KirillR",
-  //       messageContent: "xruk!",
-  //       messageType: "receiver"),
-  //   ChatMessage(
-  //       senderName: "KirillR",
-  //       messageContent: "xruk!",
-  //       messageType: "receiver"),
-  //   ChatMessage(
-  //       senderName: "KirillR",
-  //       messageContent: "xruk!",
-  //       messageType: "receiver"),
-  //   ChatMessage(
-  //       senderName: "KirillR",
-  //       messageContent: "xruk!",
-  //       messageType: "receiver"),
-  //   ChatMessage(
-  //       senderName: "KirillR",
-  //       messageContent: "xruk!",
-  //       messageType: "receiver"),
-  //   ChatMessage(
-  //       senderName: "KirillR",
-  //       messageContent: "xruk!",
-  //       messageType: "receiver"),
-  //   ChatMessage(
-  //       senderName: "KirillR",
-  //       messageContent: "xruk!",
-  //       messageType: "receiver"),
-  //   ChatMessage(
-  //       senderName: "KirillR",
-  //       messageContent: "xruk!",
-  //       messageType: "receiver"),
-  // ];
   String _activeRoomId;
 
   final _controller = ScrollController();
@@ -67,22 +25,22 @@ class _ChatPageState extends State<Chat> {
   void handleMsg(String msgPayload) {
     FlutterLogs.logInfo(
         "Chat", "handleMsg", "Received message: $msgPayload");
-    try {
-      var jsonCmd = JsonDecoder().convert(msgPayload);
-      if (jsonCmd["type"] == "client-chat") {
-        setState(() {
-          context.read<MainStore>().addChatMessage(ChatMessage(
-              senderName: jsonCmd["user"]["givenName"],
-              messageContent: jsonCmd["msg"],
-              messageType: "receiver"));
-          _controller
-              .jumpTo(_controller.position.maxScrollExtent);
-        });
-      }
-    } on FormatException catch (e) {
-      FlutterLogs.logError("Chat", "handleMsg",
-          "The provided string is not valid JSON: ${e.toString()}");
-    }
+    // try {
+    //   var jsonCmd = JsonDecoder().convert(msgPayload);
+    //   if (jsonCmd["type"] == "client-chat") {
+    //     setState(() {
+    //       context.read<MainStore>().addChatMessage(ChatMessage(
+    //           senderName: jsonCmd["user"]["givenName"],
+    //           messageContent: jsonCmd["msg"],
+    //           messageType: "receiver"));
+    //       _controller
+    //           .jumpTo(_controller.position.maxScrollExtent);
+    //     });
+    //   }
+    // } on FormatException catch (e) {
+    //   FlutterLogs.logError("Chat", "handleMsg",
+    //       "The provided string is not valid JSON: ${e.toString()}");
+    // }
   }
 
   @override
@@ -90,6 +48,7 @@ class _ChatPageState extends State<Chat> {
     final mqttClient = context.read<MQTTClient>();
     if (isFirst) {
       isFirst = false;
+      mqttClient.subscribe("galaxy/room/$_activeRoomId/chat");
       mqttClient.addOnMsgReceivedCallback((msgPayload) =>
           handleMsg(msgPayload));
     }
@@ -220,11 +179,45 @@ class _ChatPageState extends State<Chat> {
                             //     duration: new Duration(milliseconds: 200),
                             //     curve: Curves.easeOut);
                             // },
+
+
+                            // {
+                            //   "ack":false,
+                            //   "textroom":"message",
+                            //   "transaction":"SnBxXo2uOJdy",
+                            //   "room":1051,
+                            //   "text":
+                            //    {
+                            //      "user":
+                            //        {
+                            //          "id":"3e7d1f8f-e530-4169-be04-6856fc5a2710",
+                            //          "role":"user",
+                            //          "display":"Kirill Rogachevsky"
+                            //        },
+                            //        "type":"chat",
+                            //        "text":"uuu"
+                            //     }
+                            // }
+
+                            var text = {};
+                            text["user"] = _activeUser.toJson();
+                            text["type"] = "chat";
+                            text["text"] = inputFieldController.text;
+
+
                             var message = {};
-                            message["type"] = "client-chat";
-                            message["msg"] = inputFieldController.text;
-                            message["user"] = _activeUser.toJson();
-                            mqttClient.send("galaxy/room/" + _activeRoomId,
+                            message["ack"] = false;
+                            message["textroom"] = "message";
+                            message["transaction"] = "";
+                            message["room"] = _activeRoomId;
+                            message["text"] = text.toString();
+
+                            FlutterLogs.logInfo("chat", "send", "message: ${message.toString()}");
+
+                            // message["type"] = "client-chat";
+                            // message["msg"] = inputFieldController.text;
+                            // message["user"] = _activeUser.toJson();
+                            mqttClient.send("galaxy/room/$_activeRoomId/chat",
                                 JsonEncoder().convert(message));
 
                             inputFieldController.text = "";
