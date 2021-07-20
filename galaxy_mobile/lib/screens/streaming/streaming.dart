@@ -221,12 +221,7 @@ class StreamingUnified extends StatefulWidget {
 double getAudioLevelofTrack(MediaStreamTrack track) {}
 
 class _StreamingUnifiedState extends State<StreamingUnified> {
-  JanusClient janusClient = JanusClient(iceServers: [
-    RTCIceServer(url: "stun:stream.kli.one:3478", username: "", credential: "")
-  ], server: [
-    "https://str2.kli.one/janustrl"
-  ], withCredentials: false, apiSecret: "secret", isUnifiedPlan: true);
-
+  JanusClient janusClient;
   TextEditingController nameController = TextEditingController();
   RTCVideoRenderer _remoteRenderer = new RTCVideoRenderer();
   PlayerWidget playerOverlay = PlayerWidget();
@@ -268,7 +263,15 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
   void initState() {
     // TODO: implement initState
     super.initState();
+
     final s = context.read<MainStore>();
+    janusClient = JanusClient(iceServers: [
+      RTCIceServer(
+          url: "stun:stream.kli.one:3478", username: "", credential: "")
+    ], server: [
+      s.activeStreamGateway.url // "https://str2.kli.one/janustrl" //
+      // "https://gxydev.kli.one/janusgxy"
+    ], withCredentials: false, apiSecret: "secret", isUnifiedPlan: true);
     widget.audioMode = s.audioMode;
     widget.state = this;
     widget.trlAudioMuted = true;
@@ -306,7 +309,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
         //   "offer_video": true,
         // });
         initAudioStream();
-        // initTrlAudioStream();
+        initTrlAudioStream();
         initVideoStream();
       }
     };
@@ -523,7 +526,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
             //     this.getStreamListing();
             widget.audioTrlStreamingPlugin.send(message: {
               "request": "watch",
-              "id": playerOverlay.audioTypeValue["value"], //15, //
+              "id": 301, //playerOverlay.audioTypeValue["value"], //15, //
               "offer_audio": true,
               "offer_video": true,
             });
@@ -634,14 +637,18 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
     double height = MediaQuery.of(context).size.height;
     return MediaQuery.of(context).orientation == Orientation.portrait
         ? height / 3
-        : widget.isFullScreen ? height : height / 2;
+        : widget.isFullScreen
+            ? height
+            : height / 2;
   }
 
   double getWidth() {
     double width = MediaQuery.of(context).size.width;
     return MediaQuery.of(context).orientation == Orientation.portrait
         ? width
-        : widget.isFullScreen ? width : width / 2;
+        : widget.isFullScreen
+            ? width
+            : width / 2;
   }
 
   @override
@@ -654,7 +661,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
       //audio plugin init
       initAudioStream();
       //audio trl init
-      // initTrlAudioStream();
+      initTrlAudioStream();
     }
     return GestureDetector(
         dragStartBehavior: DragStartBehavior.down,

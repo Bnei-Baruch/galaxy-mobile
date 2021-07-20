@@ -430,31 +430,33 @@ class _DashboardState extends State<Dashboard> {
       },
       child: Scaffold(
         drawer: isFullScreen ? null : VideoRoomDrawer(),
-        appBar: isFullScreen ? null : AppBar(title: Text(activeRoom.description), actions: <Widget>[
-          // IconButton(
-          //     icon: Icon(Icons.chat, color: Colors.white),
-          //     onPressed: () {
-          //       setState(() {
-          //         isChatVisible = !isChatVisible;
-          //       });
-          //     }),
-          IconButton(
-              icon: setIcon(),
-              onPressed: () async {
-                await switchAudioDevice();
-                setState(() {});
-              }),
-          IconButton(
-              icon: Icon(Icons.logout, color: Colors.white),
-              onPressed: () {
-                final mqttClient = context.read<MQTTClient>();
-                Navigator.of(context).pop(true);
-                stream.exit();
-                videoRoom.exitRoom();
-                userTimer.cancel();
-                mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
-              })
-        ]),
+        appBar: isFullScreen
+            ? null
+            : AppBar(title: Text(activeRoom.description), actions: <Widget>[
+                // IconButton(
+                //     icon: Icon(Icons.chat, color: Colors.white),
+                //     onPressed: () {
+                //       setState(() {
+                //         isChatVisible = !isChatVisible;
+                //       });
+                //     }),
+                IconButton(
+                    icon: setIcon(),
+                    onPressed: () async {
+                      await switchAudioDevice();
+                      setState(() {});
+                    }),
+                IconButton(
+                    icon: Icon(Icons.logout, color: Colors.white),
+                    onPressed: () {
+                      final mqttClient = context.read<MQTTClient>();
+                      Navigator.of(context).pop(true);
+                      stream.exit();
+                      videoRoom.exitRoom();
+                      userTimer.cancel();
+                      mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
+                    })
+              ]),
         body: OrientationBuilder(builder: (context, orientation) {
           return Stack(children: <Widget>[
             Flex(
@@ -465,73 +467,75 @@ class _DashboardState extends State<Dashboard> {
                 children: [stream, videoRoom])
           ]);
         }),
-        bottomNavigationBar: isFullScreen ? null : BottomNavigationBar(
-          items: <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-                label: "Mic",
-                icon: audioMute
-                    ? Icon(Icons.mic_off, color: Colors.red)
-                    : Icon(Icons.mic, color: Colors.white)),
-            BottomNavigationBarItem(
-                label: "Video",
-                icon: videoMute
-                    ? Icon(Icons.videocam_off, color: Colors.red)
-                    : Icon(Icons.videocam, color: Colors.white)),
-            // BottomNavigationBarItem(
-            //     label: 'Ask Question',
-            //     icon: !questionDisabled
-            //         ? (videoRoom.getIsQuestion()
-            //             ? Icon(Icons.live_help, color: Colors.red)
-            //             : Icon(Icons.live_help, color: Colors.white))
-            //         : Icon(Icons.live_help, color: Colors.grey)),
-            BottomNavigationBarItem(
-                label: "Audio Mode",
-                icon: audioMode
-                    ? Icon(Icons.supervised_user_circle_outlined,
-                        color: Colors.red)
-                    : Icon(Icons.supervised_user_circle_outlined,
-                        color: Colors.white)),
-          ],
-          onTap: (value) {
-            FlutterLogs.logInfo("Dashboard", "onTap", value.toString());
-            switch (value) {
-              case 0:
-                videoRoom.mute();
-                setState(() {
-                  audioMute = !audioMute;
-                });
+        bottomNavigationBar: isFullScreen
+            ? null
+            : BottomNavigationBar(
+                items: <BottomNavigationBarItem>[
+                  BottomNavigationBarItem(
+                      label: "Mic",
+                      icon: audioMute
+                          ? Icon(Icons.mic_off, color: Colors.red)
+                          : Icon(Icons.mic, color: Colors.white)),
+                  BottomNavigationBarItem(
+                      label: "Video",
+                      icon: videoMute
+                          ? Icon(Icons.videocam_off, color: Colors.red)
+                          : Icon(Icons.videocam, color: Colors.white)),
+                  BottomNavigationBarItem(
+                      label: 'Ask Question',
+                      icon: !questionDisabled
+                          ? (videoRoom.getIsQuestion()
+                              ? Icon(Icons.live_help, color: Colors.red)
+                              : Icon(Icons.live_help, color: Colors.white))
+                          : Icon(Icons.live_help, color: Colors.grey)),
+                  BottomNavigationBarItem(
+                      label: "Audio Mode",
+                      icon: audioMode
+                          ? Icon(Icons.supervised_user_circle_outlined,
+                              color: Colors.red)
+                          : Icon(Icons.supervised_user_circle_outlined,
+                              color: Colors.white)),
+                ],
+                onTap: (value) {
+                  FlutterLogs.logInfo("Dashboard", "onTap", value.toString());
+                  switch (value) {
+                    case 0:
+                      videoRoom.mute();
+                      setState(() {
+                        audioMute = !audioMute;
+                      });
 
-                break;
-              case 1:
-                videoRoom.toggleVideo();
-                setState(() {
-                  videoMute = !videoMute;
-                  updateRoomWithMyState(false);
-                });
-                break;
-              // case 2:
-              //   if (videoRoom.questionInRoom == null) {
-              //     bool isQ = videoRoom.getIsQuestion();
-              //     videoRoom.toggleQuestion();
-              //     updateRoomWithMyState(!isQ);
-              //     setState(() {
-              //       videoRoom.setIsQuestion(!isQ);
-              //     });
-              //   } else {
-              //     FlutterLogs.logWarn("Dashboard", "toggleQuestion",
-              //         "question already set in room");
-              //   }
-              //   break;
-              case 2:
-                setState(() {
-                  audioMode = !audioMode;
-                  stream.toggleAudioMode();
-                });
-                videoRoom.toggleAudioMode();
-                break;
-            }
-          },
-        ),
+                      break;
+                    case 1:
+                      videoRoom.toggleVideo();
+                      setState(() {
+                        videoMute = !videoMute;
+                        updateRoomWithMyState(false);
+                      });
+                      break;
+                    case 2:
+                      if (videoRoom.questionInRoom == null) {
+                        bool isQ = videoRoom.getIsQuestion();
+                        videoRoom.toggleQuestion();
+                        updateRoomWithMyState(!isQ);
+                        setState(() {
+                          videoRoom.setIsQuestion(!isQ);
+                        });
+                      } else {
+                        FlutterLogs.logWarn("Dashboard", "toggleQuestion",
+                            "question already set in room");
+                      }
+                      break;
+                    case 2:
+                      setState(() {
+                        audioMode = !audioMode;
+                        stream.toggleAudioMode();
+                      });
+                      videoRoom.toggleAudioMode();
+                      break;
+                  }
+                },
+              ),
       ),
     );
     // );

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:galaxy_mobile/chat/chatMessage.dart';
 import 'package:galaxy_mobile/models/sharedPref.dart';
@@ -12,13 +14,14 @@ class MainStore extends ChangeNotifier {
   AuthService _auth;
   MQTTClient _mqttClient;
 
-  List<RoomData> config; // TODO: available gatways
+  List<List<RoomData>> config; // TODO: available gatways
   List<Room> availableRooms;
   List<ChatMessage> chatMessageList = [];
 
   User activeUser;
   Room activeRoom;
   RoomData activeGateway;
+  RoomData activeStreamGateway;
   bool audioMode;
   int audioPreset;
   int videoPreset;
@@ -46,12 +49,15 @@ class MainStore extends ChangeNotifier {
       activeGateway = null;
       SharedPrefs().roomName = null;
     } else if (roomName.isNotEmpty) {
-      activeRoom =
-          availableRooms.firstWhere((element) => element.description == roomName);
-      activeGateway = config.firstWhere((e) => e.name == activeRoom.janus);
+      activeRoom = availableRooms
+          .firstWhere((element) => element.description == roomName);
+      activeGateway = config[0].firstWhere((e) => e.name == activeRoom.janus);
 
+      activeStreamGateway =
+          config[1][(Random().nextDouble() * config[1].length).floor()];
       // TODO: what if the room doesn't exists anymore ?
       SharedPrefs().roomName = roomName;
+
       notifyListeners();
     }
   }
@@ -104,7 +110,11 @@ class MainStore extends ChangeNotifier {
     _api.updateUser(user["id"], user);
   }
 
-  List<ChatMessage> getChatMessages() { return chatMessageList; }
+  List<ChatMessage> getChatMessages() {
+    return chatMessageList;
+  }
 
-  void addChatMessage(ChatMessage msg) { chatMessageList.add(msg); }
+  void addChatMessage(ChatMessage msg) {
+    chatMessageList.add(msg);
+  }
 }
