@@ -5,8 +5,11 @@ class ChatMessage{
   String senderName;
   String messageContent;
   String messageType;
-  ChatMessage({
-    @required this.senderName,
-    @required this.messageContent,
-    @required this.messageType});
+
+  ChatMessage(String sender, String content, String type)
+  {
+    senderName = sender;
+    messageContent = content;
+    messageType = type;
+  }
 }

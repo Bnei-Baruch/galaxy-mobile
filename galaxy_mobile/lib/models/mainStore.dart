@@ -23,6 +23,8 @@ class MainStore extends ChangeNotifier {
   int audioPreset;
   int videoPreset;
 
+  Function() chatUpdater;
+
   Future init() async {
     await Future.wait([fetchUser(), fetchConfig(), fetchAvailableRooms(false)]);
 
@@ -106,5 +108,14 @@ class MainStore extends ChangeNotifier {
 
   List<ChatMessage> getChatMessages() { return chatMessageList; }
 
-  void addChatMessage(ChatMessage msg) { chatMessageList.add(msg); }
+  void addChatMessage(ChatMessage msg) {
+    chatMessageList.add(msg);
+    if (chatUpdater != null) {
+      chatUpdater();
+    }
+  }
+
+  void setChatUpdater(Function() callback) {
+    chatUpdater = callback;
+  }
 }

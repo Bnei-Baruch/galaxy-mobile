@@ -17,7 +17,7 @@ import 'package:galaxy_mobile/services/mqttClient.dart';
 import 'package:galaxy_mobile/widgets/loading_indicator.dart';
 import 'package:galaxy_mobile/widgets/videoRoomDrawer.dart';
 import 'package:galaxy_mobile/services/authService.dart';
-import 'package:galaxy_mobile/chat/chat.dart';
+import 'package:galaxy_mobile/chat/chatMessage.dart';
 
 enum AudioDevice { receiver, speaker, bluetooth }
 
@@ -170,7 +170,10 @@ class _DashboardState extends State<Dashboard> {
       mqttClient.init(
           authService.getUserEmail(), authService.getToken().accessToken);
 
-      mqttClient.addOnConnectedCallback(() => {mqttClient.subscribe("galaxy/room/" + _activeRoomId)}); // connectedToBroker());
+      mqttClient.addOnConnectedCallback(() => {
+        mqttClient.subscribe("galaxy/room/$_activeRoomId"),
+        mqttClient.subscribe("galaxy/room/$_activeRoomId/chat")
+      }); // connectedToBroker());
       mqttClient.addOnSubscribedCallback((topic) => subscribedToTopic(topic));
       mqttClient.addOnMsgReceivedCallback((payload) => handleCmdData(payload));
       mqttClient.addOnConnectionFailedCallback(() => handleConnectionFailed());
@@ -181,7 +184,8 @@ class _DashboardState extends State<Dashboard> {
       videoRoom.exitRoom();
       userTimer.cancel();
       if (mqttClient != null) {
-        mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
+        mqttClient.unsubscribe("galaxy/room/$_activeRoomId");
+        mqttClient.unsubscribe("galaxy/room/$_activeRoomId/chat");
         mqttClient.disconnect();
       }
       showDialog(
@@ -343,26 +347,35 @@ class _DashboardState extends State<Dashboard> {
 
   void handleCmdData(String msgPayload) {
     FlutterLogs.logInfo(
-        "Dashboard", "handleCmdData", "Received message: $msgPayload");
+        "Dashboard", "handleCmdData", "received message: $msgPayload");
     try {
       var jsonCmd = JsonDecoder().convert(msgPayload);
-      switch (jsonCmd["type"]) {
-        case "client-state":
-          videoRoom.setUserState(jsonCmd["user"]);
-          setState(() {
-            //disable question at bottom in case other friends ask question
-            if (jsonCmd["user"]["id"] != userMap["id"]) {
-              questionDisabled = jsonCmd["user"]["question"];
+      if (jsonCmd["textroom"] != null) {
+        String textElem = jsonCmd["text"];
+        var chatCmd = JsonDecoder().convert(textElem);
+        String msgText = chatCmd["text"];
+        context.read<MainStore>()
+            .addChatMessage(ChatMessage(chatCmd["user"]["display"],
+            msgText, "message"));
+      } else {
+        switch (jsonCmd["type"]) {
+          case "client-state":
+            videoRoom.setUserState(jsonCmd["user"]);
+            setState(() {
+              //disable question at bottom in case other friends ask question
+              if (jsonCmd["user"]["id"] != userMap["id"]) {
+                questionDisabled = jsonCmd["user"]["question"];
+              }
+            });
+            break;
+          case "audio-out":
+            if (videoRoom.getIsQuestion()) {
+              videoRoom.toggleQuestion();
+              updateRoomWithMyState(false);
             }
-          });
-          break;
-        case "audio-out":
-          if (videoRoom.getIsQuestion()) {
-            videoRoom.toggleQuestion();
-            updateRoomWithMyState(false);
-          }
-          stream.toggleOnAir(jsonCmd);
-          break;
+            stream.toggleOnAir(jsonCmd);
+            break;
+        }
       }
     } on FormatException catch (e) {
       FlutterLogs.logError("Dashboard", "handleCmdData",
@@ -455,7 +468,8 @@ class _DashboardState extends State<Dashboard> {
         videoRoom.exitRoom();
         userTimer.cancel();
         if (mqttClient != null) {
-          mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
+          mqttClient.unsubscribe("galaxy/room/$_activeRoomId");
+          mqttClient.unsubscribe("galaxy/room/$_activeRoomId/chat");
           mqttClient.disconnect();
         }
         return;
@@ -485,7 +499,8 @@ class _DashboardState extends State<Dashboard> {
                 videoRoom.exitRoom();
                 userTimer.cancel();
                 if (mqttClient != null) {
-                  mqttClient.unsubscribe("galaxy/room/" + _activeRoomId);
+                  mqttClient.unsubscribe("galaxy/room/$_activeRoomId");
+                  mqttClient.unsubscribe("galaxy/room/$_activeRoomId/chat");
                   mqttClient.disconnect();
                 }
               })

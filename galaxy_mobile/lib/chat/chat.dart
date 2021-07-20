@@ -5,6 +5,7 @@ import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_logs/flutter_logs.dart';
+import 'package:galaxy_mobile/services/keycloak.dart';
 
 import 'dart:convert';
 
@@ -17,10 +18,12 @@ class _ChatPageState extends State<Chat> {
   final inputFieldController = TextEditingController();
 
   bool isFirst = true;
-  String _activeRoomId;
+  int _activeRoomId;
 
   final _controller = ScrollController();
-  var _activeUser;
+  User _activeUser;
+
+  void update() { setState(() {}); }
 
   void handleMsg(String msgPayload) {
     FlutterLogs.logInfo(
@@ -46,15 +49,16 @@ class _ChatPageState extends State<Chat> {
   @override
   Widget build(BuildContext context) {
     final mqttClient = context.read<MQTTClient>();
+    context.read<MainStore>().setChatUpdater(() => update());
     if (isFirst) {
       isFirst = false;
-      mqttClient.subscribe("galaxy/room/$_activeRoomId/chat");
+      mqttClient.subscribe("galaxy/room/${_activeRoomId.toString()}/chat");
       mqttClient.addOnMsgReceivedCallback((msgPayload) =>
           handleMsg(msgPayload));
     }
 
     final activeRoom = context.select((MainStore s) => s.activeRoom);
-    _activeRoomId = activeRoom.room.toString();
+    _activeRoomId = activeRoom.room;
     _activeUser = context.read<MainStore>().activeUser;
 
     return WillPopScope(
@@ -199,25 +203,15 @@ class _ChatPageState extends State<Chat> {
                             //     }
                             // }
 
-                            var text = {};
-                            text["user"] = _activeUser.toJson();
-                            text["type"] = "chat";
-                            text["text"] = inputFieldController.text;
-
-
                             var message = {};
                             message["ack"] = false;
                             message["textroom"] = "message";
                             message["transaction"] = "";
                             message["room"] = _activeRoomId;
-                            message["text"] = text.toString();
+                            message["text"] = "{\"user\":${_activeUser.toChatString()},\"type\":\"chat\",\"text\":\"${inputFieldController.text}\"}";
 
                             FlutterLogs.logInfo("chat", "send", "message: ${message.toString()}");
-
-                            // message["type"] = "client-chat";
-                            // message["msg"] = inputFieldController.text;
-                            // message["user"] = _activeUser.toJson();
-                            mqttClient.send("galaxy/room/$_activeRoomId/chat",
+                            mqttClient.send("galaxy/room/${_activeRoomId.toString()}/chat",
                                 JsonEncoder().convert(message));
 
                             inputFieldController.text = "";
@@ -240,6 +234,7 @@ class _ChatPageState extends State<Chat> {
   @override
   void dispose() {
     inputFieldController.dispose();
+    context.read<MainStore>().setChatUpdater(() => null);
     super.dispose();
   }
 }

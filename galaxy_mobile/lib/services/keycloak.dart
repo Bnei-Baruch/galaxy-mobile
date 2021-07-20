@@ -62,4 +62,8 @@ class User {
         'camera: ${this.camera} ,'
         'group: ${this.group}}';
   }
+
+  String toChatString() {
+    return '{\"id\":\"${this.id}\",\"role\":\"user\",\"display\":\"${this.givenName}\"}';
+  }
 }
