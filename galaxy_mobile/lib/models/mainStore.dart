@@ -9,6 +9,7 @@ import 'package:galaxy_mobile/services/keycloak.dart';
 import 'package:galaxy_mobile/services/mqttClient.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 
+// TODO: change to prefernces store.
 class MainStore extends ChangeNotifier {
   Api _api;
   AuthService _auth;
@@ -22,7 +23,7 @@ class MainStore extends ChangeNotifier {
   Room activeRoom;
   RoomData activeGateway;
   RoomData activeStreamGateway;
-  bool audioMode;
+  bool audioMode; // TODO: doesn't belong here
   int audioPreset;
   int videoPreset;
 
@@ -103,15 +104,19 @@ class MainStore extends ChangeNotifier {
     notifyListeners();
   }
 
+  // TODO: this function should be declared as async.
   void updateMonitor(String data) {
     _api.updateMonitor(data);
   }
 
-  void updaterUser(Map<String, dynamic> user) {
+  // TODO: this function should be declared as async.
+  Future<void> updaterUser(Map<String, dynamic> user) {
     FlutterLogs.logInfo("MainStore", "updaterUser", "");
-    _api.updateUser(user["id"], user);
+    return _api.updateUser(user["id"], user);
   }
 
+  // CR: doesn't belong here, should be in the chat widget state,
+  // this is never cleared, will eventually bloat memory.
   List<ChatMessage> getChatMessages() {
     return chatMessageList;
   }
