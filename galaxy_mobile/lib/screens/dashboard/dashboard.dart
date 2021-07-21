@@ -526,7 +526,7 @@ class _DashboardState extends State<Dashboard> {
                             "question already set in room");
                       }
                       break;
-                    case 2:
+                    case 3:
                       setState(() {
                         audioMode = !audioMode;
                         stream.toggleAudioMode();
