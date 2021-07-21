@@ -79,14 +79,19 @@ class Api {
 
   // fetchConfig = () =>
   //         this.logAndParse('fetch config', fetch(this.urlFor('/v2/config'), this.defaultOptions()));
-  Future<List<RoomData>> fetchConfig() async {
+  Future<List<List<RoomData>>> fetchConfig() async {
     final response = await _dio.get('/v2/config');
 
     Map<String, dynamic> gateways = response.data['gateways'];
     Map<String, dynamic> roomsData = gateways['rooms'];
+    Map<String, dynamic> streamData = gateways['streaming'];
+
     List<RoomData> rooms =
         roomsData.values.map((dynamic e) => RoomData.fromJson(e)).toList();
-    return rooms;
+    List<RoomData> streams =
+        streamData.values.map((dynamic e) => RoomData.fromJson(e)).toList();
+
+    return [rooms, streams];
   }
 
   // fetchAvailableRooms = (params = {}) =>
