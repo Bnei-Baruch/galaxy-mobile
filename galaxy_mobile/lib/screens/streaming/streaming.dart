@@ -289,6 +289,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
       if (!playing) {
         if (widget.videoStreamingPlugin != null)
           widget.videoStreamingPlugin.send(message: {"request": "stop"});
+        _remoteStreamAudio.getAudioTracks().last.stop();
         widget.audioStreamingPlugin.send(message: {"request": "stop"});
         //  widget.audioTrlStreamingPlugin.send(message: {"request": "stop"});
         _remoteStreamAudio = null;
@@ -296,20 +297,8 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
           widget.isVideoPlaying = playing;
         });
       } else {
-        // widget.videoStreamingPlugin.send(message: {
-        //   "request": "watch",
-        //   "id": 1, //playerOverlay.videoTypeValue["value"],
-        //   "offer_audio": true,
-        //   "offer_video": true,
-        // });
-        // widget.audioStreamingPlugin.send(message: {
-        //   "request": "watch",
-        //   "id": 15, //playerOverlay.videoTypeValue["value"],
-        //   "offer_audio": true,
-        //   "offer_video": true,
-        // });
         initAudioStream();
-        initTrlAudioStream();
+
         initVideoStream();
       }
     };
@@ -492,8 +481,6 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
               FlutterLogs.logInfo("Streaming", "initTrlAudioStream",
                   "disabling trl stream track count ${_remoteTrlStreamAudio.getAudioTracks().length}");
               _remoteTrlStreamAudio.getAudioTracks().last.enabled = false;
-              _remoteTrlStreamAudio.getAudioTracks().last.setVolume(0);
-              _remoteTrlStreamAudio.getAudioTracks().last.stop();
             }
           }
 
