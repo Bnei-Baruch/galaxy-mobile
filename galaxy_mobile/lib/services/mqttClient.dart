@@ -23,9 +23,8 @@ class MQTTClient {
   var _onConnectionFailedCallbackList = new List();
 
   MQTTClient() {
-    _client =
-        MqttServerClient.withPort(APP_MQTT_HOST,
-            APP_MQTT_CLIENT_ID, APP_MQTT_PORT);
+    _client = MqttServerClient.withPort(
+        APP_MQTT_HOST, APP_MQTT_CLIENT_ID, APP_MQTT_PORT);
   }
 
   void init(String username, String password) {
@@ -47,6 +46,22 @@ class MQTTClient {
 
   void addOnConnectionFailedCallback(Function() onConnectionFailedCallback) {
     _onConnectionFailedCallbackList.add(onConnectionFailedCallback);
+  }
+
+  void removeOnConnectedCallback() {
+    _onConnectedCallbackList.clear();
+  }
+
+  void removeOnSubscribedCallback() {
+    _onSubscribedCallbackList.clear();
+  }
+
+  void removeOnMsgReceivedCallback() {
+    _onMsgReceivedCallbackList.clear();
+  }
+
+  void removeOnConnectionFailedCallback() {
+    _onConnectionFailedCallbackList.clear();
   }
 
   Future<MqttServerClient> connect() async {
@@ -89,10 +104,11 @@ class MQTTClient {
       _client.updates.listen((List<MqttReceivedMessage<MqttMessage>> c) {
         final MqttPublishMessage message = c[0].payload;
         final payload =
-        MqttPublishPayload.bytesToStringAsString(message.payload.message);
+            MqttPublishPayload.bytesToStringAsString(message.payload.message);
 
         logger.info("Received message: $payload from topic: ${c[0].topic}>");
-        for (Function(String) msgReceivedCallback in _onMsgReceivedCallbackList) {
+        for (Function(String) msgReceivedCallback
+            in _onMsgReceivedCallbackList) {
           msgReceivedCallback(payload);
         }
       });
@@ -100,7 +116,8 @@ class MQTTClient {
       return _client;
     } else {
       logger.error("connection to MQTT failed");
-      for (Function() connectionFailedCallback in _onConnectionFailedCallbackList) {
+      for (Function() connectionFailedCallback
+          in _onConnectionFailedCallbackList) {
         connectionFailedCallback();
       }
       return null;
@@ -156,6 +173,10 @@ class MQTTClient {
 
   void disconnect() {
     if (_isConnected) {
+      removeOnConnectedCallback();
+      removeOnConnectionFailedCallback();
+      removeOnMsgReceivedCallback();
+      removeOnSubscribedCallback();
       _client.disconnect();
     }
   }

@@ -171,9 +171,9 @@ class _DashboardState extends State<Dashboard> {
           authService.getUserEmail(), authService.getToken().accessToken);
 
       mqttClient.addOnConnectedCallback(() => {
-        mqttClient.subscribe("galaxy/room/$_activeRoomId"),
-        mqttClient.subscribe("galaxy/room/$_activeRoomId/chat")
-      }); // connectedToBroker());
+            mqttClient.subscribe("galaxy/room/$_activeRoomId"),
+            mqttClient.subscribe("galaxy/room/$_activeRoomId/chat")
+          }); // connectedToBroker());
       mqttClient.addOnSubscribedCallback((topic) => subscribedToTopic(topic));
       mqttClient.addOnMsgReceivedCallback((payload) => handleCmdData(payload));
       mqttClient.addOnConnectionFailedCallback(() => handleConnectionFailed());
@@ -354,9 +354,8 @@ class _DashboardState extends State<Dashboard> {
         String textElem = jsonCmd["text"];
         var chatCmd = JsonDecoder().convert(textElem);
         String msgText = chatCmd["text"];
-        context.read<MainStore>()
-            .addChatMessage(ChatMessage(chatCmd["user"]["display"],
-            msgText, "message"));
+        context.read<MainStore>().addChatMessage(
+            ChatMessage(chatCmd["user"]["display"], msgText, "message"));
       } else {
         switch (jsonCmd["type"]) {
           case "client-state":
@@ -470,41 +469,48 @@ class _DashboardState extends State<Dashboard> {
         if (mqttClient != null) {
           mqttClient.unsubscribe("galaxy/room/$_activeRoomId");
           mqttClient.unsubscribe("galaxy/room/$_activeRoomId/chat");
+          mqttClient.removeOnConnectedCallback();
+          mqttClient.removeOnConnectionFailedCallback();
+          mqttClient.removeOnMsgReceivedCallback();
+          mqttClient.removeOnSubscribedCallback();
           mqttClient.disconnect();
         }
         return;
       },
       child: Scaffold(
         drawer: isFullScreen ? null : VideoRoomDrawer(),
-        appBar: isFullScreen ? null : AppBar(title: Text(activeRoom.description), actions: <Widget>[
-          // IconButton(
-          //     icon: Icon(Icons.chat, color: Colors.white),
-          //     onPressed: () {
-          //       setState(() {
-          //         isChatVisible = !isChatVisible;
-          //       });
-          //     }),
-          IconButton(
-              icon: setIcon(),
-              onPressed: () async {
-                await switchAudioDevice();
-                setState(() {});
-              }),
-          IconButton(
-              icon: Icon(Icons.logout, color: Colors.white),
-              onPressed: () {
-                final mqttClient = context.read<MQTTClient>();
-                Navigator.of(context).pop(true);
-                stream.exit();
-                videoRoom.exitRoom();
-                userTimer.cancel();
-                if (mqttClient != null) {
-                  mqttClient.unsubscribe("galaxy/room/$_activeRoomId");
-                  mqttClient.unsubscribe("galaxy/room/$_activeRoomId/chat");
-                  mqttClient.disconnect();
-                }
-              })
-        ]),
+        appBar: isFullScreen
+            ? null
+            : AppBar(title: Text(activeRoom.description), actions: <Widget>[
+                // IconButton(
+                //     icon: Icon(Icons.chat, color: Colors.white),
+                //     onPressed: () {
+                //       setState(() {
+                //         isChatVisible = !isChatVisible;
+                //       });
+                //     }),
+                IconButton(
+                    icon: setIcon(),
+                    onPressed: () async {
+                      await switchAudioDevice();
+                      setState(() {});
+                    }),
+                IconButton(
+                    icon: Icon(Icons.logout, color: Colors.white),
+                    onPressed: () {
+                      final mqttClient = context.read<MQTTClient>();
+                      Navigator.of(context).pop(true);
+                      stream.exit();
+                      videoRoom.exitRoom();
+                      userTimer.cancel();
+                      if (mqttClient != null) {
+                        mqttClient.unsubscribe("galaxy/room/$_activeRoomId");
+                        mqttClient
+                            .unsubscribe("galaxy/room/$_activeRoomId/chat");
+                        mqttClient.disconnect();
+                      }
+                    })
+              ]),
         body: OrientationBuilder(builder: (context, orientation) {
           return Stack(children: <Widget>[
             Flex(

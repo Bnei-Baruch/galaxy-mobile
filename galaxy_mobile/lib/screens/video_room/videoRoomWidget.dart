@@ -348,6 +348,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
             onSuccess: () async {
               FlutterLogs.logInfo("VideoRoom", "_newRemoteFeed",
                   "subscription to publishers successful");
+              widget.RoomReady();
             },
             onError: (error) {
               FlutterLogs.logError("VideoRoom", "_newRemoteFeed",
@@ -566,8 +567,6 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                         /* page= */ page,
                         List.empty(),
                         newFeedsState);
-
-                    widget.RoomReady();
                   }
                 } else if (event == 'talking') {
                   FlutterLogs.logInfo(
@@ -1120,405 +1119,418 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         "VideoRoomWidget",
         "### itemWidth: $itemWidth | "
             "### itemHeight: $itemHeight");
-    return widget.isFullScreen ? Container() : Container(
-      alignment: Alignment.topCenter,
-      height: userGridHeight,
-        width: userGridWidth,
-      child: Stack(
-        children: [
-          GridView.count(
-            childAspectRatio:
-                MediaQuery.of(context).orientation == Orientation.portrait
-                    ? (itemWidth / itemHeight)
-                    : (itemHeight / itemWidth),
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                    border: Border.all(
-                        color: (widget.myAudioMuted != true)
-                            ? Colors.lightGreen
-                            : Colors.black)), //Colors.lightGreenAccent
-                child: Stack(
+    return widget.isFullScreen
+        ? Container()
+        : Container(
+            alignment: Alignment.topCenter,
+            height: userGridHeight,
+            width: userGridWidth,
+            child: Stack(
+              children: [
+                GridView.count(
+                  childAspectRatio:
+                      MediaQuery.of(context).orientation == Orientation.portrait
+                          ? (itemWidth / itemHeight)
+                          : (itemHeight / itemWidth),
                   children: [
-                    (widget.myVideoMuted)
-                        ? RTCVideoView(widget._localRenderer)
-                        : Align(
-                            alignment: Alignment.center,
-                            child: Icon(Icons.account_circle,
-                                color: Colors.white, size: itemWidth - 60)),
-                    Align(
-                      alignment: Alignment.bottomLeft,
-                      child: Row(
+                    Container(
+                      decoration: BoxDecoration(
+                          border: Border.all(
+                              color: (widget.myAudioMuted != true)
+                                  ? Colors.lightGreen
+                                  : Colors.black)), //Colors.lightGreenAccent
+                      child: Stack(
                         children: [
-                          Icon(
-                            Icons.mic_off,
-                            color: (widget.myAudioMuted != true)
-                                ? Colors.transparent
-                                : Colors.red,
-                            size: 18,
+                          (widget.myVideoMuted)
+                              ? RTCVideoView(widget._localRenderer)
+                              : Align(
+                                  alignment: Alignment.center,
+                                  child: Icon(Icons.account_circle,
+                                      color: Colors.white,
+                                      size: itemWidth - 60)),
+                          Align(
+                            alignment: Alignment.bottomLeft,
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.mic_off,
+                                  color: (widget.myAudioMuted != true)
+                                      ? Colors.transparent
+                                      : Colors.red,
+                                  size: 18,
+                                ),
+                                SizedBox(width: 5),
+                                Text(widget.user.givenName),
+                              ],
+                            ),
                           ),
-                          SizedBox(width: 5),
-                          Text(widget.user.givenName),
+                          Align(
+                              alignment: Alignment.topRight,
+                              child: Container(
+                                  margin: const EdgeInsets.only(
+                                      top: 8.0, right: 8.0),
+                                  child: Icon(
+                                    Icons.live_help_rounded,
+                                    color: widget.isQuestion
+                                        ? Colors.red
+                                        : Colors.transparent,
+                                    size: 50,
+                                  )))
                         ],
                       ),
                     ),
-                    Align(
-                        alignment: Alignment.topRight,
-                        child: Container(
-                            margin: const EdgeInsets.only(top: 8.0, right: 8.0),
-                            child: Icon(
-                              Icons.live_help_rounded,
-                              color: widget.isQuestion
-                                  ? Colors.red
-                                  : Colors.transparent,
-                              size: 50,
-                            )))
+                    (widget._remoteRenderer != null &&
+                            widget._remoteRenderer.elementAt(0) != null &&
+                            widget._remoteRenderer.elementAt(0).srcObject !=
+                                null &&
+                            feeds.any((element) => element["videoSlot"] == 0))
+                        ? Container(
+                            decoration: BoxDecoration(
+                                border: Border.all(
+                                    color: (feeds.firstWhere((element) =>
+                                                    element["videoSlot"] ==
+                                                    0)["talking"] !=
+                                                null &&
+                                            feeds.firstWhere((element) =>
+                                                    element["videoSlot"] ==
+                                                    0)["talking"] ==
+                                                true)
+                                        ? Colors.lightGreen
+                                        : Colors.black)),
+                            child: Stack(children: [
+                              (feeds.firstWhere((element) =>
+                                              element["videoSlot"] ==
+                                              0)["cammute"] ==
+                                          false &&
+                                      !muteOtherCams)
+                                  // (true)
+                                  // (widget._remoteRenderer
+                                  //         .elementAt(0)
+                                  //         .srcObject
+                                  //         .getVideoTracks()
+                                  //         .elementAt(widget._remoteRenderer
+                                  //             .elementAt(0)
+                                  //             .trackIndex)
+                                  //         .enabled)
+                                  ? RTCVideoView(
+                                      widget._remoteRenderer.elementAt(0))
+                                  : Align(
+                                      alignment: Alignment.center,
+                                      child: Icon(
+                                        Icons.account_circle,
+                                        color: Colors.white,
+                                        size: itemWidth - 60,
+                                      ),
+                                    ),
+                              Align(
+                                alignment: Alignment.bottomLeft,
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.mic_off,
+                                      color: (feeds.firstWhere((element) =>
+                                                      element["videoSlot"] ==
+                                                      0)["talking"] !=
+                                                  null &&
+                                              feeds.firstWhere((element) =>
+                                                      element["videoSlot"] ==
+                                                      0)["talking"] ==
+                                                  true)
+                                          ? Colors.transparent
+                                          : Colors.red,
+                                      size: 18,
+                                    ),
+                                    Text((feeds.isNotEmpty &&
+                                            feeds.any((element) =>
+                                                element["videoSlot"] == 0))
+                                        ? feeds.firstWhere((element) =>
+                                            element["videoSlot"] ==
+                                            0)["display"]["display"]
+                                        : ""),
+                                  ],
+                                ),
+                              ),
+                              Align(
+                                  alignment: Alignment.topRight,
+                                  child: Container(
+                                      margin: const EdgeInsets.only(
+                                          top: 8.0, right: 8.0),
+                                      child: Icon(
+                                        Icons.live_help_rounded,
+                                        color: (feeds.firstWhere((element) =>
+                                                        element["videoSlot"] ==
+                                                        0)["question"] !=
+                                                    null &&
+                                                feeds.firstWhere((element) =>
+                                                        element["videoSlot"] ==
+                                                        0)["question"] ==
+                                                    true)
+                                            ? Colors.red
+                                            : Colors.transparent,
+                                        size: 50,
+                                      )))
+                            ]))
+                        : Container(),
+
+                    (widget._remoteRenderer != null &&
+                            widget._remoteRenderer.elementAt(1) != null &&
+                            widget._remoteRenderer.elementAt(1).srcObject !=
+                                null &&
+                            feeds.any((element) => element["videoSlot"] == 1))
+                        ? Container(
+                            decoration: BoxDecoration(
+                                border: Border.all(
+                                    color: (feeds.firstWhere((element) =>
+                                                    element["videoSlot"] ==
+                                                    1)["talking"] !=
+                                                null &&
+                                            feeds.firstWhere((element) =>
+                                                    element["videoSlot"] ==
+                                                    1)["talking"] ==
+                                                true)
+                                        ? Colors.lightGreen
+                                        : Colors.black)),
+                            child: Stack(
+                              children: [
+                                (feeds.firstWhere((element) =>
+                                                element["videoSlot"] ==
+                                                1)["cammute"] ==
+                                            false &&
+                                        !muteOtherCams)
+                                    // (widget._remoteRenderer
+                                    //         .elementAt(1)
+                                    //         .srcObject
+                                    //         .getVideoTracks()
+                                    //         .elementAt(widget._remoteRenderer
+                                    //             .elementAt(1)
+                                    //             .trackIndex)
+                                    //         .enabled)
+                                    ? RTCVideoView(
+                                        widget._remoteRenderer.elementAt(1))
+                                    : Align(
+                                        alignment: Alignment.center,
+                                        child: Icon(
+                                          Icons.account_circle,
+                                          color: Colors.white,
+                                          size: itemWidth - 60,
+                                        ),
+                                      ),
+                                Align(
+                                  alignment: Alignment.bottomLeft,
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.mic_off,
+                                        color: (feeds.firstWhere((element) =>
+                                                        element["videoSlot"] ==
+                                                        1)["talking"] !=
+                                                    null &&
+                                                feeds.firstWhere((element) =>
+                                                        element["videoSlot"] ==
+                                                        1)["talking"] ==
+                                                    true)
+                                            ? Colors.transparent
+                                            : Colors.red,
+                                        size: 18,
+                                      ),
+                                      Text((feeds.isNotEmpty &&
+                                              feeds.any((element) =>
+                                                  element["videoSlot"] == 1))
+                                          ? feeds.firstWhere((element) =>
+                                              element["videoSlot"] ==
+                                              1)["display"]["display"]
+                                          : ""),
+                                    ],
+                                  ),
+                                ),
+                                Align(
+                                    alignment: Alignment.topRight,
+                                    child: Container(
+                                        margin: const EdgeInsets.only(
+                                            top: 8.0, right: 8.0),
+                                        child: Icon(
+                                          Icons.live_help_rounded,
+                                          color: (feeds.firstWhere((element) =>
+                                                          element[
+                                                              "videoSlot"] ==
+                                                          1)["question"] !=
+                                                      null &&
+                                                  feeds.firstWhere((element) =>
+                                                          element[
+                                                              "videoSlot"] ==
+                                                          1)["question"] ==
+                                                      true)
+                                              ? Colors.red
+                                              : Colors.transparent,
+                                          size: 50,
+                                        )))
+                              ],
+                            ))
+                        : Container(),
+                    (widget._remoteRenderer != null &&
+                            widget._remoteRenderer.elementAt(2) != null &&
+                            widget._remoteRenderer.elementAt(2).srcObject !=
+                                null &&
+                            feeds.any((element) => element["videoSlot"] == 2))
+                        ? Container(
+                            decoration: BoxDecoration(
+                                border: Border.all(
+                                    color: (feeds.firstWhere((element) =>
+                                                    element["videoSlot"] ==
+                                                    2)["talking"] !=
+                                                null &&
+                                            feeds.firstWhere((element) =>
+                                                    element["videoSlot"] ==
+                                                    2)["talking"] ==
+                                                true)
+                                        ? Colors.lightGreen
+                                        : Colors.black)),
+                            child: Stack(
+                              children: [
+                                (feeds.firstWhere((element) =>
+                                                element["videoSlot"] ==
+                                                2)["cammute"] ==
+                                            false &&
+                                        !muteOtherCams)
+                                    // (widget._remoteRenderer
+                                    //         .elementAt(2)
+                                    //         .srcObject
+                                    //         .getVideoTracks()
+                                    //         .elementAt(widget._remoteRenderer
+                                    //             .elementAt(2)
+                                    //             .trackIndex)
+                                    //         .enabled)
+                                    ? RTCVideoView(
+                                        widget._remoteRenderer.elementAt(2))
+                                    : Align(
+                                        alignment: Alignment.center,
+                                        child: Icon(
+                                          Icons.account_circle,
+                                          color: Colors.white,
+                                          size: itemWidth - 60,
+                                        ),
+                                      ),
+                                Align(
+                                  alignment: Alignment.bottomLeft,
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.mic_off,
+                                        color: (feeds.firstWhere((element) =>
+                                                        element["videoSlot"] ==
+                                                        2)["talking"] !=
+                                                    null &&
+                                                feeds.firstWhere((element) =>
+                                                        element["videoSlot"] ==
+                                                        2)["talking"] ==
+                                                    true)
+                                            ? Colors.transparent
+                                            : Colors.red,
+                                        size: 18,
+                                      ),
+                                      Text((feeds.isNotEmpty &&
+                                              feeds.any((element) =>
+                                                  element["videoSlot"] == 2))
+                                          ? feeds.firstWhere((element) =>
+                                              element["videoSlot"] ==
+                                              2)["display"]["display"]
+                                          : ""),
+                                    ],
+                                  ),
+                                ),
+                                Align(
+                                    alignment: Alignment.topRight,
+                                    child: Container(
+                                        margin: const EdgeInsets.only(
+                                            top: 8.0, right: 8.0),
+                                        child: Icon(
+                                          Icons.live_help_rounded,
+                                          color: (feeds.firstWhere((element) =>
+                                                          element[
+                                                              "videoSlot"] ==
+                                                          2)["question"] !=
+                                                      null &&
+                                                  feeds.firstWhere((element) =>
+                                                          element[
+                                                              "videoSlot"] ==
+                                                          2)["question"] ==
+                                                      true)
+                                              ? Colors.red
+                                              : Colors.transparent,
+                                          size: 50,
+                                        )))
+                              ],
+                            ))
+                        : Container()
+
+                    // CarouselSlider(
+                    //   height: 200.0,
+                    //   autoPlay: true,
+                    //   autoPlayInterval: Duration(seconds: 3),
+                    //   autoPlayAnimationDuration: Duration(milliseconds: 800),
+                    //   autoPlayCurve: Curves.fastOutSlowIn,
+                    //   pauseAutoPlayOnTouch: Duration(seconds: 10),
+                    //   aspectRatio: 2.0,
+                    //   onPageChanged: (index) {
+                    //     setState(() {
+                    //       page = index;
+                    //     });
+                    //   },
+                    //   items: feeds.map((feed) {
+                    //     return Builder(builder: (BuildContext context) {
+                    //       return Container(
+                    //         height: MediaQuery.of(context).size.height * 0.30,
+                    //         width: MediaQuery.of(context).size.width,
+                    //         child: Card(
+                    //           color: Colors.blueAccent,
+                    //           child: Container(),
+                    //         ),
+                    //       );
+                    //     });
+                    //   }).toList(),
+                    // ),
                   ],
+                  primary: false,
+                  padding: const EdgeInsets.all(0),
+                  crossAxisSpacing: 0,
+                  mainAxisSpacing: 0,
+                  crossAxisCount: 2,
                 ),
-              ),
-              (widget._remoteRenderer != null &&
-                      widget._remoteRenderer.elementAt(0) != null &&
-                      widget._remoteRenderer.elementAt(0).srcObject != null &&
-                      feeds.any((element) => element["videoSlot"] == 0))
-                  ? Container(
-                      decoration: BoxDecoration(
-                          border: Border.all(
-                              color: (feeds.firstWhere((element) =>
-                                              element["videoSlot"] ==
-                                              0)["talking"] !=
-                                          null &&
-                                      feeds.firstWhere((element) =>
-                                              element["videoSlot"] ==
-                                              0)["talking"] ==
-                                          true)
-                                  ? Colors.lightGreen
-                                  : Colors.black)),
-                      child: Stack(children: [
-                        (feeds.firstWhere((element) =>
-                                        element["videoSlot"] == 0)["cammute"] ==
-                                    false &&
-                                !muteOtherCams)
-                            // (true)
-                            // (widget._remoteRenderer
-                            //         .elementAt(0)
-                            //         .srcObject
-                            //         .getVideoTracks()
-                            //         .elementAt(widget._remoteRenderer
-                            //             .elementAt(0)
-                            //             .trackIndex)
-                            //         .enabled)
-                            ? RTCVideoView(widget._remoteRenderer.elementAt(0))
-                            : Align(
-                                alignment: Alignment.center,
-                                child: Icon(
-                                  Icons.account_circle,
-                                  color: Colors.white,
-                                  size: itemWidth - 60,
-                                ),
-                              ),
-                        Align(
-                          alignment: Alignment.bottomLeft,
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.mic_off,
-                                color: (feeds.firstWhere((element) =>
-                                                element["videoSlot"] ==
-                                                0)["talking"] !=
-                                            null &&
-                                        feeds.firstWhere((element) =>
-                                                element["videoSlot"] ==
-                                                0)["talking"] ==
-                                            true)
-                                    ? Colors.transparent
-                                    : Colors.red,
-                                size: 18,
-                              ),
-                              Text((feeds.isNotEmpty &&
-                                      feeds.any((element) =>
-                                          element["videoSlot"] == 0))
-                                  ? feeds.firstWhere((element) =>
-                                          element["videoSlot"] == 0)["display"]
-                                      ["display"]
-                                  : ""),
-                            ],
-                          ),
-                        ),
-                        Align(
-                            alignment: Alignment.topRight,
-                            child: Container(
-                                margin:
-                                    const EdgeInsets.only(top: 8.0, right: 8.0),
-                                child: Icon(
-                                  Icons.live_help_rounded,
-                                  color: (feeds.firstWhere((element) =>
-                                                  element["videoSlot"] ==
-                                                  0)["question"] !=
-                                              null &&
-                                          feeds.firstWhere((element) =>
-                                                  element["videoSlot"] ==
-                                                  0)["question"] ==
-                                              true)
-                                      ? Colors.red
-                                      : Colors.transparent,
-                                  size: 50,
-                                )))
-                      ]))
-                  : Container(),
-
-              (widget._remoteRenderer != null &&
-                      widget._remoteRenderer.elementAt(1) != null &&
-                      widget._remoteRenderer.elementAt(1).srcObject != null &&
-                      feeds.any((element) => element["videoSlot"] == 1))
-                  ? Container(
-                      decoration: BoxDecoration(
-                          border: Border.all(
-                              color: (feeds.firstWhere((element) =>
-                                              element["videoSlot"] ==
-                                              1)["talking"] !=
-                                          null &&
-                                      feeds.firstWhere((element) =>
-                                              element["videoSlot"] ==
-                                              1)["talking"] ==
-                                          true)
-                                  ? Colors.lightGreen
-                                  : Colors.black)),
-                      child: Stack(
-                        children: [
-                          (feeds.firstWhere((element) =>
-                                          element["videoSlot"] ==
-                                          1)["cammute"] ==
-                                      false &&
-                                  !muteOtherCams)
-                              // (widget._remoteRenderer
-                              //         .elementAt(1)
-                              //         .srcObject
-                              //         .getVideoTracks()
-                              //         .elementAt(widget._remoteRenderer
-                              //             .elementAt(1)
-                              //             .trackIndex)
-                              //         .enabled)
-                              ? RTCVideoView(
-                                  widget._remoteRenderer.elementAt(1))
-                              : Align(
-                                  alignment: Alignment.center,
-                                  child: Icon(
-                                    Icons.account_circle,
-                                    color: Colors.white,
-                                    size: itemWidth - 60,
-                                  ),
-                                ),
-                          Align(
-                            alignment: Alignment.bottomLeft,
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.mic_off,
-                                  color: (feeds.firstWhere((element) =>
-                                                  element["videoSlot"] ==
-                                                  1)["talking"] !=
-                                              null &&
-                                          feeds.firstWhere((element) =>
-                                                  element["videoSlot"] ==
-                                                  1)["talking"] ==
-                                              true)
-                                      ? Colors.transparent
-                                      : Colors.red,
-                                  size: 18,
-                                ),
-                                Text((feeds.isNotEmpty &&
-                                        feeds.any((element) =>
-                                            element["videoSlot"] == 1))
-                                    ? feeds.firstWhere((element) =>
-                                        element["videoSlot"] ==
-                                        1)["display"]["display"]
-                                    : ""),
-                              ],
-                            ),
-                          ),
-                          Align(
-                              alignment: Alignment.topRight,
-                              child: Container(
-                                  margin: const EdgeInsets.only(
-                                      top: 8.0, right: 8.0),
-                                  child: Icon(
-                                    Icons.live_help_rounded,
-                                    color: (feeds.firstWhere((element) =>
-                                                    element["videoSlot"] ==
-                                                    1)["question"] !=
-                                                null &&
-                                            feeds.firstWhere((element) =>
-                                                    element["videoSlot"] ==
-                                                    1)["question"] ==
-                                                true)
-                                        ? Colors.red
-                                        : Colors.transparent,
-                                    size: 50,
-                                  )))
-                        ],
-                      ))
-                  : Container(),
-              (widget._remoteRenderer != null &&
-                      widget._remoteRenderer.elementAt(2) != null &&
-                      widget._remoteRenderer.elementAt(2).srcObject != null &&
-                      feeds.any((element) => element["videoSlot"] == 2))
-                  ? Container(
-                      decoration: BoxDecoration(
-                          border: Border.all(
-                              color: (feeds.firstWhere((element) =>
-                                              element["videoSlot"] ==
-                                              2)["talking"] !=
-                                          null &&
-                                      feeds.firstWhere((element) =>
-                                              element["videoSlot"] ==
-                                              2)["talking"] ==
-                                          true)
-                                  ? Colors.lightGreen
-                                  : Colors.black)),
-                      child: Stack(
-                        children: [
-                          (feeds.firstWhere((element) =>
-                                          element["videoSlot"] ==
-                                          2)["cammute"] ==
-                                      false &&
-                                  !muteOtherCams)
-                              // (widget._remoteRenderer
-                              //         .elementAt(2)
-                              //         .srcObject
-                              //         .getVideoTracks()
-                              //         .elementAt(widget._remoteRenderer
-                              //             .elementAt(2)
-                              //             .trackIndex)
-                              //         .enabled)
-                              ? RTCVideoView(
-                                  widget._remoteRenderer.elementAt(2))
-                              : Align(
-                                  alignment: Alignment.center,
-                                  child: Icon(
-                                    Icons.account_circle,
-                                    color: Colors.white,
-                                    size: itemWidth - 60,
-                                  ),
-                                ),
-                          Align(
-                            alignment: Alignment.bottomLeft,
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.mic_off,
-                                  color: (feeds.firstWhere((element) =>
-                                                  element["videoSlot"] ==
-                                                  2)["talking"] !=
-                                              null &&
-                                          feeds.firstWhere((element) =>
-                                                  element["videoSlot"] ==
-                                                  2)["talking"] ==
-                                              true)
-                                      ? Colors.transparent
-                                      : Colors.red,
-                                  size: 18,
-                                ),
-                                Text((feeds.isNotEmpty &&
-                                        feeds.any((element) =>
-                                            element["videoSlot"] == 2))
-                                    ? feeds.firstWhere((element) =>
-                                        element["videoSlot"] ==
-                                        2)["display"]["display"]
-                                    : ""),
-                              ],
-                            ),
-                          ),
-                          Align(
-                              alignment: Alignment.topRight,
-                              child: Container(
-                                  margin: const EdgeInsets.only(
-                                      top: 8.0, right: 8.0),
-                                  child: Icon(
-                                    Icons.live_help_rounded,
-                                    color: (feeds.firstWhere((element) =>
-                                                    element["videoSlot"] ==
-                                                    2)["question"] !=
-                                                null &&
-                                            feeds.firstWhere((element) =>
-                                                    element["videoSlot"] ==
-                                                    2)["question"] ==
-                                                true)
-                                        ? Colors.red
-                                        : Colors.transparent,
-                                    size: 50,
-                                  )))
-                        ],
-                      ))
-                  : Container()
-
-              // CarouselSlider(
-              //   height: 200.0,
-              //   autoPlay: true,
-              //   autoPlayInterval: Duration(seconds: 3),
-              //   autoPlayAnimationDuration: Duration(milliseconds: 800),
-              //   autoPlayCurve: Curves.fastOutSlowIn,
-              //   pauseAutoPlayOnTouch: Duration(seconds: 10),
-              //   aspectRatio: 2.0,
-              //   onPageChanged: (index) {
-              //     setState(() {
-              //       page = index;
-              //     });
-              //   },
-              //   items: feeds.map((feed) {
-              //     return Builder(builder: (BuildContext context) {
-              //       return Container(
-              //         height: MediaQuery.of(context).size.height * 0.30,
-              //         width: MediaQuery.of(context).size.width,
-              //         child: Card(
-              //           color: Colors.blueAccent,
-              //           child: Container(),
-              //         ),
-              //       );
-              //     });
-              //   }).toList(),
-              // ),
-            ],
-            primary: false,
-            padding: const EdgeInsets.all(0),
-            crossAxisSpacing: 0,
-            mainAxisSpacing: 0,
-            crossAxisCount: 2,
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: IconButton(
-              color: Colors.blue,
-              icon: Icon(Icons.arrow_forward),
-              onPressed: () {
-                setState(() {
-                  switchPage(page + 1);
-                });
-              },
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: IconButton(
+                    color: Colors.blue,
+                    icon: Icon(Icons.arrow_forward),
+                    onPressed: () {
+                      setState(() {
+                        switchPage(page + 1);
+                      });
+                    },
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: IconButton(
+                    color: Colors.blue,
+                    icon: Icon(Icons.arrow_back),
+                    onPressed: () {
+                      setState(() {
+                        switchPage(page - 1);
+                      });
+                    },
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: DotsIndicator(
+                      dotsCount: (feeds.length / PAGE_SIZE).ceil() > 0
+                          ? (feeds.length / PAGE_SIZE).ceil()
+                          : 1,
+                      position: page.toDouble()),
+                ),
+              ],
             ),
-          ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: IconButton(
-              color: Colors.blue,
-              icon: Icon(Icons.arrow_back),
-              onPressed: () {
-                setState(() {
-                  switchPage(page - 1);
-                });
-              },
-            ),
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: DotsIndicator(
-                dotsCount: (feeds.length / PAGE_SIZE).ceil() > 0
-                    ? (feeds.length / PAGE_SIZE).ceil()
-                    : 1,
-                position: page.toDouble()),
-          ),
-        ],
-      ),
-    );
+          );
   }
 
   void unsubscribeFrom(List ids, bool onlyVideo) {
