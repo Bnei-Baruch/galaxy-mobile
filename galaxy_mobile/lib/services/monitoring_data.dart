@@ -39,7 +39,7 @@ class MonitoringData {
     userJson["network"] = "true";
     userJson["streamingGateway"] = "glx4";
 
-    userJson["galaxyVersion"] = "1.0.5";
+    userJson["galaxyVersion"] = "1.0.9";
   }
 
   startMonitor() {

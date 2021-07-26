@@ -184,8 +184,6 @@ class _DashboardState extends State<Dashboard> {
       videoRoom.exitRoom();
       userTimer.cancel();
       if (mqttClient != null) {
-        mqttClient.unsubscribe("galaxy/room/$_activeRoomId");
-        mqttClient.unsubscribe("galaxy/room/$_activeRoomId/chat");
         mqttClient.disconnect();
       }
       showDialog(
