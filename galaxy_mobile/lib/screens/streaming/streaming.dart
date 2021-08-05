@@ -290,6 +290,8 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
         if (widget.videoStreamingPlugin != null)
           widget.videoStreamingPlugin.send(message: {"request": "stop"});
         _remoteStreamAudio.getAudioTracks().last.stop();
+        _remoteStreamAudio.getAudioTracks().last.enabled = false;
+        _remoteStreamAudio.dispose();
         widget.audioStreamingPlugin.send(message: {"request": "stop"});
         //  widget.audioTrlStreamingPlugin.send(message: {"request": "stop"});
         _remoteStreamAudio = null;
@@ -481,6 +483,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
               FlutterLogs.logInfo("Streaming", "initTrlAudioStream",
                   "disabling trl stream track count ${_remoteTrlStreamAudio.getAudioTracks().length}");
               _remoteTrlStreamAudio.getAudioTracks().last.enabled = false;
+              _remoteTrlStreamAudio.getAudioTracks().last.setVolume(0);
             }
           }
 
