@@ -1142,7 +1142,8 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                       child: Stack(
                         children: [
                           (widget.myVideoMuted)
-                              ? RTCVideoView(widget._localRenderer)
+                              ? RTCVideoView(widget._localRenderer,
+                                  mirror: true)
                               : Align(
                                   alignment: Alignment.center,
                                   child: Icon(Icons.account_circle,
