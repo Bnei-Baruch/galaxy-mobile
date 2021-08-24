@@ -137,10 +137,11 @@ class _SettingsState extends State<Settings> {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [selfWidget]),
                             SizedBox(height: 20.h),
-                            Opacity(
-                              opacity: 0.3,
-                              child: AudioMode(),
-                            ),
+                            // Opacity(
+                            // opacity: 0.3,
+                            // child:
+                            AudioMode(),
+                            // ),
                             SizedBox(height: 10.h),
                             Row(children: [
                               SizedBox(width: 10.w),
@@ -177,38 +178,36 @@ class _SettingsState extends State<Settings> {
                                                 color: Colors.white)
                                           ]),
                                       onPressed: () {
-                                        final activeRoom =
-                                        context.select((MainStore s) =>
-                                        s.activeRoom);
+                                        final activeRoom = context.select(
+                                            (MainStore s) => s.activeRoom);
 
                                         if (connectionStatus ==
-                                            ConnectivityResult.none)
-                                        {
+                                            ConnectivityResult.none) {
                                           showDialog(
                                               context: context,
                                               child: AlertDialog(
-                                                title: Text("No Internet"),
-                                                content:
-                                                    Text("Please reconnect")
-                                              ));
+                                                  title: Text("No Internet"),
+                                                  content: Text(
+                                                      "Please reconnect")));
                                         } else if (activeRoom == null) {
                                           showDialog(
                                               context: context,
                                               child: AlertDialog(
-                                                title:
-                                                Text("Room not selected"),
-                                                content:
-                                                Text("Please select a room")
-                                              ));
+                                                  title:
+                                                      Text("Room not selected"),
+                                                  content: Text(
+                                                      "Please select a room")));
                                         } else {
                                           selfWidget.stopCamera();
                                           Navigator.pushNamed(
-                                                  context, ''
+                                                  context,
+                                                  ''
                                                   '/dashboard')
                                               .then((value) {
                                             if (value == false) {
                                               Navigator.pushNamed(
-                                                  context, ''
+                                                  context,
+                                                  ''
                                                   '/dashboard');
                                             }
                                             setState(() {

@@ -166,6 +166,7 @@ class _DashboardState extends State<Dashboard> {
       }
     });
     videoRoom.RoomReady = () {
+      FlutterLogs.logInfo("Dashboard", "videoRoom", "RoomReady");
       final authService = context.read<AuthService>();
       mqttClient.init(
           authService.getUserEmail(), authService.getToken().accessToken);
@@ -412,6 +413,17 @@ class _DashboardState extends State<Dashboard> {
     if (topic == "galaxy/room/" + _activeRoomId) {
       Future.delayed(const Duration(milliseconds: 1000), () {
         updateRoomWithMyState(false);
+
+        //toggle audio mode only
+        final s = context.read<MainStore>();
+        audioMode = s.audioMode;
+        FlutterLogs.logInfo(
+            "Dashboard", "videoRoom", "audioMode toggle $audioMode");
+
+        if (audioMode) {
+          // stream.toggleAudioMode();
+          videoRoom.toggleAudioMode();
+        }
       });
     }
   }

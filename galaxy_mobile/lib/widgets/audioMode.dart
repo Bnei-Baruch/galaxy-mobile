@@ -13,13 +13,12 @@ class AudioMode extends StatelessWidget {
       title: Text('audio_mode'.tr()),
       value: audioMode,
       secondary: const Icon(Icons.videocam_off),
-      onChanged: (bool value) => {
-        if (enabled) {
-          context.read<MainStore>().setAudioMode(value)
-        }
-      },
+      onChanged: (bool value) =>
+          {context.read<MainStore>().setAudioMode(value)},
     );
   }
 
-  bool isEnabled() { return enabled; }
+  bool isEnabled() {
+    return enabled;
+  }
 }

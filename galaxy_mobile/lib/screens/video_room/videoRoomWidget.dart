@@ -233,8 +233,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    final s = context.read<MainStore>();
-    muteOtherCams = s.audioMode;
+
     WidgetsBinding.instance.addObserver(this);
     switcher = SwitchPageHelper(unsubscribeFrom, makeSubscription,
         switchVideoSlots, PAGE_SIZE, muteOtherCams);
@@ -1089,21 +1088,22 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
       Map<String, dynamic> userJson = widget.user.toJson();
       userJson["room"] = widget.roomNumber;
       userJson["group"] = "Test Room";
-      initIsolate(context).then((value) => {
-            mainToIsolateStream = value,
-            mainToIsolateStream.send({
-              "type": 'setConnection',
-              "user": userJson,
-              // "userExtra": {},
-              // "data": {}
-            }),
-            mainToIsolateStream.send({"type": "start"})
-          });
+      // initIsolate(context).then((value) => {
+      //       mainToIsolateStream = value,
+      //       mainToIsolateStream.send({
+      //         "type": 'setConnection',
+      //         "user": userJson,
+      //         // "userExtra": {},
+      //         // "data": {}
+      //       }),
+      //       mainToIsolateStream.send({"type": "start"})
+      //     });
     }
 
     final double userGridHeight =
         MediaQuery.of(context).orientation == Orientation.portrait
-            ? (MediaQuery.of(context).size.height / 3 * 2 - 140)
+            ? (MediaQuery.of(context).size.height / 3 * 1.5 -
+                kBottomNavigationBarHeight)
             : (MediaQuery.of(context).size.height);
 
     final double userGridWidth =

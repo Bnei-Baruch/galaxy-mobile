@@ -102,8 +102,9 @@ class StreamingUnified extends StatefulWidget {
         });
       }
     } else {
-      state.initVideoStream();
       audioMode = false;
+      state.getPresets();
+      state.initVideoStream();
     }
   }
 
@@ -276,13 +277,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
     widget.state = this;
     widget.trlAudioMuted = true;
 //set user preset of audio and video
-    final int audio =
-        Provider.of<MainStore>(context, listen: false).audioPreset;
-    final int video =
-        Provider.of<MainStore>(context, listen: false).videoPreset;
-    playerOverlay.audioPreset = audio;
-    playerOverlay.videoPreset = video;
-    playerOverlay.setStreamPresets(audio, video);
+    getPresets();
 
     playerOverlay.play = (playing) {
       FlutterLogs.logInfo("Streaming", "play", "request to $playing");
@@ -376,6 +371,20 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
       widget.connected = true;
       setState(() {});
     });
+  }
+
+  void getPresets() {
+    final int audio =
+        Provider.of<MainStore>(context, listen: false).audioPreset;
+    int video = Provider.of<MainStore>(context, listen: false).videoPreset;
+
+    if (widget.audioMode) {
+      video = StreamConstants.NO_VIDEO_OPTION_VALUE;
+    }
+
+    playerOverlay.audioPreset = audio;
+    playerOverlay.videoPreset = video;
+    playerOverlay.setStreamPresets(audio, video);
   }
 
   void initAudioStream() {
