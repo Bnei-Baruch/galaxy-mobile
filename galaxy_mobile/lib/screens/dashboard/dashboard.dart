@@ -639,9 +639,11 @@ class _DashboardState extends State<Dashboard> {
   }
 
   void hideBottomBar() {
-    setState(() {
-      _show = false;
-    });
+    if (mounted) {
+      setState(() {
+        _show = false;
+      });
+    }
   }
 }
 
