@@ -35,7 +35,7 @@ Future<void> initLogs() async {
       directoryStructure: DirectoryStructure.FOR_DATE,
       logTypesEnabled: ["device", "network", "errors"],
       logFileExtension: LogFileExtension.LOG,
-      logsWriteDirectoryName: "galaxyLogs",
+      logsWriteDirectoryName: "galaxy",
       logsExportDirectoryName: "galaxyLogs/exported",
       debugFileOperations: true,
       isDebuggable: true);
@@ -43,8 +43,10 @@ Future<void> initLogs() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  print("main start");
   await SharedPrefs().init();
   await initLogs();
+  print("main init logs passed");
   await Firebase.initializeApp();
 
   Wakelock.enable();
@@ -59,11 +61,10 @@ void main() async {
           Provider<MQTTClient>(create: (_) => MQTTClient()),
 
           // Provider<Dashboard>(create: (_) => Dashboard()),
-          ChangeNotifierProxyProvider3
-          <AuthService, Api, MQTTClient, MainStore>(
+          ChangeNotifierProxyProvider3<AuthService, Api, MQTTClient, MainStore>(
               create: (_) => MainStore(),
               update: (_, auth, api, mqttClient, model) =>
-              model..update(auth, api, mqttClient)),
+                  model..update(auth, api, mqttClient)),
         ],
         child: EasyLocalization(
             supportedLocales: [

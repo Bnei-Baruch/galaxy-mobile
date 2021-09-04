@@ -22,12 +22,14 @@ class AppDrawer extends StatelessWidget {
 
     var path = "";
     if (Platform.isAndroid) {
-      path = "/sdcard/Android/data/com.galaxy_mobile/files/";
+      path = "/sdcard/Android/data/com.galaxy_mobile/files";
     } else {
       path = ((await getApplicationSupportDirectory()).path);
     }
     FlutterLogs.logInfo("AppDrawer", "archiveLogs", "2");
-    encoder.create(path + 'galaxyLogs.zip');
+    encoder.create(path + '/galaxyLogs.zip');
+    FlutterLogs.logInfo(
+        "AppDrawer", "archiveLogs", "2.0 zip path ${encoder.zip_path}");
     if (Platform.isAndroid) {
       File logcat = File(path + "/galaxyLogs/logcat.txt");
       final String logs = await Logcat.execute();
@@ -35,9 +37,16 @@ class AppDrawer extends StatelessWidget {
       if (!logcat.existsSync()) logcat.create();
       logcat.openWrite();
       logcat.writeAsStringSync(logs);
+      encoder.addDirectory(Directory(path + '/galaxyLogs/'));
+    }
+    if (Platform.isIOS) {
+      List<FileSystemEntity> list = Directory(path).listSync();
+      FlutterLogs.logInfo("AppDrawer", "archiveLogs", "2.1 ${list.length} ");
+      FlutterLogs.logInfo("AppDrawer", "archiveLogs",
+          "2.2 ${list.map((value) => value.path.toString())}");
+      encoder.addDirectory(Directory(path + "/Logs"));
     }
     FlutterLogs.logInfo("AppDrawer", "archiveLogs", "3 $path");
-    encoder.addDirectory(Directory(path + 'galaxyLogs/'));
     FlutterLogs.logInfo("AppDrawer", "archiveLogs", "3.1");
     encoder.close();
     FlutterLogs.logInfo("AppDrawer", "archiveLogs", "4");
@@ -53,9 +62,7 @@ class AppDrawer extends StatelessWidget {
             '<-------------please write above this line-----------> \n appName=${packageInfo.appName}\n packageName = ${packageInfo.packageName} \n version = ${packageInfo.version} \n buildNumber = ${packageInfo.buildNumber}',
         subject: 'Send logs to developer',
         recipients: ['igal.avraham@gmail.com'],
-        attachmentPaths: [
-          '/sdcard/Android/data/com.galaxy_mobile/files/galaxyLogs.zip'
-        ],
+        attachmentPaths: [path + "/galaxyLogs.zip"],
         isHTML: false);
     FlutterLogs.logInfo("AppDrawer", "archiveLogs", "6");
     await FlutterEmailSender.send(email);
