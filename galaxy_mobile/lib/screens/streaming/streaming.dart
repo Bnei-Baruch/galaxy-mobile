@@ -687,7 +687,8 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
                             //     RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
                             // RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
                           )
-                        : InkWell(
+                    : Material(
+                        child: InkWell(
                             onTap: () {
                               setState(() {
                                 widget.isPlayerShown = !widget.isPlayerShown;
@@ -700,7 +701,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
                                     child: Text(
                                   "No video",
                                   style: TextStyle(fontSize: 24),
-                                )))),
+                                ))))),
               ),
             ],
           ),
