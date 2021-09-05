@@ -499,37 +499,50 @@ class _DashboardState extends State<Dashboard> {
                     backgroundColor: Colors.transparent,
                     iconTheme: IconThemeData(color: Colors.transparent),
                   )
-                : AppBar(title: Text(activeRoom.description), actions: <Widget>[
-                    // IconButton(
-                    //     icon: Icon(Icons.chat, color: Colors.white),
-                    //     onPressed: () {
-                    //       setState(() {
-                    //         isChatVisible = !isChatVisible;
-                    //       });
-                    //     }),
-                    IconButton(
+                : AppBar(
+                    title: Text(activeRoom.description,
+                        textAlign: TextAlign.center),
+                    centerTitle: true,
+                    leading: IconButton(
                         icon: setIcon(),
                         onPressed: () async {
                           await switchAudioDevice();
                           setState(() {});
                         }),
-                    IconButton(
-                        icon: Icon(Icons.logout, color: Colors.white),
-                        onPressed: () {
-                          final mqttClient = context.read<MQTTClient>();
-                          Navigator.of(context).pop(true);
-                          stream.exit();
-                          videoRoom.exitRoom();
-                          userTimer.cancel();
-                          if (mqttClient != null) {
-                            mqttClient
-                                .unsubscribe("galaxy/room/$_activeRoomId");
-                            mqttClient
-                                .unsubscribe("galaxy/room/$_activeRoomId/chat");
-                            mqttClient.disconnect();
-                          }
-                        })
-                  ]),
+                    actions: <Widget>[
+                        // IconButton(
+                        //     icon: Icon(Icons.chat, color: Colors.white),
+                        //     onPressed: () {
+                        //       setState(() {
+                        //         isChatVisible = !isChatVisible;
+                        //       });
+                        //     }),
+                        Container(
+                            height: 30,
+                            child: TextButton(
+                                style: ButtonStyle(
+                                    foregroundColor:
+                                        MaterialStateProperty.all(Colors.white),
+                                    backgroundColor:
+                                        MaterialStateProperty.all(Colors.red)),
+                                child: Text(
+                                  "Leave",
+                                ),
+                                onPressed: () {
+                                  final mqttClient = context.read<MQTTClient>();
+                                  Navigator.of(context).pop(true);
+                                  stream.exit();
+                                  videoRoom.exitRoom();
+                                  userTimer.cancel();
+                                  if (mqttClient != null) {
+                                    mqttClient.unsubscribe(
+                                        "galaxy/room/$_activeRoomId");
+                                    mqttClient.unsubscribe(
+                                        "galaxy/room/$_activeRoomId/chat");
+                                    mqttClient.disconnect();
+                                  }
+                                }))
+                      ]),
         body: OrientationBuilder(builder: (context, orientation) {
           return Stack(children: <Widget>[
             Flex(
