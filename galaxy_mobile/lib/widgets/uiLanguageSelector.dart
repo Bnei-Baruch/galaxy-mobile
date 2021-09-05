@@ -6,7 +6,9 @@ import 'package:easy_localization/easy_localization.dart';
 class UILanguageSelector extends StatelessWidget {
   bool _withLabel;
 
-  UILanguageSelector(bool withLabel) { _withLabel = withLabel; }
+  UILanguageSelector(bool withLabel) {
+    _withLabel = withLabel;
+  }
 
   void setLanguage(BuildContext context, String language) {
     switch (language) {
@@ -44,7 +46,9 @@ class UILanguageSelector extends StatelessWidget {
         break;
 
       default:
-        FlutterLogs.logError("UILanguageSelector", "getLanguage",
+        FlutterLogs.logError(
+            "UILanguageSelector",
+            "getLanguage",
             "unsupported language: "
                 "${EasyLocalization.of(context).locale.languageCode}");
         return "";
@@ -56,26 +60,30 @@ class UILanguageSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final languages = ['English', 'Русский', 'עברית'];
 
-    return DropdownSearch<String>(
-      showSelectedItem: true,
-      mode: Mode.DIALOG,
-      label: _withLabel ? 'interface_language'.tr() : '',
-      hint: 'select_language'.tr(),
-      items: languages,
-      selectedItem: getLanguage(context),
-      onChanged: (String language) => {
-        FlutterLogs.logInfo("UILanguageSelector", "DropdownSearch.onChanged",
-            "selected language: $language"),
-        setLanguage(context, language)
-      },
-        dropdownSearchDecoration: InputDecoration(
-            filled: true,
-            border: OutlineInputBorder(),
-            contentPadding: EdgeInsets.fromLTRB(12, 12, 8, 0),
-            fillColor: Colors.transparent //Theme.of(context).inputDecorationTheme.fillColor,
-        ),
-      showClearButton: false,
-      showSearchBox: false
-    );
+    return Align(
+        alignment: AlignmentDirectional.centerEnd,
+        child: DropdownSearch<String>(
+            showSelectedItem: true,
+            mode: Mode.DIALOG,
+            label: _withLabel ? 'interface_language'.tr() : '',
+            hint: 'select_language'.tr(),
+            items: languages,
+            selectedItem: getLanguage(context),
+            onChanged: (String language) => {
+                  FlutterLogs.logInfo(
+                      "UILanguageSelector",
+                      "DropdownSearch.onChanged",
+                      "selected language: $language"),
+                  setLanguage(context, language)
+                },
+            dropdownSearchDecoration: InputDecoration.collapsed(
+                filled: true,
+                //border: OutlineInputBorder(),
+                // contentPadding: EdgeInsets.fromLTRB(12, 12, 8, 0),
+                fillColor: Colors
+                    .transparent //Theme.of(context).inputDecorationTheme.fillColor,
+                ),
+            showClearButton: false,
+            showSearchBox: false));
   }
 }
