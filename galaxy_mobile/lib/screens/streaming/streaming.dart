@@ -666,11 +666,12 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
         dragStartBehavior: DragStartBehavior.down,
         child: Stack(alignment: Alignment.topCenter, children: [
           Column(
-            // mainAxisSize: MainAxisSize.min,
+            mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                height: getHeight(),
+                height: getHeight() - 50,
                 width: getWidth(),
                 decoration: BoxDecoration(
                     border: Border.all(
@@ -678,15 +679,15 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
                             ? Colors.redAccent
                             : Colors.transparent,
                         width: 3)),
-                child:
-                    (_remoteRenderer.srcObject != null && widget.isVideoPlaying)
-                        ? RTCVideoView(
-                            _remoteRenderer,
-                            mirror: false,
-                            // objectFit:
-                            //     RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
-                            // RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-                          )
+                child: (_remoteRenderer.srcObject != null &&
+                        widget.isVideoPlaying)
+                    ? RTCVideoView(
+                        _remoteRenderer,
+                        mirror: false,
+                        // objectFit:
+                        //     RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
+                        // RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+                      )
                     : Material(
                         child: InkWell(
                             onTap: () {
@@ -703,9 +704,13 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
                                   style: TextStyle(fontSize: 24),
                                 ))))),
               ),
+              Container(
+                height: 50,
+                width: getWidth(),
+                child: widget.isPlayerShown ? playerOverlay : Container(),
+              )
             ],
           ),
-          widget.isPlayerShown ? playerOverlay : Container(),
           Align(
               alignment: Alignment.topRight,
               child: Container(

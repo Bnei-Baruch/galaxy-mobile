@@ -53,209 +53,203 @@ class _PlayerStateWidget extends State<PlayerWidget> {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.transparent,
+      color: Colors.black12,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Padding(padding: EdgeInsets.only(top: 40)),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               // Container(
               //   width: 35.0,
               //   height: 35.0,
               //   child: DecoratedBox(
               //       child:
-              Center(
-                child: Ink(
-                  decoration: const ShapeDecoration(
-                    color: Colors.white,
-                    shape: RoundedRectangleBorder(),
-                  ),
-                  child: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        widget.isPlaying = !widget.isPlaying;
-                        widget.play(widget.isPlaying);
-                      });
-                    },
-                    icon: Icon(
-                      widget.isPlaying ? Icons.stop : Icons.play_arrow,
-                      color: Colors.black,
-                      // size: 24.0,
-                      semanticLabel: 'Play/Stop button',
-                    ),
-                  ),
+
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    widget.isPlaying = !widget.isPlaying;
+                    widget.play(widget.isPlaying);
+                  });
+                },
+                icon: Icon(
+                  widget.isPlaying ? Icons.stop : Icons.play_arrow,
+                  color: Colors.white,
+                  // size: 24.0,
+                  semanticLabel: 'Play/Stop button',
                 ),
               ),
-              Center(
-                child: Ink(
-                  decoration: const ShapeDecoration(
-                    color: Colors.white,
-                    shape: RoundedRectangleBorder(),
-                  ),
-                  child: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        widget.isMuted = !widget.isMuted;
-                        widget.mute(widget.isMuted);
-                      });
-                    },
-                    icon: Icon(
-                      widget.isMuted ? Icons.volume_mute : Icons.volume_up,
-                      color: Colors.black,
-                      // size: 24.0,
-                      semanticLabel: 'Play/Stop button',
-                    ),
-                  ),
+
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    widget.isMuted = !widget.isMuted;
+                    widget.mute(widget.isMuted);
+                  });
+                },
+                icon: Icon(
+                  widget.isMuted ? Icons.volume_mute : Icons.volume_up,
+                  color: Colors.white,
+                  // size: 24.0,
+                  semanticLabel: 'Play/Stop button',
                 ),
               ),
-              Center(
-                child: Ink(
-                  decoration: const ShapeDecoration(
-                    color: Colors.white,
-                    shape: RoundedRectangleBorder(),
-                  ),
-                  child: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        widget.toggleFullScreen();
-                      });
-                    },
-                    icon: Icon(
-                      widget.isFullScreen ? Icons.fullscreen_exit : Icons.fullscreen,
-                      color: Colors.black,
-                      // size: 24.0,
-                      semanticLabel: 'Fullscreen button',
-                    ),
-                  ),
+              Spacer(),
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    showDialog(
+                        useRootNavigator: false,
+                        context: context,
+                        builder: (context) => Dialog(
+                            insetPadding: EdgeInsets.only(
+                                right: MediaQuery.of(context).size.width / 3),
+                            child: Container(
+                                color: Colors.black12,
+                                width: 200,
+                                height: 150,
+                                child: Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: [
+                                        Text("Language"),
+                                        DropdownButton<Map<String, Object>>(
+                                            value: widget.audioTypeValue,
+                                            icon: Icon(Icons.multitrack_audio),
+                                            iconSize: 24,
+                                            elevation: 16,
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                            underline: Container(
+                                              height: 2,
+                                              color: Colors.white,
+                                            ),
+                                            onChanged:
+                                                (Map<String, Object> newValue) {
+                                              setState(() {
+                                                widget.audioTypeValue =
+                                                    newValue;
+                                                widget.audioChange();
+                                              });
+                                            },
+                                            items: StreamConstants
+                                                .audiog_options
+                                                .map<
+                                                        DropdownMenuItem<
+                                                            Map<String,
+                                                                Object>>>(
+                                                    (Map<String, Object>
+                                                        value) {
+                                              return DropdownMenuItem<
+                                                  Map<String, Object>>(
+                                                value: value,
+                                                child: //Text(value["text"]),
+                                                    Row(
+                                                  children: <Widget>[
+                                                    value.keys.contains("flag")
+                                                        ? Flag(value["flag"],
+                                                            height: 24,
+                                                            width: 24,
+                                                            fit: BoxFit.contain)
+                                                        : Icon(Icons.group),
+                                                    SizedBox(
+                                                      width: 10,
+                                                    ),
+                                                    Text(
+                                                      value["text"],
+                                                      style: TextStyle(
+                                                          color: Colors.white),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            }).toList()),
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: [
+                                        Text("Quality"),
+                                        DropdownButton<Map<String, Object>>(
+                                            value: widget.videoTypeValue,
+                                            icon: Icon(Icons.video_label),
+                                            iconSize: 24,
+                                            elevation: 16,
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                            underline: Container(
+                                              height: 2,
+                                              color: Colors.white,
+                                            ),
+                                            onChanged:
+                                                (Map<String, Object> newValue) {
+                                              setState(() {
+                                                widget.videoTypeValue =
+                                                    newValue;
+                                                widget.videoChange();
+                                              });
+                                            },
+                                            items: StreamConstants
+                                                .videos_options
+                                                .map<
+                                                        DropdownMenuItem<
+                                                            Map<String,
+                                                                Object>>>(
+                                                    (Map<String, Object>
+                                                        value) {
+                                              return DropdownMenuItem<
+                                                  Map<String, Object>>(
+                                                value: value,
+                                                child: Text(value["text"]),
+                                              );
+                                            }).toList()),
+                                      ],
+                                    )
+                                  ],
+                                ))));
+                  });
+                },
+                icon: Icon(
+                  Icons.settings,
+                  color: Colors.white,
+                  // size: 24.0,
+                  semanticLabel: 'Fullscreen button',
                 ),
               ),
-              // decoration: BoxDecoration(color: Colors.white)),
-              // ),
-              // DecoratedBox(
-              //   decoration: BoxDecoration(color: Colors.white),
-              //   child: Container(
-              //     // constraints: BoxConstraints(minWidth: 100, maxWidth: 175),
-              //     height: 35,
-              //     width: 180,
-              //     child: FittedBox(
-              //       child: FlutterVolumeSlider(
-              //         display: Display.HORIZONTAL,
-              //         sliderActiveColor: Colors.blue,
-              //         sliderInActiveColor: Colors.grey,
-              //       ),
-              //     ),
-              //   ),
-              // ),
-              // Container(
-              //   width: 35.0,
-              //   height: 35.0,
-              //   child: DecoratedBox(
-              //       child: IconButton(
-              //         color: Colors.white,
-              //         // minWidth: 24,
-              //         onPressed: () => widget.play(widget.isPlaying),
-              //         icon: Icon(
-              //           Icons.fullscreen,
-              //           color: Colors.black,
-              //           // size: 24.0,
-              //           semanticLabel: 'Full screen',
-              //         ),
-              //       ),
-              //       decoration: BoxDecoration(color: Colors.white)),
-              // ),
-              // Container(
-              //   width: 35.0,
-              //   height: 35.0,
-              //   child: DecoratedBox(
-              //       child: IconButton(
-              //         color: Colors.white,
-              //         // minWidth: 24,
-              //         onPressed: () => widget.play(widget.isPlaying),
-              //         icon: Icon(
-              //           Icons.settings,
-              //           color: Colors.black,
-              //           size: 24.0,
-              //           semanticLabel: 'Settings',
-              //         ),
-              //       ),
-              //       decoration: BoxDecoration(color: Colors.white)),
-              // ),
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    widget.toggleFullScreen();
+                  });
+                },
+                icon: Icon(
+                  widget.isFullScreen
+                      ? Icons.fullscreen_exit
+                      : Icons.fullscreen,
+                  color: Colors.white,
+                  // size: 24.0,
+                  semanticLabel: 'Fullscreen button',
+                ),
+              ),
             ],
           ),
-          Padding(padding: EdgeInsets.only(top: 35)),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              DropdownButton<Map<String, Object>>(
-                  value: widget.videoTypeValue,
-                  icon: Icon(Icons.video_label),
-                  iconSize: 24,
-                  elevation: 16,
-                  style: TextStyle(color: Colors.white),
-                  underline: Container(
-                    height: 2,
-                    color: Colors.white,
-                  ),
-                  onChanged: (Map<String, Object> newValue) {
-                    setState(() {
-                      widget.videoTypeValue = newValue;
-                      widget.videoChange();
-                    });
-                  },
-                  items: StreamConstants.videos_options
-                      .map<DropdownMenuItem<Map<String, Object>>>(
-                          (Map<String, Object> value) {
-                    return DropdownMenuItem<Map<String, Object>>(
-                      value: value,
-                      child: Text(value["text"]),
-                    );
-                  }).toList()),
-              DropdownButton<Map<String, Object>>(
-                  value: widget.audioTypeValue,
-                  icon: Icon(Icons.multitrack_audio),
-                  iconSize: 24,
-                  elevation: 16,
-                  style: TextStyle(color: Colors.white),
-                  underline: Container(
-                    height: 2,
-                    color: Colors.white,
-                  ),
-                  onChanged: (Map<String, Object> newValue) {
-                    setState(() {
-                      widget.audioTypeValue = newValue;
-                      widget.audioChange();
-                    });
-                  },
-                  items: StreamConstants.audiog_options
-                      .map<DropdownMenuItem<Map<String, Object>>>(
-                          (Map<String, Object> value) {
-                    return DropdownMenuItem<Map<String, Object>>(
-                      value: value,
-                      child: //Text(value["text"]),
-                          Row(
-                        children: <Widget>[
-                          value.keys.contains("flag")
-                              ? Flag(value["flag"],
-                                  height: 24, width: 24, fit: BoxFit.contain)
-                              : Icon(Icons.group),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Text(
-                            value["text"],
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList()),
-            ],
-          )
+
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.spaceAround,
+          //   children: [
+
+          //
+          //   ],
+          // )
         ],
       ),
     );
