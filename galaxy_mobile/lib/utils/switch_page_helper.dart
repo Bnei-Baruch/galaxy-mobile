@@ -1,4 +1,5 @@
 import 'package:flutter_logs/flutter_logs.dart';
+import 'package:galaxy_mobile/screens/video_room/videoRoomWidget.dart';
 
 typedef unsub = Function(List<dynamic>, bool);
 
@@ -13,10 +14,11 @@ class SwitchPageHelper {
   make makeSubscription;
   switcher switchVideoSlots;
   unsub unsubscribeFrom;
+  VideoRoom widget;
 
   SwitchPageHelper(unsub unsubscriber, make makeSub, switcher Switcher,
-      int pageSize, bool mute)
-  {
+      int pageSize, bool mute, VideoRoom widget) {
+    this.widget = widget;
     PAGE_SIZE = pageSize;
     muteOtherCams = mute;
     makeSubscription = makeSub;
@@ -38,8 +40,14 @@ class SwitchPageHelper {
     }
   }
 
-  void switchVideos(int page, List oldFeeds, List newFeeds,) {
-    FlutterLogs.logInfo("SwitchPageHelper", "switchVideos",
+  void switchVideos(
+    int page,
+    List oldFeeds,
+    List newFeeds,
+  ) {
+    FlutterLogs.logInfo(
+        "SwitchPageHelper",
+        "switchVideos",
         "switchVideos >> page: ${page.toString()} | "
             "pageSize: ${PAGE_SIZE.toString()} | "
             "old feeds: ${oldFeeds.length.toString()} | "
@@ -64,7 +72,9 @@ class SwitchPageHelper {
           : (page * PAGE_SIZE) + index);
     }
 
-    FlutterLogs.logInfo("SwitchPageHelper", "switchVideos",
+    FlutterLogs.logInfo(
+        "SwitchPageHelper",
+        "switchVideos",
         "oldVideoSlots: ${oldVideoSlots.toString()} | "
             "newVideoSlots: ${newVideoSlots.toString()}");
 
@@ -90,7 +100,9 @@ class SwitchPageHelper {
           })
         : null;
 
-    FlutterLogs.logInfo("SwitchPageHelper", "switchVideos",
+    FlutterLogs.logInfo(
+        "SwitchPageHelper",
+        "switchVideos",
         "oldVideoSlots: ${oldVideoSlots.toString()} | "
             "newVideoSlots: ${newVideoSlots.toString()}");
 
@@ -137,7 +149,9 @@ class SwitchPageHelper {
     }
 
     if (!muteOtherCams) {
-      FlutterLogs.logInfo("SwitchPageHelper", "switchVideos",
+      FlutterLogs.logInfo(
+          "SwitchPageHelper",
+          "switchVideos",
           "subscribeFeeds: ${subscribeFeeds.toString()} | "
               "unsubscribeFeeds: ${unsubscribeFeeds.toString()} | "
               "switchFeeds: ${switchFeeds.toString()}");
@@ -159,7 +173,9 @@ class SwitchPageHelper {
         (this.switchVideoSlots != null)
             ? this.switchVideoSlots(element["from"], element["to"])
             : null;
-      }); //first(({ from, to }) => this.switchVideoSlots(from, to));
+      });
+      //first(({ from, to }) => this.switchVideoSlots(from, to));
+      widget.updateDots(page, newFeeds.length);
     } else {
       FlutterLogs.logWarn("SwitchPageHelper", "switchVideos",
           "ignoring subscribe/unsubscribe/switch; other cams on mute mode");

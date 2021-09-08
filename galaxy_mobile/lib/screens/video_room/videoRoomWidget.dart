@@ -238,7 +238,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
 
     WidgetsBinding.instance.addObserver(this);
     switcher = SwitchPageHelper(unsubscribeFrom, makeSubscription,
-        switchVideoSlots, PAGE_SIZE, muteOtherCams);
+        switchVideoSlots, PAGE_SIZE, muteOtherCams, widget);
     widget.state = this;
   }
 
@@ -271,6 +271,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         "VideoRoom", "switchPage", "switch page to: ${page.toString()}");
     int numPages = (feeds.length / PAGE_SIZE).ceil();
     this.page = numPages == 0 ? 0 : (numPages + page) % numPages;
+
     switcher.switchVideos(this.page, feeds, feeds);
   }
 
@@ -1121,9 +1122,6 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         "VideoRoomWidget",
         "### itemWidth: $itemWidth | "
             "### itemHeight: $itemHeight");
-    // if (widget.updateDots != null) {
-    //   widget.updateDots(page.toInt(), feeds.length);
-    // }
     return widget.isFullScreen
         ? Container()
         : Container(
@@ -1526,14 +1524,14 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                     },
                   ),
                 ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: DotsIndicator(
-                      dotsCount: (feeds.length / PAGE_SIZE).ceil() > 0
-                          ? (feeds.length / PAGE_SIZE).ceil()
-                          : 1,
-                      position: page.toDouble()),
-                ),
+                // Align(
+                //   alignment: Alignment.bottomCenter,
+                //   child: DotsIndicator(
+                //       dotsCount: (feeds.length / PAGE_SIZE).ceil() > 0
+                //           ? (feeds.length / PAGE_SIZE).ceil()
+                //           : 1,
+                //       position: page.toDouble()),
+                // ),
               ],
             ),
           );

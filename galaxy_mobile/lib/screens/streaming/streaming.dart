@@ -62,6 +62,18 @@ class StreamingUnified extends StatefulWidget {
   @override
   _StreamingUnifiedState createState() => _StreamingUnifiedState();
 
+  void showBar() {
+    state.setState(() {
+      isPlayerShown = true;
+    });
+  }
+
+  void hideBar() {
+    state.setState(() {
+      isPlayerShown = false;
+    });
+  }
+
   void toggleOnAir(var data) {
     if (state != null && state.mounted) {
       state.setState(() {

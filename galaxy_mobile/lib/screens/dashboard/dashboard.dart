@@ -176,10 +176,12 @@ class _DashboardState extends State<Dashboard> {
     });
 
     videoRoom.updateDots = (int position, int length) {
-      setState(() {
-        pagePosition = position;
-        feedsLength = length;
-      });
+      if (mounted) {
+        setState(() {
+          pagePosition = position;
+          feedsLength = length;
+        });
+      }
     };
     videoRoom.RoomReady = () {
       FlutterLogs.logInfo("Dashboard", "videoRoom", "RoomReady");
@@ -687,6 +689,7 @@ class _DashboardState extends State<Dashboard> {
       _show = true;
     });
     Timer(Duration(seconds: 3), hideBottomBar);
+    Timer(Duration(seconds: 3), stream.hideBar);
   }
 
   void hideBottomBar() {
@@ -699,10 +702,13 @@ class _DashboardState extends State<Dashboard> {
 
   void tapped() {
     //if shown then hide  else show
-    if (_show)
+    if (_show) {
+      stream.hideBar();
       hideBottomBar();
-    else
+    } else {
+      stream.showBar();
       showBottomBar();
+    }
   }
 }
 
