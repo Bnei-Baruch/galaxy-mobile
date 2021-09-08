@@ -39,6 +39,7 @@ dependencies:
   slide_to_confirm: ^0.0.7
   mqtt_client: ^7.2.1
   jwt_decode: ^0.2.0
+  mdi: ^3.0.0
   flutter_logs: #^2.1.4
     git:
       url: https://github.com/igala/flutter_logs.git

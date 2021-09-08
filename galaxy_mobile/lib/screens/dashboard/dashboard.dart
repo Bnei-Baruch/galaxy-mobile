@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:connectivity/connectivity.dart';
+import 'package:mdi/mdi.dart';
 import 'package:provider/provider.dart';
 import 'package:phone_state_i/phone_state_i.dart';
 
@@ -495,9 +496,12 @@ class _DashboardState extends State<Dashboard> {
         appBar: isFullScreen
             ? null
             : !_show
-                ? AppBar(
-                    backgroundColor: Colors.transparent,
-                    iconTheme: IconThemeData(color: Colors.transparent),
+                ? CustomAppBar(
+                    appBar: AppBar(
+                      backgroundColor: Colors.transparent,
+                      iconTheme: IconThemeData(color: Colors.transparent),
+                    ),
+                    onTap: () => tapped(),
                   )
                 : AppBar(
                     title: Text(activeRoom.description,
@@ -543,35 +547,46 @@ class _DashboardState extends State<Dashboard> {
                                   }
                                 }))
                       ]),
-        body: OrientationBuilder(builder: (context, orientation) {
-          return Stack(children: <Widget>[
-            Flex(
-                mainAxisAlignment: MainAxisAlignment.center,
-                direction: orientation == Orientation.landscape
-                    ? Axis.horizontal
-                    : Axis.vertical,
-                children: [
-                  stream,
-                  GestureDetector(
-                    child: videoRoom,
-                    onTap: () {
-                      //if shown then hide  else show
-                      if (_show)
-                        hideBottomBar();
-                      else
-                        showBottomBar();
-                    },
-                  )
-                ])
-          ]);
-        }),
+        body: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => tapped(),
+            child: OrientationBuilder(builder: (context, orientation) {
+              return Stack(children: <Widget>[
+                Flex(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    direction: orientation == Orientation.landscape
+                        ? Axis.horizontal
+                        : Axis.vertical,
+                    children: [
+                      stream,
+                      // GestureDetector(
+                      //   child:
+                      videoRoom,
+                      // onTap: () {
+                      //   //if shown then hide  else show
+                      //   if (_show)
+                      //     hideBottomBar();
+                      //   else
+                      //     showBottomBar();
+                      // },
+                      // )
+                    ])
+              ]);
+            })),
         bottomNavigationBar: isFullScreen
             ? null
             : !_show
-                ? Container(
-                    height: kBottomNavigationBarHeight,
-                  )
+                ? GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => tapped(),
+                    child: Container(
+                      height: kBottomNavigationBarHeight,
+                    ))
                 : BottomNavigationBar(
+                    showSelectedLabels: true, // <-- HERE
+                    showUnselectedLabels: true,
+                    selectedItemColor: Colors.white,
+                    unselectedItemColor: Colors.white,
                     items: <BottomNavigationBarItem>[
                       BottomNavigationBarItem(
                           label: "Mic",
@@ -579,24 +594,27 @@ class _DashboardState extends State<Dashboard> {
                               ? Icon(Icons.mic_off, color: Colors.red)
                               : Icon(Icons.mic, color: Colors.white)),
                       BottomNavigationBarItem(
-                          label: "Video",
+                          label: "Camera",
                           icon: videoMute
                               ? Icon(Icons.videocam_off, color: Colors.red)
                               : Icon(Icons.videocam, color: Colors.white)),
                       BottomNavigationBarItem(
-                          label: 'Ask Question',
+                          label: 'Ask',
                           icon: !questionDisabled
                               ? (videoRoom.getIsQuestion()
-                                  ? Icon(Icons.live_help, color: Colors.red)
-                                  : Icon(Icons.live_help, color: Colors.white))
-                              : Icon(Icons.live_help, color: Colors.grey)),
+                                  ? Icon(Mdi.help, color: Colors.red)
+                                  : Icon(Mdi.help, color: Colors.white))
+                              : Icon(Mdi.help, color: Colors.grey)),
                       BottomNavigationBarItem(
                           label: "Audio Mode",
                           icon: audioMode
-                              ? Icon(Icons.supervised_user_circle_outlined,
-                                  color: Colors.red)
-                              : Icon(Icons.supervised_user_circle_outlined,
-                                  color: Colors.white)),
+                              ? Icon(Mdi.accountVoice, color: Colors.red)
+                              : Icon(Mdi.accountVoice, color: Colors.white)),
+                      BottomNavigationBarItem(
+                          label: "More",
+                          icon: audioMode
+                              ? Icon(Mdi.dotsVertical, color: Colors.red)
+                              : Icon(Mdi.dotsVertical, color: Colors.white)),
                     ],
                     onTap: (value) {
                       FlutterLogs.logInfo(
@@ -658,9 +676,33 @@ class _DashboardState extends State<Dashboard> {
       });
     }
   }
+
+  void tapped() {
+    //if shown then hide  else show
+    if (_show)
+      hideBottomBar();
+    else
+      showBottomBar();
+  }
 }
 
 void updateGxyUser(context, userData) async {
   Provider.of<MainStore>(context, listen: false).updaterUser(userData);
 }
+
 //
+class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final VoidCallback onTap;
+  final AppBar appBar;
+
+  const CustomAppBar({Key key, this.onTap, this.appBar}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(onTap: onTap, child: appBar);
+  }
+
+  // TODO: implement preferredSize
+  @override
+  Size get preferredSize => new Size.fromHeight(kToolbarHeight);
+}
