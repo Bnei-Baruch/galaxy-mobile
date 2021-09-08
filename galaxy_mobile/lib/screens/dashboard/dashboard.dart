@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:connectivity/connectivity.dart';
+import 'package:dots_indicator/dots_indicator.dart';
 import 'package:mdi/mdi.dart';
 import 'package:provider/provider.dart';
 import 'package:phone_state_i/phone_state_i.dart';
@@ -57,6 +58,10 @@ class _DashboardState extends State<Dashboard> {
   StreamSubscription streamSubscription;
 
   bool _show = false;
+
+  int pagePosition = 0;
+
+  int feedsLength = 1;
 
   @override
   void initState() {
@@ -169,6 +174,13 @@ class _DashboardState extends State<Dashboard> {
         });
       }
     });
+
+    videoRoom.updateDots = (int position, int length) {
+      setState(() {
+        pagePosition = position;
+        feedsLength = length;
+      });
+    };
     videoRoom.RoomReady = () {
       FlutterLogs.logInfo("Dashboard", "videoRoom", "RoomReady");
       final authService = context.read<AuthService>();
@@ -581,6 +593,14 @@ class _DashboardState extends State<Dashboard> {
                     onTap: () => tapped(),
                     child: Container(
                       height: kBottomNavigationBarHeight,
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: DotsIndicator(
+                            dotsCount: (feedsLength / PAGE_SIZE).ceil() > 0
+                                ? (feedsLength / PAGE_SIZE).ceil()
+                                : 1,
+                            position: pagePosition.toDouble()),
+                      ),
                     ))
                 : BottomNavigationBar(
                     showSelectedLabels: true, // <-- HERE

@@ -25,6 +25,7 @@ import '../../foreground.dart';
 
 typedef BoolCallback = Function(bool);
 typedef UpdateUserCallback = Function(Map<String, dynamic> user);
+typedef UpdateDots = Function(int position, int length);
 final int PAGE_SIZE = 3;
 
 class VideoRoom extends StatefulWidget {
@@ -45,6 +46,7 @@ class VideoRoom extends StatefulWidget {
   bool myVideoMuted = false;
   bool isQuestion = false;
 
+  UpdateDots updateDots;
   var questionInRoom;
 
   MediaStream myStream;
@@ -1119,6 +1121,9 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         "VideoRoomWidget",
         "### itemWidth: $itemWidth | "
             "### itemHeight: $itemHeight");
+    // if (widget.updateDots != null) {
+    //   widget.updateDots(page.toInt(), feeds.length);
+    // }
     return widget.isFullScreen
         ? Container()
         : Container(
