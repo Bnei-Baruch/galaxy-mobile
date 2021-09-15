@@ -58,7 +58,7 @@ dependencies:
   wakelock: ^0.2.1+1
   flutter_fgbg: ^0.0.1
   url_launcher: ^5.7.10
-  connectivity: ^2.0.2
+  connectivity_plus: ^0.8.1
   phone_state_i: ^0.0.3
 #    path: ../../Documents/GitHub/PhoneCallState-fork
   logcat: #^1.0.2

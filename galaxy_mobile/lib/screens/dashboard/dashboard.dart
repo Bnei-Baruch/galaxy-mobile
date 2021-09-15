@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
 
-import 'package:connectivity/connectivity.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:mdi/mdi.dart';
 import 'package:provider/provider.dart';
@@ -97,14 +97,14 @@ class _DashboardState extends State<Dashboard>
 
         hadNoConnection = true;
         showDialog(
-            context: this.context,
+            context: context,
             useRootNavigator: false,
             barrierDismissible: false,
             builder: (BuildContext context) {
               dialogPleaseWaitContext = context;
               return WillPopScope(
                   onWillPop: () {
-                    Navigator.of(this.context).pop();
+                    Navigator.of(dialogPleaseWaitContext).pop();
                     return Future.value(true);
                   },
                   child: Dialog(
@@ -121,7 +121,7 @@ class _DashboardState extends State<Dashboard>
               mqttClient.disconnect();
             }
             Navigator.pop(dialogPleaseWaitContext);
-            Navigator.of(this.context).pop();
+            Navigator.of(context).pop();
           }
         });
         //show message on screen
