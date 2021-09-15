@@ -162,7 +162,7 @@ class _DashboardState extends State<Dashboard>
       print('Call is Incoming or Connected' + event.stateC);
       //event.stateC has values "true" or "false"
       //if had a ring or connected need to re-enter
-      if (event.stateC == true) {
+      if (event.stateC == "true") {
         //mark re-enter
         FlutterLogs.logInfo("Dashboard", "phoneCall", "mark re-enter");
         callInProgress = true;
