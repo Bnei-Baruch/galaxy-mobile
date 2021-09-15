@@ -30,7 +30,8 @@ class Dashboard extends StatefulWidget {
   State createState() => _DashboardState();
 }
 
-class _DashboardState extends State<Dashboard> {
+class _DashboardState extends State<Dashboard>
+    with SingleTickerProviderStateMixin {
   var stream = StreamingUnified();
   var videoRoom = VideoRoom();
   // var chat = Chat();
@@ -64,12 +65,21 @@ class _DashboardState extends State<Dashboard> {
 
   int feedsLength = 1;
 
+  AnimationController controller;
+  Animation<Offset> offset;
+
   @override
   void initState() {
     // TODO: implement initState
     FlutterAudioManager.setListener(() {
       FlutterLogs.logInfo("dashboard", "onInputChanged", "");
     });
+
+    controller =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 300));
+
+    offset = Tween<Offset>(begin: Offset.zero, end: Offset(0.0, 1.0))
+        .animate(controller);
 
     final mqttClient = context.read<MQTTClient>();
 
@@ -611,9 +621,8 @@ class _DashboardState extends State<Dashboard> {
                                 position: pagePosition.toDouble()),
                           ),
                         )),
-                    AnimatedContainer(
-                      duration: Duration(milliseconds: 500),
-                      height: _show ? kBottomNavigationBarHeight : 0,
+                    SlideTransition(
+                      position: offset,
                       child: BottomNavigationBar(
                         showSelectedLabels: true, // <-- HERE
                         showUnselectedLabels: true,
@@ -703,6 +712,7 @@ class _DashboardState extends State<Dashboard> {
   void showBottomBar() {
     setState(() {
       _show = true;
+      controller.reverse();
     });
     Timer(Duration(seconds: 5), hideBottomBar);
     Timer(Duration(seconds: 5), stream.hideBar);
@@ -712,6 +722,7 @@ class _DashboardState extends State<Dashboard> {
     if (mounted) {
       setState(() {
         _show = false;
+        controller.forward();
       });
     }
   }
