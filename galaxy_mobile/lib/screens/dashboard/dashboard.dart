@@ -712,7 +712,7 @@ class _DashboardState extends State<Dashboard>
   void showBottomBar() {
     setState(() {
       _show = true;
-      controller.reverse();
+      if (controller != null) controller.reverse();
     });
     Timer(Duration(seconds: 5), hideBottomBar);
     Timer(Duration(seconds: 5), stream.hideBar);

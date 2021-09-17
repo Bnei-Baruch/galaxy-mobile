@@ -12,4 +12,16 @@ class Utils {
     final jsonResponse = jsonDecode(jsonString);
     return jsonResponse;
   }
+
+  static List sortAndFilterFeeds(List feeds) {
+    feeds = feeds
+        .where((feed) =>
+            feed["display"]["role"] != ("ghost") &&
+            feed["display"]["role"] != ("guest"))
+        .toList();
+    feeds.sort((a, b) =>
+        (a["display"]["timestamp"] as int) -
+        (b["display"]["timestamp"] as int));
+    return feeds;
+  }
 }

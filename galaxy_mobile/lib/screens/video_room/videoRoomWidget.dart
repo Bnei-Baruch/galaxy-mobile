@@ -9,6 +9,7 @@ import 'package:galaxy_mobile/services/keycloak.dart';
 import 'package:galaxy_mobile/services/monitoring_data.dart';
 import 'package:galaxy_mobile/services/monitoring_isolate.dart';
 import 'package:galaxy_mobile/utils/switch_page_helper.dart';
+import 'package:galaxy_mobile/utils/utils.dart';
 import 'package:janus_client/janus_client.dart';
 import 'package:janus_client/utils.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
@@ -275,11 +276,6 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     switcher.switchVideos(this.page, feeds, feeds);
   }
 
-  sortAndFilterFeeds(List feeds) => feeds
-      .where((feed) => !feed["display"]["role"].match("/^(ghost|guest)"))
-      .toList()
-      .sort((a, b) => a["display"]["timestamp"] - b["display"]["timestamp"]);
-
   userFeeds(feeds) => feeds.map((feed) => feed["display"]["role"] == 'user');
 
   _newRemoteFeed(JanusClient j, List<Map> feeds) async {
@@ -524,6 +520,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                         value["display"] = (jsonDecode(value["display"])));
                     //( (l)  => l["display"] = (jsonDecode(l["display"])) as Map);
                     //          List newFeeds = sortAndFilterFeeds();
+                    publishersList = Utils.sortAndFilterFeeds(publishersList);
                     List newFeeds = publishersList;
                     FlutterLogs.logInfo(
                         "VideoRoom",

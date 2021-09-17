@@ -99,21 +99,21 @@ class AppDrawer extends StatelessWidget {
               color: Colors.blue,
             ),
           ),
-          ListTile(
-            leading: Icon(Icons.home),
-            title: Text('my_account'.tr()),
-            onTap: () {
-              // Update the state of the app.
-              // ...
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.home),
-            title: Text('settings'.tr()),
-            onTap: () async {
-              Navigator.pushNamed(context, '/settings');
-            },
-          ),
+          // ListTile(
+          //   leading: Icon(Icons.home),
+          //   title: Text('my_account'.tr()),
+          //   onTap: () {
+          //     // Update the state of the app.
+          //     // ...
+          //   },
+          // ),
+          // ListTile(
+          //   leading: Icon(Icons.home),
+          //   title: Text('settings'.tr()),
+          //   onTap: () async {
+          //     Navigator.pushNamed(context, '/settings');
+          //   },
+          // ),
           ListTile(
             leading: Icon(Icons.email),
             title: Text('send_logs'.tr()),
