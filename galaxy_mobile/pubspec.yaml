@@ -79,7 +79,7 @@ dependencies:
     git:
       url: https://github.com/igala/flutter_janus_client.git
       #https://github.com/shivanshtalwar0/flutter_janus_client.git
-      ref: 0.0.4+3
+      ref: 0.0.4+4
       #path: ../../Documents/Github/flutter_janus_client-fork/
 
 
