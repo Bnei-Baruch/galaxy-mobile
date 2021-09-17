@@ -68,6 +68,8 @@ class _DashboardState extends State<Dashboard>
   AnimationController controller;
   Animation<Offset> offset;
 
+  List<AudioInput> _availableInputs = [];
+
   @override
   void initState() {
     // TODO: implement initState
@@ -286,6 +288,8 @@ class _DashboardState extends State<Dashboard>
       setState(() {});
     });
 
+    _availableInputs = await FlutterAudioManager.getAvailableInputs();
+
     if (await changeAudioDevice(AudioDevice.speaker)) {
       FlutterLogs.logInfo(
           "dashboard", "initAudioMgr", ">>> switch to RECEIVER: Success");
@@ -315,14 +319,26 @@ class _DashboardState extends State<Dashboard>
             "dashboard", "switchAudioDevice", ">>> switch to SPEAKER: Failed");
       }
     } else if (_audioDevice == AudioDevice.speaker) {
-      res = await changeAudioDevice(AudioDevice.bluetooth);
-      if (res) {
-        FlutterLogs.logInfo("dashboard", "switchAudioDevice",
-            ">>> switch to BLUETOOTH: Success");
-        _audioDevice = AudioDevice.bluetooth;
+      if (_availableInputs.any((element) => element == AudioDevice.bluetooth)) {
+        res = await changeAudioDevice(AudioDevice.bluetooth);
+        if (res) {
+          FlutterLogs.logInfo("dashboard", "switchAudioDevice",
+              ">>> switch to BLUETOOTH: Success");
+          _audioDevice = AudioDevice.bluetooth;
+        } else {
+          FlutterLogs.logError("dashboard", "switchAudioDevice",
+              ">>> switch to BLUETOOTH: Failed");
+        }
       } else {
-        FlutterLogs.logError("dashboard", "switchAudioDevice",
-            ">>> switch to BLUETOOTH: Failed");
+        res = await changeAudioDevice(AudioDevice.receiver);
+        if (res) {
+          FlutterLogs.logInfo("dashboard", "switchAudioDevice",
+              ">>> switch to RECEIVER: Success");
+          _audioDevice = AudioDevice.receiver;
+        } else {
+          FlutterLogs.logError("dashboard", "switchAudioDevice",
+              ">>> switch to RECEIVER: Failed");
+        }
       }
     } else if (_audioDevice == AudioDevice.bluetooth) {
       res = await changeAudioDevice(AudioDevice.receiver);
