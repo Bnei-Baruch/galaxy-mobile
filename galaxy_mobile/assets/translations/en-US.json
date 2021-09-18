@@ -27,6 +27,11 @@
   "sign_out": "Sign Out",
   "version": "Version",
   "chat": "Chat",
-  "leave": "leave"
+  "leave": "leave",
+  "mic" : "Mic",
+  "camera" : "Camera",
+  "ask" : "Ask",
+  "audio_mode" : "Audio Mode",
+  "more" : "More"
 
 }

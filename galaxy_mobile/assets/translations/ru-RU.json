@@ -28,6 +28,11 @@
   "sign_out": "Выход",
   "version": "Version",
   "chat": "Чат",
-  "leave": "выход"
+  "leave": "выход",
+  "mic" : "mикрофон ",
+  "camera" : "Камера",
+  "ask" : "просить",
+  "audio_mode" : "Аудио режим",
+  "more" : "Более"
 
 }

@@ -575,7 +575,7 @@ class _DashboardState extends State<Dashboard>
                                           MaterialStateProperty.all(
                                               Colors.red)),
                                   child: Text(
-                                    'Leave'.tr(),
+                                    'leave'.tr(),
                                   ),
                                   onPressed: () {
                                     final mqttClient =
@@ -646,30 +646,30 @@ class _DashboardState extends State<Dashboard>
                         unselectedItemColor: Colors.white,
                         items: <BottomNavigationBarItem>[
                           BottomNavigationBarItem(
-                              label: "Mic",
+                              label: "mic".tr(),
                               icon: audioMute
                                   ? Icon(Icons.mic_off, color: Colors.red)
                                   : Icon(Icons.mic, color: Colors.white)),
                           BottomNavigationBarItem(
-                              label: "Camera",
+                              label: "camera".tr(),
                               icon: videoMute
                                   ? Icon(Icons.videocam_off, color: Colors.red)
                                   : Icon(Icons.videocam, color: Colors.white)),
                           BottomNavigationBarItem(
-                              label: 'Ask',
+                              label: 'ask'.tr(),
                               icon: !questionDisabled
                                   ? (videoRoom.getIsQuestion()
                                       ? Icon(Mdi.help, color: Colors.red)
                                       : Icon(Mdi.help, color: Colors.white))
                                   : Icon(Mdi.help, color: Colors.grey)),
                           BottomNavigationBarItem(
-                              label: "Audio Mode",
+                              label: "audio_mode".tr(),
                               icon: audioMode
                                   ? Icon(Mdi.accountVoice, color: Colors.red)
                                   : Icon(Mdi.accountVoice,
                                       color: Colors.white)),
                           BottomNavigationBarItem(
-                              label: "More",
+                              label: "more".tr(),
                               icon: audioMode
                                   ? Icon(Mdi.dotsVertical, color: Colors.red)
                                   : Icon(Mdi.dotsVertical,
