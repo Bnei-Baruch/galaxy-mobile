@@ -23,7 +23,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>For people to hear you during meetings, Arvut Mobile needs access to your camera</string>
+	<string>For people to see you during meetings, Arvut Mobile needs access to your camera</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>For people to hear you during meetings, Arvut Mobile needs access to your microphone</string>
 	<key>UIBackgroundModes</key>
