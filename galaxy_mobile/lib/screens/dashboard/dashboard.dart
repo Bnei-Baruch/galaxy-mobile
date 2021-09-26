@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dio/dio.dart';
 import 'package:dots_indicator/dots_indicator.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:mdi/mdi.dart';
 import 'package:provider/provider.dart';
 import 'package:phone_state_i/phone_state_i.dart';
@@ -22,6 +24,7 @@ import 'package:galaxy_mobile/widgets/videoRoomDrawer.dart';
 import 'package:galaxy_mobile/services/authService.dart';
 import 'package:galaxy_mobile/chat/chatMessage.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 enum AudioDevice { receiver, speaker, bluetooth }
 
@@ -209,6 +212,7 @@ class _DashboardState extends State<Dashboard>
       mqttClient.addOnSubscribedCallback((topic) => subscribedToTopic(topic));
       mqttClient.addOnMsgReceivedCallback((payload) => handleCmdData(payload));
       mqttClient.addOnConnectionFailedCallback(() => handleConnectionFailed());
+      mqttClient.addOnDisconnectedCallback(() => handleOnDisconnection());
       mqttClient.connect();
       tapped();
     };
@@ -458,6 +462,12 @@ class _DashboardState extends State<Dashboard>
         ],
       ),
     );
+  }
+
+  void handleOnDisconnection() {
+    //reconnect
+    final mqttClient = context.read<MQTTClient>();
+    mqttClient.connect();
   }
 
   void connectedToBroker() {

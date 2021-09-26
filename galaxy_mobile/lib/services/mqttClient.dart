@@ -21,6 +21,7 @@ class MQTTClient {
   var _onSubscribedCallbackList = new List();
   var _onMsgReceivedCallbackList = new List();
   var _onConnectionFailedCallbackList = new List();
+  var _onDisconnectionFailedCallbackList = new List();
 
   MQTTClient() {
     _client = MqttServerClient.withPort(
@@ -34,6 +35,10 @@ class MQTTClient {
 
   void addOnConnectedCallback(Function() onConnectedCallback) {
     _onConnectedCallbackList.add(onConnectedCallback);
+  }
+
+  void addOnDisconnectedCallback(Function() onDisconnectedCallback) {
+    _onDisconnectionFailedCallbackList.add(onDisconnectedCallback);
   }
 
   void addOnSubscribedCallback(Function(String) onSubscribedCallback) {
@@ -150,6 +155,10 @@ class MQTTClient {
   void onDisconnected() {
     logger.info("Disconnected");
     _isConnected = false;
+    for (Function() disconnectionFailedCallback
+        in _onDisconnectionFailedCallbackList) {
+      disconnectionFailedCallback();
+    }
   }
 
   void onSubscribed(String topic) {

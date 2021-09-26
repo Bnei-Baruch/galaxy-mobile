@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:galaxy_mobile/chat/chatMessage.dart';
 import 'package:galaxy_mobile/models/sharedPref.dart';
@@ -110,7 +111,7 @@ class MainStore extends ChangeNotifier {
   }
 
   // TODO: this function should be declared as async.
-  Future<void> updaterUser(Map<String, dynamic> user) {
+  Future<Response> updaterUser(Map<String, dynamic> user) {
     FlutterLogs.logInfo("MainStore", "updaterUser", "");
     return _api.updateUser(user["id"], user);
   }

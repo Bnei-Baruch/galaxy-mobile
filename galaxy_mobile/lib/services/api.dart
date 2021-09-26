@@ -144,11 +144,13 @@ class Api {
     _dio.options.headers["Content-Type"] = "application/json";
 
     try {
+      print(
+          "calling updateUser with params userId = ${id} and url = ${_dio.options.baseUrl} ");
       final response = await _dio.put("/users/${id}", data: user);
       return response;
     } catch (error, requestOptions) {
       logger.error(error.toString());
-      return Response();
+      return Response(statusCode: -1);
     }
   }
 
