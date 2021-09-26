@@ -43,7 +43,7 @@ dependencies:
   flutter_logs: #^2.1.4
     git:
       url: https://github.com/igala/flutter_logs.git
-      ref: 2.1.4-1
+      ref: 2.1.4-2
     #path: ../../flutter_logs
 
   archive: ^2.0.13
