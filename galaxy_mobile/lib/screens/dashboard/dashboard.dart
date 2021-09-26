@@ -554,7 +554,6 @@ class _DashboardState extends State<Dashboard>
           return;
         },
         child: Scaffold(
-          drawer: isFullScreen ? null : VideoRoomDrawer(),
           appBar: isFullScreen
               ? null
               : !_show
@@ -562,6 +561,7 @@ class _DashboardState extends State<Dashboard>
                       appBar: AppBar(
                         backgroundColor: Colors.transparent,
                         iconTheme: IconThemeData(color: Colors.transparent),
+                        automaticallyImplyLeading: false,
                       ),
                       onTap: () => tapped(),
                     )

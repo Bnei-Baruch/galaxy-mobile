@@ -394,11 +394,9 @@ packages:
   flutter_logs:
     dependency: "direct main"
     description:
-      path: "."
-      ref: "2.1.4-1"
-      resolved-ref: "10a2b490a5367dd12952938f243a60215ab4ac7f"
-      url: "https://github.com/igala/flutter_logs.git"
-    source: git
+      path: "../../flutter_logs"
+      relative: true
+    source: path
     version: "2.1.4"
   flutter_screenutil:
     dependency: "direct main"

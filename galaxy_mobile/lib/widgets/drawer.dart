@@ -31,13 +31,13 @@ class AppDrawer extends StatelessWidget {
     FlutterLogs.logInfo(
         "AppDrawer", "archiveLogs", "2.0 zip path ${encoder.zip_path}");
     if (Platform.isAndroid) {
-      File logcat = File(path + "/galaxyLogs/logcat.txt");
+      File logcat = File(path + "/galaxy/logcat.txt");
       final String logs = await Logcat.execute();
 
       if (!logcat.existsSync()) logcat.create();
       logcat.openWrite();
       logcat.writeAsStringSync(logs);
-      encoder.addDirectory(Directory(path + '/galaxyLogs/'));
+      encoder.addDirectory(Directory(path + '/galaxy/'));
     }
     if (Platform.isIOS) {
       List<FileSystemEntity> list = Directory(path).listSync();
@@ -118,6 +118,20 @@ class AppDrawer extends StatelessWidget {
             leading: Icon(Icons.email),
             title: Text('send_logs'.tr()),
             onTap: () async {
+              Fluttertoast.showToast(
+                  msg: "Preparing logs",
+                  toastLength: Toast.LENGTH_LONG,
+                  gravity: ToastGravity.CENTER,
+                  timeInSecForIosWeb: 1,
+                  backgroundColor: Colors.white,
+                  textColor: Colors.black,
+                  fontSize: 16.0);
+
+              // showDialog(
+              //     context: context,
+              //     child: Dialog(
+              //       child: CircularProgressIndicator(),
+              //     ));
               archiveLogs();
               Navigator.pushNamed(context, '/settings');
             },
