@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:galaxy_mobile/config/env.dart';
 import 'package:mqtt_client/mqtt_client.dart';
@@ -10,6 +12,7 @@ final logger = new Logger("MQTTClient");
 class MQTTClient {
   String _username;
   String _password;
+  String _id;
 
   MqttServerClient _client;
 
@@ -24,13 +27,13 @@ class MQTTClient {
   var _onDisconnectionFailedCallbackList = new List();
 
   MQTTClient() {
-    _client = MqttServerClient.withPort(
-        APP_MQTT_HOST, APP_MQTT_CLIENT_ID, APP_MQTT_PORT);
+    _client = MqttServerClient(APP_MQTT_HOST, APP_MQTT_CLIENT_ID);
   }
 
-  void init(String username, String password) {
+  void init(String username, String password, String id) {
     _username = username;
     _password = password;
+    _id = id;
   }
 
   void addOnConnectedCallback(Function() onConnectedCallback) {
@@ -71,6 +74,7 @@ class MQTTClient {
 
   Future<MqttServerClient> connect() async {
     logger.info(">>> connection attempt: $_connectionAttempt");
+    var clientId = _id + "-" + randomString(3);
     if (_connectionAttempt < _maxConnectionAttempts) {
       _client.logging(on: true);
       _client.onConnected = onConnected;
@@ -79,20 +83,26 @@ class MQTTClient {
       _client.onSubscribed = onSubscribed;
       _client.onSubscribeFail = onSubscribeFail;
       _client.pongCallback = pong;
-      _client.secure = true;
+      _client.useWebSocket = true;
+      _client.clientIdentifier = clientId;
+      _client.keepAlivePeriod = 10;
+      _client.port = 443; // ( or whatever your WS port is)
+      //_client.secure = true;
       _client.connectionMessage = MqttConnectMessage()
           .authenticateAs(_username, _password)
-          .withClientIdentifier(APP_MQTT_CLIENT_ID)
-          .keepAliveFor(60)
+          .withClientIdentifier(clientId)
+          .keepAliveFor(10)
           .startClean()
           .will()
+          .withProtocolVersion(4)
+          .withProtocolName("MQTT")
           .withWillTopic(APP_MQTT_WILL_TOPIC)
           .withWillMessage(APP_MQTT_WILL_MESSAGE)
           .withWillRetain()
           .withWillQos(MqttQos.exactlyOnce);
 
       try {
-        Future.delayed(const Duration(seconds: 5), () {
+        Future.delayed(const Duration(seconds: 20), () {
           if (!_isConnected) {
             _connectionAttempt++;
             connect();
@@ -188,5 +198,16 @@ class MQTTClient {
       removeOnSubscribedCallback();
       _client.disconnect();
     }
+  }
+
+  String randomString(len) {
+    var charSet =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    var randomString = "";
+    for (var i = 0; i < len; i++) {
+      int randomPoz = (Random().nextInt(charSet.length));
+      randomString += charSet.substring(randomPoz, randomPoz + 1);
+    }
+    return randomString;
   }
 }

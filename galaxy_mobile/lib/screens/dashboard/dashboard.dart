@@ -6,6 +6,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:galaxy_mobile/services/keycloak.dart';
 import 'package:mdi/mdi.dart';
 import 'package:provider/provider.dart';
 import 'package:phone_state_i/phone_state_i.dart';
@@ -202,8 +203,8 @@ class _DashboardState extends State<Dashboard>
     videoRoom.RoomReady = () {
       FlutterLogs.logInfo("Dashboard", "videoRoom", "RoomReady");
       final authService = context.read<AuthService>();
-      mqttClient.init(
-          authService.getUserEmail(), authService.getToken().accessToken);
+      mqttClient.init(authService.getUserEmail(),
+          authService.getToken().accessToken, (activeUser as User).id);
 
       mqttClient.addOnConnectedCallback(() => {
             mqttClient.subscribe("galaxy/room/$_activeRoomId"),
@@ -212,7 +213,7 @@ class _DashboardState extends State<Dashboard>
       mqttClient.addOnSubscribedCallback((topic) => subscribedToTopic(topic));
       mqttClient.addOnMsgReceivedCallback((payload) => handleCmdData(payload));
       mqttClient.addOnConnectionFailedCallback(() => handleConnectionFailed());
-      mqttClient.addOnDisconnectedCallback(() => handleOnDisconnection());
+      // mqttClient.addOnDisconnectedCallback(() => handleOnDisconnection());
       mqttClient.connect();
       tapped();
     };
@@ -467,7 +468,9 @@ class _DashboardState extends State<Dashboard>
   void handleOnDisconnection() {
     //reconnect
     final mqttClient = context.read<MQTTClient>();
-    mqttClient.connect();
+    Timer(Duration(seconds: 10), () {
+      mqttClient.connect();
+    });
   }
 
   void connectedToBroker() {
