@@ -69,9 +69,11 @@ class StreamingUnified extends StatefulWidget {
   }
 
   void hideBar() {
-    state.setState(() {
-      isPlayerShown = false;
-    });
+    if (state.mounted) {
+      state.setState(() {
+        isPlayerShown = false;
+      });
+    }
   }
 
   void toggleOnAir(var data) {

@@ -24,6 +24,10 @@ class UILanguageSelector extends StatelessWidget {
         EasyLocalization.of(context).locale = Locale('he', 'IL');
         break;
 
+      case "Español":
+        EasyLocalization.of(context).locale = Locale('es', '');
+        break;
+
       default:
         FlutterLogs.logError("UILanguageSelector", "setLanguage",
             "unsupported language: $language");
@@ -45,6 +49,10 @@ class UILanguageSelector extends StatelessWidget {
         return "עברית";
         break;
 
+      case "es":
+        return "Español";
+        break;
+
       default:
         FlutterLogs.logError(
             "UILanguageSelector",
@@ -58,7 +66,7 @@ class UILanguageSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final languages = ['English', 'Русский', 'עברית'];
+    final languages = ['English', 'Русский', 'עברית', 'Español'];
 
     return Align(
         alignment: AlignmentDirectional.centerEnd,

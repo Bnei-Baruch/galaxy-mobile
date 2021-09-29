@@ -4,6 +4,7 @@ import 'dart:isolate';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_logs/flutter_logs.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/services/logger.dart';
 import 'package:galaxy_mobile/services/monitoring_isolate.dart';
@@ -27,7 +28,7 @@ class Settings extends StatefulWidget {
   State createState() => _SettingsState();
 }
 
-class _SettingsState extends State<Settings> {
+class _SettingsState extends State<Settings> with WidgetsBindingObserver {
   SelfViewWidget selfWidget;
   bool _isThinScreen;
 
@@ -45,6 +46,8 @@ class _SettingsState extends State<Settings> {
   Future<void> initState() {
     super.initState();
     logger.info("starting settings");
+    WidgetsBinding.instance.addObserver(this);
+
     selfWidget = SelfViewWidget();
 
     subscription = Connectivity()
@@ -55,6 +58,29 @@ class _SettingsState extends State<Settings> {
     Utils.parseJson("user_monitor_example.json")
         .then((value) => userJsonExtra = value);
     Utils.parseJson("monitor_data.json").then((value) => monitorData = value);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    switch (state) {
+      case AppLifecycleState.inactive:
+        FlutterLogs.logInfo("Settings", "appLifeCycleState", "inactive");
+        selfWidget.stopCamera();
+        break;
+      case AppLifecycleState.resumed:
+        FlutterLogs.logInfo("Settings", "appLifeCycleState", "resumed");
+        selfWidget.restartCamera();
+        break;
+      case AppLifecycleState.paused:
+        FlutterLogs.logInfo("Settings", "appLifeCycleState", "paused");
+        selfWidget.stopCamera();
+        break;
+      case AppLifecycleState.detached:
+        FlutterLogs.logInfo("Settings", "appLifeCycleState", "detached");
+        selfWidget.stopCamera();
+        break;
+    }
   }
 
   @override
@@ -224,6 +250,7 @@ class _SettingsState extends State<Settings> {
             }));
   }
 }
+
 //
 //
 // (value as Dashboard).callReneter =

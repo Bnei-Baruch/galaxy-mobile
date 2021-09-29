@@ -77,12 +77,19 @@ class VideoRoom extends StatefulWidget {
     if (pluginHandle != null) pluginHandle.hangup();
     if (subscriberHandle != null) subscriberHandle.destroy();
     if (_localRenderer != null) {
+      _localRenderer.dispose();
       _localRenderer.srcObject = null;
       // _localRenderer.dispose();
     }
     if (_remoteRenderer != null && _remoteRenderer.isNotEmpty) {
       _remoteRenderer.map((e) => e.srcObject = null);
       //_remoteRenderer.map((e) => e.dispose());
+    }
+    if (myStream != null) {
+      myStream.getAudioTracks().first.setMicrophoneMute(false);
+      myStream.getVideoTracks().first.enabled = false;
+      myStream.getAudioTracks().first.enabled = false;
+      myStream.dispose();
     }
     pluginHandle = null;
     subscriberHandle = null;

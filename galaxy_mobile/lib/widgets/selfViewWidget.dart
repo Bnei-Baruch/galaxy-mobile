@@ -21,15 +21,13 @@ class SelfViewWidget extends StatefulWidget {
     if (state != null && state.mounted) {
       (state.myStream as MediaStream).getVideoTracks().first.enabled = false;
       (state.myStream as MediaStream).getVideoTracks().first.stop();
-      (state.myStream as MediaStream).getAudioTracks().first.enabled = false;
-      (state.myStream as MediaStream).getAudioTracks().first.stop();
     }
   }
 }
 
 class _SelfViewWidgetState extends State<SelfViewWidget>
     with WidgetsBindingObserver {
-  RTCVideoRenderer _localRenderer = new RTCVideoRenderer();
+  RTCVideoRenderer _localRenderer;
   Plugin pluginHandle;
   Plugin subscriberHandle;
   MediaStream myStream;
@@ -48,27 +46,31 @@ class _SelfViewWidgetState extends State<SelfViewWidget>
     widget.state = this;
     FlutterLogs.logInfo("SelfViewWidget", "initState", "");
     WidgetsBinding.instance.addObserver(this);
-    _localRenderer.initialize();
+
     initRenderers();
   }
 
   @override
   void dispose() {
     FlutterLogs.logInfo("SelfViewWidget", "dispose", "");
+    _localRenderer.dispose();
     _localRenderer.srcObject = null;
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   initRenderers() {
+    _localRenderer = new RTCVideoRenderer();
+    _localRenderer.initialize();
+
     var mediaConstraints = {
-      "audio": true,
+      "audio": false,
       "video": {
         "mandatory": {
           "minWidth":
               '1280', // Provide your own width, height and frame rate here
           "minHeight": '720',
-          "minFrameRate": '60',
+          "minFrameRate": '30',
         },
         "facingMode": "user",
         "optional": [],
@@ -104,7 +106,6 @@ class _SelfViewWidgetState extends State<SelfViewWidget>
         break;
       case AppLifecycleState.resumed:
         FlutterLogs.logInfo("SelfViewWidget", "appLifeCycleState", "resumed");
-
         break;
       case AppLifecycleState.paused:
         FlutterLogs.logInfo("SelfViewWidget", "appLifeCycleState", "paused");
