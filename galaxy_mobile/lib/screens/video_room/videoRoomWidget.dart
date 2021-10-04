@@ -539,7 +539,8 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                     newFeeds.forEach((element) {
                       if (element["display"]["id"] == widget.user.id) {
                         //notify on exit room
-                        widget.callExitRoomUserExists();
+                        //request to disbale TRL-75
+                        // widget.callExitRoomUserExists();
                       }
                     });
 

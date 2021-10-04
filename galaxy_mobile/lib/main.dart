@@ -101,6 +101,7 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
             designSize: Size(412, 732),
             allowFontScaling: false,
             builder: () => MaterialApp(
+                debugShowCheckedModeBanner: false,
                 localizationsDelegates: context.localizationDelegates,
                 supportedLocales: context.supportedLocales,
                 locale: context.locale,

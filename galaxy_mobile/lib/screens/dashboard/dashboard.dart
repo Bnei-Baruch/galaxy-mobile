@@ -29,6 +29,8 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 enum AudioDevice { receiver, speaker, bluetooth }
 
+final int TIME_TO_SHOW_CONTROLS = 10;
+
 class Dashboard extends StatefulWidget {
   @override
   State createState() => _DashboardState();
@@ -753,8 +755,8 @@ class _DashboardState extends State<Dashboard>
       _show = true;
       if (controller != null) controller.reverse();
     });
-    Timer(Duration(seconds: 5), hideBottomBar);
-    Timer(Duration(seconds: 5), stream.hideBar);
+    Timer(Duration(seconds: TIME_TO_SHOW_CONTROLS), hideBottomBar);
+    Timer(Duration(seconds: TIME_TO_SHOW_CONTROLS), stream.hideBar);
   }
 
   void hideBottomBar() {

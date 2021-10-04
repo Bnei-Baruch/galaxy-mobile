@@ -29,6 +29,7 @@ class StreamingUnified extends StatefulWidget {
   var audioStream;
 
   var isVideoPlaying;
+  var isStreamIsPlaying;
   Plugin videoStreamingPlugin;
   Plugin audioStreamingPlugin;
   Plugin audioTrlStreamingPlugin;
@@ -713,10 +714,16 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
                                 height: MediaQuery.of(context).size.height / 3,
                                 width: MediaQuery.of(context).size.width,
                                 child: Center(
-                                    child: Text(
-                                  "No video",
-                                  style: TextStyle(fontSize: 24),
-                                ))))),
+                                    child: IconButton(
+                                  icon: Icon(Icons.graphic_eq),
+                                  color: Colors.white,
+                                )
+                                    //     Text(
+                                    //   "No video",
+                                    //   style: TextStyle(fontSize: 24),
+                                    // )
+
+                                    )))),
               ),
               Container(
                 height: 50,
