@@ -85,8 +85,8 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    final activeUser = context.select((MainStore s) => s.activeUser);
-    final rooms = context.select((MainStore s) => s.availableRooms);
+    var activeUser = context.select((MainStore s) => s.activeUser);
+    var rooms = context.select((MainStore s) => s.availableRooms);
 
     // initIsolate(context).then((value) => {
     //       mainToIsolateStream = value,

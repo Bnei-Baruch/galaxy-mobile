@@ -677,75 +677,61 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
       //audio trl init
       initTrlAudioStream();
     }
-    return GestureDetector(
-        dragStartBehavior: DragStartBehavior.down,
-        child: Stack(alignment: Alignment.topCenter, children: [
-          Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                height: getHeight() - 50,
-                width: getWidth(),
-                decoration: BoxDecoration(
-                    border: Border.all(
-                        color: widget.isOnAir
-                            ? Colors.redAccent
-                            : Colors.transparent,
-                        width: 3)),
-                child: (_remoteRenderer.srcObject != null &&
-                        widget.isVideoPlaying)
-                    ? RTCVideoView(
-                        _remoteRenderer,
-                        mirror: false,
-                        // objectFit:
-                        //     RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
-                        // RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-                      )
-                    : Material(
-                        child: InkWell(
-                            onTap: () {
-                              setState(() {
-                                widget.isPlayerShown = !widget.isPlayerShown;
-                              });
-                            },
-                            child: Container(
-                                height: MediaQuery.of(context).size.height / 3,
-                                width: MediaQuery.of(context).size.width,
-                                child: Center(
-                                    child: IconButton(
-                                  icon: Icon(Icons.graphic_eq),
-                                  color: Colors.white,
-                                )
-                                    //     Text(
-                                    //   "No video",
-                                    //   style: TextStyle(fontSize: 24),
-                                    // )
-
-                                    )))),
-              ),
-              Container(
-                height: 50,
-                width: getWidth(),
-                child: widget.isPlayerShown ? playerOverlay : Container(),
-              )
-            ],
+    return Stack(alignment: Alignment.topCenter, children: [
+      Column(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: getHeight() - 50,
+            width: getWidth(),
+            decoration: BoxDecoration(
+                border: Border.all(
+                    color:
+                        widget.isOnAir ? Colors.redAccent : Colors.transparent,
+                    width: 3)),
+            child: (_remoteRenderer.srcObject != null && widget.isVideoPlaying)
+                ? RTCVideoView(
+                    _remoteRenderer,
+                    mirror: false,
+                    // objectFit:
+                    //     RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
+                    // RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+                  )
+                : Material(
+                    child: InkWell(
+                        onTap: () {
+                          setState(() {
+                            widget.isPlayerShown = !widget.isPlayerShown;
+                          });
+                        },
+                        child: Container(
+                          height: MediaQuery.of(context).size.height / 3,
+                          width: MediaQuery.of(context).size.width,
+                          child: Icon(
+                            Icons.graphic_eq,
+                            size: 150.0,
+                            color: Colors.grey,
+                          ),
+                        ))),
           ),
-          Align(
-              alignment: Alignment.topRight,
-              child: Container(
-                  margin: const EdgeInsets.only(top: 8.0, right: 8.0),
-                  child: Opacity(
-                      opacity: widget.isOnAir ? 1.0 : 0.0,
-                      child: Image.asset('assets/graphics/onAir.png',
-                          height: 50, fit: BoxFit.fill))))
-        ]),
-        onTap: () {
-          setState(() {
-            widget.isPlayerShown = !widget.isPlayerShown;
-          });
-        });
+          Container(
+            height: 50,
+            width: getWidth(),
+            child: widget.isPlayerShown ? playerOverlay : Container(),
+          )
+        ],
+      ),
+      Align(
+          alignment: Alignment.topRight,
+          child: Container(
+              margin: const EdgeInsets.only(top: 8.0, right: 8.0),
+              child: Opacity(
+                  opacity: widget.isOnAir ? 1.0 : 0.0,
+                  child: Image.asset('assets/graphics/onAir.png',
+                      height: 50, fit: BoxFit.fill))))
+    ]);
     //
   }
 

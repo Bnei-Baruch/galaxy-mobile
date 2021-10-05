@@ -87,9 +87,8 @@ class MainStore extends ChangeNotifier {
   }
 
   Future fetchUser() async {
-    if (activeUser == null) {
-      activeUser = await _auth.getUser();
-    }
+    activeUser = await _auth.getUser();
+
     notifyListeners();
   }
 

@@ -76,6 +76,7 @@ class AuthService {
     FlutterLogs.logInfo("AuthService", "signIn", "logout");
     await _dio.get(
         "$APP_OPENID_END_SESSION_ENDPOINT?id_token_hint=${tokenResponse.idToken}");
+    this.tokenResponse = null;
   }
 
   Future<void> refreshToken() async {
