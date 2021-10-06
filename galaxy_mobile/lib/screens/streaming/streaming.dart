@@ -291,6 +291,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
     widget.audioMode = s.audioMode;
     widget.state = this;
     widget.trlAudioMuted = true;
+    widget.isVideoPlaying = false;
 //set user preset of audio and video
     getPresets();
 
@@ -709,11 +710,24 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
                         child: Container(
                           height: MediaQuery.of(context).size.height / 3,
                           width: MediaQuery.of(context).size.width,
-                          child: Icon(
-                            Icons.graphic_eq,
-                            size: 150.0,
-                            color: Colors.grey,
-                          ),
+                          child: widget.isVideoPlaying
+                              ? Icon(
+                                  Icons.graphic_eq,
+                                  size: 150.0,
+                                  color: Colors.grey,
+                                )
+                              : GestureDetector(
+                                  child: Icon(
+                                    Icons.play_arrow,
+                                    size: 150.0,
+                                    color: Colors.grey,
+                                  ),
+                                  onTap: () {
+                                    initAudioStream();
+
+                                    initVideoStream();
+                                  },
+                                ),
                         ))),
           ),
           Container(
