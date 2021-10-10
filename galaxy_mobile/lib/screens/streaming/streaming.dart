@@ -710,7 +710,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
                         child: Container(
                           height: MediaQuery.of(context).size.height / 3,
                           width: MediaQuery.of(context).size.width,
-                          child: widget.isVideoPlaying
+                          child: playerOverlay.isPlaying
                               ? Icon(
                                   Icons.graphic_eq,
                                   size: 150.0,
