@@ -10,6 +10,7 @@ import 'package:galaxy_mobile/services/logger.dart';
 import 'package:galaxy_mobile/themes/default.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_logs/flutter_logs.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'models/sharedPref.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:wakelock/wakelock.dart';
@@ -50,8 +51,11 @@ void main() async {
   await Firebase.initializeApp();
 
   Wakelock.enable();
-
-  runApp(
+  await SentryFlutter.init(
+          (options) {
+        options.dsn = 'https://ac8b0f908e3c49d395c1fc47fb2022ca@sentry.kab.info/4';
+      },
+      appRunner: () => runApp(
     /// Providers are above [MyApp] instead of inside it, so that tests
     /// can use [MyApp] while mocking the providers
     MultiProvider(
@@ -64,7 +68,7 @@ void main() async {
           ChangeNotifierProxyProvider3<AuthService, Api, MQTTClient, MainStore>(
               create: (_) => MainStore(),
               update: (_, auth, api, mqttClient, model) =>
-                  model..update(auth, api, mqttClient)),
+              model..update(auth, api, mqttClient)),
         ],
         child: EasyLocalization(
             supportedLocales: [
@@ -76,9 +80,11 @@ void main() async {
             path: 'assets/translations',
             fallbackLocale: Locale('en', 'US'),
             child: MyApp())
-        //MyApp()
-        ),
-  );
+      //MyApp()
+    ),
+  )
+      );
+
 }
 
 class MyApp extends StatelessWidget with WidgetsBindingObserver {
