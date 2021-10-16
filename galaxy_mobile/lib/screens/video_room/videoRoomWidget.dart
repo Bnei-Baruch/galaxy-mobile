@@ -1095,17 +1095,21 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
       initInfra();
       Map<String, dynamic> userJson = widget.user.toJson();
       userJson["room"] = widget.roomNumber;
-      userJson["group"] = "Test Room";
-      // initIsolate(context).then((value) => {
-      //       mainToIsolateStream = value,
-      //       mainToIsolateStream.send({
-      //         "type": 'setConnection',
-      //         "user": userJson,
-      //         // "userExtra": {},
-      //         // "data": {}
-      //       }),
-      //       mainToIsolateStream.send({"type": "start"})
-      //     });
+      userJson["group"] = widget.groupName;
+      initIsolate(context).then((value) => {
+            mainToIsolateStream = value,
+            mainToIsolateStream.send({
+              "type": 'setConnection',
+              "user": userJson,
+               "localAudio": widget.myStream.getAudioTracks().first,
+               "localVideo": widget.myStream.getVideoTracks().first,
+              "plugin": widget.pluginHandle,
+              "galaxyServer":widget.server
+              // "userExtra": {},
+              // "data": {}
+            }),
+            mainToIsolateStream.send({"type": "start"})
+          });
     }
 
     final double userGridHeight =

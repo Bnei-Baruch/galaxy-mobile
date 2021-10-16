@@ -137,6 +137,8 @@ class Api {
         },
       ),
     );
+    FlutterLogs.logInfo("Api", "updateMonitor",
+        "sending $data got back ${response.statusMessage}");
     return response;
   }
 

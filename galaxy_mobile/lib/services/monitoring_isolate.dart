@@ -36,7 +36,7 @@ void myIsolate(SendPort isolateToMainStream) {
   mainToIsolateStream.listen((data) {
     switch (data["type"]) {
       case "setConnection":
-        monitor.setConnection("", null, null, data["user"], "glx3"); //,
+        monitor.setConnection(data["plugin"], data["audioTrack"], data["videoTrack"], data["user"], data["galaxyServer"]); //,
         //data["userExtra"], data["data"]);
         //data["user"]
 
