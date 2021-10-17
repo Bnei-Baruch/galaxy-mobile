@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:math';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:disk_space/disk_space.dart';
@@ -16,7 +17,32 @@ import 'package:package_info/package_info.dart';
 import 'package:provider/provider.dart';
 import 'package:system_info/system_info.dart';
 
+
+final ONE_SECOND_IN_MS = 1000;
+final ONE_MINUTE_IN_MS = 60 * 1000;
+final FIVE_SECONDS_IN_MS = 5 * ONE_SECOND_IN_MS;
+
+final FIRST_BUCKET = 5 * ONE_SECOND_IN_MS;
+final MEDIUM_BUCKET = 15 * ONE_SECOND_IN_MS;
+final FULL_BUCKET = 45 * ONE_SECOND_IN_MS;
+
+final INITIAL_STORE_INTERVAL = 5 * ONE_MINUTE_IN_MS;
+final INITIAL_SAMPLE_INTERVAL = FIVE_SECONDS_IN_MS;
+final MAX_EXPONENTIAL_BACKOFF_MS = 10 * ONE_MINUTE_IN_MS;
+
 class MonitoringData {
+
+
+
+  var fetchErrors = 0;
+  var lastFetchTimestamp = 0;
+  var lastUpdateTimestamp = 0;
+
+  final LINK_STATE_INIT = "init";
+  final LINK_STATE_GOOD = "good";
+  final LINK_STATE_MEDIUM = "medium";
+  final LINK_STATE_WEAK = "weak";
+
   int gatherIntervalInMS;
   int updateIntervalInMS;
   Timer looper;
@@ -27,6 +53,13 @@ class MonitoringData {
   Plugin pluginHandle;
   MediaStreamTrack localAudioTrack;
   MediaStreamTrack localVideoTrack;
+  var miscData = {};
+  var storedData = [];
+  var spec = {
+  "sample_interval": INITIAL_SAMPLE_INTERVAL,
+  "store_interval": INITIAL_STORE_INTERVAL,
+  "metrics_whitelist": [],
+  };
 
 
   Map<String, dynamic> sentData;
@@ -204,6 +237,178 @@ class MonitoringData {
     // this.forEachMonitor_([], defaultTimestamp);
     // }
   }
+
+  navigatorConnectionData(var timestamp) {
+    //const c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    // if (!c) {
+      return null;
+    // }
+    // return {
+    //   timestamp,
+    //   downlink: c.downlink,
+    //   downlinkMax: c.downlinkMax,
+    //   effectiveType: c.effectiveType,
+    //   rtt: c.rtt,
+    //   saveData: c.saveData,
+    //   type: c.type,
+    // };
+  }
+
+  onSlowLink(slowLinkType, lost) {
+    var countName = "slow-link-${slowLinkType}";
+    var lostName = "slow-link-${slowLinkType}-lost";
+    if (( ! this.miscData.containsKey(countName)) ) {
+    this.miscData[countName] = 0;
+    }
+    this.miscData[countName]++;
+    if (!( miscData.containsKey(lostName))) {
+    this.miscData[lostName] = 0;
+    }
+    this.miscData[lostName] += lost;
+    }
+
+
+  Map getMiscData(var timestamp) {
+
+    return Map.of({timestamp:this.miscData, "type": "misc"});
+  }
+  forEachMonitor(List datas, defaultTimestamp) {
+    var dataTimestamp = (datas != null && datas.length >0 && datas[0].timestamp) || defaultTimestamp;
+    var navigatorConnection = this.navigatorConnectionData(dataTimestamp);
+    if (navigatorConnection) {
+      datas.add({"name": "NetworkInformation", "reports": [navigatorConnection], "timestamp": dataTimestamp});
+    }
+    var misc = this.getMiscData(dataTimestamp);
+    if (misc != null) {
+      datas.add({"name": "Misc", "reports": [misc], "timestamp": dataTimestamp});
+    }
+    if (datas.length >0) {
+      this.storedData.add(datas);
+    }
+
+    // This is Async callback. Sort stored data.
+    this.storedData.sort((a, b) => a[0].timestamp - b[0].timestamp);
+    // Throw old stats, STORE_INTERVAL from last timestamp stored.
+    var lastTimestamp = this.lastTimestamp();
+    if (lastTimestamp) {
+      this.storedData.removeWhere((data) => data[0].timestamp >= lastTimestamp - this.spec["store_interval"]);
+    }
+    if (datas.length > 0 /*&& this.onDataCallback*/ && this.storedData.length>0) {
+      //this.onDataCallback(this.storedData[this.storedData.length - 1]);
+    }
+    this.updateScore();
+
+    var  backoff = min(MAX_EXPONENTIAL_BACKOFF_MS, FIVE_SECONDS_IN_MS * pow(2, this.fetchErrors));
+    if (
+    (lastUpdateTimestamp >0 && fetchErrors>0) /* Fetch for the first time */ ||
+        (lastTimestamp - this.lastUpdateTimestamp > this.spec["store_interval"] /* Fetch after STORE_INTERVAL */ &&
+            lastTimestamp - this.lastFetchTimestamp > backoff) /* Fetch after errors backoff */
+    ) {
+      this.updateBackend(/*logToConsole=*/);
+    }
+  }
+
+
+  //
+  // updateScore() {
+  //   const data = this.storedData.map((d) => this.filterData(d, this.spec.metrics_whitelist, ""));
+  //   data.forEach((d) => {
+  //   if (d.length && d[0].timestamp) {
+  //       const timestamp = d[0].timestamp;
+  //       const lastScoreTimestamp = this.scoreData.length && this.scoreData[this.scoreData.length - 1][0].timestamp;
+  //       if (timestamp && (!lastScoreTimestamp || lastScoreTimestamp < timestamp)) {
+  //   this.scoreData.push(d);
+  //   }
+  //   }
+  //   });
+  //   // Remove older then 10 minutes.
+  //   const last = this.scoreData[this.scoreData.length - 1];
+  //   if (last && last.length && /* [0] - audio */ last[0].timestamp) {
+  //   const lastTimestamp = last[0].timestamp;
+  //   this.scoreData = this.scoreData.filter((d) => {
+  //   const timestamp = d[0].timestamp;
+  //   return timestamp && timestamp >= lastTimestamp - FULL_BUCKET;
+  //   });
+  //   const input = {
+  //   // Last timestamp.
+  //   timestamp: [lastTimestamp],
+  //   // Last timestamp values.
+  //   data: this.spec.metrics_whitelist.map((metric) => [this.getMetricValue(last, metric, "")]),
+  //   // Mapping form metric to it's index.
+  //   index: this.spec.metrics_whitelist.reduce((acc, metric, idx) => {
+  //   acc[metric] = idx;
+  //   return acc;
+  //   }, {}),
+  //   stats: this.spec.metrics_whitelist.map((metric) => {
+  //   const stats = [new Stats(), new Stats(), new Stats()];
+  //   stats.forEach((stat, statIndex) =>
+  //   this.scoreData
+  //       .map((d) => {
+  //   return [d[0].timestamp, this.getMetricValue(d, metric, "")];
+  //   })
+  //       .forEach(([timestamp, v]) => {
+  //   switch (statIndex) {
+  //   case 0: // Smallest time bucket.
+  //   if (lastTimestamp - timestamp > FIRST_BUCKET) {
+  //   return; // Skipp add.
+  //   }
+  //   break;
+  //   case 1: // Medium time bucket.
+  //   if (lastTimestamp - timestamp > MEDIUM_BUCKET) {
+  //   return; // Skipp add.
+  //   }
+  //   break;
+  //   case 2: // Full time bucket
+  //   if (lastTimestamp - timestamp > FULL_BUCKET) {
+  //   return; // Skipp add.
+  //   }
+  //   break;
+  //   default:
+  //   break;
+  //   }
+  //   stat.add(v, timestamp);
+  //   })
+  //   );
+  //   return stats;
+  //   }),
+  //   };
+  //   const values = dataValues(input, lastTimestamp);
+  //   // Keep commented out logs for debugging.
+  //   // console.log(input, values);
+  //   // console.log('last', this.scoreData.length, input.data.map(arr => arr[0] === undefined ? 'undefined' : arr[0]).join(' | '));
+  //   // console.log('score', values.score.value, values.score.formula);
+  //   // console.log('audio score 1min', values.audio.jitter.oneMin && values.audio.jitter.oneMin.mean.value, values.audio.packetsLost.oneMin && values.audio.packetsLost.oneMin.mean.value, values.audio.roundTripTime.oneMin && values.audio.roundTripTime.oneMin.mean.value);
+  //   // console.log('audio score 3min', values.audio.jitter.threeMin && values.audio.jitter.threeMin.mean.value, values.audio.packetsLost.threeMin && values.audio.packetsLost.threeMin.mean.value, values.audio.roundTripTime.threeMin && values.audio.roundTripTime.threeMin.mean.value);
+  //   // console.log('video score 1min', values.video.jitter.oneMin && values.video.jitter.oneMin.mean.value, values.video.packetsLost.oneMin && values.video.packetsLost.oneMin.mean.value, values.video.roundTripTime.oneMin && values.video.roundTripTime.oneMin.mean.value);
+  //   // console.log('video score 3min', values.video.jitter.threeMin && values.video.jitter.threeMin.mean.value, values.video.packetsLost.threeMin && values.video.packetsLost.threeMin.mean.value, values.video.roundTripTime.threeMin && values.video.roundTripTime.threeMin.mean.value);
+  //   if (this.onStatus) {
+  //   const firstTimestamp = this.scoreData[0][0].timestamp;
+  //   const formula = `Score ${values.score.view} = ${values.score.formula}`;
+  //   // console.log('Connection', formula, values.score.value);
+  //   if (lastTimestamp - firstTimestamp >= MEDIUM_BUCKET) {
+  //   if (values.score.value < 10) {
+  //   this.onStatus(LINK_STATE_GOOD, formula);
+  //   } else if (values.score.value < 100) {
+  //   this.onStatus(LINK_STATE_MEDIUM, formula);
+  //   } else {
+  //   this.onStatus(LINK_STATE_WEAK, formula);
+  //   }
+  //   } else {
+  //   this.onStatus(LINK_STATE_INIT, formula);
+  //   }
+  //   }
+  //   }
+  // }
+
+
+  lastTimestamp() {
+    return this.storedData.length>0 &&
+        this.storedData[this.storedData.length - 1] &&
+        this.storedData[this.storedData.length - 1].length
+        ? this.storedData[this.storedData.length - 1][0].timestamp
+        : 0;
+  }
+
 
   updateBackend(String data) async {
     print("monitor updateBackend");
