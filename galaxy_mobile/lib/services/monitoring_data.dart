@@ -408,40 +408,40 @@ class MonitoringData {
     // reduce((acc, metric, idx) => {
     acc["metric"] = idx;
     return acc;
-    },
+    }),
     "stats": (spec["metrics_whitelist"] as List).map((metric)  {
     var stats = [new Stats(), new Stats(), new Stats()];
-    stats.forEach((stat, statIndex) =>
+    stats.asMap().forEach((statIndex,stat) {
     this.scoreData
         .map((d) {
     return [d[0].timestamp, this.getMetricValue(d, metric, "")];
     })
-        .forEach(([timestamp, v])  {
+        .forEach(([timestamp, v]) {
     switch (statIndex) {
     case 0: // Smallest time bucket.
     if (lastTimestamp - timestamp > FIRST_BUCKET) {
-    return; // Skipp add.
+     null; // Skipp add.
     }
     break;
     case 1: // Medium time bucket.
     if (lastTimestamp - timestamp > MEDIUM_BUCKET) {
-    return; // Skipp add.
+     null; // Skipp add.
     }
     break;
     case 2: // Full time bucket
     if (lastTimestamp - timestamp > FULL_BUCKET) {
-    return; // Skipp add.
+     null; // Skipp add.
     }
     break;
     default:
+       null;
     break;
     }
     stat.add(v, timestamp);
-    })
-    );
-    return stats;
-    })),
-    };
+    });
+    });
+    }
+    )};
     var values = dataValues(input, lastTimestamp);
     // Keep commented out logs for debugging.
     // console.log(input, values);
@@ -502,7 +502,23 @@ class MonitoringData {
   }
 }
 
-Stats = class {
+class Stats  {
+  int mean;
+
+  int dSquared;
+
+  int length;
+
+  int maxAddedTimestamp;
+
+  int maxRemovedTimestamp;
+
+  int numAdds;
+
+  int numRemoves;
+
+  int numEmptyRemoves;
+
 constructor() {
 this.mean = 0;
 this.dSquared = 0;
@@ -514,8 +530,8 @@ this.numRemoves = 0;
 this.numEmptyRemoves = 0;
 }
 
-add(value, timestamp) {
-if (isNaN(value) || !isFinite(value)) {
+add(double value, var timestamp) {
+if (value.isNaN || !value.isFinite) {
 // May be string value. Ignore.
 return;
 }
@@ -524,51 +540,51 @@ this.numAdds++;
 if (timestamp > this.maxAddedTimestamp) {
 this.maxAddedTimestamp = timestamp;
 } else {
-console.error(
-`Expecting to add only new values, old timestamp: ${timestamp} found, max ${this.maxAddedTimestamp}.`
+print(
+"Expecting to add only new values, old timestamp: ${timestamp} found, max ${this.maxAddedTimestamp}."
 );
 }
 this.length++;
 
-const meanIncrement = (value - this.mean) / this.length;
-const newMean = this.mean + meanIncrement;
+var meanIncrement = (value - this.mean) / this.length;
+var newMean = this.mean + meanIncrement;
 
-const dSquaredIncrement = (value - newMean) * (value - this.mean);
-let newDSquared = (this.dSquared * (this.length - 1) + dSquaredIncrement) / this.length;
-if (isNaN(newDSquared)) {
-console.log("add newDSquared", newDSquared, this.dSquared, this.length, dSquaredIncrement);
+var dSquaredIncrement = (value - newMean) * (value - this.mean);
+var newDSquared = (this.dSquared * (this.length - 1) + dSquaredIncrement) / this.length;
+if (newDSquared.isNaN) {
+print("add newDSquared $newDSquared, $this.dSquared, $this.length, $dSquaredIncrement");
 }
 if (newDSquared < 0) {
 // Correcting float inaccuracy.
 if (newDSquared < -0.00001) {
-console.warn(`Add: newDSquared negative: ${newDSquared}. Setting to 0. ${value}, ${timestamp} ${this}`);
+print("Add: newDSquared negative: ${newDSquared}. Setting to 0. ${value}, ${timestamp} ${this}");
 }
 newDSquared = 0;
 }
 
-this.mean = newMean;
-this.dSquared = newDSquared;
+this.mean = newMean.toInt();
+this.dSquared = newDSquared.toInt();
 }
 
-remove(value, timestamp) {
-if (isNaN(value) || !isFinite(value)) {
-// May be string value. Ingore.
-return;
-}
+remove(double value, var timestamp) {
+  if (value.isNaN || !value.isFinite) {
+// May be string value. Ignore.
+    return;
+  }
 if (timestamp > this.maxRemovedTimestamp) {
 this.maxRemovedTimestamp = timestamp;
 } else {
-console.warn(
-`Expecting to remove only new values, old timestamp: ${timestamp} found, max ${this.maxRemovedTimestamp}.`
+print(
+"Expecting to remove only new values, old timestamp: ${timestamp} found, max ${this.maxRemovedTimestamp}."
 );
 }
 if (this.length <= 1) {
-if (this.length === 1) {
+if (this.length == 1) {
 this.numRemoves++;
 } else {
 this.numEmptyRemoves++;
 }
-console.warn(`Empty stats (${value}, ${timestamp}, ${this}).`);
+print("Empty stats (${value}, ${timestamp}, ${this}).");
 this.mean = 0;
 this.dSquared = 0;
 this.length = 0;
@@ -577,23 +593,123 @@ return;
 this.numRemoves++;
 this.length--;
 
-const meanIncrement = (this.mean - value) / this.length;
-const newMean = this.mean + meanIncrement;
+var meanIncrement = (this.mean - value) / this.length;
+var newMean = this.mean + meanIncrement;
 
-const dSquaredIncrement = (newMean - value) * (value - this.mean);
-let newDSquared = (this.dSquared * (this.length + 1) + dSquaredIncrement) / this.length;
-if (isNaN(newDSquared)) {
-console.log("remove newDSquared", newDSquared, this.dSquared, this.length, dSquaredIncrement);
+var dSquaredIncrement = (newMean - value) * (value - this.mean);
+var newDSquared = (this.dSquared * (this.length + 1) + dSquaredIncrement) / this.length;
+if (newDSquared.isNaN) {
+print("remove $newDSquared  $newDSquared, $this.dSquared, $this.length, $dSquaredIncrement");
 }
 if (newDSquared < 0) {
 // Correcting float inaccuracy.
 if (newDSquared < -0.00001) {
-console.warn(`Remove: newDSquared negative: ${newDSquared}. Setting to 0. ${value}, ${timestamp} ${this}`);
+print("Remove: newDSquared negative: ${newDSquared}. Setting to 0. ${value}, ${timestamp} ${this}");
 }
 newDSquared = 0;
 }
 
-this.mean = newMean;
-this.dSquared = newDSquared;
+this.mean = newMean.toInt();
+this.dSquared = newDSquared.toInt();
 }
+}
+
+const statsNames = ["oneMin", "threeMin", "tenMin"];
+ List audioVideoScore(var audioVideo) {
+if (!audioVideo) {
+return [0, ""];
+}
+var score = 0;
+var formula = "";
+if (audioVideo.jitter && audioVideo.jitter.score.value > 0) {
+score += 1000 * audioVideo.jitter.score.value;
+formula += "1000*jitter(${audioVideo.jitter.score.value})";
+}
+if (audioVideo.packetsLost && audioVideo.packetsLost.score.value > 0) {
+score += audioVideo.packetsLost.score.value;
+formula += " + packet lost(${audioVideo.packetsLost.score.value})";
+}
+if (audioVideo.roundTripTime && audioVideo.roundTripTime.score.value > 0) {
+score += 100 * audioVideo.roundTripTime.score.value;
+formula += " + 100*rTT(${audioVideo.roundTripTime.score.value})";
+}
+return [score, formula];
+}
+
+String sinceTimestamp(ms, now){
+var pad = (int number, int size) {
+String s = number.toString();
+while (s.length < (size ?? 2)) {
+s = "0" + s;
+}
+return s;
+};
+var loginDate =  DateTime.fromMicrosecondsSinceEpoch(ms);
+var diff = now - loginDate;
+var minutes = pad(((diff / (1000 * 60)) % 60), 2);
+var hours = (diff / (1000 * 3600));
+return "${hours}h:${minutes}m";
+};
+
+Map dataValues(var data, var now) {
+var values = {};
+if (data["timestamps"] && data["timestamps"].length) {
+values = {"value": data.timestamps[0], "view": sinceTimestamp(data.timestamps[0], now)};
+}
+if (data["index"]!= null) {
+for (var metric in  data["index"]) {
+var metricField = metric.includes("Misc") ? "misc" : metric.includes("video") ? "video" : "audio";
+if (values.containsKey(metricField)) {
+values[metricField] = {};
+}
+var metricName = metric.split(".").slice(-1)[0];
+var metricNames = [
+["slow-link-receiving", "slowLink"],
+["slow-link-receiving-lost", "slowLinkLost"],
+];
+if (metricNames.contains(metricName)) {
+metricName = metricNames[metricName];
+}
+values[metricField][metricName] = {};
+
+var value = data["data"]["index"][0];
+values[metricField][metricName].last = {"value", "view": shortNumber(value) || ""};
+let metricScore = 0;
+if (!isNaN(value)) {
+data.stats[index].forEach((stats, statsIndex) => {
+const stdev = Math.sqrt(stats.dsquared);
+values[metricField][metricName][statsNames[statsIndex]] = {
+mean: {value: stats.mean, view: shortNumber(stats.mean)},
+stdev: {value: stdev, view: shortNumber(stdev)},
+length: {value: stats.length, view: shortNumber(stats.length)},
+};
+});
+if (values[metricField][metricName].oneMin && values[metricField][metricName].threeMin) {
+metricScore =
+values[metricField][metricName].oneMin.mean.value - values[metricField][metricName].threeMin.mean.value;
+}
+}
+values[metricField][metricName].score = {value: metricScore, view: shortNumber(metricScore)};
+}
+}
+let [score, formula] = audioVideoScore(values.audio);
+let [videoScore, videoFormula] = audioVideoScore(values.video);
+score += videoScore;
+formula = `Audio: ${formula} + Video: ${videoFormula}`;
+if (values.misc && values.misc.iceState && values.misc.iceState.last.value) {
+if (!["checking", "completed", "connected"].includes(values.misc.iceState.last.value)) {
+score += 100000; // Ice state disconnected or not connected yet. Slow user!
+formula += " + 100K iceState";
+}
+}
+if (values.misc && values.misc.slowLink.score.value) {
+score += values.misc.slowLink.score.value * 100;
+formula += ` + 100*slowLink(${values.misc.slowLink.score.value})`;
+}
+if (values.misc && values.misc.slowLinkLost.score.value) {
+score += values.misc.slowLinkLost.score.value * 10;
+formula += ` + 10*slowLinkLost(${values.misc.slowLinkLost.score.value})`;
+}
+values.score = {value: score, view: shortNumber(score), formula};
+return values;
 };
