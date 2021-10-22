@@ -17,7 +17,6 @@ import 'package:package_info/package_info.dart';
 import 'package:provider/provider.dart';
 import 'package:system_info/system_info.dart';
 
-
 final ONE_SECOND_IN_MS = 1000;
 final ONE_MINUTE_IN_MS = 60 * 1000;
 final FIVE_SECONDS_IN_MS = 5 * ONE_SECOND_IN_MS;
@@ -31,9 +30,6 @@ final INITIAL_SAMPLE_INTERVAL = FIVE_SECONDS_IN_MS;
 final MAX_EXPONENTIAL_BACKOFF_MS = 10 * ONE_MINUTE_IN_MS;
 
 class MonitoringData {
-
-
-
   var fetchErrors = 0;
   var lastFetchTimestamp = 0;
   var lastUpdateTimestamp = 0;
@@ -57,17 +53,20 @@ class MonitoringData {
   var storedData = [];
   var scoreData = [];
   var spec = {
-  "sample_interval": INITIAL_SAMPLE_INTERVAL,
-  "store_interval": INITIAL_STORE_INTERVAL,
-  "metrics_whitelist": [],
+    "sample_interval": INITIAL_SAMPLE_INTERVAL,
+    "store_interval": INITIAL_STORE_INTERVAL,
+    "metrics_whitelist": [],
   };
 
-
   Map<String, dynamic> sentData;
+
+  var onStatus;
+
   MonitoringData(SendPort isolateToMainStream) {
     toApp = isolateToMainStream;
   }
-  setConnection (
+
+  setConnection(
       Plugin pluginHandle,
       MediaStreamTrack localAudioTrack,
       MediaStreamTrack localVideoTrack,
@@ -76,11 +75,12 @@ class MonitoringData {
     // userJsonExtra = userExtra;
     // //userJson = user.toJson();
     // sentData = data;
-     this.pluginHandle = pluginHandle;
+    this.pluginHandle = pluginHandle;
     this.localAudioTrack = localAudioTrack;
     this.localVideoTrack = localVideoTrack;
     userJson = user;
-    userJson["cpu"] = (Platform.isAndroid?"Android ":"iOS ")+Platform.operatingSystemVersion;
+    userJson["cpu"] = (Platform.isAndroid ? "Android " : "iOS ") +
+        Platform.operatingSystemVersion;
 
     userJson["ram"] = SysInfo.getTotalPhysicalMemory().toString();
 
@@ -102,9 +102,8 @@ class MonitoringData {
 
   gatherDataPerInterval() {
     //
-
-
   }
+
   updateLooper() {
     print("monitor updateLooper");
     int counter = 1;
@@ -121,16 +120,17 @@ class MonitoringData {
   }
 
   monitor_() {
-    if (this.pluginHandle  ==null || this.localAudioTrack == null|| this.userJson == null) {
+    if (this.pluginHandle == null ||
+        this.localAudioTrack == null ||
+        this.userJson == null) {
       return; // User not connected.
     }
     RTCPeerConnection pc = (this.pluginHandle.webRTCHandle.pc);
-    var defaultTimestamp =   DateTime.now().millisecondsSinceEpoch;
-    if (
-    pc != null &&
+    var defaultTimestamp = DateTime.now().millisecondsSinceEpoch;
+    if (pc != null &&
         this.localAudioTrack is MediaStreamTrack &&
-        (this.localVideoTrack != null|| this.localVideoTrack is MediaStreamTrack)
-    ) {
+        (this.localVideoTrack != null ||
+            this.localVideoTrack is MediaStreamTrack)) {
       const datas = [];
       const SKIP_REPORTS = [
         "certificate",
@@ -140,45 +140,41 @@ class MonitoringData {
         "remote-candidate"
       ];
       const getStatsPromises = [];
-      getStatsPromises.add(
-          pc.getStats(this.localAudioTrack).then((stats) {
-            var audioReports = {
-              "name": "audio",
-              "reports": [],
-              "timestamp": defaultTimestamp
-            };
-            stats.forEach((report) {
-              // Remove not necessary reports.
-              if (!SKIP_REPORTS.contains(report.type)) {
-                if (report.timestamp != null) {
-                  audioReports["timestamp"] = report.timestamp;
-                }
-                (audioReports["reports"] as List).add(report);
-              }
-            });
-            datas.add(audioReports);
-          })
-      );
+      getStatsPromises.add(pc.getStats(this.localAudioTrack).then((stats) {
+        var audioReports = {
+          "name": "audio",
+          "reports": [],
+          "timestamp": defaultTimestamp
+        };
+        stats.forEach((report) {
+          // Remove not necessary reports.
+          if (!SKIP_REPORTS.contains(report.type)) {
+            if (report.timestamp != null) {
+              audioReports["timestamp"] = report.timestamp;
+            }
+            (audioReports["reports"] as List).add(report);
+          }
+        });
+        datas.add(audioReports);
+      }));
       if (this.localVideoTrack != null) {
-        getStatsPromises.add(
-            pc.getStats(this.localVideoTrack).then((stats) {
-              var videoReports = {
-                "name": "video",
-                "reports": [],
-                "timestamp": defaultTimestamp
-              };
-              stats.forEach((report) {
-                // Remove not necessary reports.
-                if (!SKIP_REPORTS.contains(report.type)) {
-                  if (report.timestamp != null) {
-                    videoReports["timestamp"] = report.timestamp;
-                  }
-                  (videoReports["reports"] as List).add(report);
-                }
-              });
-              datas.add(videoReports);
-            })
-        );
+        getStatsPromises.add(pc.getStats(this.localVideoTrack).then((stats) {
+          var videoReports = {
+            "name": "video",
+            "reports": [],
+            "timestamp": defaultTimestamp
+          };
+          stats.forEach((report) {
+            // Remove not necessary reports.
+            if (!SKIP_REPORTS.contains(report.type)) {
+              if (report.timestamp != null) {
+                videoReports["timestamp"] = report.timestamp;
+              }
+              (videoReports["reports"] as List).add(report);
+            }
+          });
+          datas.add(videoReports);
+        }));
       }
 
       // Missing some important reports. Add them manually.
@@ -188,48 +184,44 @@ class MonitoringData {
       }
       var mediaSourceIds = [];
       var ssrcs = [];
-      getStatsPromises.add(
-          pc.getStats(null).then((stats) {
-            stats.forEach((report) {
-              if (ids.contains(report.values["trackIdentifier"])) {
-                if (report.values["mediaSourceId"] != null &&
-                    !mediaSourceIds.contains(report.values["mediaSourceId"])) {
-                  mediaSourceIds.add(report.values["mediaSourceId"]);
+      getStatsPromises.add(pc.getStats(null).then((stats) {
+        stats.forEach((report) {
+          if (ids.contains(report.values["trackIdentifier"])) {
+            if (report.values["mediaSourceId"] != null &&
+                !mediaSourceIds.contains(report.values["mediaSourceId"])) {
+              mediaSourceIds.add(report.values["mediaSourceId"]);
+            }
+          }
+        });
+        if (mediaSourceIds.length != null) {
+          stats.forEach((report) {
+            if (mediaSourceIds.contains(report.values["mediaSourceId"])) {
+              if (report.values["ssrc"] != null &&
+                  !ssrcs.contains(report.values["ssrc"])) {
+                ssrcs.add(report.values["ssrc"]);
+              }
+            }
+          });
+        }
+        if (ssrcs.length != null) {
+          stats.forEach((report) {
+            if (ssrcs.contains(report.values["ssrc"]) ||
+                mediaSourceIds.contains(report.values["mediaSourceId"]) ||
+                ids.contains(report.values["trackIdentifier"])) {
+              var kind = report.values["kind"];
+              var type = report.type;
+              var data = datas.firstWhere((data) => data.name == kind);
+              if (data && data.reports) {
+                var r =
+                    (data["reports"] as List).firstWhere((r) => r.type == type);
+                if (!r) {
+                  (data["reports"] as List).add(report);
                 }
               }
-            });
-            if (mediaSourceIds.length != null) {
-              stats.forEach((report) {
-                if (mediaSourceIds.contains(report.values["mediaSourceId"])) {
-                  if (report.values["ssrc"] != null &&
-                      !ssrcs.contains(report.values["ssrc"])) {
-                    ssrcs.add(report.values["ssrc"]);
-                  }
-                }
-              });
             }
-            if (ssrcs.length != null) {
-              stats.forEach((report) {
-                if (
-                ssrcs.contains(report.values["ssrc"]) ||
-                    mediaSourceIds.contains(report.values["mediaSourceId"]) ||
-                    ids.contains(report.values["trackIdentifier"])
-                ) {
-                  var kind = report.values["kind"];
-                  var type = report.type;
-                  var data = datas.firstWhere((data) => data.name == kind);
-                  if (data && data.reports) {
-                    var r = (data["reports"] as List).firstWhere((r) =>
-                    r.type == type);
-                    if (!r) {
-                      (data["reports"] as List).add(report);
-                    }
-                  }
-                }
-              });
-            }
-          })
-      );
+          });
+        }
+      }));
     }
     // Promise.all(getStatsPromises).then(() => {
     // this.forEachMonitor_(datas, defaultTimestamp);
@@ -242,7 +234,7 @@ class MonitoringData {
   navigatorConnectionData(var timestamp) {
     //const c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
     // if (!c) {
-      return null;
+    return null;
     // }
     // return {
     //   timestamp,
@@ -258,32 +250,41 @@ class MonitoringData {
   onSlowLink(slowLinkType, lost) {
     var countName = "slow-link-${slowLinkType}";
     var lostName = "slow-link-${slowLinkType}-lost";
-    if (( ! this.miscData.containsKey(countName)) ) {
-    this.miscData[countName] = 0;
+    if ((!this.miscData.containsKey(countName))) {
+      this.miscData[countName] = 0;
     }
     this.miscData[countName]++;
-    if (!( miscData.containsKey(lostName))) {
-    this.miscData[lostName] = 0;
+    if (!(miscData.containsKey(lostName))) {
+      this.miscData[lostName] = 0;
     }
     this.miscData[lostName] += lost;
-    }
-
+  }
 
   Map getMiscData(var timestamp) {
-
-    return Map.of({timestamp:this.miscData, "type": "misc"});
+    return Map.of({timestamp: this.miscData, "type": "misc"});
   }
+
   forEachMonitor(List datas, defaultTimestamp) {
-    var dataTimestamp = (datas != null && datas.length >0 && datas[0].timestamp) || defaultTimestamp;
+    var dataTimestamp =
+        (datas != null && datas.length > 0 && datas[0].timestamp) ||
+            defaultTimestamp;
     var navigatorConnection = this.navigatorConnectionData(dataTimestamp);
     if (navigatorConnection) {
-      datas.add({"name": "NetworkInformation", "reports": [navigatorConnection], "timestamp": dataTimestamp});
+      datas.add({
+        "name": "NetworkInformation",
+        "reports": [navigatorConnection],
+        "timestamp": dataTimestamp
+      });
     }
     var misc = this.getMiscData(dataTimestamp);
     if (misc != null) {
-      datas.add({"name": "Misc", "reports": [misc], "timestamp": dataTimestamp});
+      datas.add({
+        "name": "Misc",
+        "reports": [misc],
+        "timestamp": dataTimestamp
+      });
     }
-    if (datas.length >0) {
+    if (datas.length > 0) {
       this.storedData.add(datas);
     }
 
@@ -292,38 +293,45 @@ class MonitoringData {
     // Throw old stats, STORE_INTERVAL from last timestamp stored.
     var lastTimestamp = this.lastTimestamp();
     if (lastTimestamp) {
-      this.storedData.removeWhere((data) => data[0].timestamp >= lastTimestamp - this.spec["store_interval"]);
+      this.storedData.removeWhere((data) =>
+          data[0].timestamp >= lastTimestamp - this.spec["store_interval"]);
     }
-    if (datas.length > 0 /*&& this.onDataCallback*/ && this.storedData.length>0) {
+    if (datas.length > 0 /*&& this.onDataCallback*/ &&
+        this.storedData.length > 0) {
       //this.onDataCallback(this.storedData[this.storedData.length - 1]);
     }
     this.updateScore();
 
-    var  backoff = min(MAX_EXPONENTIAL_BACKOFF_MS, FIVE_SECONDS_IN_MS * pow(2, this.fetchErrors));
-    if (
-    (lastUpdateTimestamp >0 && fetchErrors>0) /* Fetch for the first time */ ||
-        (lastTimestamp - this.lastUpdateTimestamp > this.spec["store_interval"] /* Fetch after STORE_INTERVAL */ &&
-            lastTimestamp - this.lastFetchTimestamp > backoff) /* Fetch after errors backoff */
-    ) {
-      this.updateBackend(/*logToConsole=*/"");
+    var backoff = min(MAX_EXPONENTIAL_BACKOFF_MS,
+        FIVE_SECONDS_IN_MS * pow(2, this.fetchErrors));
+    if ((lastUpdateTimestamp > 0 &&
+                fetchErrors > 0) /* Fetch for the first time */ ||
+            (lastTimestamp - this.lastUpdateTimestamp >
+                    this.spec[
+                        "store_interval"] /* Fetch after STORE_INTERVAL */ &&
+                lastTimestamp - this.lastFetchTimestamp >
+                    backoff) /* Fetch after errors backoff */
+        ) {
+      this.updateBackend(/*logToConsole=*/ "");
     }
   }
 
-  getMetricValue(data, metric, prefix) {
+  getMetricValue(List data, metric, prefix) {
     if (data is List) {
-      var e = data.find((e) =>
-          metric.startsWith([prefix, e.name ? "[name:${e.name}]" : "[type:${e.type}]"].filter((part) => part).join("."))
-      );
-      if (e  == null) {
+      var e = data.firstWhere((e) => metric.startsWith([
+            prefix,
+            e.name ? "[name:${e.name}]" : "[type:${e.type}]"
+          ].join(".")));
+      if (e == null) {
         return null;
       }
       return this.getMetricValue(
           e,
           metric,
-          [prefix, e.name ? "[name:${e.name}]" : "[type:${e.type}]"].filter((part) => part).join(".")
-      );
-    } else if (data != null &&  data is Map) {
-      data.forEach((key, value)  {
+          [prefix, e["name"] ? "[name:${e["name"]}]" : "[type:${e["type"]}]"]
+              .join("."));
+    } else if (data != null && data is Map) {
+      (data as Map).forEach((key, value) {
         if (metric.startsWith("${prefix}.${key}")) {
           var ret = getMetricValue(value, metric, "${prefix}.${key}");
           if (ret != null) {
@@ -343,22 +351,17 @@ class MonitoringData {
 
   filterData(data, metrics, prefix) {
     if (data is List) {
-       data
-          .removeWhere((e) =>
-          metrics.any((m) =>
-              m.startsWith([prefix, e.name ? "[name:${e.name}]" : "[type:${e.type}]"].join("."))
-          )
-      );
-      data
-          .map((e) =>
-          this.filterData(
-              e,
-              metrics,
-              [prefix, e.name ? "[name:${e.name}]" : "[type:${e.type}]"].join(".")
-          )
-      );
+      data.removeWhere((e) => metrics.any((m) => m.startsWith([
+            prefix,
+            e.name ? "[name:${e.name}]" : "[type:${e.type}]"
+          ].join("."))));
+      data.map((e) => this.filterData(
+          e,
+          metrics,
+          [prefix, e.name ? "[name:${e.name}]" : "[type:${e.type}]"]
+              .join(".")));
       return data;
-    } else if (data is Map ) {
+    } else if (data is Map) {
       // const filterField = ["type", "name"].find((f) => prefix.split(".").slice(-1)[0].startsWith(`[${f}`));
       const copy = {};
       // Object.entries(data)
@@ -374,116 +377,118 @@ class MonitoringData {
       return copy;
     }
     if (!metrics.some((m) => m == prefix)) {
-     // console.log(`Expected leaf ${data} to fully match prefix ${prefix} to one of the metrics ${metrics}`);
+      // console.log(`Expected leaf ${data} to fully match prefix ${prefix} to one of the metrics ${metrics}`);
     }
     return data;
   }
 
   updateScore() {
-    var  data = this.storedData.map((d) => this.filterData(d, this.spec["metrics_whitelist"], ""));
+    var data = this
+        .storedData
+        .map((d) => this.filterData(d, this.spec["metrics_whitelist"], ""));
     data.forEach((d) {
-    if (d.length && d[0]["timestamp"]) {
-        var  timestamp = d[0]["timestamp"];
-        var lastScoreTimestamp = scoreData.length >0?? scoreData[scoreData.length - 1][0]["timestamp"];
-        if (timestamp && (lastScoreTimestamp >0|| lastScoreTimestamp < timestamp)) {
-    this.scoreData.add(d);
-    }
-    }
+      if (d.length && d[0]["timestamp"]) {
+        var timestamp = d[0]["timestamp"];
+        var lastScoreTimestamp = scoreData.length > 0 ??
+            scoreData[scoreData.length - 1][0]["timestamp"];
+        if (timestamp &&
+            (lastScoreTimestamp > 0 || lastScoreTimestamp < timestamp)) {
+          this.scoreData.add(d);
+        }
+      }
     });
     // Remove older then 10 minutes.
     var last = scoreData[scoreData.length - 1];
     if (last && last.length && /* [0] - audio */ last[0].timestamp) {
-    var lastTimestamp = last[0]["timestamp"];
-    scoreData.removeWhere((d)  {
-    var timestamp = d[0]["timestamp"];
-    return timestamp>0?? timestamp >= lastTimestamp - FULL_BUCKET;
-    });
-    var input = {
-    // Last timestamp.
-    "timestamp": [lastTimestamp],
-    // Last timestamp values.
-    "data": (spec["metrics_whitelist"] as List).map((metric) => [getMetricValue(last, metric, "")]),
-    // Mapping form metric to it's index.
-    "index": (spec["metrics_whitelist"] as List).reduce((idx, acc) {
-    // reduce((acc, metric, idx) => {
-    acc["metric"] = idx;
-    return acc;
-    }),
-    "stats": (spec["metrics_whitelist"] as List).map((metric)  {
-    var stats = [new Stats(), new Stats(), new Stats()];
-    stats.asMap().forEach((statIndex,stat) {
-    this.scoreData
-        .map((d) {
-    return [d[0].timestamp, this.getMetricValue(d, metric, "")];
-    })
-        .forEach(([timestamp, v]) {
-    switch (statIndex) {
-    case 0: // Smallest time bucket.
-    if (lastTimestamp - timestamp > FIRST_BUCKET) {
-     null; // Skipp add.
-    }
-    break;
-    case 1: // Medium time bucket.
-    if (lastTimestamp - timestamp > MEDIUM_BUCKET) {
-     null; // Skipp add.
-    }
-    break;
-    case 2: // Full time bucket
-    if (lastTimestamp - timestamp > FULL_BUCKET) {
-     null; // Skipp add.
-    }
-    break;
-    default:
-       null;
-    break;
-    }
-    stat.add(v, timestamp);
-    });
-    });
-    }
-    )};
-    var values = dataValues(input, lastTimestamp);
-    // Keep commented out logs for debugging.
-    // console.log(input, values);
-    // console.log('last', this.scoreData.length, input.data.map(arr => arr[0] === undefined ? 'undefined' : arr[0]).join(' | '));
-    // console.log('score', values.score.value, values.score.formula);
-    // console.log('audio score 1min', values.audio.jitter.oneMin && values.audio.jitter.oneMin.mean.value, values.audio.packetsLost.oneMin && values.audio.packetsLost.oneMin.mean.value, values.audio.roundTripTime.oneMin && values.audio.roundTripTime.oneMin.mean.value);
-    // console.log('audio score 3min', values.audio.jitter.threeMin && values.audio.jitter.threeMin.mean.value, values.audio.packetsLost.threeMin && values.audio.packetsLost.threeMin.mean.value, values.audio.roundTripTime.threeMin && values.audio.roundTripTime.threeMin.mean.value);
-    // console.log('video score 1min', values.video.jitter.oneMin && values.video.jitter.oneMin.mean.value, values.video.packetsLost.oneMin && values.video.packetsLost.oneMin.mean.value, values.video.roundTripTime.oneMin && values.video.roundTripTime.oneMin.mean.value);
-    // console.log('video score 3min', values.video.jitter.threeMin && values.video.jitter.threeMin.mean.value, values.video.packetsLost.threeMin && values.video.packetsLost.threeMin.mean.value, values.video.roundTripTime.threeMin && values.video.roundTripTime.threeMin.mean.value);
-    if (onStatus) {
-    const firstTimestamp = scoreData[0][0].timestamp;
-    const formula = `Score ${values.score.view} = ${values.score.formula}`;
-    // console.log('Connection', formula, values.score.value);
-    if (lastTimestamp - firstTimestamp >= MEDIUM_BUCKET) {
-    if (values.score.value < 10) {
-    this.onStatus(LINK_STATE_GOOD, formula);
-    } else if (values.score.value < 100) {
-    this.onStatus(LINK_STATE_MEDIUM, formula);
-    } else {
-    this.onStatus(LINK_STATE_WEAK, formula);
-    }
-    } else {
-    this.onStatus(LINK_STATE_INIT, formula);
-    }
-    }
+      var lastTimestamp = last[0]["timestamp"];
+      scoreData.removeWhere((d) {
+        var timestamp = d[0]["timestamp"];
+        return timestamp > 0 ?? timestamp >= lastTimestamp - FULL_BUCKET;
+      });
+      var input = {
+        // Last timestamp.
+        "timestamp": [lastTimestamp],
+        // Last timestamp values.
+        "data": (spec["metrics_whitelist"] as List)
+            .map((metric) => [getMetricValue(last, metric, "")]),
+        // Mapping form metric to it's index.
+        "index": (spec["metrics_whitelist"] as List).reduce((idx, acc) {
+          // reduce((acc, metric, idx) => {
+          acc["metric"] = idx;
+          return acc;
+        }),
+        "stats": (spec["metrics_whitelist"] as List).map((metric) {
+          var stats = [new Stats(), new Stats(), new Stats()];
+          stats.asMap().forEach((statIndex, stat) {
+            this.scoreData.map((d) {
+              return [d[0].timestamp, this.getMetricValue(d, metric, "")];
+            }).forEach(([timestamp, v]) {
+              switch (statIndex) {
+                case 0: // Smallest time bucket.
+                  if (lastTimestamp - timestamp > FIRST_BUCKET) {
+                    null; // Skipp add.
+                  }
+                  break;
+                case 1: // Medium time bucket.
+                  if (lastTimestamp - timestamp > MEDIUM_BUCKET) {
+                    null; // Skipp add.
+                  }
+                  break;
+                case 2: // Full time bucket
+                  if (lastTimestamp - timestamp > FULL_BUCKET) {
+                    null; // Skipp add.
+                  }
+                  break;
+                default:
+                  null;
+                  break;
+              }
+              stat.add(v, timestamp);
+            });
+          });
+        })
+      };
+      var values = dataValues(input, lastTimestamp);
+      // Keep commented out logs for debugging.
+      // console.log(input, values);
+      // console.log('last', this.scoreData.length, input.data.map(arr => arr[0] === undefined ? 'undefined' : arr[0]).join(' | '));
+      // console.log('score', values.score.value, values.score.formula);
+      // console.log('audio score 1min', values.audio.jitter.oneMin && values.audio.jitter.oneMin.mean.value, values.audio.packetsLost.oneMin && values.audio.packetsLost.oneMin.mean.value, values.audio.roundTripTime.oneMin && values.audio.roundTripTime.oneMin.mean.value);
+      // console.log('audio score 3min', values.audio.jitter.threeMin && values.audio.jitter.threeMin.mean.value, values.audio.packetsLost.threeMin && values.audio.packetsLost.threeMin.mean.value, values.audio.roundTripTime.threeMin && values.audio.roundTripTime.threeMin.mean.value);
+      // console.log('video score 1min', values.video.jitter.oneMin && values.video.jitter.oneMin.mean.value, values.video.packetsLost.oneMin && values.video.packetsLost.oneMin.mean.value, values.video.roundTripTime.oneMin && values.video.roundTripTime.oneMin.mean.value);
+      // console.log('video score 3min', values.video.jitter.threeMin && values.video.jitter.threeMin.mean.value, values.video.packetsLost.threeMin && values.video.packetsLost.threeMin.mean.value, values.video.roundTripTime.threeMin && values.video.roundTripTime.threeMin.mean.value);
+      if (onStatus != null) {
+        var firstTimestamp = scoreData[0][0].timestamp;
+        var formula =
+            "Score ${values["score"]["view"]} = ${values["score"]["formula"]}";
+        // console.log('Connection', formula, values.score.value);
+        if (lastTimestamp - firstTimestamp >= MEDIUM_BUCKET) {
+          if (values["score"]["value"] < 10) {
+            this.onStatus(LINK_STATE_GOOD, formula);
+          } else if (values["score"]["value"] < 100) {
+            this.onStatus(LINK_STATE_MEDIUM, formula);
+          } else {
+            this.onStatus(LINK_STATE_WEAK, formula);
+          }
+        } else {
+          this.onStatus(LINK_STATE_INIT, formula);
+        }
+      }
     }
   }
 
-
   lastTimestamp() {
-    return this.storedData.length>0 &&
-        this.storedData[this.storedData.length - 1] &&
-        this.storedData[this.storedData.length - 1].length
+    return this.storedData.length > 0 &&
+            this.storedData[this.storedData.length - 1] &&
+            this.storedData[this.storedData.length - 1].length
         ? this.storedData[this.storedData.length - 1][0].timestamp
         : 0;
   }
 
-
   updateBackend(String data) async {
     print("monitor updateBackend");
     //this.userJson["network"] = (await Connectivity().checkConnectivity()).toString();
-  //  userJson["diskFree"] = (await DiskSpace.getFreeDiskSpace).toString();
+    //  userJson["diskFree"] = (await DiskSpace.getFreeDiskSpace).toString();
     var data = {
       "user": this.userJson,
       "data": [],
@@ -502,7 +507,7 @@ class MonitoringData {
   }
 }
 
-class Stats  {
+class Stats {
   int mean;
 
   int dSquared;
@@ -519,197 +524,224 @@ class Stats  {
 
   int numEmptyRemoves;
 
-constructor() {
-this.mean = 0;
-this.dSquared = 0;
-this.length = 0;
-this.maxAddedTimestamp = 0;
-this.maxRemovedTimestamp = 0;
-this.numAdds = 0;
-this.numRemoves = 0;
-this.numEmptyRemoves = 0;
-}
-
-add(double value, var timestamp) {
-if (value.isNaN || !value.isFinite) {
-// May be string value. Ignore.
-return;
-}
-
-this.numAdds++;
-if (timestamp > this.maxAddedTimestamp) {
-this.maxAddedTimestamp = timestamp;
-} else {
-print(
-"Expecting to add only new values, old timestamp: ${timestamp} found, max ${this.maxAddedTimestamp}."
-);
-}
-this.length++;
-
-var meanIncrement = (value - this.mean) / this.length;
-var newMean = this.mean + meanIncrement;
-
-var dSquaredIncrement = (value - newMean) * (value - this.mean);
-var newDSquared = (this.dSquared * (this.length - 1) + dSquaredIncrement) / this.length;
-if (newDSquared.isNaN) {
-print("add newDSquared $newDSquared, $this.dSquared, $this.length, $dSquaredIncrement");
-}
-if (newDSquared < 0) {
-// Correcting float inaccuracy.
-if (newDSquared < -0.00001) {
-print("Add: newDSquared negative: ${newDSquared}. Setting to 0. ${value}, ${timestamp} ${this}");
-}
-newDSquared = 0;
-}
-
-this.mean = newMean.toInt();
-this.dSquared = newDSquared.toInt();
-}
-
-remove(double value, var timestamp) {
-  if (value.isNaN || !value.isFinite) {
-// May be string value. Ignore.
-    return;
+  constructor() {
+    this.mean = 0;
+    this.dSquared = 0;
+    this.length = 0;
+    this.maxAddedTimestamp = 0;
+    this.maxRemovedTimestamp = 0;
+    this.numAdds = 0;
+    this.numRemoves = 0;
+    this.numEmptyRemoves = 0;
   }
-if (timestamp > this.maxRemovedTimestamp) {
-this.maxRemovedTimestamp = timestamp;
-} else {
-print(
-"Expecting to remove only new values, old timestamp: ${timestamp} found, max ${this.maxRemovedTimestamp}."
-);
-}
-if (this.length <= 1) {
-if (this.length == 1) {
-this.numRemoves++;
-} else {
-this.numEmptyRemoves++;
-}
-print("Empty stats (${value}, ${timestamp}, ${this}).");
-this.mean = 0;
-this.dSquared = 0;
-this.length = 0;
-return;
-}
-this.numRemoves++;
-this.length--;
 
-var meanIncrement = (this.mean - value) / this.length;
-var newMean = this.mean + meanIncrement;
+  add(double value, var timestamp) {
+    if (value.isNaN || !value.isFinite) {
+// May be string value. Ignore.
+      return;
+    }
 
-var dSquaredIncrement = (newMean - value) * (value - this.mean);
-var newDSquared = (this.dSquared * (this.length + 1) + dSquaredIncrement) / this.length;
-if (newDSquared.isNaN) {
-print("remove $newDSquared  $newDSquared, $this.dSquared, $this.length, $dSquaredIncrement");
-}
-if (newDSquared < 0) {
+    this.numAdds++;
+    if (timestamp > this.maxAddedTimestamp) {
+      this.maxAddedTimestamp = timestamp;
+    } else {
+      print(
+          "Expecting to add only new values, old timestamp: ${timestamp} found, max ${this.maxAddedTimestamp}.");
+    }
+    this.length++;
+
+    var meanIncrement = (value - this.mean) / this.length;
+    var newMean = this.mean + meanIncrement;
+
+    var dSquaredIncrement = (value - newMean) * (value - this.mean);
+    var newDSquared =
+        (this.dSquared * (this.length - 1) + dSquaredIncrement) / this.length;
+    if (newDSquared.isNaN) {
+      print(
+          "add newDSquared $newDSquared, $this.dSquared, $this.length, $dSquaredIncrement");
+    }
+    if (newDSquared < 0) {
 // Correcting float inaccuracy.
-if (newDSquared < -0.00001) {
-print("Remove: newDSquared negative: ${newDSquared}. Setting to 0. ${value}, ${timestamp} ${this}");
-}
-newDSquared = 0;
+      if (newDSquared < -0.00001) {
+        print(
+            "Add: newDSquared negative: ${newDSquared}. Setting to 0. ${value}, ${timestamp} ${this}");
+      }
+      newDSquared = 0;
+    }
+
+    this.mean = newMean.toInt();
+    this.dSquared = newDSquared.toInt();
+  }
+
+  remove(double value, var timestamp) {
+    if (value.isNaN || !value.isFinite) {
+// May be string value. Ignore.
+      return;
+    }
+    if (timestamp > this.maxRemovedTimestamp) {
+      this.maxRemovedTimestamp = timestamp;
+    } else {
+      print(
+          "Expecting to remove only new values, old timestamp: ${timestamp} found, max ${this.maxRemovedTimestamp}.");
+    }
+    if (this.length <= 1) {
+      if (this.length == 1) {
+        this.numRemoves++;
+      } else {
+        this.numEmptyRemoves++;
+      }
+      print("Empty stats (${value}, ${timestamp}, ${this}).");
+      this.mean = 0;
+      this.dSquared = 0;
+      this.length = 0;
+      return;
+    }
+    this.numRemoves++;
+    this.length--;
+
+    var meanIncrement = (this.mean - value) / this.length;
+    var newMean = this.mean + meanIncrement;
+
+    var dSquaredIncrement = (newMean - value) * (value - this.mean);
+    var newDSquared =
+        (this.dSquared * (this.length + 1) + dSquaredIncrement) / this.length;
+    if (newDSquared.isNaN) {
+      print(
+          "remove $newDSquared  $newDSquared, $this.dSquared, $this.length, $dSquaredIncrement");
+    }
+    if (newDSquared < 0) {
+// Correcting float inaccuracy.
+      if (newDSquared < -0.00001) {
+        print(
+            "Remove: newDSquared negative: ${newDSquared}. Setting to 0. ${value}, ${timestamp} ${this}");
+      }
+      newDSquared = 0;
+    }
+
+    this.mean = newMean.toInt();
+    this.dSquared = newDSquared.toInt();
+  }
 }
 
-this.mean = newMean.toInt();
-this.dSquared = newDSquared.toInt();
-}
+var statsNames = ["oneMin", "threeMin", "tenMin"];
+
+List audioVideoScore(var audioVideo) {
+  if (!audioVideo) {
+    return [0, ""];
+  }
+  var score = 0;
+  var formula = "";
+  if (audioVideo.jitter && audioVideo.jitter.score.value > 0) {
+    score += 1000 * audioVideo.jitter.score.value;
+    formula += "1000*jitter(${audioVideo.jitter.score.value})";
+  }
+  if (audioVideo.packetsLost && audioVideo.packetsLost.score.value > 0) {
+    score += audioVideo.packetsLost.score.value;
+    formula += " + packet lost(${audioVideo.packetsLost.score.value})";
+  }
+  if (audioVideo.roundTripTime && audioVideo.roundTripTime.score.value > 0) {
+    score += 100 * audioVideo.roundTripTime.score.value;
+    formula += " + 100*rTT(${audioVideo.roundTripTime.score.value})";
+  }
+  return [score, formula];
 }
 
-const statsNames = ["oneMin", "threeMin", "tenMin"];
- List audioVideoScore(var audioVideo) {
-if (!audioVideo) {
-return [0, ""];
+String sinceTimestamp(ms, now) {
+  var pad = (int number, int size) {
+    String s = number.toString();
+    while (s.length < (size ?? 2)) {
+      s = "0" + s;
+    }
+    return s;
+  };
+  var loginDate = DateTime.fromMicrosecondsSinceEpoch(ms);
+  var diff = now - loginDate;
+  var minutes = pad(((diff / (1000 * 60)) % 60), 2);
+  var hours = (diff / (1000 * 3600));
+  return "${hours}h:${minutes}m";
 }
-var score = 0;
-var formula = "";
-if (audioVideo.jitter && audioVideo.jitter.score.value > 0) {
-score += 1000 * audioVideo.jitter.score.value;
-formula += "1000*jitter(${audioVideo.jitter.score.value})";
-}
-if (audioVideo.packetsLost && audioVideo.packetsLost.score.value > 0) {
-score += audioVideo.packetsLost.score.value;
-formula += " + packet lost(${audioVideo.packetsLost.score.value})";
-}
-if (audioVideo.roundTripTime && audioVideo.roundTripTime.score.value > 0) {
-score += 100 * audioVideo.roundTripTime.score.value;
-formula += " + 100*rTT(${audioVideo.roundTripTime.score.value})";
-}
-return [score, formula];
-}
-
-String sinceTimestamp(ms, now){
-var pad = (int number, int size) {
-String s = number.toString();
-while (s.length < (size ?? 2)) {
-s = "0" + s;
-}
-return s;
-};
-var loginDate =  DateTime.fromMicrosecondsSinceEpoch(ms);
-var diff = now - loginDate;
-var minutes = pad(((diff / (1000 * 60)) % 60), 2);
-var hours = (diff / (1000 * 3600));
-return "${hours}h:${minutes}m";
-};
 
 Map dataValues(var data, var now) {
-var values = {};
-if (data["timestamps"] && data["timestamps"].length) {
-values = {"value": data.timestamps[0], "view": sinceTimestamp(data.timestamps[0], now)};
-}
-if (data["index"]!= null) {
-for (var metric in  data["index"]) {
-var metricField = metric.includes("Misc") ? "misc" : metric.includes("video") ? "video" : "audio";
-if (values.containsKey(metricField)) {
-values[metricField] = {};
-}
-var metricName = metric.split(".").slice(-1)[0];
-var metricNames = [
-["slow-link-receiving", "slowLink"],
-["slow-link-receiving-lost", "slowLinkLost"],
-];
-if (metricNames.contains(metricName)) {
-metricName = metricNames[metricName];
-}
-values[metricField][metricName] = {};
+  var values = {};
+  if (data["timestamps"] && data["timestamps"].length) {
+    values = {
+      "value": data.timestamps[0],
+      "view": sinceTimestamp(data.timestamps[0], now)
+    };
+  }
+  if (data["index"] != null) {
+    for (var metric in data["index"]) {
+      var metricField = metric.includes("Misc")
+          ? "misc"
+          : metric.includes("video")
+              ? "video"
+              : "audio";
+      if (values.containsKey(metricField)) {
+        values[metricField] = {};
+      }
+      var metricName = metric.split(".").slice(-1)[0];
+      var metricNames = [
+        ["slow-link-receiving", "slowLink"],
+        ["slow-link-receiving-lost", "slowLinkLost"],
+      ];
+      if (metricNames.contains(metricName)) {
+        metricName = metricNames[metricName];
+      }
+      values[metricField][metricName] = {};
 
-var value = data["data"]["index"][0];
-values[metricField][metricName].last = {"value", "view": shortNumber(value) || ""};
-let metricScore = 0;
-if (!isNaN(value)) {
-data.stats[index].forEach((stats, statsIndex) => {
-const stdev = Math.sqrt(stats.dsquared);
-values[metricField][metricName][statsNames[statsIndex]] = {
-mean: {value: stats.mean, view: shortNumber(stats.mean)},
-stdev: {value: stdev, view: shortNumber(stdev)},
-length: {value: stats.length, view: shortNumber(stats.length)},
-};
-});
-if (values[metricField][metricName].oneMin && values[metricField][metricName].threeMin) {
-metricScore =
-values[metricField][metricName].oneMin.mean.value - values[metricField][metricName].threeMin.mean.value;
+      double value = data["data"]["index"][0];
+//(values["metricField"]["metricName"] as List).last = {"value", "view": value};
+      var metricScore = 0;
+      if (!value.isNaN) {
+        data.stats[metric].forEach((stats, statsIndex) {
+          var stdev = sqrt(stats.dsquared);
+          values[metricField][metricName][statsNames[statsIndex]] = {
+            "mean": {"value": stats.mean, "view": (stats.mean)},
+            "stdev": {"value": stdev, "view": (stdev)},
+            "length": {"value": stats.length, "view": (stats.length)},
+          };
+        });
+        if (values[metricField][metricName].oneMin &&
+            values[metricField][metricName].threeMin) {
+          metricScore = values[metricField][metricName].oneMin.mean.value -
+              values[metricField][metricName].threeMin.mean.value;
+        }
+      }
+      values[metricField][metricName].score = {
+        "value": metricScore,
+        "view": (metricScore)
+      };
+    }
+  }
+  var scoreFormulaAudio = audioVideoScore(values["audio"]);
+  var scoreFormulaVideo = audioVideoScore(values["video"]);
+  scoreFormulaAudio.first += scoreFormulaVideo.first;
+  scoreFormulaAudio.last =
+      "Audio: ${scoreFormulaAudio.last} + Video: ${scoreFormulaVideo.last}";
+  if (values["misc"] != null &&
+      values["misc"]["iceState"] != null &&
+      (values["misc"]["iceState"] as List).last) {
+    if (!["checking", "completed", "connected"]
+        .contains((values["misc"]["iceState"] as List).last)) {
+      scoreFormulaAudio.first +=
+          100000; // Ice state disconnected or not connected yet. Slow user!
+      scoreFormulaAudio.last += " + 100K iceState";
+    }
+  }
+  if (values["misc"] != null && values["misc"]["slowLink"]["score"].value) {
+    scoreFormulaAudio.first += values["misc"]["slowLink"]["score"].value * 100;
+    scoreFormulaAudio.last +=
+        " + 100*slowLink(${values["misc"]["slowLink"]["score"].value})";
+  }
+  if (values["misc"] != null && values["misc"]["slowLinkLost"]["score"].value) {
+    scoreFormulaAudio.first +=
+        values["misc"]["slowLinkLost"]["score"].value * 10;
+    scoreFormulaAudio.last +=
+        " + 10*slowLinkLost(${values["misc"]["slowLinkLost"]["score"].value})";
+  }
+  values["score"] = {
+    "value": scoreFormulaAudio.first,
+    "view": scoreFormulaAudio.last
+  };
+  return values;
 }
-}
-values[metricField][metricName].score = {value: metricScore, view: shortNumber(metricScore)};
-}
-}
-let [score, formula] = audioVideoScore(values.audio);
-let [videoScore, videoFormula] = audioVideoScore(values.video);
-score += videoScore;
-formula = `Audio: ${formula} + Video: ${videoFormula}`;
-if (values.misc && values.misc.iceState && values.misc.iceState.last.value) {
-if (!["checking", "completed", "connected"].includes(values.misc.iceState.last.value)) {
-score += 100000; // Ice state disconnected or not connected yet. Slow user!
-formula += " + 100K iceState";
-}
-}
-if (values.misc && values.misc.slowLink.score.value) {
-score += values.misc.slowLink.score.value * 100;
-formula += ` + 100*slowLink(${values.misc.slowLink.score.value})`;
-}
-if (values.misc && values.misc.slowLinkLost.score.value) {
-score += values.misc.slowLinkLost.score.value * 10;
-formula += ` + 10*slowLinkLost(${values.misc.slowLinkLost.score.value})`;
-}
-values.score = {value: score, view: shortNumber(score), formula};
-return values;
-};
