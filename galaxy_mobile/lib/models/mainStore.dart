@@ -1,7 +1,9 @@
+import 'dart:isolate';
 import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_webrtc/src/interface/media_stream.dart';
 import 'package:galaxy_mobile/chat/chatMessage.dart';
 import 'package:galaxy_mobile/models/sharedPref.dart';
 import 'package:galaxy_mobile/services/api.dart';
@@ -9,6 +11,7 @@ import 'package:galaxy_mobile/services/authService.dart';
 import 'package:galaxy_mobile/services/keycloak.dart';
 import 'package:galaxy_mobile/services/mqttClient.dart';
 import 'package:flutter_logs/flutter_logs.dart';
+import 'package:janus_client/Plugin.dart';
 
 // TODO: change to prefernces store.
 class MainStore extends ChangeNotifier {
@@ -29,6 +32,15 @@ class MainStore extends ChangeNotifier {
   int videoPreset;
 
   Function() chatUpdater;
+
+  Plugin plugin;
+
+  MediaStream localStream;
+
+  SendPort monitorPort;
+
+
+
 
   Future init() async {
     await Future.wait([fetchUser(), fetchConfig(), fetchAvailableRooms(false)]);
@@ -130,5 +142,20 @@ class MainStore extends ChangeNotifier {
 
   void setChatUpdater(Function() callback) {
     chatUpdater = callback;
+  }
+
+  void setVideoRoomParams(Plugin pluginHandle, MediaStream myStream) {
+    plugin = pluginHandle;
+    localStream = myStream;
+  }
+
+   getStats() async {
+    var audio = await plugin.webRTCHandle.pc.getStats(localStream.getAudioTracks().first);
+    var video = await plugin.webRTCHandle.pc.getStats(localStream.getVideoTracks().first);
+    monitorPort.send({"report" :{"audio":audio,"video":video}});
+  }
+
+  void setMonitorPort(SendPort mainToIsolateStream) {
+    monitorPort = mainToIsolateStream;
   }
 }

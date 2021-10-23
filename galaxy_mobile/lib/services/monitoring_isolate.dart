@@ -12,7 +12,7 @@ Future<SendPort> initIsolate(BuildContext context) async {
   Completer completer = new Completer<SendPort>();
   ReceivePort isolateToMainStream = ReceivePort();
 
-  isolateToMainStream.listen((data) {
+  isolateToMainStream.listen((data)  {
     if (data is SendPort) {
       SendPort mainToIsolateStream = data;
       completer.complete(mainToIsolateStream);
@@ -23,7 +23,8 @@ Future<SendPort> initIsolate(BuildContext context) async {
               .updateMonitor(data["data"].toString());
           break;
         case "getStats":
-          //Provider.of<MainStore>(context, listen: false).getStats();
+           Provider.of<MainStore>(context, listen: false).getStats();
+
           break;
       }
       //print('[isolateToMainStream] $data');

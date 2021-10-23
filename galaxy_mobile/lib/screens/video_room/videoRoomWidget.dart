@@ -358,10 +358,20 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
               FlutterLogs.logInfo("VideoRoom", "_newRemoteFeed",
                   "subscription to publishers successful");
               widget.RoomReady();
+
+              //set the pc and local streams to main store
+              // Provider.of<MainStore>(context).setVideoRoomParams(widget.pluginHandle,widget.myStream);
+              context.read<MainStore>().plugin = widget.pluginHandle;
+              context.read<MainStore>().localStream = widget.myStream;
+
+
+
+
               Map<String, dynamic> userJson = widget.user.toJson();
               userJson["room"] = widget.roomNumber;
               userJson["group"] = widget.groupName;
               widget.mainToIsolateStream  = await initIsolate(context);
+              Provider.of<MainStore>(context).setMonitorPort(widget.mainToIsolateStream);
                 // mainToIsolateStream = value,
                 // mainToIsolateStream = value,
                 widget.mainToIsolateStream.send({
