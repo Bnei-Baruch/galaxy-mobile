@@ -2,6 +2,7 @@ import 'dart:io'; // for exit();
 import 'dart:async';
 import 'dart:isolate';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/services/monitoring_data.dart';
@@ -16,9 +17,15 @@ Future<SendPort> initIsolate(BuildContext context) async {
       SendPort mainToIsolateStream = data;
       completer.complete(mainToIsolateStream);
     } else {
-      Provider.of<MainStore>(context, listen: false)
-          .updateMonitor(data.toString());
-
+      switch (data["type"]) {
+        case "updateBackend":
+          Provider.of<MainStore>(context, listen: false)
+              .updateMonitor(data["data"].toString());
+          break;
+        case "getStats":
+          //Provider.of<MainStore>(context, listen: false).getStats();
+          break;
+      }
       //print('[isolateToMainStream] $data');
     }
   });
@@ -36,7 +43,7 @@ void myIsolate(SendPort isolateToMainStream) {
   mainToIsolateStream.listen((data) {
     switch (data["type"]) {
       case "setConnection":
-        monitor.setConnection(data["plugin"], data["audioTrack"], data["videoTrack"], data["user"], data["galaxyServer"]); //,
+        monitor.setConnection(null, null, null, data["user"], data["galaxyServer"]); //,
         //data["userExtra"], data["data"]);
         //data["user"]
 
@@ -46,6 +53,9 @@ void myIsolate(SendPort isolateToMainStream) {
         break;
       case "stop":
         monitor.stopMonitor();
+        break;
+      case "report":
+        monitor.setReport(data["report"]);
         break;
       default:
         print('[mainToIsolateStream] $data');

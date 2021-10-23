@@ -18,6 +18,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter/services.dart';
 
+
 import 'dart:async';
 
 import 'package:synchronized/synchronized.dart';
@@ -72,6 +73,8 @@ class VideoRoom extends StatefulWidget {
 
   bool isFullScreen = false;
 
+  SendPort mainToIsolateStream;
+
   void exitRoom() {
     if (j != null) j.destroy();
     if (pluginHandle != null) pluginHandle.hangup();
@@ -94,6 +97,7 @@ class VideoRoom extends StatefulWidget {
     pluginHandle = null;
     subscriberHandle = null;
     questionInRoom = null;
+    //Isolate.current.kill();
   }
 
   @override
@@ -222,7 +226,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
 
   int toVideoIndex;
 
-  SendPort mainToIsolateStream;
+
 
   set id(id) {}
 
@@ -354,6 +358,24 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
               FlutterLogs.logInfo("VideoRoom", "_newRemoteFeed",
                   "subscription to publishers successful");
               widget.RoomReady();
+              Map<String, dynamic> userJson = widget.user.toJson();
+              userJson["room"] = widget.roomNumber;
+              userJson["group"] = widget.groupName;
+              widget.mainToIsolateStream  = await initIsolate(context);
+                // mainToIsolateStream = value,
+                // mainToIsolateStream = value,
+                widget.mainToIsolateStream.send({
+                  "type": 'setConnection',
+                  "user": userJson,
+                  // "localAudio": widget.myStream.getAudioTracks().first,
+                  // "localVideo": widget.myStream.getVideoTracks().first,
+                  // "plugin": context,
+                  "galaxyServer":widget.server
+                  // "userExtra": {},
+                  // "data": {}
+                });
+                widget.mainToIsolateStream.send({"type": "start"});
+              // });
             },
             onError: (error) {
               FlutterLogs.logError("VideoRoom", "_newRemoteFeed",
@@ -1093,23 +1115,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     if (!initialized) {
       initialized = true;
       initInfra();
-      Map<String, dynamic> userJson = widget.user.toJson();
-      userJson["room"] = widget.roomNumber;
-      userJson["group"] = widget.groupName;
-      initIsolate(context).then((value) => {
-            mainToIsolateStream = value,
-            mainToIsolateStream.send({
-              "type": 'setConnection',
-              "user": userJson,
-               "localAudio": widget.myStream.getAudioTracks().first,
-               "localVideo": widget.myStream.getVideoTracks().first,
-              "plugin": widget.pluginHandle,
-              "galaxyServer":widget.server
-              // "userExtra": {},
-              // "data": {}
-            }),
-            mainToIsolateStream.send({"type": "start"})
-          });
+
     }
 
     final double userGridHeight =

@@ -45,7 +45,7 @@ class MonitoringData {
   Map<String, dynamic> userJson;
   Map<String, dynamic> userJsonExtra;
   SendPort toApp;
-
+BuildContext context;
   Plugin pluginHandle;
   MediaStreamTrack localAudioTrack;
   MediaStreamTrack localVideoTrack;
@@ -67,7 +67,7 @@ class MonitoringData {
   }
 
   setConnection(
-      Plugin pluginHandle,
+      BuildContext pluginHandle,
       MediaStreamTrack localAudioTrack,
       MediaStreamTrack localVideoTrack,
       Map<String, dynamic> user,
@@ -75,7 +75,7 @@ class MonitoringData {
     // userJsonExtra = userExtra;
     // //userJson = user.toJson();
     // sentData = data;
-    this.pluginHandle = pluginHandle;
+    this.context = pluginHandle;
     this.localAudioTrack = localAudioTrack;
     this.localVideoTrack = localVideoTrack;
     userJson = user;
@@ -88,6 +88,10 @@ class MonitoringData {
     userJson["streamingGateway"] = streamingGateway;
 
     userJson["galaxyVersion"] = PackageInfo().version;
+
+
+     int roomnumber = context.read<MainStore>().activeRoom.room;
+     print(roomnumber);
   }
 
   startMonitor() {
@@ -101,7 +105,11 @@ class MonitoringData {
   }
 
   gatherDataPerInterval() {
-    //
+    //send request for stats to app
+    toApp.send({
+      "type": 'getStat',
+    });
+    
   }
 
   updateLooper() {
@@ -119,12 +127,13 @@ class MonitoringData {
     });
   }
 
-  monitor_() {
+  monitor_(data) {
     if (this.pluginHandle == null ||
         this.localAudioTrack == null ||
         this.userJson == null) {
       return; // User not connected.
     }
+
     RTCPeerConnection pc = (this.pluginHandle.webRTCHandle.pc);
     var defaultTimestamp = DateTime.now().millisecondsSinceEpoch;
     if (pc != null &&
@@ -501,9 +510,16 @@ class MonitoringData {
     // };
 
     String data_to_send = json.encode(data);
-    toApp.send(data_to_send);
+    toApp.send({
+          "type": 'updateBackend',
+          "data": data_to_send,
+        });
 
     //Api().updateMonitor(data.toString());
+  }
+
+  void setReport(data) {
+    monitor_(data);
   }
 }
 
