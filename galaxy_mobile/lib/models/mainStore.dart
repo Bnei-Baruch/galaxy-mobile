@@ -152,7 +152,8 @@ class MainStore extends ChangeNotifier {
    getStats() async {
     var audio = await plugin.webRTCHandle.pc.getStats(localStream.getAudioTracks().first);
     var video = await plugin.webRTCHandle.pc.getStats(localStream.getVideoTracks().first);
-    monitorPort.send({"report" :{"audio":audio,"video":video}});
+    var general = await plugin.webRTCHandle.pc.getStats(null);
+    monitorPort.send({"type":"report","value" :{"audio":audio,"video":video,"general":general}});
   }
 
   void setMonitorPort(SendPort mainToIsolateStream) {

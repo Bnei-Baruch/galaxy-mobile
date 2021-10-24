@@ -73,7 +73,7 @@ class VideoRoom extends StatefulWidget {
 
   bool isFullScreen = false;
 
-  SendPort mainToIsolateStream;
+  List mainToIsolateStream;
 
   void exitRoom() {
     if (j != null) j.destroy();
@@ -97,7 +97,7 @@ class VideoRoom extends StatefulWidget {
     pluginHandle = null;
     subscriberHandle = null;
     questionInRoom = null;
-    //Isolate.current.kill();
+    mainToIsolateStream[0].kill();
   }
 
   @override
@@ -371,10 +371,10 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
               userJson["room"] = widget.roomNumber;
               userJson["group"] = widget.groupName;
               widget.mainToIsolateStream  = await initIsolate(context);
-              Provider.of<MainStore>(context).setMonitorPort(widget.mainToIsolateStream);
+              context.read<MainStore>().setMonitorPort(widget.mainToIsolateStream[1]);
                 // mainToIsolateStream = value,
                 // mainToIsolateStream = value,
-                widget.mainToIsolateStream.send({
+                widget.mainToIsolateStream[1].send({
                   "type": 'setConnection',
                   "user": userJson,
                   // "localAudio": widget.myStream.getAudioTracks().first,
@@ -384,7 +384,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                   // "userExtra": {},
                   // "data": {}
                 });
-                widget.mainToIsolateStream.send({"type": "start"});
+                widget.mainToIsolateStream[1].send({"type": "start"});
               // });
             },
             onError: (error) {

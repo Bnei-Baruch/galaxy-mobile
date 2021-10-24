@@ -90,8 +90,6 @@ BuildContext context;
     userJson["galaxyVersion"] = PackageInfo().version;
 
 
-     int roomnumber = context.read<MainStore>().activeRoom.room;
-     print(roomnumber);
   }
 
   startMonitor() {
@@ -128,34 +126,27 @@ BuildContext context;
   }
 
   monitor_(data) {
-    if (this.pluginHandle == null ||
-        this.localAudioTrack == null ||
-        this.userJson == null) {
-      return; // User not connected.
-    }
 
-    RTCPeerConnection pc = (this.pluginHandle.webRTCHandle.pc);
+
+
     var defaultTimestamp = DateTime.now().millisecondsSinceEpoch;
-    if (pc != null &&
-        this.localAudioTrack is MediaStreamTrack &&
-        (this.localVideoTrack != null ||
-            this.localVideoTrack is MediaStreamTrack)) {
-      const datas = [];
-      const SKIP_REPORTS = [
+    if (data["video"] != null && data["audio"] != null)  {
+      var datas = [];
+      var SKIP_REPORTS = [
         "certificate",
         "codec",
         "track",
         "local-candidate",
         "remote-candidate"
       ];
-      const getStatsPromises = [];
-      getStatsPromises.add(pc.getStats(this.localAudioTrack).then((stats) {
+      var getStatsPromises = [];
+      getStatsPromises.add((data)  {
         var audioReports = {
           "name": "audio",
           "reports": [],
           "timestamp": defaultTimestamp
         };
-        stats.forEach((report) {
+        data["audio"].forEach((report) {
           // Remove not necessary reports.
           if (!SKIP_REPORTS.contains(report.type)) {
             if (report.timestamp != null) {
@@ -165,15 +156,16 @@ BuildContext context;
           }
         });
         datas.add(audioReports);
-      }));
+        return datas;
+      });
       if (this.localVideoTrack != null) {
-        getStatsPromises.add(pc.getStats(this.localVideoTrack).then((stats) {
+        getStatsPromises.add((data) {
           var videoReports = {
             "name": "video",
             "reports": [],
             "timestamp": defaultTimestamp
           };
-          stats.forEach((report) {
+          data["video"].forEach((report) {
             // Remove not necessary reports.
             if (!SKIP_REPORTS.contains(report.type)) {
               if (report.timestamp != null) {
@@ -183,7 +175,7 @@ BuildContext context;
             }
           });
           datas.add(videoReports);
-        }));
+        });
       }
 
       // Missing some important reports. Add them manually.
@@ -193,8 +185,8 @@ BuildContext context;
       }
       var mediaSourceIds = [];
       var ssrcs = [];
-      getStatsPromises.add(pc.getStats(null).then((stats) {
-        stats.forEach((report) {
+      getStatsPromises.add((data)  {
+        data["general"].forEach((report) {
           if (ids.contains(report.values["trackIdentifier"])) {
             if (report.values["mediaSourceId"] != null &&
                 !mediaSourceIds.contains(report.values["mediaSourceId"])) {
@@ -203,7 +195,7 @@ BuildContext context;
           }
         });
         if (mediaSourceIds.length != null) {
-          stats.forEach((report) {
+          data["general"].forEach((report) {
             if (mediaSourceIds.contains(report.values["mediaSourceId"])) {
               if (report.values["ssrc"] != null &&
                   !ssrcs.contains(report.values["ssrc"])) {
@@ -213,7 +205,7 @@ BuildContext context;
           });
         }
         if (ssrcs.length != null) {
-          stats.forEach((report) {
+          data["general"].forEach((report) {
             if (ssrcs.contains(report.values["ssrc"]) ||
                 mediaSourceIds.contains(report.values["mediaSourceId"]) ||
                 ids.contains(report.values["trackIdentifier"])) {
@@ -222,7 +214,7 @@ BuildContext context;
               var data = datas.firstWhere((data) => data.name == kind);
               if (data && data.reports) {
                 var r =
-                    (data["reports"] as List).firstWhere((r) => r.type == type);
+                (data["reports"] as List).firstWhere((r) => r.type == type);
                 if (!r) {
                   (data["reports"] as List).add(report);
                 }
@@ -230,7 +222,7 @@ BuildContext context;
             }
           });
         }
-      }));
+      });
     }
     // Promise.all(getStatsPromises).then(() => {
     // this.forEachMonitor_(datas, defaultTimestamp);

@@ -8,21 +8,23 @@ import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/services/monitoring_data.dart';
 import 'package:provider/provider.dart';
 
-Future<SendPort> initIsolate(BuildContext context) async {
-  Completer completer = new Completer<SendPort>();
+Future<List> initIsolate(BuildContext context) async {
+  Completer completer = new Completer<List>();
   ReceivePort isolateToMainStream = ReceivePort();
+  Isolate myIsolateInstance =
+  await Isolate.spawn(myIsolate, isolateToMainStream.sendPort);
 
   isolateToMainStream.listen((data)  {
     if (data is SendPort) {
       SendPort mainToIsolateStream = data;
-      completer.complete(mainToIsolateStream);
+      completer.complete([myIsolateInstance ,mainToIsolateStream]);
     } else {
       switch (data["type"]) {
         case "updateBackend":
           Provider.of<MainStore>(context, listen: false)
               .updateMonitor(data["data"].toString());
           break;
-        case "getStats":
+        case "getStat":
            Provider.of<MainStore>(context, listen: false).getStats();
 
           break;
@@ -31,8 +33,7 @@ Future<SendPort> initIsolate(BuildContext context) async {
     }
   });
 
-  Isolate myIsolateInstance =
-      await Isolate.spawn(myIsolate, isolateToMainStream.sendPort);
+
   return completer.future;
 }
 
@@ -56,7 +57,7 @@ void myIsolate(SendPort isolateToMainStream) {
         monitor.stopMonitor();
         break;
       case "report":
-        monitor.setReport(data["report"]);
+        monitor.setReport(data["value"]);
         break;
       default:
         print('[mainToIsolateStream] $data');
