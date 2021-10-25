@@ -126,11 +126,12 @@ BuildContext context;
   }
 
   monitor_(data) {
-
-
-
-    var defaultTimestamp = DateTime.now().millisecondsSinceEpoch;
-    if (data["video"] != null && data["audio"] != null)  {
+    print("monitor data before print");
+    print("monitor data " + jsonEncode(data));
+    var defaultTimestamp = DateTime
+        .now()
+        .millisecondsSinceEpoch;
+    if (data["video"] != null && data["audio"] != null) {
       var datas = [];
       var SKIP_REPORTS = [
         "certificate",
@@ -140,43 +141,43 @@ BuildContext context;
         "remote-candidate"
       ];
       var getStatsPromises = [];
-      getStatsPromises.add((data)  {
-        var audioReports = {
-          "name": "audio",
-          "reports": [],
-          "timestamp": defaultTimestamp
-        };
-        data["audio"].forEach((report) {
-          // Remove not necessary reports.
-          if (!SKIP_REPORTS.contains(report.type)) {
-            if (report.timestamp != null) {
-              audioReports["timestamp"] = report.timestamp;
-            }
-            (audioReports["reports"] as List).add(report);
+
+      var audioReports = {
+        "name": "audio",
+        "reports": [],
+        "timestamp": defaultTimestamp
+      };
+      data["audio"].forEach((report) {
+        // Remove not necessary reports.
+        if (!SKIP_REPORTS.contains(report["type"])) {
+          if (report["timestamp"] != null) {
+            audioReports["timestamp"] = report["timestamp"];
           }
-        });
-        datas.add(audioReports);
-        return datas;
+          (audioReports["reports"] as List).add(report);
+        }
       });
-      if (this.localVideoTrack != null) {
-        getStatsPromises.add((data) {
-          var videoReports = {
-            "name": "video",
-            "reports": [],
-            "timestamp": defaultTimestamp
-          };
-          data["video"].forEach((report) {
-            // Remove not necessary reports.
-            if (!SKIP_REPORTS.contains(report.type)) {
-              if (report.timestamp != null) {
-                videoReports["timestamp"] = report.timestamp;
-              }
-              (videoReports["reports"] as List).add(report);
-            }
-          });
-          datas.add(videoReports);
-        });
-      }
+      datas.add(audioReports);
+      getStatsPromises.add(datas);
+
+
+      var videoReports = {
+        "name": "video",
+        "reports": [],
+        "timestamp": defaultTimestamp
+      };
+      data["video"].forEach((report) {
+        // Remove not necessary reports.
+        if (!SKIP_REPORTS.contains(report["type"])) {
+          if (report["timestamp"] != null) {
+            videoReports["timestamp"] = report["timestamp"];
+          }
+          (videoReports["reports"] as List).add(report);
+        }
+      });
+      datas.add(videoReports);
+
+      getStatsPromises.add(datas);
+
 
       // Missing some important reports. Add them manually.
       var ids = [this.localAudioTrack.id];
@@ -185,51 +186,51 @@ BuildContext context;
       }
       var mediaSourceIds = [];
       var ssrcs = [];
-      getStatsPromises.add((data)  {
+
+      data["general"].forEach((report) {
+        if (ids.contains(report.values["trackIdentifier"])) {
+          if (report.values["mediaSourceId"] != null &&
+              !mediaSourceIds.contains(report.values["mediaSourceId"])) {
+            mediaSourceIds.add(report.values["mediaSourceId"]);
+          }
+        }
+      });
+      if (mediaSourceIds.length != null) {
         data["general"].forEach((report) {
-          if (ids.contains(report.values["trackIdentifier"])) {
-            if (report.values["mediaSourceId"] != null &&
-                !mediaSourceIds.contains(report.values["mediaSourceId"])) {
-              mediaSourceIds.add(report.values["mediaSourceId"]);
+          if (mediaSourceIds.contains(report.values["mediaSourceId"])) {
+            if (report.values["ssrc"] != null &&
+                !ssrcs.contains(report.values["ssrc"])) {
+              ssrcs.add(report.values["ssrc"]);
             }
           }
         });
-        if (mediaSourceIds.length != null) {
-          data["general"].forEach((report) {
-            if (mediaSourceIds.contains(report.values["mediaSourceId"])) {
-              if (report.values["ssrc"] != null &&
-                  !ssrcs.contains(report.values["ssrc"])) {
-                ssrcs.add(report.values["ssrc"]);
+      }
+      if (ssrcs.length != null) {
+        data["general"].forEach((report) {
+          if (ssrcs.contains(report.values["ssrc"]) ||
+              mediaSourceIds.contains(report.values["mediaSourceId"]) ||
+              ids.contains(report.values["trackIdentifier"])) {
+            var kind = report.values["kind"];
+            var type = report.type;
+            var data = datas.firstWhere((data) => data.name == kind);
+            if (data && data.reports) {
+              var r =
+              (data["reports"] as List).firstWhere((r) => r.type == type);
+              if (!r) {
+                (data["reports"] as List).add(report);
               }
             }
-          });
-        }
-        if (ssrcs.length != null) {
-          data["general"].forEach((report) {
-            if (ssrcs.contains(report.values["ssrc"]) ||
-                mediaSourceIds.contains(report.values["mediaSourceId"]) ||
-                ids.contains(report.values["trackIdentifier"])) {
-              var kind = report.values["kind"];
-              var type = report.type;
-              var data = datas.firstWhere((data) => data.name == kind);
-              if (data && data.reports) {
-                var r =
-                (data["reports"] as List).firstWhere((r) => r.type == type);
-                if (!r) {
-                  (data["reports"] as List).add(report);
-                }
-              }
-            }
-          });
-        }
-      });
+          }
+        });
+      }
+      getStatsPromises.add(data);
+      // Promise.all(getStatsPromises).then(() => {
+      // this.forEachMonitor_(datas, defaultTimestamp);
+      // });
+      // } else {
+      // this.forEachMonitor_([], defaultTimestamp);
+      // }
     }
-    // Promise.all(getStatsPromises).then(() => {
-    // this.forEachMonitor_(datas, defaultTimestamp);
-    // });
-    // } else {
-    // this.forEachMonitor_([], defaultTimestamp);
-    // }
   }
 
   navigatorConnectionData(var timestamp) {

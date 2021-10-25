@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'dart:isolate';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:galaxy_mobile/services/monitoring_data.dart';
+import 'package:galaxy_mobile/services/monitoring_isolate.dart';
 import 'package:galaxy_mobile/utils/utils.dart';
 
 void main() {
@@ -16,5 +19,11 @@ void main() {
 
     String data_to_send = json.encode(data_exp);
     print(data_to_send);
+  });
+
+  test('monitor test', () async {
+
+    var data_monitor = await Utils.parseJson("monitor_data_mobile.json");
+    MonitoringData(ReceivePort().sendPort).monitor_(data_monitor);
   });
 }
