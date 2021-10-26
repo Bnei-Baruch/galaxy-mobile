@@ -59,6 +59,12 @@ void myIsolate(SendPort isolateToMainStream) {
       case "report":
         monitor.setReport(data["value"]);
         break;
+      case "slowLink":
+        monitor.onSlowLink(data["direction"], data["lost"]);
+        break;
+      case "iceState":
+        monitor.onIceState(data["state"]);
+        break;
       default:
         print('[mainToIsolateStream] $data');
     }

@@ -249,6 +249,9 @@ BuildContext context;
     // };
   }
 
+  onIceState(state) {
+    this.miscData["iceState"] = state;
+  }
   onSlowLink(slowLinkType, lost) {
     var countName = "slow-link-${slowLinkType}";
     var lostName = "slow-link-${slowLinkType}-lost";
