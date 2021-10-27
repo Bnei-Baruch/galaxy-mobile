@@ -1,3 +1,4 @@
+import 'package:galaxy_mobile/utils/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPrefs {
@@ -21,7 +22,7 @@ class SharedPrefs {
   bool get audioMode => _sharedPrefs.getBool('audioMode') ?? false;
   set audioMode(bool value) => _sharedPrefs.setBool('audioMode', value);
 
-  int get audioPreset => _sharedPrefs.getInt('audioPreset') ?? 2;
+  int get audioPreset => _sharedPrefs.getInt('audioPreset') ?? Utils.getDefaultAudioOnLocal();//2
   set audioPreset(int value) => _sharedPrefs.setInt('audioPreset', value);
 
   int get videoPreset => _sharedPrefs.getInt('videoPreset') ?? 1;

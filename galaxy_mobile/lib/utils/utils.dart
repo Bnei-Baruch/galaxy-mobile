@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/services.dart';
 
@@ -24,4 +25,23 @@ class Utils {
         (b["display"]["timestamp"] as int));
     return feeds;
   }
+  static int getDefaultAudioOnLocal()
+  {
+    if(Platform.localeName.contains("en")) {
+      return 4;
+    }
+    if(Platform.localeName.contains("ru")) {
+      return 3;
+    }
+    if(Platform.localeName.contains("he")) {
+      return 2;
+    }
+    if(Platform.localeName.contains("es")) {
+      return 6;
+    }
+  
+
+
+  }
+
 }
