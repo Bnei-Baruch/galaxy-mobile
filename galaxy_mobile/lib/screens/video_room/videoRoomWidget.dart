@@ -1139,7 +1139,8 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         MediaQuery.of(context).orientation == Orientation.portrait
             ? (MediaQuery.of(context).size.height / 3 * 1.5 -
                 kBottomNavigationBarHeight)
-            : (MediaQuery.of(context).size.height);
+            : (MediaQuery.of(context).size.height+2*
+            kBottomNavigationBarHeight+20);
 
     final double userGridWidth =
         MediaQuery.of(context).orientation == Orientation.portrait

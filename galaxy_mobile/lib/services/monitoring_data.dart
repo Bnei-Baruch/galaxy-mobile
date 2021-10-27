@@ -71,7 +71,7 @@ BuildContext context;
       MediaStreamTrack localAudioTrack,
       MediaStreamTrack localVideoTrack,
       Map<String, dynamic> user,
-      String streamingGateway) {
+      String streamingGateway)  {
     // userJsonExtra = userExtra;
     // //userJson = user.toJson();
     // sentData = data;
@@ -87,7 +87,7 @@ BuildContext context;
     userJson["network"] = "true";
     userJson["streamingGateway"] = streamingGateway;
 
-    userJson["galaxyVersion"] = PackageInfo().version;
+    userJson["galaxyVersion"] = "1.0.8";
 
 
   }
@@ -104,9 +104,9 @@ BuildContext context;
 
   gatherDataPerInterval() {
     //send request for stats to app
-    toApp.send({
-      "type": 'getStat',
-    });
+    // toApp.send({
+    //   "type": 'getStat',
+    // });
     
   }
 

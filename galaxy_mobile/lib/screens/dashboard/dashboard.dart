@@ -652,6 +652,7 @@ class _DashboardState extends State<Dashboard>
                         behavior: HitTestBehavior.opaque,
                         onTap: () => tapped(),
                         child: Container(
+                          color: Colors.black,
                           height: kBottomNavigationBarHeight,
                           child: Align(
                             alignment: Alignment.center,
