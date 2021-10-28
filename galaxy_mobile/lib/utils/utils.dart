@@ -39,7 +39,7 @@ class Utils {
     if(Platform.localeName.contains("es")) {
       return 6;
     }
-  
+
 
 
   }

@@ -75,6 +75,8 @@ class VideoRoom extends StatefulWidget {
 
   List mainToIsolateStream;
 
+  String streamingServer;
+
   void exitRoom() {
     if (j != null) j.destroy();
     if (pluginHandle != null) pluginHandle.hangup();
@@ -374,13 +376,17 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
               context.read<MainStore>().setMonitorPort(widget.mainToIsolateStream[1]);
                 // mainToIsolateStream = value,
                 // mainToIsolateStream = value,
+              widget.mainToIsolateStream[1].send({
+                  "type": "updateSpec",
+                  "spec": context.read<MainStore>().spec
+              });
                 widget.mainToIsolateStream[1].send({
                   "type": 'setConnection',
                   "user": userJson,
                   // "localAudio": widget.myStream.getAudioTracks().first,
                   // "localVideo": widget.myStream.getVideoTracks().first,
                   // "plugin": context,
-                  "galaxyServer":widget.server
+                  "galaxyServer":context.read<MainStore>().activeStreamGateway.url
                   // "userExtra": {},
                   // "data": {}
                 });

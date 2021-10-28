@@ -82,12 +82,18 @@ BuildContext context;
     userJson["cpu"] = (Platform.isAndroid ? "Android " : "iOS ") +
         Platform.operatingSystemVersion;
 
-    userJson["ram"] = SysInfo.getTotalPhysicalMemory().toString();
+    userJson["ram"] = (SysInfo.getTotalPhysicalMemory()/1000/1000/1000).floor().toString();
 
     userJson["network"] = "true";
     userJson["streamingGateway"] = streamingGateway;
 
     userJson["galaxyVersion"] = "1.0.8";
+
+    userJson["title"] = user["givenName"];
+
+    userJson["display"] = user["givenName"];
+
+    userJson["janus"] = "gxy2";//janusGateway;
 
 
   }
@@ -113,6 +119,7 @@ BuildContext context;
   updateLooper() {
     print("monitor updateLooper");
     int counter = 1;
+    updateBackend("ff");
     //loop for 1 min - in this 1 min gather data oer sec [call gatherDataPerInterval], after one min send data to backend
     looper = Timer.periodic(Duration(seconds: 1), (timer) {
       gatherDataPerInterval();
@@ -249,6 +256,10 @@ BuildContext context;
     // };
   }
 
+  void updateSpec (whiteList)
+  {
+    spec = whiteList;
+  }
   onIceState(state) {
     this.miscData["iceState"] = state;
   }
@@ -496,7 +507,7 @@ BuildContext context;
     //  userJson["diskFree"] = (await DiskSpace.getFreeDiskSpace).toString();
     var data = {
       "user": this.userJson,
-      "data": [],
+      "data": [[{"name": "audio", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}, {"name": "video", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}, {"name": "Misc", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}]],
     };
     // var user_monitor = await Utils.parseJson("user_monitor_example.json");
     // var data_monitor = await Utils.parseJson("monitor_data.json");

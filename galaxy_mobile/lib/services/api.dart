@@ -142,6 +142,15 @@ class Api {
     return response;
   }
 
+  Future<Map<String,Object>> getMonitorSpec() async{
+    FlutterLogs.logInfo("Api", "getMonitorSpec", "enter");
+    final response = await _monitor.get(
+      "/spec"
+    );
+    FlutterLogs.logInfo("Api", "getMonitorSpec", "spec ${response.data} spec status ${response.statusMessage}");
+    return response.data;
+  }
+
   Future<Response> updateUser(String id, Map<String, dynamic> user) async {
     _dio.options.headers["Content-Type"] = "application/json";
 

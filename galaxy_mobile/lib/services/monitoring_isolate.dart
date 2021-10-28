@@ -65,6 +65,9 @@ void myIsolate(SendPort isolateToMainStream) {
       case "iceState":
         monitor.onIceState(data["state"]);
         break;
+      case "updateSpec":
+        monitor.updateSpec(data["spec"]);
+        break;
       default:
         print('[mainToIsolateStream] $data');
     }

@@ -22,7 +22,7 @@ class MainStore extends ChangeNotifier {
   List<List<RoomData>> config; // TODO: available gatways
   List<Room> availableRooms;
   List<ChatMessage> chatMessageList = [];
-
+  Map<String,Object> spec;
   User activeUser;
   Room activeRoom;
   RoomData activeGateway;
@@ -88,6 +88,10 @@ class MainStore extends ChangeNotifier {
     if (config == null) {
       config = await _api.fetchConfig();
     }
+    if(spec == null)
+      {
+        spec = await _api.getMonitorSpec();
+      }
     notifyListeners();
   }
 
