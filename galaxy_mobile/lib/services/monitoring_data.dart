@@ -49,7 +49,7 @@ BuildContext context;
   Plugin pluginHandle;
   MediaStreamTrack localAudioTrack;
   MediaStreamTrack localVideoTrack;
-  var miscData = {};
+  var miscData = Map<String,dynamic>();
   var storedData = [];
   var scoreData = [];
   var spec = {
@@ -138,7 +138,7 @@ BuildContext context;
     var defaultTimestamp = DateTime
         .now()
         .millisecondsSinceEpoch;
-    if (data["video"] != null && data["audio"] != null) {
+    if (data != null && data["video"] != null && data["audio"] != null) {
       var datas = [];
       var SKIP_REPORTS = [
         "certificate",
@@ -231,6 +231,7 @@ BuildContext context;
         });
       }
       getStatsPromises.add(data);
+      forEachMonitor(datas, defaultTimestamp);
       // Promise.all(getStatsPromises).then(() => {
       // this.forEachMonitor_(datas, defaultTimestamp);
       // });
@@ -238,9 +239,13 @@ BuildContext context;
       // this.forEachMonitor_([], defaultTimestamp);
       // }
     }
+    else
+      {
+        forEachMonitor([], defaultTimestamp);
+      }
   }
 
-  navigatorConnectionData(var timestamp) {
+  dynamic navigatorConnectionData(var timestamp) {
     //const c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
     // if (!c) {
     return null;
@@ -276,22 +281,24 @@ BuildContext context;
     this.miscData[lostName] += lost;
   }
 
-  Map getMiscData(var timestamp) {
-    return Map.of({timestamp: this.miscData, "type": "misc"});
+  Map<String,dynamic> getMiscData(var timestamp) {
+    var misc =  Map<String,dynamic>.of({"timestamp":timestamp, "type": "misc"});
+    misc.addAll(miscData);
+    return misc;
   }
 
   forEachMonitor(List datas, defaultTimestamp) {
     var dataTimestamp =
-        (datas != null && datas.length > 0 && datas[0].timestamp) ||
+        (datas != null && datas.length > 0)?  datas[0].timestamp :
             defaultTimestamp;
-    var navigatorConnection = this.navigatorConnectionData(dataTimestamp);
-    if (navigatorConnection) {
-      datas.add({
-        "name": "NetworkInformation",
-        "reports": [navigatorConnection],
-        "timestamp": dataTimestamp
-      });
-    }
+    // var navigatorConnection = this.navigatorConnectionData(dataTimestamp);
+    // if (navigatorConnection) {
+    //   datas.add({
+    //     "name": "NetworkInformation",
+    //     "reports": [navigatorConnection],
+    //     "timestamp": dataTimestamp
+    //   });
+    // }
     var misc = this.getMiscData(dataTimestamp);
     if (misc != null) {
       datas.add({
@@ -308,9 +315,9 @@ BuildContext context;
     this.storedData.sort((a, b) => a[0].timestamp - b[0].timestamp);
     // Throw old stats, STORE_INTERVAL from last timestamp stored.
     var lastTimestamp = this.lastTimestamp();
-    if (lastTimestamp) {
+    if (lastTimestamp >0) {
       this.storedData.removeWhere((data) =>
-          data[0].timestamp >= lastTimestamp - this.spec["store_interval"]);
+          data[0]["timestamp"] <= lastTimestamp - this.spec["store_interval"]);
     }
     if (datas.length > 0 /*&& this.onDataCallback*/ &&
         this.storedData.length > 0) {
@@ -414,8 +421,8 @@ BuildContext context;
       }
     });
     // Remove older then 10 minutes.
-    var last = scoreData[scoreData.length - 1];
-    if (last && last.length && /* [0] - audio */ last[0].timestamp) {
+    var last = scoreData.isNotEmpty?scoreData[scoreData.length - 1]:null;
+    if (last != null && last.length && /* [0] - audio */ last[0]["timestamp"]) {
       var lastTimestamp = last[0]["timestamp"];
       scoreData.removeWhere((d) {
         var timestamp = d[0]["timestamp"];
@@ -493,11 +500,11 @@ BuildContext context;
     }
   }
 
-  lastTimestamp() {
-    return this.storedData.length > 0 &&
-            this.storedData[this.storedData.length - 1] &&
-            this.storedData[this.storedData.length - 1].length
-        ? this.storedData[this.storedData.length - 1][0].timestamp
+  int lastTimestamp() {
+    return (this.storedData.length > 0 &&
+            this.storedData.elementAt(this.storedData.length - 1)!=null &&
+            this.storedData.elementAt(this.storedData.length - 1).length>0)
+        ? this.storedData[this.storedData.length - 1][0]["timestamp"]
         : 0;
   }
 

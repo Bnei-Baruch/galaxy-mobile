@@ -21,9 +21,38 @@ void main() {
     print(data_to_send);
   });
 
-  test('monitor test', () async {
+  test('monitor on slow link test', () async {
 
     var data_monitor = await Utils.parseJson("monitor_data_mobile.json");
-    MonitoringData(ReceivePort().sendPort).monitor_(data_monitor);
+    MonitoringData(ReceivePort().sendPort).onSlowLink("receiving",6);
+  });
+
+  test('monitor on ice state test', () async {
+
+    var data_monitor = await Utils.parseJson("monitor_data_mobile.json");
+    MonitoringData(ReceivePort().sendPort).onIceState("connected");
+  });
+
+  test('monitor on getMisc test', () async {
+
+    var data_monitor = await Utils.parseJson("monitor_data_mobile.json");
+    var monitor = MonitoringData(ReceivePort().sendPort);
+    monitor.onSlowLink("receiving",6);
+
+    monitor.onIceState("connected");
+    var misc = monitor.getMiscData(DateTime.now().millisecondsSinceEpoch);
+    print(misc);
+  });
+
+  test('monitor on monitor test', () async {
+
+    var data_monitor = await Utils.parseJson("monitor_data_mobile.json");
+    var monitor = MonitoringData(ReceivePort().sendPort);
+    monitor.onSlowLink("receiving",6);
+
+    monitor.onIceState("connected");
+    var misc = monitor.getMiscData(DateTime.now().millisecondsSinceEpoch);
+    print(misc);
+    monitor.monitor_(null);
   });
 }
