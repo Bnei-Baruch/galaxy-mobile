@@ -47,7 +47,9 @@ void main() {
   test('monitor on monitor test', () async {
 
     var data_monitor = await Utils.parseJson("monitor_data_mobile.json");
+    var spec = await Utils.parseJson("whitelist.json");
     var monitor = MonitoringData(ReceivePort().sendPort);
+    monitor.updateSpec(spec);
     monitor.onSlowLink("receiving",6);
 
     monitor.onIceState("connected");

@@ -1,0 +1,15 @@
+{
+  "metrics_whitelist": [
+    "[name:audio].reports.[type:remote-inbound-rtp].jitter",
+    "[name:audio].reports.[type:remote-inbound-rtp].packetsLost",
+    "[name:audio].reports.[type:remote-inbound-rtp].roundTripTime",
+    "[name:video].reports.[type:remote-inbound-rtp].jitter",
+    "[name:video].reports.[type:remote-inbound-rtp].packetsLost",
+    "[name:video].reports.[type:remote-inbound-rtp].roundTripTime",
+    "[name:Misc].reports.[type:misc].slow-link-receiving",
+    "[name:Misc].reports.[type:misc].slow-link-receiving-lost",
+    "[name:Misc].reports.[type:misc].iceState"
+  ],
+  "sample_interval": 1000,
+  "store_interval": 60000
+}

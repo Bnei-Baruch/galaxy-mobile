@@ -374,14 +374,16 @@ BuildContext context;
 
   filterData(data, metrics, prefix) {
     if (data is List) {
-      data.removeWhere((e) => metrics.any((m) => m.startsWith([
+      data.removeWhere((e) =>
+          (metrics as List).any((m) =>
+              m.startsWith([
             prefix,
-            e.name ? "[name:${e.name}]" : "[type:${e.type}]"
+            e["name"]!= null ? "[name:${e["name"]}]" : "[type:${e["type"]}]"
           ].join("."))));
       data.map((e) => this.filterData(
           e,
           metrics,
-          [prefix, e.name ? "[name:${e.name}]" : "[type:${e.type}]"]
+          [prefix, e["name"] ? "[name:${e["name"]}]" : "[type:${e["type"]}]"]
               .join(".")));
       return data;
     } else if (data is Map) {
@@ -410,11 +412,11 @@ BuildContext context;
         .storedData
         .map((d) => this.filterData(d, this.spec["metrics_whitelist"], ""));
     data.forEach((d) {
-      if (d.length && d[0]["timestamp"]) {
+      if (d.length>0 && d[0]["timestamp"] !=null) {
         var timestamp = d[0]["timestamp"];
-        var lastScoreTimestamp = scoreData.length > 0 ??
-            scoreData[scoreData.length - 1][0]["timestamp"];
-        if (timestamp &&
+        var lastScoreTimestamp = scoreData.length > 0 ?
+            scoreData[scoreData.length - 1][0]["timestamp"]:0;
+        if (timestamp != null &&
             (lastScoreTimestamp > 0 || lastScoreTimestamp < timestamp)) {
           this.scoreData.add(d);
         }
@@ -422,11 +424,11 @@ BuildContext context;
     });
     // Remove older then 10 minutes.
     var last = scoreData.isNotEmpty?scoreData[scoreData.length - 1]:null;
-    if (last != null && last.length && /* [0] - audio */ last[0]["timestamp"]) {
+    if (last != null && last.length>0 && /* [0] - audio */ last[0]["timestamp"]!=null) {
       var lastTimestamp = last[0]["timestamp"];
       scoreData.removeWhere((d) {
         var timestamp = d[0]["timestamp"];
-        return timestamp > 0 ?? timestamp >= lastTimestamp - FULL_BUCKET;
+        return timestamp > 0 ? timestamp >= lastTimestamp - FULL_BUCKET:0;
       });
       var input = {
         // Last timestamp.
