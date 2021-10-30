@@ -341,10 +341,16 @@ BuildContext context;
 
   getMetricValue(List data, metric, prefix) {
     if (data is List) {
-      var e = data.firstWhere((e) => metric.startsWith([
+      var e = data.firstWhere((e) =>
+
+          metric.startsWith([
             prefix,
-            e.name ? "[name:${e.name}]" : "[type:${e.type}]"
-          ].join(".")));
+        e["name"]!=null ? "[name:${e["name"]}]" : "[type:${e["type"]}]"
+          ].join(".")),
+
+          orElse: null
+
+      );
       if (e == null) {
         return null;
       }
@@ -428,7 +434,7 @@ BuildContext context;
       var lastTimestamp = last[0]["timestamp"];
       scoreData.removeWhere((d) {
         var timestamp = d[0]["timestamp"];
-        return timestamp > 0 ? timestamp >= lastTimestamp - FULL_BUCKET:0;
+        return (timestamp > 0) ? (timestamp >= lastTimestamp + FULL_BUCKET):false;
       });
       var input = {
         // Last timestamp.
@@ -437,17 +443,20 @@ BuildContext context;
         "data": (spec["metrics_whitelist"] as List)
             .map((metric) => [getMetricValue(last, metric, "")]),
         // Mapping form metric to it's index.
-        "index": (spec["metrics_whitelist"] as List).reduce((idx, acc) {
-          // reduce((acc, metric, idx) => {
-          acc["metric"] = idx;
-          return acc;
-        }),
+        "index": "0",
+        // (spec["metrics_whitelist"] as List).reduce((idx, acc) {
+        //   // reduce((acc, metric, idx) => {
+        //   acc["metric"] = idx;
+        //   return acc;
+        // }),
         "stats": (spec["metrics_whitelist"] as List).map((metric) {
+          print("got inside");
           var stats = [new Stats(), new Stats(), new Stats()];
           stats.asMap().forEach((statIndex, stat) {
-            this.scoreData.map((d) {
-              return [d[0].timestamp, this.getMetricValue(d, metric, "")];
-            }).forEach(([timestamp, v]) {
+            var mappedScoreData = this.scoreData.map((d) {
+              return [d[0]["timestamp"], this.getMetricValue(d, metric, "")];
+            });
+            mappedScoreData.toList().forEach((timestamp) {
               switch (statIndex) {
                 case 0: // Smallest time bucket.
                   if (lastTimestamp - timestamp > FIRST_BUCKET) {
@@ -468,10 +477,10 @@ BuildContext context;
                   null;
                   break;
               }
-              stat.add(v, timestamp);
+              //stat.add(d);
             });
           });
-        })
+        }).toList()
       };
       var values = dataValues(input, lastTimestamp);
       // Keep commented out logs for debugging.
