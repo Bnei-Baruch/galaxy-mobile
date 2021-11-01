@@ -339,28 +339,30 @@ BuildContext context;
     }
   }
 
-  getMetricValue(List data, metric, prefix) {
+  getMetricValue(dynamic data, metric, prefix) {
     if (data is List) {
-      var e = data.firstWhere((e) =>
 
-          metric.startsWith([
-            prefix,
-        e["name"]!=null ? "[name:${e["name"]}]" : "[type:${e["type"]}]"
-          ].join(".")),
-
-          orElse: null
-
+      Map e = data.firstWhere((e) =>
+        metric.startsWith(
+        //  e["name"] != null ? "[name:${e["name"]}]" : "[type:${e["type"]}]"
+         // "[name:Misc]."
+            [prefix, e["name"]!=null ? "[name:${e["name"]}]" : "[type:${e["type"]}]"].where((element) => (element as String).isNotEmpty)
+                .join(".")
+        )
+        ,orElse: ()=>null
       );
+
       if (e == null) {
         return null;
       }
       return this.getMetricValue(
           e,
           metric,
-          [prefix, e["name"] ? "[name:${e["name"]}]" : "[type:${e["type"]}]"]
+          [prefix, e["name"]!=null ? "[name:${e["name"]}]" : "[type:${e["type"]}]"].where((element) => (element as String).isNotEmpty)
               .join("."));
     } else if (data != null && data is Map) {
-      (data as Map).forEach((key, value) {
+      (data).forEach
+        ((key, value) {
         if (metric.startsWith("${prefix}.${key}")) {
           var ret = getMetricValue(value, metric, "${prefix}.${key}");
           if (ret != null) {
@@ -441,35 +443,32 @@ BuildContext context;
         "timestamp": [lastTimestamp],
         // Last timestamp values.
         "data": (spec["metrics_whitelist"] as List)
-            .map((metric) => [getMetricValue(last, metric, "")]),
+            .map((metric) => [getMetricValue(last, metric, "")]).toList(),
         // Mapping form metric to it's index.
-        "index": "0",
-        // (spec["metrics_whitelist"] as List).reduce((idx, acc) {
-        //   // reduce((acc, metric, idx) => {
-        //   acc["metric"] = idx;
-        //   return acc;
-        // }),
+        "index":
+        (spec["metrics_whitelist"] as List).asMap(),
         "stats": (spec["metrics_whitelist"] as List).map((metric) {
           print("got inside");
           var stats = [new Stats(), new Stats(), new Stats()];
           stats.asMap().forEach((statIndex, stat) {
             var mappedScoreData = this.scoreData.map((d) {
-              return [d[0]["timestamp"], this.getMetricValue(d, metric, "")];
-            });
-            mappedScoreData.toList().forEach((timestamp) {
+              return [d[0]["timestamp"],
+                 this.getMetricValue(d, metric, "")];
+            }).toList();
+            mappedScoreData.forEach((timestamp) {
               switch (statIndex) {
                 case 0: // Smallest time bucket.
-                  if (lastTimestamp - timestamp > FIRST_BUCKET) {
+                  if (lastTimestamp - timestamp[0] > FIRST_BUCKET) {
                     null; // Skipp add.
                   }
                   break;
                 case 1: // Medium time bucket.
-                  if (lastTimestamp - timestamp > MEDIUM_BUCKET) {
+                  if (lastTimestamp - timestamp[0] > MEDIUM_BUCKET) {
                     null; // Skipp add.
                   }
                   break;
                 case 2: // Full time bucket
-                  if (lastTimestamp - timestamp > FULL_BUCKET) {
+                  if (lastTimestamp - timestamp[0] > FULL_BUCKET) {
                     null; // Skipp add.
                   }
                   break;
@@ -688,14 +687,14 @@ List audioVideoScore(var audioVideo) {
 }
 
 String sinceTimestamp(ms, now) {
-  var pad = (int number, int size) {
+  var pad = (double number, int size) {
     String s = number.toString();
     while (s.length < (size ?? 2)) {
       s = "0" + s;
     }
     return s;
   };
-  var loginDate = DateTime.fromMicrosecondsSinceEpoch(ms);
+  var loginDate = DateTime.fromMicrosecondsSinceEpoch(ms).millisecondsSinceEpoch;
   var diff = now - loginDate;
   var minutes = pad(((diff / (1000 * 60)) % 60), 2);
   var hours = (diff / (1000 * 3600));
@@ -704,23 +703,23 @@ String sinceTimestamp(ms, now) {
 
 Map dataValues(var data, var now) {
   var values = {};
-  if (data["timestamps"] && data["timestamps"].length) {
+  if (data["timestamp"]!=null && data["timestamp"].length>0) {
     values = {
-      "value": data.timestamps[0],
-      "view": sinceTimestamp(data.timestamps[0], now)
+      "value": data["timestamp"][0],
+      "view": sinceTimestamp(data["timestamp"][0], now)
     };
   }
   if (data["index"] != null) {
-    for (var metric in data["index"]) {
-      var metricField = metric.includes("Misc")
+    (data["index"] as Map).forEach((key, metric) {
+      var metricField = (metric as String).contains("Misc")
           ? "misc"
-          : metric.includes("video")
+          : (metric as String).contains("video")
               ? "video"
               : "audio";
       if (values.containsKey(metricField)) {
         values[metricField] = {};
       }
-      var metricName = metric.split(".").slice(-1)[0];
+      var metricName = (metric.split(".") as List).last;
       var metricNames = [
         ["slow-link-receiving", "slowLink"],
         ["slow-link-receiving-lost", "slowLinkLost"],
@@ -728,10 +727,11 @@ Map dataValues(var data, var now) {
       if (metricNames.contains(metricName)) {
         metricName = metricNames[metricName];
       }
+      values[metricField]  = {};
       values[metricField][metricName] = {};
 
-      double value = data["data"]["index"][0];
-//(values["metricField"]["metricName"] as List).last = {"value", "view": value};
+      var value = data["index"][0];
+      values[metricField][metricName] = { "view": value};
       var metricScore = 0;
       if (!value.isNaN) {
         data.stats[metric].forEach((stats, statsIndex) {
@@ -752,7 +752,7 @@ Map dataValues(var data, var now) {
         "value": metricScore,
         "view": (metricScore)
       };
-    }
+    });
   }
   var scoreFormulaAudio = audioVideoScore(values["audio"]);
   var scoreFormulaVideo = audioVideoScore(values["video"]);

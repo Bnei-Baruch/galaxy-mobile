@@ -46,7 +46,7 @@ void main() {
 
   test('monitor on monitor test', () async {
 
-    var data_monitor = await Utils.parseJson("monitor_data_mobile.json");
+
     var spec = await Utils.parseJson("whitelist.json");
     var monitor = MonitoringData(ReceivePort().sendPort);
     monitor.updateSpec(spec);
@@ -56,5 +56,22 @@ void main() {
     var misc = monitor.getMiscData(DateTime.now().millisecondsSinceEpoch);
     print(misc);
     monitor.monitor_(null);
+  });
+
+  test('getmetric value test', () async {
+
+    var spec = await Utils.parseJson("whitelist.json");
+    var data = await Utils.parseJson("monitor_data_element.json");
+    var monitor = MonitoringData(ReceivePort().sendPort);
+
+     monitor.getMetricValue(data,(spec["metrics_whitelist"] as List).first,"");
+  });
+  test('getmetric 7 value test', () async {
+
+    var spec = await Utils.parseJson("whitelist.json");
+    var data = await Utils.parseJson("monitor_data_element.json");
+    var monitor = MonitoringData(ReceivePort().sendPort);
+
+    monitor.getMetricValue(data,(spec["metrics_whitelist"] as List).last,"");
   });
 }
