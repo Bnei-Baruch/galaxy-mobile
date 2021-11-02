@@ -458,7 +458,7 @@ BuildContext context;
               return [d[0]["timestamp"],
                  this.getMetricValue(d, metric, "")];
             }).toList();
-            mappedScoreData.forEach((timestamp) {
+            for(var timestamp in mappedScoreData) {
               switch (key) {
                 case 0: // Smallest time bucket.
                   if (lastTimestamp - timestamp[0] > FIRST_BUCKET) {
@@ -479,9 +479,10 @@ BuildContext context;
                   null;
                   break;
               }
-              //stat.add(d);
-            });
-          };
+               mappedStats[key].add(timestamp[1] ,timestamp[0]);
+            }
+          }
+              return mappedStats;
         }).toList()
       };
       var values = dataValues(input, lastTimestamp);
@@ -567,7 +568,7 @@ class Stats {
 
   int numEmptyRemoves;
 
-  constructor() {
+  Stats() {
     this.mean = 0;
     this.dSquared = 0;
     this.length = 0;
@@ -578,13 +579,13 @@ class Stats {
     this.numEmptyRemoves = 0;
   }
 
-  add(double value, var timestamp) {
-    if (value.isNaN || !value.isFinite) {
+  add(dynamic value, var timestamp) {
+    if (value == null || value is String) {
 // May be string value. Ignore.
       return;
     }
 
-    this.numAdds++;
+    this.numAdds +=1;
     if (timestamp > this.maxAddedTimestamp) {
       this.maxAddedTimestamp = timestamp;
     } else {
