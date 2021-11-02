@@ -340,7 +340,7 @@ BuildContext context;
   }
 
   getMetricValue(dynamic data, metric, prefix) {
-    if (data is List) {
+    if (data != null && data is List) {
 
       Map e = data.firstWhere((e) =>
         metric.startsWith(
@@ -361,15 +361,15 @@ BuildContext context;
           [prefix, e["name"]!=null ? "[name:${e["name"]}]" : "[type:${e["type"]}]"].where((element) => (element as String).isNotEmpty)
               .join("."));
     } else if (data != null && data is Map) {
-      (data).forEach
-        ((key, value) {
+      for(var key  in data.keys)
+         {
         if (metric.startsWith("${prefix}.${key}")) {
-          var ret = getMetricValue(value, metric, "${prefix}.${key}");
+          final ret = getMetricValue(data[key], metric, "${prefix}.${key}");
           if (ret != null) {
             return ret;
           }
         }
-      });
+      }
       // Did not find metric.
       return null;
     }
@@ -450,13 +450,16 @@ BuildContext context;
         "stats": (spec["metrics_whitelist"] as List).map((metric) {
           print("got inside");
           var stats = [new Stats(), new Stats(), new Stats()];
-          stats.asMap().forEach((statIndex, stat) {
+          var mappedStats = stats.asMap();
+              for(var key in mappedStats.keys)
+                  {
+
             var mappedScoreData = this.scoreData.map((d) {
               return [d[0]["timestamp"],
                  this.getMetricValue(d, metric, "")];
             }).toList();
             mappedScoreData.forEach((timestamp) {
-              switch (statIndex) {
+              switch (key) {
                 case 0: // Smallest time bucket.
                   if (lastTimestamp - timestamp[0] > FIRST_BUCKET) {
                     null; // Skipp add.
@@ -478,7 +481,7 @@ BuildContext context;
               }
               //stat.add(d);
             });
-          });
+          };
         }).toList()
       };
       var values = dataValues(input, lastTimestamp);
@@ -730,11 +733,11 @@ Map dataValues(var data, var now) {
       values[metricField]  = {};
       values[metricField][metricName] = {};
 
-      var value = data["index"][0];
+      var value = data["data"][key][0];
       values[metricField][metricName] = { "view": value};
       var metricScore = 0;
-      if (!value.isNaN) {
-        data.stats[metric].forEach((stats, statsIndex) {
+      if (value != null) {
+        data["stats"][metric].forEach((stats, statsIndex) {
           var stdev = sqrt(stats.dsquared);
           values[metricField][metricName][statsNames[statsIndex]] = {
             "mean": {"value": stats.mean, "view": (stats.mean)},
@@ -748,7 +751,7 @@ Map dataValues(var data, var now) {
               values[metricField][metricName].threeMin.mean.value;
         }
       }
-      values[metricField][metricName].score = {
+      values[metricField][metricName]["score"] = {
         "value": metricScore,
         "view": (metricScore)
       };

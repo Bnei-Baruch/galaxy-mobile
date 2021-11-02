@@ -72,6 +72,7 @@ void main() {
     var data = await Utils.parseJson("monitor_data_element.json");
     var monitor = MonitoringData(ReceivePort().sendPort);
 
-    monitor.getMetricValue(data,(spec["metrics_whitelist"] as List).last,"");
+    var val  = monitor.getMetricValue(data,(spec["metrics_whitelist"] as List).last,"");
+    print(val);
   });
 }
