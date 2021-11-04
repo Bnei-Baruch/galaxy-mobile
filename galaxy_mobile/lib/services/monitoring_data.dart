@@ -28,6 +28,7 @@ final FULL_BUCKET = 45 * ONE_SECOND_IN_MS;
 final INITIAL_STORE_INTERVAL = 5 * ONE_MINUTE_IN_MS;
 final INITIAL_SAMPLE_INTERVAL = FIVE_SECONDS_IN_MS;
 final MAX_EXPONENTIAL_BACKOFF_MS = 10 * ONE_MINUTE_IN_MS;
+final statsNames = ["oneMin", "threeMin", "tenMin"];
 
 class MonitoringData {
   var fetchErrors = 0;
@@ -667,25 +668,25 @@ class Stats {
   }
 }
 
-var statsNames = ["oneMin", "threeMin", "tenMin"];
+
 
 List audioVideoScore(var audioVideo) {
-  if (!audioVideo) {
+  if (audioVideo == null) {
     return [0, ""];
   }
   var score = 0;
   var formula = "";
-  if (audioVideo.jitter && audioVideo.jitter.score.value > 0) {
-    score += 1000 * audioVideo.jitter.score.value;
-    formula += "1000*jitter(${audioVideo.jitter.score.value})";
+  if (audioVideo["jitter"] !=null && audioVideo["jitter"]["score"]["value"] > 0) {
+    score += 1000 * audioVideo["jitter"]["score"]["value"];
+    formula += "1000*jitter(${audioVideo["jitter"]["score"]["value"]})";
   }
-  if (audioVideo.packetsLost && audioVideo.packetsLost.score.value > 0) {
-    score += audioVideo.packetsLost.score.value;
-    formula += " + packet lost(${audioVideo.packetsLost.score.value})";
+  if (audioVideo["packetsLost"] !=null && audioVideo["packetsLost"]["score"]["value"] >0) {
+    score += audioVideo["packetsLost"]["score"]["value"];
+    formula += " + packet lost(${audioVideo["packetsLost"]["score"]["value"]})";
   }
-  if (audioVideo.roundTripTime && audioVideo.roundTripTime.score.value > 0) {
-    score += 100 * audioVideo.roundTripTime.score.value;
-    formula += " + 100*rTT(${audioVideo.roundTripTime.score.value})";
+  if ( audioVideo["roundTripTime"] !=null && audioVideo["roundTripTime"]["score"]["value"] >0 ) {
+    score += 100 * audioVideo["roundTripTime"]["score"]["value"];
+    formula += " + 100*rTT(${audioVideo["roundTripTime"]["score"]["value"]})";
   }
   return [score, formula];
 }
@@ -738,18 +739,18 @@ Map dataValues(var data, var now) {
       values[metricField][metricName] = { "view": value};
       var metricScore = 0;
       if (value != null) {
-        data["stats"][metric].forEach((stats, statsIndex) {
-          var stdev = sqrt(stats.dsquared);
+        data["stats"][key].forEach((statsIndex,stats ) {
+          var stdev = sqrt(stats.dSquared);
           values[metricField][metricName][statsNames[statsIndex]] = {
             "mean": {"value": stats.mean, "view": (stats.mean)},
             "stdev": {"value": stdev, "view": (stdev)},
             "length": {"value": stats.length, "view": (stats.length)},
           };
         });
-        if (values[metricField][metricName].oneMin &&
-            values[metricField][metricName].threeMin) {
-          metricScore = values[metricField][metricName].oneMin.mean.value -
-              values[metricField][metricName].threeMin.mean.value;
+        if ((values[metricField][metricName]["oneMin"] as Map).isNotEmpty &&
+            (values[metricField][metricName]["threeMin"] as Map).isNotEmpty) {
+          metricScore = values[metricField][metricName]["oneMin"]["mean"]["value"] -
+              values[metricField][metricName]["threeMin"]["mean"]["value"];
         }
       }
       values[metricField][metricName]["score"] = {
@@ -765,24 +766,24 @@ Map dataValues(var data, var now) {
       "Audio: ${scoreFormulaAudio.last} + Video: ${scoreFormulaVideo.last}";
   if (values["misc"] != null &&
       values["misc"]["iceState"] != null &&
-      (values["misc"]["iceState"] as List).last) {
+      (values["misc"]["iceState"] as Map)["view"] !=null) {
     if (!["checking", "completed", "connected"]
-        .contains((values["misc"]["iceState"] as List).last)) {
+        .contains((values["misc"]["iceState"] as Map)["view"])) {
       scoreFormulaAudio.first +=
           100000; // Ice state disconnected or not connected yet. Slow user!
       scoreFormulaAudio.last += " + 100K iceState";
     }
   }
-  if (values["misc"] != null && values["misc"]["slowLink"]["score"].value) {
-    scoreFormulaAudio.first += values["misc"]["slowLink"]["score"].value * 100;
+  if (values["misc"] != null && values["misc"]["slowLink"]!=null) {
+    scoreFormulaAudio.first += values["misc"]["slowLink"]["score"]["value"] * 100;
     scoreFormulaAudio.last +=
-        " + 100*slowLink(${values["misc"]["slowLink"]["score"].value})";
+        " + 100*slowLink(${values["misc"]["slowLink"]["score"]["value"]})";
   }
-  if (values["misc"] != null && values["misc"]["slowLinkLost"]["score"].value) {
+  if (values["misc"] != null && values["misc"]["slowLinkLost"] != null) {
     scoreFormulaAudio.first +=
-        values["misc"]["slowLinkLost"]["score"].value * 10;
+        values["misc"]["slowLinkLost"]["score"]["value"] * 10;
     scoreFormulaAudio.last +=
-        " + 10*slowLinkLost(${values["misc"]["slowLinkLost"]["score"].value})";
+        " + 10*slowLinkLost(${values["misc"]["slowLinkLost"]["score"]["value"]})";
   }
   values["score"] = {
     "value": scoreFormulaAudio.first,
