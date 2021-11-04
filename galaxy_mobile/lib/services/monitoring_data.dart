@@ -527,10 +527,13 @@ BuildContext context;
     print("monitor updateBackend");
     //this.userJson["network"] = (await Connectivity().checkConnectivity()).toString();
     //  userJson["diskFree"] = (await DiskSpace.getFreeDiskSpace).toString();
+    var datatoSend = storedData.map((e) => filterData(e, spec["metrics_whitelist"], ""));
+
     var data = {
       "user": this.userJson,
-      "data": [[{"name": "audio", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}, {"name": "video", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}, {"name": "Misc", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}]],
+      "data": [[{"name": "audio", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}, {"name": "video", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch},(datatoSend.first as List).first ]],
     };
+    //{"name": "Misc", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}
     // var user_monitor = await Utils.parseJson("user_monitor_example.json");
     // var data_monitor = await Utils.parseJson("monitor_data.json");
     // Map<String, dynamic> data_exp = {
