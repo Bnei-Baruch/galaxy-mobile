@@ -511,7 +511,13 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         slowLink: (uplink, lost, mid) {
           FlutterLogs.logWarn("VideoRoom", "plugin: remotefeed_user",
               "slowLink: uplink ${uplink} lost ${lost} mid ${mid}");
-        }));
+          (widget.mainToIsolateStream[1] as SendPort).send({"type":"slowLink","direction":uplink ? "sending":"receiving","lost":lost});
+        },
+      onIceConnectionState:(connection){
+        FlutterLogs.logWarn("VideoRoom", "onIceConnectionState",
+            "state: $connection");
+        (widget.mainToIsolateStream[1] as SendPort).send({"type":"iceState","state":connection});
+      },));
   }
 
   Future<void> initPlatformState() async {
@@ -839,12 +845,12 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
             slowLink: (uplink, lost, mid) {
               FlutterLogs.logWarn("VideoRoom", "plugin: janus.plugin.videoroom",
                   "slowLink: uplink ${uplink} lost ${lost} mid ${mid}");
-              (widget.mainToIsolateStream[0] as SendPort).send({"type":"slowLink","direction":uplink ? "sending":"receiving","lost":lost});
+          //    (widget.mainToIsolateStream[0] as SendPort).send({"type":"slowLink","direction":uplink ? "sending":"receiving","lost":lost});
             },
             onIceConnectionState:(connection){
               FlutterLogs.logWarn("VideoRoom", "onIceConnectionState",
                   "state: $connection");
-              (widget.mainToIsolateStream[0] as SendPort).send({"type":"iceState","state":connection});
+             (widget.mainToIsolateStream[0] as SendPort).send({"type":"iceState","state":connection});
             },
         ));
       }, onError: (e) {

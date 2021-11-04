@@ -111,9 +111,9 @@ BuildContext context;
 
   gatherDataPerInterval() {
     //send request for stats to app
-    // toApp.send({
-    //   "type": 'getStat',
-    // });
+    toApp.send({
+      "type": 'getStat',
+    });
     
   }
 
@@ -133,7 +133,7 @@ BuildContext context;
     });
   }
 
-  monitor_(data) {
+   monitor_(data) {
     print("monitor data before print");
     print("monitor data " + jsonEncode(data));
     var defaultTimestamp = DateTime
@@ -313,7 +313,7 @@ BuildContext context;
     }
 
     // This is Async callback. Sort stored data.
-    this.storedData.sort((a, b) => a[0].timestamp - b[0].timestamp);
+    this.storedData.sort((a, b) => a[0]["timestamp"] - b[0]["timestamp"]);
     // Throw old stats, STORE_INTERVAL from last timestamp stored.
     var lastTimestamp = this.lastTimestamp();
     if (lastTimestamp >0) {
@@ -336,7 +336,7 @@ BuildContext context;
                 lastTimestamp - this.lastFetchTimestamp >
                     backoff) /* Fetch after errors backoff */
         ) {
-      this.updateBackend(/*logToConsole=*/ "");
+      //this.updateBackend(/*logToConsole=*/ "");
     }
   }
 
@@ -531,7 +531,7 @@ BuildContext context;
 
     var data = {
       "user": this.userJson,
-      "data": [[{"name": "audio", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}, {"name": "video", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch},(datatoSend.first as List).first ]],
+      "data": [[{"name": "audio", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}, {"name": "video", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch},datatoSend.isNotEmpty?(datatoSend.first as List).first:{"name": "Misc", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}]],
     };
     //{"name": "Misc", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}
     // var user_monitor = await Utils.parseJson("user_monitor_example.json");
@@ -542,6 +542,7 @@ BuildContext context;
     // };
 
     String data_to_send = json.encode(data);
+    print("update backend data: ${data_to_send}");
     toApp.send({
           "type": 'updateBackend',
           "data": data_to_send,
