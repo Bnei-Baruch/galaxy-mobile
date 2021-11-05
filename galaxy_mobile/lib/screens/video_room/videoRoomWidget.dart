@@ -14,6 +14,7 @@ import 'package:janus_client/janus_client.dart';
 import 'package:janus_client/utils.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:janus_client/Plugin.dart';
+import 'package:mdi/mdi.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter/services.dart';
@@ -227,6 +228,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
   int fromVideoIndex;
 
   int toVideoIndex;
+  String signal = "good";
 
 
 
@@ -254,6 +256,16 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     switcher = SwitchPageHelper(unsubscribeFrom, makeSubscription,
         switchVideoSlots, PAGE_SIZE, muteOtherCams, widget);
     widget.state = this;
+
+    (context.read<MainStore>() as MainStore).addListener(() {
+      if((context.read<MainStore>() as MainStore).signal != signal)
+        {
+
+          signal = (context.read<MainStore>() as MainStore).signal;
+          FlutterLogs.logInfo(
+              "VideoRoom", "signal", "$signal");
+        }
+    });
   }
 
   @override
@@ -516,7 +528,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
       onIceConnectionState:(connection){
         FlutterLogs.logWarn("VideoRoom", "onIceConnectionState",
             "state: $connection");
-        (widget.mainToIsolateStream[1] as SendPort).send({"type":"iceState","state":connection});
+        (widget.mainToIsolateStream[1] as SendPort).send({"type":"iceState","state":connection.toString().split('.').last.toLowerCase().replaceFirst("rtciceconnectionstate", "")});
       },));
   }
 
@@ -850,7 +862,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
             onIceConnectionState:(connection){
               FlutterLogs.logWarn("VideoRoom", "onIceConnectionState",
                   "state: $connection");
-             (widget.mainToIsolateStream[0] as SendPort).send({"type":"iceState","state":connection});
+             (widget.mainToIsolateStream[0] as SendPort).send({"type":"iceState","state":connection.toString()});
             },
         ));
       }, onError: (e) {
@@ -1210,6 +1222,11 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                                 ),
                                 SizedBox(width: 5),
                                 Text(widget.user.givenName),
+                                Icon(
+                                   Mdi.signal,
+                                  size:15,
+                                  color: signal == "good"?Colors.white:Colors.red
+                                )
                               ],
                             ),
                           ),

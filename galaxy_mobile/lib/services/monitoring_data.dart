@@ -46,7 +46,7 @@ class MonitoringData {
   Map<String, dynamic> userJson;
   Map<String, dynamic> userJsonExtra;
   SendPort toApp;
-BuildContext context;
+  BuildContext context;
   Plugin pluginHandle;
   MediaStreamTrack localAudioTrack;
   MediaStreamTrack localVideoTrack;
@@ -124,7 +124,7 @@ BuildContext context;
     //loop for 1 min - in this 1 min gather data oer sec [call gatherDataPerInterval], after one min send data to backend
     looper = Timer.periodic(Duration(seconds: 1), (timer) {
       gatherDataPerInterval();
-      if (counter == 60) {
+      if (counter == 10) {
         updateBackend("ff");
         counter = 1;
       } else {
@@ -495,21 +495,21 @@ BuildContext context;
       // console.log('audio score 3min', values.audio.jitter.threeMin && values.audio.jitter.threeMin.mean.value, values.audio.packetsLost.threeMin && values.audio.packetsLost.threeMin.mean.value, values.audio.roundTripTime.threeMin && values.audio.roundTripTime.threeMin.mean.value);
       // console.log('video score 1min', values.video.jitter.oneMin && values.video.jitter.oneMin.mean.value, values.video.packetsLost.oneMin && values.video.packetsLost.oneMin.mean.value, values.video.roundTripTime.oneMin && values.video.roundTripTime.oneMin.mean.value);
       // console.log('video score 3min', values.video.jitter.threeMin && values.video.jitter.threeMin.mean.value, values.video.packetsLost.threeMin && values.video.packetsLost.threeMin.mean.value, values.video.roundTripTime.threeMin && values.video.roundTripTime.threeMin.mean.value);
-      if (onStatus != null) {
-        var firstTimestamp = scoreData[0][0].timestamp;
+      if (toApp != null) {
+        var firstTimestamp = scoreData[0][0]["timestamp"];
         var formula =
             "Score ${values["score"]["view"]} = ${values["score"]["formula"]}";
         // console.log('Connection', formula, values.score.value);
         if (lastTimestamp - firstTimestamp >= MEDIUM_BUCKET) {
           if (values["score"]["value"] < 10) {
-            this.onStatus(LINK_STATE_GOOD, formula);
+            updateStatus (LINK_STATE_GOOD, formula);
           } else if (values["score"]["value"] < 100) {
-            this.onStatus(LINK_STATE_MEDIUM, formula);
+            this.updateStatus(LINK_STATE_MEDIUM, formula);
           } else {
-            this.onStatus(LINK_STATE_WEAK, formula);
+            this.updateStatus(LINK_STATE_WEAK, formula);
           }
         } else {
-          this.onStatus(LINK_STATE_INIT, formula);
+          this.updateStatus(LINK_STATE_INIT, formula);
         }
       }
     }
@@ -550,6 +550,15 @@ BuildContext context;
 
     //Api().updateMonitor(data.toString());
   }
+
+  updateStatus(String link_state_medium,String view)
+  {
+    toApp.send({
+      "type": 'updateSignal',
+      "data": link_state_medium,
+    });
+  }
+
 
   void setReport(data) {
     monitor_(data);

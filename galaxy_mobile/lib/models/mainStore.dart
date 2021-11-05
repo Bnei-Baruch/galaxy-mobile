@@ -30,6 +30,7 @@ class MainStore extends ChangeNotifier {
   bool audioMode; // TODO: doesn't belong here
   int audioPreset;
   int videoPreset;
+  String signal;
 
   Function() chatUpdater;
 
@@ -164,5 +165,11 @@ class MainStore extends ChangeNotifier {
 
   void setMonitorPort(SendPort mainToIsolateStream) {
     monitorPort = mainToIsolateStream;
+  }
+
+  void setSignal(data) {
+    FlutterLogs.logInfo("MainStore", "setSignal", data);
+    signal = data;
+    notifyListeners();
   }
 }

@@ -28,6 +28,9 @@ Future<List> initIsolate(BuildContext context) async {
            Provider.of<MainStore>(context, listen: false).getStats();
 
           break;
+        case "updateSignal":
+          Provider.of<MainStore>(context, listen: false).setSignal(data["data"]);
+          break;
       }
       //print('[isolateToMainStream] $data');
     }
