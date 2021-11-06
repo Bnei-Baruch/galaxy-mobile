@@ -52,8 +52,10 @@ class _LoginState extends State<Login>  with WidgetsBindingObserver {
       debugPrint(status.localVersion);
       debugPrint(status.storeVersion);
       debugPrint(status.canUpdate.toString());
-      newVersion.dialogTitle = "Must update";
-      newVersion.showUpdateDialog(status);
+      int intA = int.parse(status.localVersion.replaceAll(".",""));
+      int intB = int.parse(status.storeVersion.replaceAll(".",""));
+      if(intA<intB)
+        newVersion.showUpdateDialog(status);
     }
   }
 
