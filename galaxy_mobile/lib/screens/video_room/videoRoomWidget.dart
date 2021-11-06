@@ -261,9 +261,12 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
       if((context.read<MainStore>() as MainStore).signal != signal)
         {
 
-          signal = (context.read<MainStore>() as MainStore).signal;
+          setState(() {
+            signal = (context.read<MainStore>() as MainStore).signal;
+          });
+
           FlutterLogs.logInfo(
-              "VideoRoom", "signal", "$signal");
+              "VideoRoom", "signal changed", "$signal");
         }
     });
   }
