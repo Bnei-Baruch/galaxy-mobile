@@ -724,7 +724,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                     // Merge new feed with existing feeds and sort.
                     var feedsNewState = feeds + newFeeds;
                     switcher.makeSubscription(
-                        feedsNewState,
+                        newFeeds,
                         /* feedsJustJoined= */ true,
                         /* subscribeToVideo= */ false,
                         /* subscribeToAudio= */ true,

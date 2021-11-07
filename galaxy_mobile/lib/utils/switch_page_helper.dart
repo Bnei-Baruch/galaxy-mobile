@@ -179,6 +179,6 @@ class SwitchPageHelper {
       FlutterLogs.logWarn("SwitchPageHelper", "switchVideos",
           "ignoring subscribe/unsubscribe/switch; other cams on mute mode");
     }
-    widget.updateDots(page, newFeeds.length);
+    widget!=null?widget.updateDots(page, newFeeds.length):(){};
   }
 }

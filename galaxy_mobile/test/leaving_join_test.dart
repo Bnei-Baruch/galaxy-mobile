@@ -231,4 +231,30 @@ void main() {
     expect(newFeed.elementAt(0)["id"] == 26725810025805, true);
     expect(newFeed.elementAt(1)["id"] == 666765090359584, true);
   });
+  test('joining 1 to 3 streams', () async {
+    var switchHelper = SwitchPageHelper(null, null, null, 3, false, null);
+    // = await rootBundle.loadString("feeds.json");
+    var newFeeds_6 = await Utils.parseJson("feeds6.json");
+    var oldFeed = (newFeeds_6 as List).sublist(0, 3);
+
+    switchHelper.switchVideos(0, [], oldFeed);
+
+    var newFeed = (newFeeds_6 as List).sublist(3, 4);
+    newFeed.addAll(oldFeed);
+
+    newFeed = newFeed.reversed.toList();
+    switchHelper.switchVideos(
+      /* page= */ 0,
+        oldFeed,
+        newFeed);
+
+    newFeed.forEach((feed) {
+      if (newFeed.indexOf(feed) == 3 ) {
+        expect(feed["videoSlot"] == null || feed["videoSlot"] == -1, true);
+      }
+    });
+
+    expect(newFeed.elementAt(3)["id"] ==  752170363902192, true);
+
+  });
 }
