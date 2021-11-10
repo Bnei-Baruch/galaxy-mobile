@@ -51,13 +51,15 @@ class MainStore extends ChangeNotifier {
     setAudioPreset(SharedPrefs().audioPreset);
     setVideoPreset(SharedPrefs().videoPreset);
 
-    _mqttClient = MQTTClient();
+    _mqttClient.init(_auth.getUserEmail(),  _auth.getToken().accessToken, activeUser.id  );
   }
 
   void update(AuthService auth, Api api, MQTTClient mqttClient) {
     _auth = auth;
     _api = api;
     _mqttClient = mqttClient;
+
+
   }
 
   void setActiveRoom(String roomName) {

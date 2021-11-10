@@ -75,6 +75,7 @@ class _DashboardState extends State<Dashboard>
   Animation<Offset> offset;
 
   List<AudioInput> _availableInputs = [];
+  var  activeRoom;
 
   @override
   void initState() {
@@ -89,8 +90,11 @@ class _DashboardState extends State<Dashboard>
     offset = Tween<Offset>(begin: Offset.zero, end: Offset(0.0, 1.0))
         .animate(controller);
 
+     activeRoom = context.read<MainStore>().activeRoom;
+    _activeRoomId = activeRoom.room.toString();
     final mqttClient = context.read<MQTTClient>();
 
+    initMQTT();
     // widget.state = this;
     callInProgress = false;
     subscription = Connectivity()
@@ -204,28 +208,16 @@ class _DashboardState extends State<Dashboard>
     };
     videoRoom.RoomReady = () {
       FlutterLogs.logInfo("Dashboard", "videoRoom", "RoomReady");
-      final authService = context.read<AuthService>();
-      mqttClient.init(authService.getUserEmail(),
-          authService.getToken().accessToken, (activeUser as User).id);
 
-      mqttClient.addOnConnectedCallback(() => {
-            mqttClient.subscribe("galaxy/room/$_activeRoomId"),
-            mqttClient.subscribe("galaxy/room/$_activeRoomId/chat")
-          }); // connectedToBroker());
-      mqttClient.addOnSubscribedCallback((topic) => subscribedToTopic(topic));
-      mqttClient.addOnMsgReceivedCallback((payload) => handleCmdData(payload));
-      mqttClient.addOnConnectionFailedCallback(() => handleConnectionFailed());
-      // mqttClient.addOnDisconnectedCallback(() => handleOnDisconnection());
-      mqttClient.connect();
       tapped();
     };
     videoRoom.callExitRoomUserExists = () {
       stream.exit();
       videoRoom.exitRoom();
       userTimer.cancel();
-      if (mqttClient != null) {
-        mqttClient.disconnect();
-      }
+      // if (mqttClient != null) {
+      //   mqttClient.disconnect();
+      // }
       showDialog(
         context: context,
         builder: (context) => new AlertDialog(
@@ -469,6 +461,8 @@ class _DashboardState extends State<Dashboard>
 
   void handleOnDisconnection() {
     //reconnect
+    FlutterLogs.logInfo(
+        "Dashboard", "mqqt","handleOnDisconnection");
     final mqttClient = context.read<MQTTClient>();
     Timer(Duration(seconds: 10), () {
       mqttClient.connect();
@@ -513,6 +507,7 @@ class _DashboardState extends State<Dashboard>
     var message = {};
     message["type"] = "client-state";
     message["user"] = userData;
+    FlutterLogs.logInfo("dashboard", "updateRoomWithMyState", "${mqttClient.getStatus()}");
     mqttClient.send(
         "galaxy/room/" + _activeRoomId, JsonEncoder().convert(message));
     userMap = userData;
@@ -537,8 +532,6 @@ class _DashboardState extends State<Dashboard>
 
   @override
   Widget build(BuildContext context) {
-    final activeRoom = context.select((MainStore s) => s.activeRoom);
-    _activeRoomId = activeRoom.room.toString();
 
     return WillPopScope(
         onWillPop: () {
@@ -554,7 +547,7 @@ class _DashboardState extends State<Dashboard>
             mqttClient.removeOnConnectionFailedCallback();
             mqttClient.removeOnMsgReceivedCallback();
             mqttClient.removeOnSubscribedCallback();
-            mqttClient.disconnect();
+          //  mqttClient.disconnect();
           }
           return;
         },
@@ -614,7 +607,7 @@ class _DashboardState extends State<Dashboard>
                                           "galaxy/room/$_activeRoomId");
                                       mqttClient.unsubscribe(
                                           "galaxy/room/$_activeRoomId/chat");
-                                      mqttClient.disconnect();
+                                     // mqttClient.disconnect();
                                     }
                                   }))
                         ]),
@@ -778,6 +771,20 @@ class _DashboardState extends State<Dashboard>
       stream.showBar();
       showBottomBar();
     }
+  }
+
+  void initMQTT() {
+    FlutterLogs.logInfo("dashboard", "initMQTT", "xxxx setup mqtt in dashboard");
+    final mqttClient = context.read<MQTTClient>();
+
+
+    mqttClient.subscribe("galaxy/room/$_activeRoomId");
+    mqttClient.subscribe("galaxy/room/$_activeRoomId/chat");
+
+    mqttClient.addOnSubscribedCallback((topic) => subscribedToTopic(topic));
+    mqttClient.addOnMsgReceivedCallback((payload) => handleCmdData(payload));
+    mqttClient.addOnConnectionFailedCallback(() => handleConnectionFailed());
+    // mqttClient.addOnDisconnectedCallback(() => handleOnDisconnection());
   }
 }
 

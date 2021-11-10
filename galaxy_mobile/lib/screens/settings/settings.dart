@@ -8,9 +8,11 @@ import 'package:flutter_logs/flutter_logs.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/services/logger.dart';
 import 'package:galaxy_mobile/services/monitoring_isolate.dart';
+import 'package:galaxy_mobile/services/mqttClient.dart';
 import 'package:galaxy_mobile/utils/utils.dart';
 import 'package:galaxy_mobile/widgets/audioMode.dart';
 import 'package:galaxy_mobile/widgets/drawer.dart';
+import 'package:galaxy_mobile/widgets/loading_indicator.dart';
 import 'package:galaxy_mobile/widgets/roomSelector.dart';
 import 'package:galaxy_mobile/widgets/screenLoader.dart';
 import 'package:galaxy_mobile/widgets/uiLanguageSelector.dart';
@@ -42,6 +44,10 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
 
   var monitorData;
 
+  BuildContext dialogPleaseWaitContext;
+
+  BuildContext dialogContext;
+
   @override
   Future<void> initState() {
     super.initState();
@@ -58,6 +64,41 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
     Utils.parseJson("user_monitor_example.json")
         .then((value) => userJsonExtra = value);
     Utils.parseJson("monitor_data.json").then((value) => monitorData = value);
+
+    final mqttClient = context.read<MQTTClient>();
+
+    mqttClient.addOnConnectedCallback(()  {
+      if(dialogPleaseWaitContext!=null)
+        Navigator.of(dialogPleaseWaitContext).pop();
+      setState(() {
+
+      });
+    });
+    mqttClient.addOnConnectionFailedCallback(() => {
+      showDialog(
+        context: context,
+        builder: (context)  {
+          dialogContext = context;
+          return AlertDialog(
+            title: new Text('Connection Message'),
+            content: Text(
+                'Server is unreachable,\nplease make sure internet connection is available'),
+            actions: <Widget>[
+              new FlatButton(
+                onPressed: () {
+                  Navigator.of(this.context, rootNavigator: true).pop();
+                  mqttClient.connect();
+                  // dismisses only the dialog and returns nothing
+                },
+                child: new Text('OK'),
+              ),
+            ],
+          );
+        }
+      )
+    });
+
+      mqttClient.connect();
   }
 
   @override
@@ -98,156 +139,172 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
     //       }),
     //       mainToIsolateStream.send({"type": "start"})
     //     });
-
+    // showDialog(
+    //     context: context,
+    //     useRootNavigator: false,
+    //     barrierDismissible: false,
+    //     builder: (BuildContext context) {
+    //       dialogPleaseWaitContext = context;
+    //       return WillPopScope(
+    //           onWillPop: () {
+    //             Navigator.of(dialogPleaseWaitContext).pop();
+    //             return Future.value(true);
+    //           },
+    //           child: Dialog(
+    //               backgroundColor: Colors.transparent,
+    //               child: LoadingIndicator(
+    //                   )));
+    //     });
     _isThinScreen = MediaQuery.of(context).size.width < 400;
+    final mqttClient = context.read<MQTTClient>();
 
-    return (activeUser == null || rooms == null)
+    return (!mqttClient.isConnected())
         ? ScreenLoader()
         : Scaffold(
-            appBar: AppBar(title: Text("settings".tr())),
-            drawer: AppDrawer(),
-            body: LayoutBuilder(builder:
-                (BuildContext context, BoxConstraints viewportConstraints) {
-              return SingleChildScrollView(
-                  child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                          minHeight: viewportConstraints.maxHeight),
-                      child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(height: 20.h),
-                            Row(children: [
-                              SizedBox(width: 10.w),
-                              Flexible(
-                                  child: Container(
-                                      padding: EdgeInsets.only(right: 13.0),
-                                      width: MediaQuery.of(context).size.width *
-                                          0.9,
-                                      child: Text(
-                                          "hello_user".tr(args: [
-                                            '${activeUser.givenName}'
-                                          ]),
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 30,
-                                              fontWeight: FontWeight.normal)))),
-                              SizedBox(width: 10.w)
-                            ]),
-                            SizedBox(height: 10.h),
-                            Row(children: [
-                              SizedBox(width: 10.w),
-                              Flexible(
-                                  child: Container(
-                                      padding: EdgeInsets.only(right: 13.0),
-                                      width: MediaQuery.of(context).size.width *
-                                          0.9,
-                                      child: Text("settings_desc".tr(),
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 20)))),
-                              SizedBox(width: 10.w)
-                            ]),
-                            SizedBox(height: 20.h),
-                            Row(children: [
-                              SizedBox(width: 10.w),
-                              Flexible(child: ScreenName(activeUser.givenName)),
-                              SizedBox(width: 10.w),
-                              Flexible(child: UILanguageSelector(true)),
-                              SizedBox(width: 10.w)
-                            ]),
-                            SizedBox(height: 20.h),
-                            Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [selfWidget]),
-                            SizedBox(height: 20.h),
-                            // Opacity(
-                            // opacity: 0.3,
-                            // child:
-                            AudioMode(),
-                            // ),
-                            SizedBox(height: 10.h),
-                            Row(children: [
-                              SizedBox(width: 10.w),
-                              Flexible(child: RoomSelector()),
-                              SizedBox(width: 10.w),
-                              Container(
-                                  height: 60.0,
-                                  child: RaisedButton(
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(10.0)),
-                                      // label: _isThinScreen ? Text("") : Text(
-                                      //     'join_room'.tr(),
-                                      //     style: TextStyle(
-                                      //         color: Colors.white,
-                                      //         fontSize: 20)),
-                                      child: Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                                _isThinScreen
-                                                    ? ''
-                                                    : 'join_room'.tr(),
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 20)),
-                                            SizedBox(
-                                                width:
-                                                    _isThinScreen ? 0 : 10.w),
-                                            Icon(Icons.double_arrow,
-                                                color: Colors.white)
-                                          ]),
-                                      onPressed: () {
-                                        final activeRoom = context.select(
+        appBar: AppBar(title: Text("settings".tr())),
+        drawer: AppDrawer(),
+        body: LayoutBuilder(builder:
+            (BuildContext context, BoxConstraints viewportConstraints) {
+          return SingleChildScrollView(
+              child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                      minHeight: viewportConstraints.maxHeight),
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 20.h),
+                        Row(children: [
+                          SizedBox(width: 10.w),
+                          Flexible(
+                              child: Container(
+                                  padding: EdgeInsets.only(right: 13.0),
+                                  width: MediaQuery.of(context).size.width *
+                                      0.9,
+                                  child: Text(
+                                      "hello_user".tr(args: [
+                                        '${activeUser.givenName}'
+                                      ]),
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 30,
+                                          fontWeight: FontWeight.normal)))),
+                          SizedBox(width: 10.w)
+                        ]),
+                        SizedBox(height: 10.h),
+                        Row(children: [
+                          SizedBox(width: 10.w),
+                          Flexible(
+                              child: Container(
+                                  padding: EdgeInsets.only(right: 13.0),
+                                  width: MediaQuery.of(context).size.width *
+                                      0.9,
+                                  child: Text("settings_desc".tr(),
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 20)))),
+                          SizedBox(width: 10.w)
+                        ]),
+                        SizedBox(height: 20.h),
+                        Row(children: [
+                          SizedBox(width: 10.w),
+                          Flexible(child: ScreenName(activeUser.givenName)),
+                          SizedBox(width: 10.w),
+                          Flexible(child: UILanguageSelector(true)),
+                          SizedBox(width: 10.w)
+                        ]),
+                        SizedBox(height: 20.h),
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [selfWidget]),
+                        SizedBox(height: 20.h),
+                        // Opacity(
+                        // opacity: 0.3,
+                        // child:
+                        AudioMode(),
+                        // ),
+                        SizedBox(height: 10.h),
+                        Row(children: [
+                          SizedBox(width: 10.w),
+                          Flexible(child: RoomSelector()),
+                          SizedBox(width: 10.w),
+                          Container(
+                              height: 60.0,
+                              child: RaisedButton(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                      BorderRadius.circular(10.0)),
+                                  // label: _isThinScreen ? Text("") : Text(
+                                  //     'join_room'.tr(),
+                                  //     style: TextStyle(
+                                  //         color: Colors.white,
+                                  //         fontSize: 20)),
+                                  child: Row(
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment.center,
+                                      mainAxisAlignment:
+                                      MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                            _isThinScreen
+                                                ? ''
+                                                : 'join_room'.tr(),
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 20)),
+                                        SizedBox(
+                                            width:
+                                            _isThinScreen ? 0 : 10.w),
+                                        Icon(Icons.double_arrow,
+                                            color: Colors.white)
+                                      ]),
+                                  onPressed: () {
+                                    final activeRoom = context.select(
                                             (MainStore s) => s.activeRoom);
 
-                                        if (connectionStatus ==
-                                            ConnectivityResult.none) {
-                                          showDialog(
-                                              context: context,
-                                              child: AlertDialog(
-                                                  title: Text("No Internet"),
-                                                  content: Text(
-                                                      "Please reconnect")));
-                                        } else if (activeRoom == null) {
-                                          showDialog(
-                                              context: context,
-                                              child: AlertDialog(
-                                                  title:
-                                                      Text("Room not selected"),
-                                                  content: Text(
-                                                      "Please select a room")));
-                                        } else {
-                                          selfWidget.stopCamera();
+                                    if (connectionStatus ==
+                                        ConnectivityResult.none) {
+                                      showDialog(
+                                          context: context,
+                                          child: AlertDialog(
+                                              title: Text("No Internet"),
+                                              content: Text(
+                                                  "Please reconnect")));
+                                    } else if (activeRoom == null) {
+                                      showDialog(
+                                          context: context,
+                                          child: AlertDialog(
+                                              title:
+                                              Text("Room not selected"),
+                                              content: Text(
+                                                  "Please select a room")));
+                                    } else {
+                                      selfWidget.stopCamera();
+                                      Navigator.pushNamed(
+                                          context,
+                                          ''
+                                              '/dashboard')
+                                          .then((value) {
+                                        if (value == false) {
                                           Navigator.pushNamed(
-                                                  context,
-                                                  ''
-                                                  '/dashboard')
-                                              .then((value) {
-                                            if (value == false) {
-                                              Navigator.pushNamed(
-                                                  context,
-                                                  ''
+                                              context,
+                                              ''
                                                   '/dashboard');
-                                            }
-                                            setState(() {
-                                              selfWidget.restartCamera();
-                                            });
-                                          });
                                         }
-                                      })),
-                              SizedBox(width: 10.w)
-                            ]),
-                            SizedBox(height: 20.h)
-                          ])));
-              SingleChildScrollView();
-            }));
+                                        setState(() {
+                                          selfWidget.restartCamera();
+                                        });
+                                      });
+                                    }
+                                  })),
+                          SizedBox(width: 10.w)
+                        ]),
+                        SizedBox(height: 20.h)
+                      ])));
+          SingleChildScrollView();
+        }));
   }
 }
 

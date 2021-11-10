@@ -258,11 +258,11 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     widget.state = this;
 
     (context.read<MainStore>() as MainStore).addListener(() {
-      if((context.read<MainStore>() as MainStore).signal != signal)
+      if((widget.state.context.read<MainStore>() as MainStore).signal != signal)
         {
 
           setState(() {
-            signal = (context.read<MainStore>() as MainStore).signal;
+            signal = (widget.state.context.read<MainStore>() as MainStore).signal;
           });
 
           FlutterLogs.logInfo(
@@ -785,77 +785,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
             },
             onSuccess: (plugin) async {
               // setState(() {
-              widget.pluginHandle = plugin;
-              MediaStream stream = await plugin.initializeMediaDevices();
-              widget.myStream = stream;
-              widget.myStream.getAudioTracks().first.setMicrophoneMute(true);
-              widget.myStream.getVideoTracks().first.enabled =
-                  widget.myVideoMuted;
-              widget.myAudioMuted = true;
-              widget.updateVideoState(true);
-              // });
-              setState(() {
-                widget._localRenderer.srcObject = widget.myStream;
-              });
-              //==> chat room can not added - infra does not support it yet == try to enter chat room, if user already exists then exit with error
-              // widget.j.attach(Plugin(
-              //     plugin: "janus.plugin.textroom",
-              //     opaqueId: widget.user.id,
-              //     onSuccess: (pluginHandle) {
-              //       var request = {"request": "setup"};
-              //       widget.chatHandle = pluginHandle;
-              //       widget.chatHandle.send(
-              //           message: request,
-              //           onSuccess: () {
-              //             FlutterLogs.logInfo("VideoRoom", "chatroom",
-              //                 "successfully subscribed to chatroom");
-              //           },
-              //           onError: (err) {
-              //             if (err == 420) {
-              //               //user already in room
-              //               showDialog(
-              //                   context: context,
-              //                   child: AlertDialog(
-              //                     title: Text("User Already In Room"),
-              //                   ));
-              //               widget.exitRoom();
-              //             }
-              //           });
-              //     },
-              //     onError: (err){
-              // FlutterLogs.logInfo("VideoRoom", "chatroom",
-              // "error subscribed to chatroom ${err.toString()}");
-              // }));
-              var register = {
-                "request": "join",
-                "room": widget.roomNumber,
-                "ptype": "publisher",
-                "display": jsonEncode({
-                  "id": widget.user.sub,
-                  "timestamp": DateTime.now().millisecondsSinceEpoch,
-                  "role": "user",
-                  "display": widget.user.givenName
-                }) //'User test'
-              };
-              plugin.send(
-                  message: register,
-                  onSuccess: () async {
-                    var publish = {
-                      "request": "configure",
-                      "audio": true,
-                      "video": true,
-                      "bitrate": 2000000
-                    };
-                    RTCSessionDescription offer =
-                        await plugin.createOffer(offerOptions: {
-                      "mandatory": {
-                        "OfferToReceiveAudio": true,
-                        "OfferToReceiveVideo": true,
-                      }
-                    });
-                    plugin.send(
-                        message: publish, jsep: offer, onSuccess: () {});
-                  });
+              await prepareAndRegisterMyStream(plugin);
             },
             slowLink: (uplink, lost, mid) {
               FlutterLogs.logWarn("VideoRoom", "plugin: janus.plugin.videoroom",
@@ -873,6 +803,174 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
             "some error occurred: ${e.toString()}");
       });
     });
+  }
+
+  Future prepareAndRegisterMyStreamRecovery(Plugin plugin) async {
+    widget.pluginHandle = plugin;
+    MediaStream stream = await plugin.initializeMediaDevices();
+    widget.myStream = stream;
+    widget.myStream.getAudioTracks().first.setMicrophoneMute(true);
+    widget.myStream.getVideoTracks().first.enabled =
+        widget.myVideoMuted;
+    widget.myAudioMuted = true;
+    widget.updateVideoState(true);
+    // });
+    setState(() {
+      widget._localRenderer.srcObject = widget.myStream;
+    });
+    //==> chat room can not added - infra does not support it yet == try to enter chat room, if user already exists then exit with error
+    // widget.j.attach(Plugin(
+    //     plugin: "janus.plugin.textroom",
+    //     opaqueId: widget.user.id,
+    //     onSuccess: (pluginHandle) {
+    //       var request = {"request": "setup"};
+    //       widget.chatHandle = pluginHandle;
+    //       widget.chatHandle.send(
+    //           message: request,
+    //           onSuccess: () {
+    //             FlutterLogs.logInfo("VideoRoom", "chatroom",
+    //                 "successfully subscribed to chatroom");
+    //           },
+    //           onError: (err) {
+    //             if (err == 420) {
+    //               //user already in room
+    //               showDialog(
+    //                   context: context,
+    //                   child: AlertDialog(
+    //                     title: Text("User Already In Room"),
+    //                   ));
+    //               widget.exitRoom();
+    //             }
+    //           });
+    //     },
+    //     onError: (err){
+    // FlutterLogs.logInfo("VideoRoom", "chatroom",
+    // "error subscribed to chatroom ${err.toString()}");
+    // }));
+    var publish = {
+      "request":"configure",
+      "audio": true,
+      "video": true,
+      "bitrate": 2000000
+    };
+    // RTCSessionDescription offer =
+    // await plugin.createOffer(offerOptions: {
+    //  "mandatory":{
+    // "audioRecv": false,
+    // "videoRecv": false,
+    // "audioSend": true,
+    // "videoSend": true,
+    // }
+    // // "mandatory": {
+    // //   "addVideo": true,
+    // //   "addAudio": true,
+    // });
+    // plugin.send(
+    //     message: publish, jsep: offer, onSuccess: () {});
+
+    // var register = {
+    //   "request": "join",
+    //   "room": widget.roomNumber,
+    //   "ptype": "publisher",
+    //   "display": jsonEncode({
+    //     "id": widget.user.sub,
+    //     "timestamp": DateTime.now().millisecondsSinceEpoch,
+    //     "role": "user",
+    //     "display": widget.user.givenName
+    //   }) //'User test'
+    // };
+    // plugin.send(
+    //     message: register,
+    //     onSuccess: () async {
+    //       var publish = {
+    //         "request": "configure",
+    //         "audio": true,
+    //         "video": true,
+    //         "bitrate": 2000000
+    //       };
+    //       RTCSessionDescription offer =
+    //       await plugin.createOffer(offerOptions: {
+    //         "mandatory": {
+    //           "OfferToReceiveAudio": true,
+    //           "OfferToReceiveVideo": true,
+    //         }
+    //       });
+    //       plugin.send(
+    //           message: publish, jsep: offer, onSuccess: () {});
+    //     });
+  }
+  Future prepareAndRegisterMyStream(Plugin plugin) async {
+    widget.pluginHandle = plugin;
+    MediaStream stream = await plugin.initializeMediaDevices();
+    widget.myStream = stream;
+    widget.myStream.getAudioTracks().first.setMicrophoneMute(true);
+    widget.myStream.getVideoTracks().first.enabled =
+        widget.myVideoMuted;
+    widget.myAudioMuted = true;
+    widget.updateVideoState(true);
+    // });
+    setState(() {
+      widget._localRenderer.srcObject = widget.myStream;
+    });
+    //==> chat room can not added - infra does not support it yet == try to enter chat room, if user already exists then exit with error
+    // widget.j.attach(Plugin(
+    //     plugin: "janus.plugin.textroom",
+    //     opaqueId: widget.user.id,
+    //     onSuccess: (pluginHandle) {
+    //       var request = {"request": "setup"};
+    //       widget.chatHandle = pluginHandle;
+    //       widget.chatHandle.send(
+    //           message: request,
+    //           onSuccess: () {
+    //             FlutterLogs.logInfo("VideoRoom", "chatroom",
+    //                 "successfully subscribed to chatroom");
+    //           },
+    //           onError: (err) {
+    //             if (err == 420) {
+    //               //user already in room
+    //               showDialog(
+    //                   context: context,
+    //                   child: AlertDialog(
+    //                     title: Text("User Already In Room"),
+    //                   ));
+    //               widget.exitRoom();
+    //             }
+    //           });
+    //     },
+    //     onError: (err){
+    // FlutterLogs.logInfo("VideoRoom", "chatroom",
+    // "error subscribed to chatroom ${err.toString()}");
+    // }));
+    var register = {
+      "request": "join",
+      "room": widget.roomNumber,
+      "ptype": "publisher",
+      "display": jsonEncode({
+        "id": widget.user.sub,
+        "timestamp": DateTime.now().millisecondsSinceEpoch,
+        "role": "user",
+        "display": widget.user.givenName
+      }) //'User test'
+    };
+    plugin.send(
+        message: register,
+        onSuccess: () async {
+          var publish = {
+            "request": "configure",
+            "audio": true,
+            "video": true,
+            "bitrate": 2000000
+          };
+          RTCSessionDescription offer =
+              await plugin.createOffer(offerOptions: {
+            "mandatory": {
+              "OfferToReceiveAudio": true,
+              "OfferToReceiveVideo": true,
+            }
+          });
+          plugin.send(
+              message: publish, jsep: offer, onSuccess: () {});
+        });
   }
 
   // Subscribe to feeds, whether already existing in the room, when I joined
@@ -1667,7 +1765,9 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         FlutterLogs.logInfo(
             "videoRoom", "didChangeAppLifecycleState", 'inactive');
         if (widget.myVideoMuted) {
-          widget.toggleVideo();
+          widget.myStream.getVideoTracks().first.enabled = false;
+         // widget.myStream.getVideoTracks().first.stop();
+
           widget.updateVideoState(!widget.myVideoMuted);
         }
         break;
@@ -1677,6 +1777,8 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         FlutterLogs.logInfo("videoRoom", "didChangeAppLifecycleState",
             'pluginHandle is present = ${widget.pluginHandle != null}');
         stopForegroundService();
+        restartSelfVideo();
+
         break;
       case AppLifecycleState.paused:
         FlutterLogs.logInfo(
@@ -1746,6 +1848,59 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
 
     }
     setState(() {});
+  }
+
+  initSelfVideo() async {
+    widget._localRenderer = new RTCVideoRenderer();
+    await widget._localRenderer.initialize();
+
+
+    var mediaConstraints = {
+      "audio": false,
+      "video": {
+        "mandatory": {
+          "minWidth":
+          '1280', // Provide your own width, height and frame rate here
+          "minHeight": '720',
+          "minFrameRate": '30',
+        },
+        "facingMode": "user",
+        "optional": [],
+      }
+    };
+    Future<MediaStream> stream =
+    navigator.mediaDevices.getUserMedia(mediaConstraints);
+
+    stream.then((value) => setState(() {
+      widget.myStream = value;
+      value.getVideoTracks().first.enabled = true;
+      widget._localRenderer.srcObject = value;
+    }));
+  }
+
+  void restartSelfVideo() async {
+
+    FlutterLogs.logInfo("VideoRoom", "restartSelfVideo", "entering");
+    FlutterLogs.logInfo("VideoRoom", "restartSelfVideo", "render video ${ widget._localRenderer.renderVideo} video = ${widget.myStream.getVideoTracks().length} video enabled = ${widget.myStream.getVideoTracks().first.enabled} video muted = ${widget.myStream.getVideoTracks().first.muted}" );
+    // await widget._localRenderer.dispose();
+    // widget._localRenderer = new RTCVideoRenderer();
+    // await widget._localRenderer.initialize();
+     Timer(Duration(seconds: 10), () {
+      setState(() {
+
+
+        //widget.myStream.getVideoTracks().first.enabled = true;
+       prepareAndRegisterMyStreamRecovery(widget.pluginHandle);
+        FlutterLogs.logInfo("VideoRoom", "restartSelfVideo 2", "render video ${ widget._localRenderer.renderVideo} video = ${widget.myStream.getVideoTracks().length} video enabled = ${widget.myStream.getVideoTracks().first.enabled} video muted = ${widget.myStream.getVideoTracks().first.muted}" );
+        
+
+      });
+
+    });
+
+
+   // await prepareAndRegisterMyStream(widget.pluginHandle);
+
   }
 }
 

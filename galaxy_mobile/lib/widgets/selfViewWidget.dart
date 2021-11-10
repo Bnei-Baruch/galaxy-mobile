@@ -18,7 +18,7 @@ class SelfViewWidget extends StatefulWidget {
 
   void stopCamera() {
     FlutterLogs.logInfo("SelfViewWidget", "stopCamera", "");
-    if (state != null && state.mounted) {
+    if (state != null && state.mounted && (state.myStream as MediaStream)!=null) {
       (state.myStream as MediaStream).getVideoTracks().first.enabled = false;
       (state.myStream as MediaStream).getVideoTracks().first.stop();
     }

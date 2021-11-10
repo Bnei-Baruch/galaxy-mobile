@@ -154,6 +154,10 @@ class MQTTClient {
     _client.publishMessage(topic, MqttQos.exactlyOnce, builder.payload);
   }
 
+  MqttClientConnectionStatus getStatus()
+  {
+    return _client.connectionStatus;
+  }
   void onConnected() {
     logger.info("Connected");
     _isConnected = true;
@@ -209,5 +213,9 @@ class MQTTClient {
       randomString += charSet.substring(randomPoz, randomPoz + 1);
     }
     return randomString;
+  }
+
+  bool isConnected() {
+    return _isConnected;
   }
 }
