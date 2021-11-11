@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/services/authService.dart';
@@ -13,6 +14,8 @@ import 'dart:io';
 import 'package:archive/archive_io.dart';
 
 import 'package:path_provider/path_provider.dart';
+import 'package:device_info/device_info.dart';
+
 
 // ignore: must_be_immutable
 class AppDrawer extends StatelessWidget {
@@ -56,10 +59,27 @@ class AppDrawer extends StatelessWidget {
     String packageName = packageInfo.packageName;
     String version = packageInfo.version;
     String buildNumber = packageInfo.buildNumber;
+    FlutterLogs.logInfo("AppDrawer", "archiveLogs", "4.1");
+    var deviceInfo;
+    try {
+      if (Platform.isAndroid) {
+        deviceInfo = await DeviceInfoPlugin().androidInfo;
+      } else if (Platform.isIOS) {
+        FlutterLogs.logInfo("AppDrawer", "archiveLogs", "4.2");
+         deviceInfo = await DeviceInfoPlugin().iosInfo;
+      }
+    } on PlatformException {
+      FlutterLogs.logInfo("AppDrawer", "archiveLogs", "failed to get device info");
+      }
+
+
     FlutterLogs.logInfo("AppDrawer", "archiveLogs", "5");
     final Email email = Email(
         body:
-            '<-------------please write above this line-----------> \n appName=${packageInfo.appName}\n packageName = ${packageInfo.packageName} \n version = ${packageInfo.version} \n buildNumber = ${packageInfo.buildNumber}',
+            '<-------------please write above this line-----------> \n appName=${packageInfo.appName}\n packageName = ${packageInfo.packageName} \n version = ${packageInfo.version} \n buildNumber = ${packageInfo.buildNumber}\n device model = ${Platform.isAndroid?((deviceInfo as AndroidDeviceInfo).model+" Android ver: "+(deviceInfo as AndroidDeviceInfo).version.release):((deviceInfo as IosDeviceInfo).utsname.machine +" iOS ver:"+(deviceInfo as IosDeviceInfo).systemVersion)}'
+
+
+                ,
         subject: 'Send logs to developer',
         recipients: ['igal.avraham@gmail.com'],
         attachmentPaths: [path + "/galaxyLogs.zip"],

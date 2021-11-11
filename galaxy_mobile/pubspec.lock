@@ -190,6 +190,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.1.2"
+  device_info:
+    dependency: "direct main"
+    description:
+      name: device_info
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0"
+  device_info_platform_interface:
+    dependency: transitive
+    description:
+      name: device_info_platform_interface
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.1"
   dio:
     dependency: "direct main"
     description:
@@ -521,8 +535,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "0.0.4+4"
-      resolved-ref: cd550ecd03443987030ea2081f396368ea7dac05
+      ref: "0.0.4+5"
+      resolved-ref: "10a2a0f4ceddc1c21f69edb2f33574b33dd741f0"
       url: "https://github.com/igala/flutter_janus_client.git"
     source: git
     version: "0.0.4"
