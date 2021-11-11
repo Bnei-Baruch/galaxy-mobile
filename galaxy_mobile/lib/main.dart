@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_plugin/flutter_foreground_plugin.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -117,4 +118,19 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
                 initialRoute: '/',
                 routes: routes)));
   }
+}
+
+Future<RemoteConfig> setupRemoteConfig() async {
+  await Firebase.initializeApp();
+  final RemoteConfig remoteConfig = RemoteConfig.instance as RemoteConfig;
+  await remoteConfig.setConfigSettings(RemoteConfigSettings(
+
+    fetchTimeoutMillis:  10*1000,
+    minimumFetchIntervalMillis: 1*60*1000,
+  ));
+  await remoteConfig.setDefaults(<String, dynamic>{
+    'currentVer': '1.0.18',
+    'latestVer': '1.0.18',
+  });
+  return remoteConfig;
 }

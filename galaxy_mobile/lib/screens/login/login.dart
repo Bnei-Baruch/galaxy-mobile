@@ -4,6 +4,7 @@ import 'package:galaxy_mobile/services/api.dart';
 import 'package:galaxy_mobile/services/authService.dart';
 import 'package:galaxy_mobile/widgets/connectedDots.dart';
 import 'package:galaxy_mobile/widgets/uiLanguageSelector.dart';
+import 'package:new_version/new_version.dart';
 import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -18,9 +19,44 @@ class Login extends StatefulWidget {
   State createState() => _LoginState();
 }
 
-class _LoginState extends State<Login> {
+class _LoginState extends State<Login>  with WidgetsBindingObserver {
   Future<String> getFileData(String path) async {
     return await rootBundle.loadString(path);
+  }
+  var newVersion;
+
+  @override
+  initState()
+  {
+     newVersion = NewVersion(
+        iOSId: 'com.galaxy.mobile',
+        androidId: 'com.galaxy_mobile',
+        context: context
+    );
+    WidgetsBinding.instance.addObserver(this);
+
+     advancedStatusCheck(newVersion);
+
+  }
+
+
+  basicStatusCheck(NewVersion newVersion) {
+    newVersion.showAlertIfNecessary();
+  }
+
+  advancedStatusCheck(NewVersion newVersion) async {
+    final status = await newVersion.getVersionStatus();
+    if (status != null) {
+
+      debugPrint(status.appStoreLink);
+      debugPrint(status.localVersion);
+      debugPrint(status.storeVersion);
+      debugPrint(status.canUpdate.toString());
+      int intA = int.parse(status.localVersion.replaceAll(".",""));
+      int intB = int.parse(status.storeVersion.replaceAll(".",""));
+      if(intA<intB)
+        newVersion.showUpdateDialog(status);
+    }
   }
 
   Future<void> showTAndCDialog(BuildContext context) async {
@@ -155,5 +191,28 @@ class _LoginState extends State<Login> {
         getView(context, viewportConstraints)
       ]);
     }));
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    switch (state) {
+      case AppLifecycleState.inactive:
+        FlutterLogs.logInfo("login", "appLifeCycleState", "inactive");
+
+        break;
+      case AppLifecycleState.resumed:
+        FlutterLogs.logInfo("login", "appLifeCycleState", "resumed");
+       basicStatusCheck(newVersion);
+        break;
+      case AppLifecycleState.paused:
+        FlutterLogs.logInfo("login", "appLifeCycleState", "paused");
+
+        break;
+      case AppLifecycleState.detached:
+        FlutterLogs.logInfo("login", "appLifeCycleState", "detached");
+
+        break;
+    }
   }
 }

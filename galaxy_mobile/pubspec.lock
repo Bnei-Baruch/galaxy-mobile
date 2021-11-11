@@ -351,6 +351,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.6"
+  firebase_remote_config:
+    dependency: "direct main"
+    description:
+      name: firebase_remote_config
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.6.0"
   flag:
     dependency: "direct main"
     description:
@@ -626,6 +633,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.0.4"
+  new_version:
+    dependency: "direct main"
+    description:
+      name: new_version
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.6"
   node_interop:
     dependency: transitive
     description:
