@@ -53,20 +53,29 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
     super.initState();
     logger.info("starting settings");
     WidgetsBinding.instance.addObserver(this);
-
+    final mqttClient = context.read<MQTTClient>();
     selfWidget = SelfViewWidget();
 
     subscription = Connectivity()
         .onConnectivityChanged
         .listen((ConnectivityResult result) {
       connectionStatus = result;
+      if(result  != ConnectivityResult.none && !mqttClient.isConnected())
+        {
+          mqttClient.connect();
+        }
     });
     Utils.parseJson("user_monitor_example.json")
         .then((value) => userJsonExtra = value);
     Utils.parseJson("monitor_data.json").then((value) => monitorData = value);
 
-    final mqttClient = context.read<MQTTClient>();
 
+
+    mqttClient.addOnDisconnectedCallback(()  {
+      setState(() {
+
+      });
+    });
     mqttClient.addOnConnectedCallback(()  {
       if(dialogPleaseWaitContext!=null)
         Navigator.of(dialogPleaseWaitContext).pop();
@@ -76,29 +85,29 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
     });
     mqttClient.addOnConnectionFailedCallback(() => {
       showDialog(
-        context: context,
-        builder: (context)  {
-          dialogContext = context;
-          return AlertDialog(
-            title: new Text('Connection Message'),
-            content: Text(
-                'Server is unreachable,\nplease make sure internet connection is available'),
-            actions: <Widget>[
-              new FlatButton(
-                onPressed: () {
-                  Navigator.of(this.context, rootNavigator: true).pop();
-                  mqttClient.connect();
-                  // dismisses only the dialog and returns nothing
-                },
-                child: new Text('OK'),
-              ),
-            ],
-          );
-        }
+          context: context,
+          builder: (context)  {
+            dialogContext = context;
+            return AlertDialog(
+              title: new Text('Connection Message'),
+              content: Text(
+                  'Server is unreachable,\nplease make sure internet connection is available'),
+              actions: <Widget>[
+                new FlatButton(
+                  onPressed: () {
+                    Navigator.of(this.context, rootNavigator: true).pop();
+                    mqttClient.connect();
+                    // dismisses only the dialog and returns nothing
+                  },
+                  child: new Text('OK'),
+                ),
+              ],
+            );
+          }
       )
     });
 
-      mqttClient.connect();
+    mqttClient.connect();
   }
 
   @override

@@ -94,7 +94,7 @@ class _DashboardState extends State<Dashboard>
     _activeRoomId = activeRoom.room.toString();
     final mqttClient = context.read<MQTTClient>();
 
-    initMQTT();
+
     // widget.state = this;
     callInProgress = false;
     subscription = Connectivity()
@@ -208,7 +208,7 @@ class _DashboardState extends State<Dashboard>
     };
     videoRoom.RoomReady = () {
       FlutterLogs.logInfo("Dashboard", "videoRoom", "RoomReady");
-
+      initMQTT();
       tapped();
     };
     videoRoom.callExitRoomUserExists = () {

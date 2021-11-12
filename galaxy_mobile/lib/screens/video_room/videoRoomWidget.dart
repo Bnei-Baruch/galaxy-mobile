@@ -258,7 +258,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     widget.state = this;
 
     (context.read<MainStore>() as MainStore).addListener(() {
-      if((widget.state.context.read<MainStore>() as MainStore).signal != signal)
+      if((widget.state.context!=null) && (widget.state.context.read<MainStore>() as MainStore).signal != signal)
         {
 
           setState(() {
