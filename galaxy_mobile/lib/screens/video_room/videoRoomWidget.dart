@@ -853,20 +853,21 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
       "video": true,
       "bitrate": 2000000
     };
-    // RTCSessionDescription offer =
-    // await plugin.createOffer(offerOptions: {
+    RTCSessionDescription offer =
+    await plugin.createOffer(offerOptions: {
     //  "mandatory":{
     // "audioRecv": false,
     // "videoRecv": false,
     // "audioSend": true,
     // "videoSend": true,
     // }
-    // // "mandatory": {
-    // //   "addVideo": true,
-    // //   "addAudio": true,
-    // });
-    // plugin.send(
-    //     message: publish, jsep: offer, onSuccess: () {});
+    "mandatory": {
+      "addVideo": true,
+      "addAudio": true,
+    }
+    });
+    plugin.send(
+        message: publish, jsep: offer, onSuccess: () {});
 
     // var register = {
     //   "request": "join",
@@ -1885,7 +1886,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     // await widget._localRenderer.dispose();
     // widget._localRenderer = new RTCVideoRenderer();
     // await widget._localRenderer.initialize();
-     Timer(Duration(seconds: 10), () {
+     Timer(Duration(seconds: 2), () {
       setState(() {
 
 
