@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
+import 'package:galaxy_mobile/models/sharedPref.dart';
 import 'package:galaxy_mobile/services/api.dart';
 import 'package:galaxy_mobile/services/authService.dart';
 import 'package:galaxy_mobile/widgets/connectedDots.dart';
@@ -53,10 +54,14 @@ class _LoginState extends State<Login> {
 
   void login() async {
     final auth = context.read<AuthService>();
+    final store = context.read<MainStore>();
+    if(store.getLastLogin().isAfter(DateTime.now().subtract(Duration(hours: 21))))
+      FlutterLogs.clearLogs();
     final authResponse = await auth.signIn();
     final api = context.read<Api>();
     api.setAccessToken(authResponse.accessToken);
     await context.read<MainStore>().init();
+    store.setLastLogin(DateTime.now());
     Navigator.pushNamed(context, '/settings');
   }
 

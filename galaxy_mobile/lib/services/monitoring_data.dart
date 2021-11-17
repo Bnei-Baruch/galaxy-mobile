@@ -63,6 +63,8 @@ class MonitoringData {
 
   var onStatus;
 
+  var sendDataCount;
+
   MonitoringData(SendPort isolateToMainStream) {
     toApp = isolateToMainStream;
   }
@@ -124,7 +126,7 @@ class MonitoringData {
     //loop for 1 min - in this 1 min gather data oer sec [call gatherDataPerInterval], after one min send data to backend
     looper = Timer.periodic(Duration(seconds: 1), (timer) {
       gatherDataPerInterval();
-      if (counter == 10) {
+      if (counter == 60) {
         updateBackend("ff");
         counter = 1;
       } else {
@@ -449,7 +451,7 @@ class MonitoringData {
         "index":
         (spec["metrics_whitelist"] as List).asMap(),
         "stats": (spec["metrics_whitelist"] as List).map((metric) {
-          print("got inside");
+          // print("got inside");
           var stats = [new Stats(), new Stats(), new Stats()];
           var mappedStats = stats.asMap();
               for(var key in mappedStats.keys)
@@ -527,7 +529,13 @@ class MonitoringData {
     print("monitor updateBackend");
     //this.userJson["network"] = (await Connectivity().checkConnectivity()).toString();
     //  userJson["diskFree"] = (await DiskSpace.getFreeDiskSpace).toString();
-    var datatoSend = storedData.map((e) => filterData(e, spec["metrics_whitelist"], ""));
+    var datatoSend = storedData.map((e) =>
+
+    {
+      sendDataCount++ % 100 == 0 ? e :
+      filterData(e, spec["metrics_whitelist"], "")
+    });
+    sendDataCount = sendDataCount % 100;
 
     var data = {
       "user": this.userJson,

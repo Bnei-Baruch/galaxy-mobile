@@ -17,7 +17,7 @@ class ScreenLoader extends StatelessWidget {
             LinearProgressIndicator(),
             FittedBox(
                   fit: BoxFit.fitWidth,
-                  child: Text('loading')
+                  child: Text('Please Wait')
               ),
           ],
         ))));

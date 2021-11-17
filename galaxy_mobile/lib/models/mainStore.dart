@@ -174,4 +174,15 @@ class MainStore extends ChangeNotifier {
     signal = data;
     notifyListeners();
   }
+
+  DateTime getLastLogin()
+  {
+    FlutterLogs.logInfo("MainStore", "last login date", SharedPrefs().lastLogin.toString());
+    return SharedPrefs().lastLogin;
+  }
+  void setLastLogin(DateTime dateTime) {
+    FlutterLogs.logInfo("MainStore", "set last login date", dateTime.toString());
+    SharedPrefs().lastLogin = dateTime;
+
+  }
 }
