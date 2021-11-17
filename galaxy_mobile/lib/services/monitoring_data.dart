@@ -124,14 +124,14 @@ class MonitoringData {
     int counter = 1;
     updateBackend("ff");
     //loop for 1 min - in this 1 min gather data oer sec [call gatherDataPerInterval], after one min send data to backend
-    looper = Timer.periodic(Duration(seconds: 1), (timer) {
+    looper = Timer.periodic(Duration(milliseconds: spec["sample_interval"]), (timer) {
       gatherDataPerInterval();
-      if (counter == 60) {
-        updateBackend("ff");
-        counter = 1;
-      } else {
-        counter += 1;
-      }
+      // if (counter == 60) {
+      //   updateBackend("ff");
+      //   counter = 1;
+      // } else {
+      //   counter += 1;
+      // }
     });
   }
 
@@ -338,7 +338,7 @@ class MonitoringData {
                 lastTimestamp - this.lastFetchTimestamp >
                     backoff) /* Fetch after errors backoff */
         ) {
-      //this.updateBackend(/*logToConsole=*/ "");
+      this.updateBackend(/*logToConsole=*/ "");
     }
   }
 
