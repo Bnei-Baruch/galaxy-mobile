@@ -63,7 +63,7 @@ class MonitoringData {
 
   var onStatus;
 
-  var sendDataCount;
+  var sendDataCount = 0;
 
   MonitoringData(SendPort isolateToMainStream) {
     toApp = isolateToMainStream;
@@ -532,22 +532,16 @@ class MonitoringData {
     var datatoSend = storedData.map((e) =>
 
     {
-      sendDataCount++ % 100 == 0 ? e :
+      (sendDataCount++ % 100) == 0 ? e :
       filterData(e, spec["metrics_whitelist"], "")
-    });
+    }).toList();
     sendDataCount = sendDataCount % 100;
 
     var data = {
       "user": this.userJson,
-      "data": [[{"name": "audio", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}, {"name": "video", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch},datatoSend.isNotEmpty?(datatoSend.first as List).first:{"name": "Misc", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}]],
+      "data": [[{"name": "audio", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}, {"name": "video", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch},datatoSend.isNotEmpty?(datatoSend):{"name": "Misc", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}]],
     };
-    //{"name": "Misc", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}
-    // var user_monitor = await Utils.parseJson("user_monitor_example.json");
-    // var data_monitor = await Utils.parseJson("monitor_data.json");
-    // Map<String, dynamic> data_exp = {
-    //   "user": user_monitor,
-    //   "data": data_monitor
-    // };
+
 
     String data_to_send = json.encode(data);
     print("update backend data: ${data_to_send}");
@@ -556,7 +550,7 @@ class MonitoringData {
           "data": data_to_send,
         });
 
-    //Api().updateMonitor(data.toString());
+
   }
 
   updateStatus(String link_state_medium,String view)
