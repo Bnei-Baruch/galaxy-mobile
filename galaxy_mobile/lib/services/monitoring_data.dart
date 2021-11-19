@@ -63,7 +63,7 @@ class MonitoringData {
 
   var onStatus;
 
-  var sendDataCount = 0;
+  int sendDataCount = 0;
 
   MonitoringData(SendPort isolateToMainStream) {
     toApp = isolateToMainStream;
@@ -277,7 +277,7 @@ class MonitoringData {
     if ((!this.miscData.containsKey(countName))) {
       this.miscData[countName] = 0;
     }
-    this.miscData[countName]++;
+    this.miscData[countName] += 1;
     if (!(miscData.containsKey(lostName))) {
       this.miscData[lostName] = 0;
     }
@@ -287,6 +287,7 @@ class MonitoringData {
   Map<String,dynamic> getMiscData(var timestamp) {
     var misc =  Map<String,dynamic>.of({"timestamp":timestamp, "type": "misc"});
     misc.addAll(miscData);
+    print("misc type is: ${misc.runtimeType}");
     return misc;
   }
 
@@ -310,10 +311,11 @@ class MonitoringData {
         "timestamp": dataTimestamp
       });
     }
+    print("datas type is: ${datas.runtimeType}");
     if (datas.length > 0) {
       this.storedData.add(datas);
     }
-
+    print("storedData type is: ${storedData.runtimeType}");
     // This is Async callback. Sort stored data.
     this.storedData.sort((a, b) => a[0]["timestamp"] - b[0]["timestamp"]);
     // Throw old stats, STORE_INTERVAL from last timestamp stored.
@@ -398,21 +400,22 @@ class MonitoringData {
               .join(".")));
       return data;
     } else if (data is Map) {
-      // const filterField = ["type", "name"].find((f) => prefix.split(".").slice(-1)[0].startsWith(`[${f}`));
-      const copy = {};
-      // Object.entries(data)
-      //     .filter(([key, value]) =>
-      //     metrics.some((m) => m.startsWith(`${prefix}.${key}`) || [filterField, "timestamp"].includes(key))
-      // )
-      //     .forEach(
-      //         ([key, value]) =>
-      //     (copy[key] = [filterField, "timestamp"].includes(key)
-      //         ? value
-      //         : this.filterData(value, metrics, `${prefix}.${key}`))
-      // );
+      var filterField = ["type", "name"].firstWhere((f) => prefix.split(".")[0].startsWith("[${f}"),orElse: ()=>null);
+      var copy = {};
+      data.removeWhere((key, value) =>
+
+          (metrics as List).any((m) =>
+          m.startsWith("${prefix}.${key}") || [filterField, "timestamp"].contains(key))
+      );
+      data.forEach((key, value) {
+          (copy[key] = [filterField, "timestamp"].contains(key)
+              ? value
+              : this.filterData(value, metrics, "${prefix}.${key}")
+      );
       return copy;
+    });
     }
-    if (!metrics.some((m) => m == prefix)) {
+    if (!metrics.any((m) => m == prefix)) {
       // console.log(`Expected leaf ${data} to fully match prefix ${prefix} to one of the metrics ${metrics}`);
     }
     return data;
@@ -529,14 +532,17 @@ class MonitoringData {
     print("monitor updateBackend");
     //this.userJson["network"] = (await Connectivity().checkConnectivity()).toString();
     //  userJson["diskFree"] = (await DiskSpace.getFreeDiskSpace).toString();
-    var datatoSend = storedData.map((e) =>
+    var datatoSend = storedData.map((e)=>
 
     {
-      (sendDataCount++ % 100) == 0 ? e :
+      (sendDataCount +=1 % 100) == 0 ? e :
       filterData(e, spec["metrics_whitelist"], "")
-    }).toList();
+    });
     sendDataCount = sendDataCount % 100;
 
+    print("going to send $datatoSend");
+    print("going to send 2 ${datatoSend.toString()}");
+    datatoSend.isNotEmpty?print("going to send 3 ${jsonEncode(datatoSend)}"):(){};
     var data = {
       "user": this.userJson,
       "data": [[{"name": "audio", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}, {"name": "video", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch},datatoSend.isNotEmpty?(datatoSend):{"name": "Misc", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}]],
