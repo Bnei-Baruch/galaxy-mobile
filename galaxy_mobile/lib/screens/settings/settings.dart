@@ -73,7 +73,7 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
 
     mqttClient.addOnDisconnectedCallback(()  {
       setState(() {
-
+          FlutterLogs.logError("Settings", "onDisconnected","mqtt got disconnected" );
       });
     });
     mqttClient.addOnConnectedCallback(()  {
@@ -95,7 +95,7 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
               actions: <Widget>[
                 new FlatButton(
                   onPressed: () {
-                    Navigator.of(this.context, rootNavigator: true).pop();
+                    Navigator.of(this.dialogContext, rootNavigator: true).pop();
                     mqttClient.connect();
                     // dismisses only the dialog and returns nothing
                   },
@@ -166,7 +166,7 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
     //     });
     _isThinScreen = MediaQuery.of(context).size.width < 400;
     final mqttClient = context.read<MQTTClient>();
-
+    FlutterLogs.logInfo("Settings", "build", "mqtt connect state ${mqttClient.isConnected()}");
     return (!mqttClient.isConnected())
         ? ScreenLoader()
         : Scaffold(
@@ -297,10 +297,14 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
                                               '/dashboard')
                                           .then((value) {
                                         if (value == false) {
-                                          Navigator.pushNamed(
-                                              context,
-                                              ''
-                                                  '/dashboard');
+                                          FlutterLogs.logInfo("Settings","pushNamed", "back from dashboard with failure");
+                                          // setState(() {
+                                          //   Navigator.pushNamed(
+                                          //       context,
+                                          //       ''
+                                          //           '/dashboard');
+                                          // });
+
                                         }
                                         setState(() {
                                           selfWidget.restartCamera();
