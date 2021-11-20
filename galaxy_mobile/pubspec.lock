@@ -190,20 +190,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.1.2"
-  device_info:
-    dependency: "direct main"
-    description:
-      name: device_info
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.0"
-  device_info_platform_interface:
-    dependency: transitive
-    description:
-      name: device_info_platform_interface
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.1"
   dio:
     dependency: "direct main"
     description:
@@ -351,13 +337,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.6"
-  firebase_remote_config:
-    dependency: "direct main"
-    description:
-      name: firebase_remote_config
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.6.0"
   flag:
     dependency: "direct main"
     description:
@@ -470,8 +449,8 @@ packages:
     dependency: transitive
     description:
       path: "."
-      ref: "0.5.8.2"
-      resolved-ref: "405f6d7f57ac3c00ce1ba81edc3a4e8c905c6bd8"
+      ref: "0.5.8.3"
+      resolved-ref: "76531ca1c7f64e196d62dfcff1c38a545b5beba0"
       url: "https://github.com/igala/flutter-webrtc.git"
     source: git
     version: "0.5.8"
@@ -542,8 +521,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "0.0.4+5"
-      resolved-ref: "10a2a0f4ceddc1c21f69edb2f33574b33dd741f0"
+      ref: "0.0.4+6"
+      resolved-ref: "9c9f2474542c99a05ec55898edc71f0ae91ec2cb"
       url: "https://github.com/igala/flutter_janus_client.git"
     source: git
     version: "0.0.4"
@@ -633,13 +612,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.0.4"
-  new_version:
-    dependency: "direct main"
-    description:
-      name: new_version
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.0.6"
   node_interop:
     dependency: transitive
     description:

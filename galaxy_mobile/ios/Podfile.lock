@@ -7,8 +7,6 @@ PODS:
   - connectivity_plus (0.0.1):
     - Flutter
     - Reachability
-  - device_info (0.0.1):
-    - Flutter
   - disk_space (0.0.1):
     - Flutter
   - Firebase/Analytics (7.3.0):
@@ -21,9 +19,6 @@ PODS:
   - Firebase/Crashlytics (7.3.0):
     - Firebase/CoreOnly
     - FirebaseCrashlytics (~> 7.3.0)
-  - Firebase/RemoteConfig (7.3.0):
-    - Firebase/CoreOnly
-    - FirebaseRemoteConfig (~> 7.3.0)
   - firebase_analytics (7.0.1):
     - Firebase/Analytics (= 7.3.0)
     - firebase_core
@@ -34,12 +29,6 @@ PODS:
   - firebase_crashlytics (0.4.0-1):
     - Firebase/Crashlytics (= 7.3.0)
     - firebase_core
-  - firebase_remote_config (0.6.0):
-    - Firebase/RemoteConfig (= 7.3.0)
-    - firebase_core
-    - Flutter
-  - FirebaseABTesting (7.11.0):
-    - FirebaseCore (~> 7.0)
   - FirebaseAnalytics (7.3.0):
     - FirebaseCore (~> 7.0)
     - FirebaseInstallations (~> 7.0)
@@ -69,12 +58,6 @@ PODS:
     - GoogleUtilities/Environment (~> 7.0)
     - GoogleUtilities/UserDefaults (~> 7.0)
     - PromisesObjC (~> 1.2)
-  - FirebaseRemoteConfig (7.3.0):
-    - FirebaseABTesting (~> 7.0)
-    - FirebaseCore (~> 7.0)
-    - FirebaseInstallations (~> 7.0)
-    - GoogleUtilities/Environment (~> 7.0)
-    - "GoogleUtilities/NSData+zlib (~> 7.0)"
   - Flutter (1.0.0)
   - flutter_appauth (0.0.1):
     - AppAuth (= 1.3.1)
@@ -168,12 +151,10 @@ PODS:
 
 DEPENDENCIES:
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
-  - device_info (from `.symlinks/plugins/device_info/ios`)
   - disk_space (from `.symlinks/plugins/disk_space/ios`)
   - firebase_analytics (from `.symlinks/plugins/firebase_analytics/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_crashlytics (from `.symlinks/plugins/firebase_crashlytics/ios`)
-  - firebase_remote_config (from `.symlinks/plugins/firebase_remote_config/ios`)
   - Flutter (from `Flutter`)
   - flutter_appauth (from `.symlinks/plugins/flutter_appauth/ios`)
   - flutter_audio_manager (from `.symlinks/plugins/flutter_audio_manager/ios`)
@@ -199,13 +180,11 @@ SPEC REPOS:
   trunk:
     - AppAuth
     - Firebase
-    - FirebaseABTesting
     - FirebaseAnalytics
     - FirebaseCore
     - FirebaseCoreDiagnostics
     - FirebaseCrashlytics
     - FirebaseInstallations
-    - FirebaseRemoteConfig
     - FMDB
     - GoogleAppMeasurement
     - GoogleDataTransport
@@ -222,8 +201,6 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   connectivity_plus:
     :path: ".symlinks/plugins/connectivity_plus/ios"
-  device_info:
-    :path: ".symlinks/plugins/device_info/ios"
   disk_space:
     :path: ".symlinks/plugins/disk_space/ios"
   firebase_analytics:
@@ -232,8 +209,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/firebase_core/ios"
   firebase_crashlytics:
     :path: ".symlinks/plugins/firebase_crashlytics/ios"
-  firebase_remote_config:
-    :path: ".symlinks/plugins/firebase_remote_config/ios"
   Flutter:
     :path: Flutter
   flutter_appauth:
@@ -278,20 +253,16 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   AppAuth: 8803ba1aec6d00d9afd30093f82e600307eaa6ea
   connectivity_plus: f5e5e0b894ec1187bfab9816d6c2f034da8d46da
-  device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
   disk_space: e94d34bbdf77954adfb39e60bde9cc5c7233eda6
   Firebase: 26223c695fe322633274198cb19dca8cb7e54416
   firebase_analytics: 41043f6e14fc9bc27c3f05217ab7f2b0ad9b41eb
   firebase_core: 91b27774a52f41f8b58484a75edf71197ac01c59
   firebase_crashlytics: e6ecb908f6249ce3757d18a812819a41495bf1cb
-  firebase_remote_config: 1c56b7b8caa840aa2e9432e66bf606d10f492fc9
-  FirebaseABTesting: e66f1f80747792630d9b292966de206d5df9853b
   FirebaseAnalytics: 2580c2d62535ae7b644143d48941fcc239ea897a
   FirebaseCore: 4d3c72622ce0e2106aaa07bb4b2935ba2c370972
   FirebaseCoreDiagnostics: d50e11039e5984d92c8a512be2395f13df747350
   FirebaseCrashlytics: d31325312c92e2cb2f0386d589b9aa44e303d99b
   FirebaseInstallations: a58d4f72ec5861840b84df489f2668d970df558a
-  FirebaseRemoteConfig: 826fad8bec5ce1912ef97a124d6ec0ce4dcf6ec1
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_appauth: a6bf9fa3192a14a981475c4cbe3bcebd3b563144
   flutter_audio_manager: 5945fdba99ff5e6c54d7e9b78d35b3a3bd574a9b

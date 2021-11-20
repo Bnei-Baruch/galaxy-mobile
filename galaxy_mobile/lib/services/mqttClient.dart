@@ -72,7 +72,9 @@ class MQTTClient {
     _onConnectionFailedCallbackList.clear();
   }
 
-  Future<MqttServerClient> connect() async {
+  Future<MqttServerClient> connect({bool internalRetry = false}) async {
+    if(!internalRetry)
+      _connectionAttempt = 0;
     logger.info(">>> connection attempt: $_connectionAttempt");
     var clientId = _id + "-" + randomString(3);
     if (_connectionAttempt < _maxConnectionAttempts) {
@@ -105,7 +107,7 @@ class MQTTClient {
         Future.delayed(const Duration(seconds: 20), () {
           if (!_isConnected) {
             _connectionAttempt++;
-            connect();
+            connect(internalRetry: true);
           }
         });
         await _client.connect();
@@ -113,7 +115,7 @@ class MQTTClient {
         logger.trace("Exception during connection to broker", e);
         _client.disconnect();
         _connectionAttempt++;
-        connect();
+        connect(internalRetry: true);
       }
 
       _client.updates.listen((List<MqttReceivedMessage<MqttMessage>> c) {
@@ -154,6 +156,10 @@ class MQTTClient {
     _client.publishMessage(topic, MqttQos.exactlyOnce, builder.payload);
   }
 
+  MqttClientConnectionStatus getStatus()
+  {
+    return _client.connectionStatus;
+  }
   void onConnected() {
     logger.info("Connected");
     _isConnected = true;
@@ -209,5 +215,9 @@ class MQTTClient {
       randomString += charSet.substring(randomPoz, randomPoz + 1);
     }
     return randomString;
+  }
+
+  bool isConnected() {
+    return _isConnected;
   }
 }

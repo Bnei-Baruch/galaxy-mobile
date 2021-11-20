@@ -51,13 +51,15 @@ class MainStore extends ChangeNotifier {
     setAudioPreset(SharedPrefs().audioPreset);
     setVideoPreset(SharedPrefs().videoPreset);
 
-    _mqttClient = MQTTClient();
+    _mqttClient.init(_auth.getUserEmail(),  _auth.getToken().accessToken, activeUser.id  );
   }
 
   void update(AuthService auth, Api api, MQTTClient mqttClient) {
     _auth = auth;
     _api = api;
     _mqttClient = mqttClient;
+
+
   }
 
   void setActiveRoom(String roomName) {
@@ -171,5 +173,16 @@ class MainStore extends ChangeNotifier {
     FlutterLogs.logInfo("MainStore", "setSignal", data);
     signal = data;
     notifyListeners();
+  }
+
+  DateTime getLastLogin()
+  {
+    FlutterLogs.logInfo("MainStore", "last login date", SharedPrefs().lastLogin.toString());
+    return SharedPrefs().lastLogin;
+  }
+  void setLastLogin(DateTime dateTime) {
+    FlutterLogs.logInfo("MainStore", "set last login date", dateTime.toString());
+    SharedPrefs().lastLogin = dateTime;
+
   }
 }

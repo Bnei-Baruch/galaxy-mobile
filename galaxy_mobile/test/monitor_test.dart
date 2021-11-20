@@ -75,4 +75,15 @@ void main() {
     var val  = monitor.getMetricValue(data,(spec["metrics_whitelist"] as List).last,"");
     print(val);
   });
+
+  test('update value test', () async {
+
+    var spec = await Utils.parseJson("whitelist.json");
+    var data = await Utils.parseJson("monitor_data_element.json");
+    var monitor = MonitoringData(ReceivePort().sendPort);
+
+    monitor.storedData = data;
+    var val  = monitor.getMetricValue(data,(spec["metrics_whitelist"] as List).last,"");
+    monitor.updateBackend("gg");
+  });
 }

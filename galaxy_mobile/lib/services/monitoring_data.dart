@@ -63,6 +63,8 @@ class MonitoringData {
 
   var onStatus;
 
+  int sendDataCount = 0;
+
   MonitoringData(SendPort isolateToMainStream) {
     toApp = isolateToMainStream;
   }
@@ -122,14 +124,14 @@ class MonitoringData {
     int counter = 1;
     updateBackend("ff");
     //loop for 1 min - in this 1 min gather data oer sec [call gatherDataPerInterval], after one min send data to backend
-    looper = Timer.periodic(Duration(seconds: 1), (timer) {
+    looper = Timer.periodic(Duration(milliseconds: spec["sample_interval"]), (timer) {
       gatherDataPerInterval();
-      if (counter == 10) {
-        updateBackend("ff");
-        counter = 1;
-      } else {
-        counter += 1;
-      }
+      // if (counter == 60) {
+      //   updateBackend("ff");
+      //   counter = 1;
+      // } else {
+      //   counter += 1;
+      // }
     });
   }
 
@@ -275,7 +277,7 @@ class MonitoringData {
     if ((!this.miscData.containsKey(countName))) {
       this.miscData[countName] = 0;
     }
-    this.miscData[countName]++;
+    this.miscData[countName] += 1;
     if (!(miscData.containsKey(lostName))) {
       this.miscData[lostName] = 0;
     }
@@ -285,6 +287,7 @@ class MonitoringData {
   Map<String,dynamic> getMiscData(var timestamp) {
     var misc =  Map<String,dynamic>.of({"timestamp":timestamp, "type": "misc"});
     misc.addAll(miscData);
+    print("misc type is: ${misc.runtimeType}");
     return misc;
   }
 
@@ -308,10 +311,11 @@ class MonitoringData {
         "timestamp": dataTimestamp
       });
     }
+    print("datas type is: ${datas.runtimeType}");
     if (datas.length > 0) {
       this.storedData.add(datas);
     }
-
+    print("storedData type is: ${storedData.runtimeType}");
     // This is Async callback. Sort stored data.
     this.storedData.sort((a, b) => a[0]["timestamp"] - b[0]["timestamp"]);
     // Throw old stats, STORE_INTERVAL from last timestamp stored.
@@ -336,7 +340,7 @@ class MonitoringData {
                 lastTimestamp - this.lastFetchTimestamp >
                     backoff) /* Fetch after errors backoff */
         ) {
-      //this.updateBackend(/*logToConsole=*/ "");
+      this.updateBackend(/*logToConsole=*/ "");
     }
   }
 
@@ -396,21 +400,22 @@ class MonitoringData {
               .join(".")));
       return data;
     } else if (data is Map) {
-      // const filterField = ["type", "name"].find((f) => prefix.split(".").slice(-1)[0].startsWith(`[${f}`));
-      const copy = {};
-      // Object.entries(data)
-      //     .filter(([key, value]) =>
-      //     metrics.some((m) => m.startsWith(`${prefix}.${key}`) || [filterField, "timestamp"].includes(key))
-      // )
-      //     .forEach(
-      //         ([key, value]) =>
-      //     (copy[key] = [filterField, "timestamp"].includes(key)
-      //         ? value
-      //         : this.filterData(value, metrics, `${prefix}.${key}`))
-      // );
+      var filterField = ["type", "name"].firstWhere((f) => prefix.split(".")[0].startsWith("[${f}"),orElse: ()=>null);
+      var copy = {};
+      data.removeWhere((key, value) =>
+
+          (metrics as List).any((m) =>
+          m.startsWith("${prefix}.${key}") || [filterField, "timestamp"].contains(key))
+      );
+      data.forEach((key, value) {
+          (copy[key] = [filterField, "timestamp"].contains(key)
+              ? value
+              : this.filterData(value, metrics, "${prefix}.${key}")
+      );
       return copy;
+    });
     }
-    if (!metrics.some((m) => m == prefix)) {
+    if (!metrics.any((m) => m == prefix)) {
       // console.log(`Expected leaf ${data} to fully match prefix ${prefix} to one of the metrics ${metrics}`);
     }
     return data;
@@ -449,7 +454,7 @@ class MonitoringData {
         "index":
         (spec["metrics_whitelist"] as List).asMap(),
         "stats": (spec["metrics_whitelist"] as List).map((metric) {
-          print("got inside");
+          // print("got inside");
           var stats = [new Stats(), new Stats(), new Stats()];
           var mappedStats = stats.asMap();
               for(var key in mappedStats.keys)
@@ -527,19 +532,24 @@ class MonitoringData {
     print("monitor updateBackend");
     //this.userJson["network"] = (await Connectivity().checkConnectivity()).toString();
     //  userJson["diskFree"] = (await DiskSpace.getFreeDiskSpace).toString();
-    var datatoSend = storedData.map((e) => filterData(e, spec["metrics_whitelist"], ""));
+    var datatoSend = storedData.map((e)
 
+    {
+      sendDataCount += 1;
+      return (sendDataCount % 100) == 0 ? e :
+      filterData(e, spec["metrics_whitelist"], "");
+
+    });
+    sendDataCount = sendDataCount % 100;
+
+    print("going to send $datatoSend");
+    print("going to send 2 ${datatoSend.toString()}");
+    datatoSend.isNotEmpty?print("going to send 3 ${jsonEncode(datatoSend.toList())}"):(){};
     var data = {
       "user": this.userJson,
-      "data": [[{"name": "audio", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}, {"name": "video", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch},datatoSend.isNotEmpty?(datatoSend.first as List).first:{"name": "Misc", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}]],
+      "data": [[{"name": "audio", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}, {"name": "video", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch},datatoSend.isNotEmpty?(datatoSend.toList()):{"name": "Misc", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}]],
     };
-    //{"name": "Misc", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}
-    // var user_monitor = await Utils.parseJson("user_monitor_example.json");
-    // var data_monitor = await Utils.parseJson("monitor_data.json");
-    // Map<String, dynamic> data_exp = {
-    //   "user": user_monitor,
-    //   "data": data_monitor
-    // };
+
 
     String data_to_send = json.encode(data);
     print("update backend data: ${data_to_send}");
@@ -548,7 +558,7 @@ class MonitoringData {
           "data": data_to_send,
         });
 
-    //Api().updateMonitor(data.toString());
+
   }
 
   updateStatus(String link_state_medium,String view)
