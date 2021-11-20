@@ -532,20 +532,22 @@ class MonitoringData {
     print("monitor updateBackend");
     //this.userJson["network"] = (await Connectivity().checkConnectivity()).toString();
     //  userJson["diskFree"] = (await DiskSpace.getFreeDiskSpace).toString();
-    var datatoSend = storedData.map((e)=>
+    var datatoSend = storedData.map((e)
 
     {
-      (sendDataCount +=1 % 100) == 0 ? e :
-      filterData(e, spec["metrics_whitelist"], "")
+      sendDataCount += 1;
+      return (sendDataCount % 100) == 0 ? e :
+      filterData(e, spec["metrics_whitelist"], "");
+
     });
     sendDataCount = sendDataCount % 100;
 
     print("going to send $datatoSend");
     print("going to send 2 ${datatoSend.toString()}");
-    datatoSend.isNotEmpty?print("going to send 3 ${jsonEncode(datatoSend)}"):(){};
+    datatoSend.isNotEmpty?print("going to send 3 ${jsonEncode(datatoSend.toList())}"):(){};
     var data = {
       "user": this.userJson,
-      "data": [[{"name": "audio", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}, {"name": "video", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch},datatoSend.isNotEmpty?(datatoSend):{"name": "Misc", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}]],
+      "data": [[{"name": "audio", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}, {"name": "video", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch},datatoSend.isNotEmpty?(datatoSend.toList()):{"name": "Misc", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}]],
     };
 
 
