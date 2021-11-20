@@ -950,7 +950,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         "id": widget.user.sub,
         "timestamp": DateTime.now().millisecondsSinceEpoch,
         "role": "user",
-        "display": widget.user.givenName
+        "display": widget.user.givenName+"\u{1F4F1}"//0xF0 0x9F 0x93 0xB1"
       }) //'User test'
     };
     plugin.send(
