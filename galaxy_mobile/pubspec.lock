@@ -430,8 +430,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "2.1.4-2"
-      resolved-ref: b4dcb7dba7f7c8be0a0e45f1a02063ab2fb5226b
+      ref: "2.1.4-3"
+      resolved-ref: "883b711a6b553e2da5481ae8f81a920e89151f2d"
       url: "https://github.com/igala/flutter_logs.git"
     source: git
     version: "2.1.4"

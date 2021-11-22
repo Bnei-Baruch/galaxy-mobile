@@ -4,6 +4,9 @@ PODS:
     - AppAuth/ExternalUserAgent (= 1.3.1)
   - AppAuth/Core (1.3.1)
   - AppAuth/ExternalUserAgent (1.3.1)
+  - CocoaLumberjack/Core (3.7.2)
+  - CocoaLumberjack/Swift (3.7.2):
+    - CocoaLumberjack/Core
   - connectivity_plus (0.0.1):
     - Flutter
     - Reachability
@@ -86,6 +89,7 @@ PODS:
   - flutter_fgbg (0.0.1):
     - Flutter
   - flutter_logs (0.0.1):
+    - CocoaLumberjack/Swift
     - Flutter
     - ZIPFoundation
   - flutter_volume_slider (1.0.0):
@@ -198,6 +202,7 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - AppAuth
+    - CocoaLumberjack
     - Firebase
     - FirebaseABTesting
     - FirebaseAnalytics
@@ -277,6 +282,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   AppAuth: 8803ba1aec6d00d9afd30093f82e600307eaa6ea
+  CocoaLumberjack: b7e05132ff94f6ae4dfa9d5bce9141893a21d9da
   connectivity_plus: f5e5e0b894ec1187bfab9816d6c2f034da8d46da
   device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
   disk_space: e94d34bbdf77954adfb39e60bde9cc5c7233eda6
@@ -297,7 +303,7 @@ SPEC CHECKSUMS:
   flutter_audio_manager: 5945fdba99ff5e6c54d7e9b78d35b3a3bd574a9b
   flutter_email_sender: 02d7443217d8c41483223627972bfdc09f74276b
   flutter_fgbg: 31c0d1140a131daea2d342121808f6aa0dcd879d
-  flutter_logs: 5d0dca26963e0f30b11a995a764744ef77d5d428
+  flutter_logs: 6ef6417dca85185f872e917433b5ea65631c8078
   flutter_volume_slider: 626493356983f02af6b984b596b071c90171002d
   flutter_webrtc: 39898454258b54ba51996850d5da8d5d53bf1524
   fluttertoast: 6122fa75143e992b1d3470f61000f591a798cc58
