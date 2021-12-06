@@ -387,9 +387,11 @@ packages:
   flutter_audio_manager:
     dependency: "direct main"
     description:
-      name: flutter_audio_manager
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "."
+      ref: "0.2.3.1"
+      resolved-ref: f2e263a8a9f3c98629d13d748a7882a2a447bcaf
+      url: "https://github.com/igala/flutter_audio_manager.git"
+    source: git
     version: "0.2.3"
   flutter_email_sender:
     dependency: "direct main"
@@ -469,11 +471,9 @@ packages:
   flutter_webrtc:
     dependency: transitive
     description:
-      path: "."
-      ref: "0.5.8.3"
-      resolved-ref: "76531ca1c7f64e196d62dfcff1c38a545b5beba0"
-      url: "https://github.com/igala/flutter-webrtc.git"
-    source: git
+      path: "../../flutter-webrtc"
+      relative: true
+    source: path
     version: "0.5.8"
   fluttertoast:
     dependency: "direct main"
@@ -541,11 +541,9 @@ packages:
   janus_client:
     dependency: "direct main"
     description:
-      path: "."
-      ref: "0.0.4+6"
-      resolved-ref: "9c9f2474542c99a05ec55898edc71f0ae91ec2cb"
-      url: "https://github.com/igala/flutter_janus_client.git"
-    source: git
+      path: "../../flutter_janus_client"
+      relative: true
+    source: path
     version: "0.0.4"
   js:
     dependency: transitive

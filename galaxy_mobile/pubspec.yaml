@@ -75,7 +75,10 @@ dependencies:
       ref: 0.6.0_taskRemovedFix
   #    path: ../../Documents/Github/flutter_foreground_service_plugin/
   dots_indicator: ^1.2.0
-  flutter_audio_manager: ^0.2.3
+  flutter_audio_manager: #^0.2.3.1
+    git:
+      url: https://github.com/igala/flutter_audio_manager.git
+      ref: 0.2.3.1
   readmore: ^1.0.1
 
   janus_client: #^0.0.4
