@@ -91,8 +91,8 @@ class _LoginState extends State<Login>  with WidgetsBindingObserver {
   void login() async {
     final auth = context.read<AuthService>();
     final store = context.read<MainStore>();
-    if(store.getLastLogin().isAfter(DateTime.now().subtract(Duration(hours: 21))))
-      FlutterLogs.clearLogs();
+    // if(store.getLastLogin().isAfter(DateTime.now().subtract(Duration(hours: 21))))
+    //   FlutterLogs.clearLogs();
     final authResponse = await auth.signIn();
     final api = context.read<Api>();
     api.setAccessToken(authResponse.accessToken);
