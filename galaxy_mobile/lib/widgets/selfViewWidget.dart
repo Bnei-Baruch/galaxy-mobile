@@ -53,15 +53,14 @@ class _SelfViewWidgetState extends State<SelfViewWidget>
   @override
   void dispose() {
     FlutterLogs.logInfo("SelfViewWidget", "dispose", "");
-    _localRenderer.dispose();
-    _localRenderer.srcObject = null;
+  
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
-  initRenderers() {
+  initRenderers() async {
     _localRenderer = new RTCVideoRenderer();
-    _localRenderer.initialize();
+    await _localRenderer.initialize();
 
     var mediaConstraints = {
       "audio": false,
@@ -76,13 +75,18 @@ class _SelfViewWidgetState extends State<SelfViewWidget>
         "optional": [],
       }
     };
-    Future<MediaStream> stream =
-        navigator.mediaDevices.getUserMedia(mediaConstraints);
+    MediaStream stream =
+        await navigator.mediaDevices.getUserMedia(mediaConstraints);
 
-    stream.then((value) => setState(() {
-          myStream = value;
-          _localRenderer.srcObject = value;
-        }));
+
+        myStream = stream;
+        setState(() {
+          _localRenderer.srcObject = stream;
+        });
+
+
+
+
   }
 
   @override

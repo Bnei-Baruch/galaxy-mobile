@@ -2,11 +2,9 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
-import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/services/keycloak.dart';
-import 'package:galaxy_mobile/services/monitoring_data.dart';
 import 'package:galaxy_mobile/services/monitoring_isolate.dart';
 import 'package:galaxy_mobile/utils/switch_page_helper.dart';
 import 'package:galaxy_mobile/utils/utils.dart';
@@ -17,7 +15,6 @@ import 'package:janus_client/Plugin.dart';
 import 'package:mdi/mdi.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_logs/flutter_logs.dart';
-import 'package:flutter/services.dart';
 
 
 import 'dart:async';
@@ -230,6 +227,10 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
 
   int toVideoIndex;
   String signal = "good";
+
+  bool recoverFromBackground = false;
+
+  List<MediaDeviceInfo> cameras;
 
 
 
@@ -539,6 +540,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         onRenegotiationNeededCallback: (){
           FlutterLogs.logWarn("VideoRoom", "onRenegotiationNeededCallback",
               "_newRemoteFeed");
+
         }
 
       ,));
@@ -807,9 +809,10 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                   "state: $connection");
              (widget.mainToIsolateStream[0] as SendPort).send({"type":"iceState","state":connection.toString()});
             },
-            onRenegotiationNeededCallback: (){
+            onRenegotiationNeededCallback: () async {
               FlutterLogs.logWarn("VideoRoom", "onRenegotiationNeededCallback",
                   "videoroom");
+
             }
         ));
       }, onError: (e) {
@@ -820,105 +823,57 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
   }
 
   Future prepareAndRegisterMyStreamRecovery(Plugin plugin) async {
-    widget.pluginHandle = plugin;
-    MediaStream stream = await plugin.initializeMediaDevices();
-    widget.myStream = stream;
-    widget.myStream.getAudioTracks().first.setMicrophoneMute(true);
-    widget.myStream.getVideoTracks().first.enabled =
-        widget.myVideoMuted;
-    widget.myAudioMuted = true;
-    widget.updateVideoState(true);
-    // });
-    setState(() {
-      widget._localRenderer.srcObject = widget.myStream;
-    });
-    //==> chat room can not added - infra does not support it yet == try to enter chat room, if user already exists then exit with error
-    // widget.j.attach(Plugin(
-    //     plugin: "janus.plugin.textroom",
-    //     opaqueId: widget.user.id,
-    //     onSuccess: (pluginHandle) {
-    //       var request = {"request": "setup"};
-    //       widget.chatHandle = pluginHandle;
-    //       widget.chatHandle.send(
-    //           message: request,
-    //           onSuccess: () {
-    //             FlutterLogs.logInfo("VideoRoom", "chatroom",
-    //                 "successfully subscribed to chatroom");
-    //           },
-    //           onError: (err) {
-    //             if (err == 420) {
-    //               //user already in room
-    //               showDialog(
-    //                   context: context,
-    //                   child: AlertDialog(
-    //                     title: Text("User Already In Room"),
-    //                   ));
-    //               widget.exitRoom();
-    //             }
-    //           });
-    //     },
-    //     onError: (err){
-    // FlutterLogs.logInfo("VideoRoom", "chatroom",
-    // "error subscribed to chatroom ${err.toString()}");
-    // }));
-    var publish = {
-      "request":"configure",
+    FlutterLogs.logWarn("VideoRoom", "prepareAndRegisterMyStreamRecovery",
+        "videoroom");
+    //if( widget.myStream.getVideoTracks() != null &&  widget.myStream.active != true) {
+      widget.pluginHandle = plugin;
+    Map<String, dynamic> mediaConstraints = {
       "audio": true,
-      "video": true,
-      "bitrate": 900000
+      "video": {
+        "mandatory": {
+          "minWidth":
+          320, // Provide your own width, height and frame rate here
+          "minHeight": 180,
+          "minFrameRate": 15
+        },
+        "facingMode": "user",
+        "optional": [],
+      }
     };
-    RTCSessionDescription offer =
-    await plugin.createOffer(offerOptions: {
-    //  "mandatory":{
-    // "audioRecv": false,
-    // "videoRecv": false,
-    // "audioSend": true,
-    // "videoSend": true,
-    // }
-    "media": {
-      "addVideo": true,
-      "addAudio": true,
-    }
-    });
-    plugin.send(
-        message: publish, jsep: offer, onSuccess: () {
-      print("xxxz plugin offer success");
-    },onError:(error){
-          print("xxxz plugin offer error: ${error}");
+      var senders = await plugin.webRTCHandle.pc.senders;
+
+
+
+      //plugin.webRTCHandle.pc.removeTrack(senders.firstWhere((sender) => sender.track.kind == "audio"));
+      MediaStream stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+
+      widget.myStream = stream;
+      widget.myStream
+          .getAudioTracks()
+          .first
+          .setMicrophoneMute(true);
+      widget.myStream
+          .getVideoTracks()
+          .first
+          .enabled =
+          widget.myVideoMuted;
+      widget.myAudioMuted = true;
+      widget.updateVideoState(true);
+      // });
+
+   await  (senders.firstWhere((sender) => sender.track.kind == "video")).replaceTrack( widget.myStream
+        .getVideoTracks()
+        .first);
+
+    setState(() {
+      widget._localRenderer.srcObject = null;
+      widget._localRenderer.srcObject = widget.myStream;
     });
 
-    // var register = {
-    //   "request": "join",
-    //   "room": widget.roomNumber,
-    //   "ptype": "publisher",
-    //   "display": jsonEncode({
-    //     "id": widget.user.sub,
-    //     "timestamp": DateTime.now().millisecondsSinceEpoch,
-    //     "role": "user",
-    //     "display": widget.user.givenName
-    //   }) //'User test'
-    // };
-    // plugin.send(
-    //     message: register,
-    //     onSuccess: () async {
-    //       var publish = {
-    //         "request": "configure",
-    //         "audio": true,
-    //         "video": true,
-    //         "bitrate": 2000000
-    //       };
-    //       RTCSessionDescription offer =
-    //       await plugin.createOffer(offerOptions: {
-    //         "mandatory": {
-    //           "OfferToReceiveAudio": true,
-    //           "OfferToReceiveVideo": true,
-    //         }
-    //       });
-    //       plugin.send(
-    //           message: publish, jsep: offer, onSuccess: () {});
-    //     });
   }
   Future prepareAndRegisterMyStream(Plugin plugin) async {
+    FlutterLogs.logWarn("VideoRoom", "prepareAndRegisterMyStream-",
+        "videoroom");
     widget.pluginHandle = plugin;
     MediaStream stream = await plugin.initializeMediaDevices();
     widget.myStream = stream;
@@ -927,39 +882,14 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         widget.myVideoMuted;
     widget.myAudioMuted = true;
     widget.updateVideoState(true);
+
+
     // });
     setState(() {
       widget._localRenderer.srcObject = widget.myStream;
     });
-    //==> chat room can not added - infra does not support it yet == try to enter chat room, if user already exists then exit with error
-    // widget.j.attach(Plugin(
-    //     plugin: "janus.plugin.textroom",
-    //     opaqueId: widget.user.id,
-    //     onSuccess: (pluginHandle) {
-    //       var request = {"request": "setup"};
-    //       widget.chatHandle = pluginHandle;
-    //       widget.chatHandle.send(
-    //           message: request,
-    //           onSuccess: () {
-    //             FlutterLogs.logInfo("VideoRoom", "chatroom",
-    //                 "successfully subscribed to chatroom");
-    //           },
-    //           onError: (err) {
-    //             if (err == 420) {
-    //               //user already in room
-    //               showDialog(
-    //                   context: context,
-    //                   child: AlertDialog(
-    //                     title: Text("User Already In Room"),
-    //                   ));
-    //               widget.exitRoom();
-    //             }
-    //           });
-    //     },
-    //     onError: (err){
-    // FlutterLogs.logInfo("VideoRoom", "chatroom",
-    // "error subscribed to chatroom ${err.toString()}");
-    // }));
+
+
     var register = {
       "request": "join",
       "room": widget.roomNumber,
@@ -978,7 +908,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
             "request": "configure",
             "audio": true,
             "video": true,
-            "bitrate": 900000
+            "bitrate": 90000
           };
           RTCSessionDescription offer =
               await plugin.createOffer(offerOptions: {
@@ -1100,31 +1030,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     _newRemoteFeed(widget.j, subscription);
   }
 
-  // Unsubscribe from feeds defined by |ids| (with all streams) and remove it when |onlyVideo| is false.
-  // If |onlyVideo| is true, will unsubscribe only from video stream of those specific feeds, keeping those feeds.
-  // void unsubscribeFrom(ids, onlyVideo) {
-  // const { feeds/*, feedStreams, index*/ } = this.state;
-  // const idsSet                            = new Set(ids);
-  // const unsubscribe                       = { request: 'unsubscribe', streams: [] };
-  // feeds.filter(feed => idsSet.has(feed.id)).forEach(feed => {
-  // if (onlyVideo) {
-  // // Unsubscribe only from one video stream (not all publisher feed).
-  // // Acutally expecting only one video stream, but writing more generic code.
-  // feed.streams.filter(stream => stream.type === 'video')
-  //     .map(stream => ({ feed: feed.id, mid: stream.mid }))
-  //     .forEach(stream => unsubscribe.streams.push(stream));
-  // } else {
-  // // Unsubscribe the whole feed (all it's streams).
-  // unsubscribe.streams.push({ feed: feed.id });
-  // Janus.log('Unsubscribe from Feed ' + JSON.stringify(feed) + ' (' + feed.id + ').');
-  // }
-  // });
-  // // Send an unsubscribe request.
-  // const { remoteFeed } = this.state;
-  // if (remoteFeed !== null && unsubscribe.streams.length > 0) {
-  // remoteFeed.send({ message: unsubscribe });
-  // }
-  // }
+
 
   void switchVideos(int page, List oldFeeds, List newFeeds) {
     FlutterLogs.logInfo(
@@ -1265,7 +1171,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     // final RoomArguments args = ModalRoute.of(/context).settings.arguments;
     widget.roomNumber = args.roomNumber;
     widget.token = args.token;
-    widget.server = "https://gxydev.kli.one/janusgxy";//args.server;//"https://gxydev.kli.one/janusgxy";//
+    widget.server = args.server;//"https://gxydev.kli.one/janusgxy";//"https://gxydev.kli.one/janusgxy";//
     widget.user = args.user;
     widget.groupName = args.groupName;
     widget.janusName = args.janusName;
@@ -1389,15 +1295,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                                               0)["cammute"] ==
                                           false &&
                                       !muteOtherCams)
-                                  // (true)
-                                  // (widget._remoteRenderer
-                                  //         .elementAt(0)
-                                  //         .srcObject
-                                  //         .getVideoTracks()
-                                  //         .elementAt(widget._remoteRenderer
-                                  //             .elementAt(0)
-                                  //             .trackIndex)
-                                  //         .enabled)
+
                                   ? RTCVideoView(
                                       widget._remoteRenderer.elementAt(0))
                                   : Align(
@@ -1483,14 +1381,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                                                 1)["cammute"] ==
                                             false &&
                                         !muteOtherCams)
-                                    // (widget._remoteRenderer
-                                    //         .elementAt(1)
-                                    //         .srcObject
-                                    //         .getVideoTracks()
-                                    //         .elementAt(widget._remoteRenderer
-                                    //             .elementAt(1)
-                                    //             .trackIndex)
-                                    //         .enabled)
+
                                     ? RTCVideoView(
                                         widget._remoteRenderer.elementAt(1))
                                     : Align(
@@ -1578,14 +1469,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                                                 2)["cammute"] ==
                                             false &&
                                         !muteOtherCams)
-                                    // (widget._remoteRenderer
-                                    //         .elementAt(2)
-                                    //         .srcObject
-                                    //         .getVideoTracks()
-                                    //         .elementAt(widget._remoteRenderer
-                                    //             .elementAt(2)
-                                    //             .trackIndex)
-                                    //         .enabled)
+
                                     ? RTCVideoView(
                                         widget._remoteRenderer.elementAt(2))
                                     : Align(
@@ -1649,32 +1533,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                             ))
                         : Container()
 
-                    // CarouselSlider(
-                    //   height: 200.0,
-                    //   autoPlay: true,
-                    //   autoPlayInterval: Duration(seconds: 3),
-                    //   autoPlayAnimationDuration: Duration(milliseconds: 800),
-                    //   autoPlayCurve: Curves.fastOutSlowIn,
-                    //   pauseAutoPlayOnTouch: Duration(seconds: 10),
-                    //   aspectRatio: 2.0,
-                    //   onPageChanged: (index) {
-                    //     setState(() {
-                    //       page = index;
-                    //     });
-                    //   },
-                    //   items: feeds.map((feed) {
-                    //     return Builder(builder: (BuildContext context) {
-                    //       return Container(
-                    //         height: MediaQuery.of(context).size.height * 0.30,
-                    //         width: MediaQuery.of(context).size.width,
-                    //         child: Card(
-                    //           color: Colors.blueAccent,
-                    //           child: Container(),
-                    //         ),
-                    //       );
-                    //     });
-                    //   }).toList(),
-                    // ),
+
                   ],
                   primary: false,
                   padding: const EdgeInsets.all(0),
@@ -1706,14 +1565,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                     },
                   ),
                 ),
-                // Align(
-                //   alignment: Alignment.bottomCenter,
-                //   child: DotsIndicator(
-                //       dotsCount: (feeds.length / PAGE_SIZE).ceil() > 0
-                //           ? (feeds.length / PAGE_SIZE).ceil()
-                //           : 1,
-                //       position: page.toDouble()),
-                // ),
+
               ],
             ),
           );
@@ -1784,14 +1636,17 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         FlutterLogs.logInfo(
             "videoRoom", "didChangeAppLifecycleState", 'inactive');
         if (widget.myVideoMuted) {
-          widget.myStream.getVideoTracks().first.enabled = false;
-         // widget.myStream.getVideoTracks().first.stop();
-
-          widget.updateVideoState(!widget.myVideoMuted);
-
-
+          FlutterLogs.logInfo(
+              "videoRoom", "didChangeAppLifecycleState",
+              'number of video tracks = ${widget.myStream
+                  .getVideoTracks()
+                  .length}');
+          widget.myStream
+              .getVideoTracks()
+              .first
+              .enabled = false;
         }
-        removeSelfVideo();
+
         break;
       case AppLifecycleState.resumed:
         FlutterLogs.logInfo(
@@ -1890,14 +1745,18 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         "optional": [],
       }
     };
-    Future<MediaStream> stream =
-    navigator.mediaDevices.getUserMedia(mediaConstraints);
+    MediaStream stream =
+    await navigator.mediaDevices.getUserMedia(mediaConstraints);
 
-    stream.then((value) => setState(() {
-      widget.myStream = value;
-      value.getVideoTracks().first.enabled = true;
-      widget._localRenderer.srcObject = value;
-    }));
+     setState(() {
+      widget.myStream = stream;
+      stream.getVideoTracks().first.enabled = true;
+      widget._localRenderer.srcObject = stream;
+     });
+
+
+
+    cameras = await Helper.cameras;
   }
 
   void restartSelfVideo() async {
@@ -1908,20 +1767,9 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     // widget._localRenderer = new RTCVideoRenderer();
     // await widget._localRenderer.initialize();
      Timer(Duration(seconds: 2), () {
-      //setState(()  {
-
-
-        //widget.myStream.getVideoTracks().first.enabled = true;
-        prepareAndRegisterMyStreamRecovery(widget.pluginHandle);
-       // FlutterLogs.logInfo("VideoRoom", "restartSelfVideo 2", "render video ${ widget._localRenderer.renderVideo} video = ${widget.myStream.getVideoTracks().length} video enabled = ${widget.myStream.getVideoTracks().first.enabled} video muted = ${widget.myStream.getVideoTracks().first.muted}" );
-        
-
-   //   });
+       prepareAndRegisterMyStreamRecovery(widget.pluginHandle);
 
     });
-
-
-   // await prepareAndRegisterMyStream(widget.pluginHandle);
 
   }
 
@@ -1932,6 +1780,13 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
   Future removeMyStreamWhenInBackground(Plugin plugin) async {
 
 
+    if(widget.myStream!=null && widget.myStream.getTracks()!=null)
+      {
+        widget.myStream.getTracks().forEach((element) {
+          element.enabled = false;
+          element.stop();
+        });
+      }
     var publish = {
       "request":"configure",
     };
@@ -1945,7 +1800,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
       // }
       "media": {
         "removeVideo": true,
-        "removeAudio": true,
+        // "removeAudio": true,
       }
     });
     plugin.send(
@@ -1955,36 +1810,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
       print("xxxz plugin offer error: ${error}");
     });
 
-    // var register = {
-    //   "request": "join",
-    //   "room": widget.roomNumber,
-    //   "ptype": "publisher",
-    //   "display": jsonEncode({
-    //     "id": widget.user.sub,
-    //     "timestamp": DateTime.now().millisecondsSinceEpoch,
-    //     "role": "user",
-    //     "display": widget.user.givenName
-    //   }) //'User test'
-    // };
-    // plugin.send(
-    //     message: register,
-    //     onSuccess: () async {
-    //       var publish = {
-    //         "request": "configure",
-    //         "audio": true,
-    //         "video": true,
-    //         "bitrate": 2000000
-    //       };
-    //       RTCSessionDescription offer =
-    //       await plugin.createOffer(offerOptions: {
-    //         "mandatory": {
-    //           "OfferToReceiveAudio": true,
-    //           "OfferToReceiveVideo": true,
-    //         }
-    //       });
-    //       plugin.send(
-    //           message: publish, jsep: offer, onSuccess: () {});
-    //     });
+
   }
 }
 
@@ -1998,32 +1824,3 @@ class RoomArguments {
   RoomArguments(this.server, this.token, this.roomNumber, this.groupName,
       this.user, this.janusName);
 }
-
-//audio only mode
-// otherCamsMuteToggle = () => {
-// const {feeds, muteOtherCams} = this.state;
-// const activeFeeds = feeds.filter((feed) => feed.videoSlot !== undefined);
-// if (!muteOtherCams) {
-// // Should hide/mute now all videos.
-// this.unsubscribeFrom(
-// activeFeeds.map((feed) => feed.id),
-// /* onlyVideo= */ true
-// );
-// this.camMute(/* cammuted= */ false);
-// this.setState({videos: NO_VIDEO_OPTION_VALUE});
-// this.state.virtualStreamingJanus.setVideo(NO_VIDEO_OPTION_VALUE);
-// } else {
-// // Should unmute/show now all videos.false,
-// this.makeSubscription(
-// activeFeeds,
-// /* feedsJustJoined= */ false,
-// /* subscribeToVideo= */ true,
-// /* subscribeToAudio= */ false,
-// /* subscribeToData= */ false
-// );
-// this.camMute(/* cammuted= */ true);
-// this.setState({videos: VIDEO_240P_OPTION_VALUE});
-// this.state.virtualStreamingJanus.setVideo(VIDEO_240P_OPTION_VALUE);
-// }
-// this.setState({muteOtherCams: !muteOtherCams});
-// };

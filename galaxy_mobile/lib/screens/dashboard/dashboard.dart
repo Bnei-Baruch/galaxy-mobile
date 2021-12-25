@@ -5,13 +5,10 @@ import 'dart:ui';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:dots_indicator/dots_indicator.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:galaxy_mobile/services/keycloak.dart';
 import 'package:mdi/mdi.dart';
 import 'package:provider/provider.dart';
 import 'package:phone_state_i/phone_state_i.dart';
 
-import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_audio_manager/flutter_audio_manager.dart';
@@ -21,11 +18,8 @@ import 'package:galaxy_mobile/screens/streaming/streaming.dart';
 import 'package:galaxy_mobile/screens/video_room/videoRoomWidget.dart';
 import 'package:galaxy_mobile/services/mqttClient.dart';
 import 'package:galaxy_mobile/widgets/loading_indicator.dart';
-import 'package:galaxy_mobile/widgets/videoRoomDrawer.dart';
-import 'package:galaxy_mobile/services/authService.dart';
 import 'package:galaxy_mobile/chat/chatMessage.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 enum AudioDevice { receiver, speaker, bluetooth }
 
@@ -55,7 +49,6 @@ class _DashboardState extends State<Dashboard>
   bool audioMode = false;
   bool questionDisabled = false;
   bool isFullScreen = false;
-  // bool isChatVisible = false;
 
   Map<String, dynamic> userMap;
   Timer userTimer;
@@ -74,7 +67,6 @@ class _DashboardState extends State<Dashboard>
   AnimationController controller;
   Animation<Offset> offset;
 
-  List<AudioInput> _availableInputs = [];
   var  activeRoom;
 
   @override
@@ -92,10 +84,8 @@ class _DashboardState extends State<Dashboard>
 
      activeRoom = context.read<MainStore>().activeRoom;
     _activeRoomId = activeRoom.room.toString();
-    final mqttClient = context.read<MQTTClient>();
 
 
-    // widget.state = this;
     callInProgress = false;
     subscription = Connectivity()
         .onConnectivityChanged
@@ -129,9 +119,7 @@ class _DashboardState extends State<Dashboard>
             stream.exit();
             videoRoom.exitRoom();
             userTimer.cancel();
-            if (mqttClient != null) {
-              mqttClient.disconnect();
-            }
+
             Navigator.pop(dialogPleaseWaitContext);
             Navigator.of(context).pop();
           }
@@ -145,18 +133,14 @@ class _DashboardState extends State<Dashboard>
         if (hadNoConnection) {
           FlutterLogs.logInfo(
               "Dashboard", "ConnectivityResult", "reconnecting - exit room");
-          if (mqttClient != null) {
-            mqttClient.disconnect();
-          }
+
           FlutterLogs.logInfo(
               "Dashboard", "ConnectivityResult", "reconnecting - enter room");
           //enter room
           setState(() {
             stream.exit();
             videoRoom.exitRoom();
-            if (mqttClient != null) {
-              mqttClient.disconnect();
-            }
+
             userTimer.cancel();
             //go out of the room and re-enter , since jauns doesn't have a reconnect infra to do it right
             Navigator.of(this.context).pop(false);
@@ -186,9 +170,9 @@ class _DashboardState extends State<Dashboard>
         setState(() {
           stream.exit();
           videoRoom.exitRoom();
-          if (mqttClient != null) {
-            mqttClient.disconnect();
-          }
+          // if (mqttClient != null) {
+          //   mqttClient.disconnect();
+          // }
           userTimer.cancel();
 
           //go out of the room and re-enter , since jauns doesn't have a reconnect infra to do it right
@@ -215,9 +199,7 @@ class _DashboardState extends State<Dashboard>
       stream.exit();
       videoRoom.exitRoom();
       userTimer.cancel();
-      // if (mqttClient != null) {
-      //   mqttClient.disconnect();
-      // }
+
       showDialog(
         context: context,
         builder: (context) => new AlertDialog(
@@ -287,7 +269,6 @@ class _DashboardState extends State<Dashboard>
       setState(() {});
     });
 
-    _availableInputs = await FlutterAudioManager.getAvailableInputs();
 
     if (await changeAudioDevice(AudioDevice.speaker)) {
       FlutterLogs.logInfo(
@@ -298,7 +279,6 @@ class _DashboardState extends State<Dashboard>
           "dashboard", "initAudioMgr", ">>> switch to SPEAKER: Failed");
     }
 
-    // await getAudioInput();
     if (!mounted) return;
     setState(() {});
   }
@@ -318,7 +298,6 @@ class _DashboardState extends State<Dashboard>
             "dashboard", "switchAudioDevice", ">>> switch to SPEAKER: Failed");
       }
     } else if (_audioDevice == AudioDevice.speaker) {
-      // if (_availableInputs.any((element) => element == AudioDevice.bluetooth)) {
       res = await changeAudioDevice(AudioDevice.bluetooth);
       AudioInput currentOutput = await FlutterAudioManager.getCurrentOutput();
       if (res && currentOutput.port == AudioPort.bluetooth) {
@@ -338,17 +317,7 @@ class _DashboardState extends State<Dashboard>
               ">>> switch to RECEIVER: Failed");
         }
       }
-      // } else {
-      // res = await changeAudioDevice(AudioDevice.receiver);
-      // if (res) {
-      //   FlutterLogs.logInfo("dashboard", "switchAudioDevice",
-      //       ">>> switch to RECEIVER: Success");
-      //   _audioDevice = AudioDevice.receiver;
-      // } else {
-      //   FlutterLogs.logError(
-      //       "dashboard", "switchAudioDevice", ">>> switch to RECEIVER: Failed");
-      // }
-      // }
+
     } else if (_audioDevice == AudioDevice.bluetooth) {
       res = await changeAudioDevice(AudioDevice.receiver);
       if (res) {
@@ -383,21 +352,7 @@ class _DashboardState extends State<Dashboard>
     return res;
   }
 
-  // getAudioInput() async {
-  //   _currentInput = await FlutterAudioManager.getCurrentOutput();
-  //   if (_currentInput.port == AudioPort.receiver) {
-  //     _audioDevice = AudioDevice.receiver;
-  //   } else if (_currentInput.port == AudioPort.speaker) {
-  //     _audioDevice = AudioDevice.speaker;
-  //   } else if (_currentInput.port == AudioPort.bluetooth) {
-  //     _audioDevice = AudioDevice.bluetooth;
-  //   }
-  //   FlutterLogs.logInfo("VideoRoom", "getAudioInput",
-  //       "######## current audio device: $_currentInput");
-  //   // _availableInputs = await FlutterAudioManager.getAvailableInputs();
-  //   // FlutterLogs.logInfo("VideoRoom", "getAudioInput",
-  //   //     "######## available audio devices: $_availableInputs");
-  // }
+
 
   void handleCmdData(String msgPayload) {
     FlutterLogs.logInfo(
@@ -463,10 +418,8 @@ class _DashboardState extends State<Dashboard>
     //reconnect
     FlutterLogs.logInfo(
         "Dashboard", "mqqt","handleOnDisconnection");
-    final mqttClient = context.read<MQTTClient>();
-    Timer(Duration(seconds: 10), () {
-      mqttClient.connect();
-    });
+
+
   }
 
   void connectedToBroker() {
@@ -526,9 +479,6 @@ class _DashboardState extends State<Dashboard>
     }
   }
 
-  // getChatWidget() {
-  //     return isChatVisible ? chat : null;
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -547,7 +497,6 @@ class _DashboardState extends State<Dashboard>
             mqttClient.removeOnConnectionFailedCallback();
             mqttClient.removeOnMsgReceivedCallback();
             mqttClient.removeOnSubscribedCallback();
-          //  mqttClient.disconnect();
           }
           return;
         },
@@ -626,14 +575,7 @@ class _DashboardState extends State<Dashboard>
                         // GestureDetector(
                         //   child:
                         videoRoom,
-                        // onTap: () {
-                        //   //if shown then hide  else show
-                        //   if (_show)
-                        //     hideBottomBar();
-                        //   else
-                        //     showBottomBar();
-                        // },
-                        // )
+
                       ])
                 ]);
               })),
@@ -784,7 +726,6 @@ class _DashboardState extends State<Dashboard>
     mqttClient.addOnSubscribedCallback((topic) => subscribedToTopic(topic));
     mqttClient.addOnMsgReceivedCallback((payload) => handleCmdData(payload));
     mqttClient.addOnConnectionFailedCallback(() => handleConnectionFailed());
-    // mqttClient.addOnDisconnectedCallback(() => handleOnDisconnection());
   }
 }
 

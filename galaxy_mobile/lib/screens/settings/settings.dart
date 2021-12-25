@@ -60,10 +60,7 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
         .onConnectivityChanged
         .listen((ConnectivityResult result) {
       connectionStatus = result;
-      if(result  != ConnectivityResult.none && !mqttClient.isConnected())
-        {
-          mqttClient.connect();
-        }
+
     });
     Utils.parseJson("user_monitor_example.json")
         .then((value) => userJsonExtra = value);
@@ -74,6 +71,8 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
     mqttClient.addOnDisconnectedCallback(()  {
       setState(() {
           FlutterLogs.logError("Settings", "onDisconnected","mqtt got disconnected" );
+
+
       });
     });
     mqttClient.addOnConnectedCallback(()  {
@@ -84,27 +83,32 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
       });
     });
     mqttClient.addOnConnectionFailedCallback(() => {
-      showDialog(
-          context: context,
-          builder: (context)  {
-            dialogContext = context;
-            return AlertDialog(
-              title: new Text('Connection Message'),
-              content: Text(
-                  'Server is unreachable,\nplease make sure internet connection is available'),
-              actions: <Widget>[
-                new FlatButton(
-                  onPressed: () {
-                    Navigator.of(this.dialogContext, rootNavigator: true).pop();
-                    mqttClient.connect();
-                    // dismisses only the dialog and returns nothing
-                  },
-                  child: new Text('OK'),
-                ),
-              ],
-            );
-          }
-      )
+      if(dialogContext == null)
+        {
+          showDialog(
+              context: context,
+              builder: (context) {
+                dialogContext = context;
+                return AlertDialog(
+                  title: new Text('Connection Message'),
+                  content: Text(
+                      'Server is unreachable,\nplease make sure internet connection is available'),
+                  actions: <Widget>[
+                    new FlatButton(
+                      onPressed: () {
+                        Navigator.of(this.dialogContext, rootNavigator: true)
+                            .pop();
+                        dialogContext = null;
+                        mqttClient.connect();
+                        // dismisses only the dialog and returns nothing
+                      },
+                      child: new Text('OK'),
+                    ),
+                  ],
+                );
+              }
+          )
+        }
     });
 
     mqttClient.connect();
@@ -138,32 +142,7 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
     var activeUser = context.select((MainStore s) => s.activeUser);
     var rooms = context.select((MainStore s) => s.availableRooms);
 
-    // initIsolate(context).then((value) => {
-    //       mainToIsolateStream = value,
-    //       mainToIsolateStream.send({
-    //         "type": 'setConnection',
-    //         "user": activeUser,
-    //         "userExtra": userJsonExtra,
-    //         "data": monitorData
-    //       }),
-    //       mainToIsolateStream.send({"type": "start"})
-    //     });
-    // showDialog(
-    //     context: context,
-    //     useRootNavigator: false,
-    //     barrierDismissible: false,
-    //     builder: (BuildContext context) {
-    //       dialogPleaseWaitContext = context;
-    //       return WillPopScope(
-    //           onWillPop: () {
-    //             Navigator.of(dialogPleaseWaitContext).pop();
-    //             return Future.value(true);
-    //           },
-    //           child: Dialog(
-    //               backgroundColor: Colors.transparent,
-    //               child: LoadingIndicator(
-    //                   )));
-    //     });
+
     _isThinScreen = MediaQuery.of(context).size.width < 400;
     final mqttClient = context.read<MQTTClient>();
     FlutterLogs.logInfo("Settings", "build", "mqtt connect state ${mqttClient.isConnected()}");
@@ -245,11 +224,7 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
                                   shape: RoundedRectangleBorder(
                                       borderRadius:
                                       BorderRadius.circular(10.0)),
-                                  // label: _isThinScreen ? Text("") : Text(
-                                  //     'join_room'.tr(),
-                                  //     style: TextStyle(
-                                  //         color: Colors.white,
-                                  //         fontSize: 20)),
+
                                   child: Row(
                                       crossAxisAlignment:
                                       CrossAxisAlignment.center,
@@ -298,16 +273,11 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
                                           .then((value) {
                                         if (value == false) {
                                           FlutterLogs.logInfo("Settings","pushNamed", "back from dashboard with failure");
-                                          // setState(() {
-                                          //   Navigator.pushNamed(
-                                          //       context,
-                                          //       ''
-                                          //           '/dashboard');
-                                          // });
 
                                         }
-                                        setState(() {
+                                         setState(() {
                                           selfWidget.restartCamera();
+                                        //   // selfWidget = SelfViewWidget();
                                         });
                                       });
                                     }

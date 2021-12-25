@@ -27,6 +27,7 @@ class MQTTClient {
   var _onDisconnectionFailedCallbackList = new List();
 
   MQTTClient() {
+    FlutterLogs.logInfo("MQTT", "MQTTClient", "ctor");
     _client = MqttServerClient(APP_MQTT_HOST, APP_MQTT_CLIENT_ID);
   }
 
@@ -75,9 +76,8 @@ class MQTTClient {
   Future<MqttServerClient> connect({bool internalRetry = false}) async {
     if(!internalRetry)
       _connectionAttempt = 0;
-    logger.info(">>> connection attempt: $_connectionAttempt");
+      logger.info(">>> connection attempt: $_connectionAttempt");
     var clientId = _id + "-" + randomString(3);
-    if (_connectionAttempt < _maxConnectionAttempts) {
       _client.logging(on: true);
       _client.onConnected = onConnected;
       _client.onDisconnected = onDisconnected;
@@ -85,11 +85,11 @@ class MQTTClient {
       _client.onSubscribed = onSubscribed;
       _client.onSubscribeFail = onSubscribeFail;
       _client.pongCallback = pong;
+      _client.autoReconnect = true;
       _client.useWebSocket = true;
       _client.clientIdentifier = clientId;
       _client.keepAlivePeriod = 10;
       _client.port = 443; // ( or whatever your WS port is)
-      //_client.secure = true;
       _client.connectionMessage = MqttConnectMessage()
           .authenticateAs(_username, _password)
           .withClientIdentifier(clientId)
@@ -103,20 +103,7 @@ class MQTTClient {
           .withWillRetain()
           .withWillQos(MqttQos.exactlyOnce);
 
-      try {
-        Future.delayed(const Duration(seconds: 20), () {
-          if (!_isConnected) {
-            _connectionAttempt++;
-            connect(internalRetry: true);
-          }
-        });
-        await _client.connect();
-      } catch (e) {
-        logger.trace("Exception during connection to broker", e);
-        _client.disconnect();
-        _connectionAttempt++;
-        connect(internalRetry: true);
-      }
+    await _client.connect();
 
       _client.updates.listen((List<MqttReceivedMessage<MqttMessage>> c) {
         final MqttPublishMessage message = c[0].payload;
@@ -130,15 +117,9 @@ class MQTTClient {
         }
       });
 
+
       return _client;
-    } else {
-      logger.error("connection to MQTT failed");
-      for (Function() connectionFailedCallback
-          in _onConnectionFailedCallbackList) {
-        connectionFailedCallback();
-      }
-      return null;
-    }
+
   }
 
   void subscribe(String topic) {
