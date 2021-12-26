@@ -869,6 +869,9 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     await  (senders.firstWhere((sender) => sender.track.kind == "video")).replaceTrack( widget.myStream
         .getVideoTracks()
         .first);
+    await  (senders.firstWhere((sender) => sender.track.kind == "audio")).replaceTrack( widget.myStream
+        .getAudioTracks()
+        .first);
 
   }
   Future prepareAndRegisterMyStream(Plugin plugin) async {
