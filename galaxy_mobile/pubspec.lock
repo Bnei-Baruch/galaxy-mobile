@@ -472,8 +472,8 @@ packages:
     dependency: transitive
     description:
       path: "."
-      ref: "0.5.8.3"
-      resolved-ref: "76531ca1c7f64e196d62dfcff1c38a545b5beba0"
+      ref: "0.5.8.4"
+      resolved-ref: db80a2e7c3427ab859060f5a549e11bbe5885c15
       url: "https://github.com/igala/flutter-webrtc.git"
     source: git
     version: "0.5.8"
@@ -544,8 +544,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "0.0.4+7"
-      resolved-ref: "86e06dd57e6886e64b46c1e9938269bc9115b4d5"
+      ref: "0.0.4+8"
+      resolved-ref: "68f23e15d1e6885b5c716b1cb851f71f45b549a7"
       url: "https://github.com/igala/flutter_janus_client.git"
     source: git
     version: "0.0.4"

@@ -861,14 +861,14 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
       widget.updateVideoState(true);
       // });
 
-   await  (senders.firstWhere((sender) => sender.track.kind == "video")).replaceTrack( widget.myStream
-        .getVideoTracks()
-        .first);
+
 
     setState(() {
-      widget._localRenderer.srcObject = null;
       widget._localRenderer.srcObject = widget.myStream;
     });
+    await  (senders.firstWhere((sender) => sender.track.kind == "video")).replaceTrack( widget.myStream
+        .getVideoTracks()
+        .first);
 
   }
   Future prepareAndRegisterMyStream(Plugin plugin) async {
