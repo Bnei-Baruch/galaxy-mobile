@@ -23,6 +23,8 @@ class PlayerWidget extends StatefulWidget {
 
   int videoPreset;
 
+  BuildContext dialogue;
+
   setStreamPresets(int audio, int video) {
     videoTypeValue = StreamConstants.videos_options
         .firstWhere((element) => element["value"] == video);
@@ -105,117 +107,135 @@ class _PlayerStateWidget extends State<PlayerWidget> {
                     showDialog(
                         useRootNavigator: false,
                         context: context,
-                        builder: (context) => Dialog(
-                            insetPadding: EdgeInsets.only(
-                                right: MediaQuery.of(context).size.width / 3),
-                            child: Container(
-                                color: Colors.black12,
-                                width: 200,
-                                height: 150,
-                                child: Column(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                      children: [
-                                        Text("Language"),
-                                        DropdownButton<Map<String, Object>>(
-                                            value: widget.audioTypeValue,
-                                            icon: Icon(Icons.multitrack_audio),
-                                            iconSize: 24,
-                                            elevation: 16,
-                                            style:
-                                                TextStyle(color: Colors.white),
-                                            underline: Container(
-                                              height: 2,
-                                              color: Colors.white,
-                                            ),
-                                            onChanged:
-                                                (Map<String, Object> newValue) {
-                                              setState(() {
-                                                widget.audioTypeValue =
-                                                    newValue;
-                                                widget.audioChange();
-                                              });
-                                            },
-                                            items: StreamConstants
-                                                .audiog_options
-                                                .map<
-                                                        DropdownMenuItem<
-                                                            Map<String,
-                                                                Object>>>(
-                                                    (Map<String, Object>
-                                                        value) {
-                                              return DropdownMenuItem<
-                                                  Map<String, Object>>(
-                                                value: value,
-                                                child: //Text(value["text"]),
-                                                    Row(
-                                                  children: <Widget>[
-                                                    value.keys.contains("flag")
-                                                        ? Flag(value["flag"],
-                                                            height: 24,
-                                                            width: 24,
-                                                            fit: BoxFit.contain)
-                                                        : Icon(Icons.group),
-                                                    SizedBox(
-                                                      width: 10,
-                                                    ),
-                                                    Text(
-                                                      value["text"],
-                                                      style: TextStyle(
-                                                          color: Colors.white),
-                                                    ),
-                                                  ],
-                                                ),
-                                              );
-                                            }).toList()),
-                                      ],
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                      children: [
-                                        Text("Quality"),
-                                        DropdownButton<Map<String, Object>>(
-                                            value: widget.videoTypeValue,
-                                            icon: Icon(Icons.video_label),
-                                            iconSize: 24,
-                                            elevation: 16,
-                                            style:
-                                                TextStyle(color: Colors.white),
-                                            underline: Container(
-                                              height: 2,
-                                              color: Colors.white,
-                                            ),
-                                            onChanged:
-                                                (Map<String, Object> newValue) {
-                                              setState(() {
-                                                widget.videoTypeValue =
-                                                    newValue;
-                                                widget.videoChange();
-                                              });
-                                            },
-                                            items: StreamConstants
-                                                .videos_options
-                                                .map<
-                                                        DropdownMenuItem<
-                                                            Map<String,
-                                                                Object>>>(
-                                                    (Map<String, Object>
-                                                        value) {
-                                              return DropdownMenuItem<
-                                                  Map<String, Object>>(
-                                                value: value,
-                                                child: Text(value["text"]),
-                                              );
-                                            }).toList()),
-                                      ],
-                                    )
-                                  ],
-                                ))));
+                        builder: (context) {
+                          widget.dialogue = context;
+                          return Dialog(
+                              insetPadding: EdgeInsets.only(
+                                  right: MediaQuery
+                                      .of(context)
+                                      .size
+                                      .width / 3),
+                              child: Container(
+                                  color: Colors.black12,
+                                  width: 200,
+                                  height: 150,
+                                  child: Column(
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                        children: [
+                                          Text("Language"),
+                                          DropdownButton<Map<String, Object>>(
+                                              value: widget.audioTypeValue,
+                                              icon: Icon(
+                                                  Icons.multitrack_audio),
+                                              iconSize: 24,
+                                              elevation: 16,
+                                              style:
+                                              TextStyle(color: Colors.white),
+                                              underline: Container(
+                                                height: 2,
+                                                color: Colors.white,
+                                              ),
+                                              onChanged:
+                                                  (Map<String,
+                                                  Object> newValue) {
+                                                setState(() {
+                                                  widget.audioTypeValue =
+                                                      newValue;
+                                                  widget.audioChange();
+                                                  Navigator.pop(widget.dialogue);
+                                                  widget.dialogue = null;
+                                                });
+                                              },
+                                              items: StreamConstants
+                                                  .audiog_options
+                                                  .map<
+                                                  DropdownMenuItem<
+                                                      Map<String,
+                                                          Object>>>(
+                                                      (Map<String, Object>
+                                                  value) {
+                                                    return DropdownMenuItem<
+                                                        Map<String, Object>>(
+                                                      value: value,
+                                                      child: //Text(value["text"]),
+                                                      Row(
+                                                        children: <Widget>[
+                                                          value.keys.contains(
+                                                              "flag")
+                                                              ? Flag(
+                                                              value["flag"],
+                                                              height: 24,
+                                                              width: 24,
+                                                              fit: BoxFit
+                                                                  .contain)
+                                                              : Icon(
+                                                              Icons.group),
+                                                          SizedBox(
+                                                            width: 10,
+                                                          ),
+                                                          Text(
+                                                            value["text"],
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    );
+                                                  }).toList()),
+                                        ],
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                        children: [
+                                          Text("Quality"),
+                                          DropdownButton<Map<String, Object>>(
+                                              value: widget.videoTypeValue,
+                                              icon: Icon(Icons.video_label),
+                                              iconSize: 24,
+                                              elevation: 16,
+                                              style:
+                                              TextStyle(color: Colors.white),
+                                              underline: Container(
+                                                height: 2,
+                                                color: Colors.white,
+                                              ),
+                                              onChanged:
+                                                  (Map<String,
+                                                  Object> newValue) {
+                                                setState(() {
+                                                  widget.videoTypeValue =
+                                                      newValue;
+                                                  widget.videoChange();
+                                                  Navigator.pop(widget.dialogue);
+                                                  widget.dialogue = null;2
+                                                });
+                                              },
+                                              items: StreamConstants
+                                                  .videos_options
+                                                  .map<
+                                                  DropdownMenuItem<
+                                                      Map<String,
+                                                          Object>>>(
+                                                      (Map<String, Object>
+                                                  value) {
+                                                    return DropdownMenuItem<
+                                                        Map<String, Object>>(
+                                                      value: value,
+                                                      child: Text(
+                                                          value["text"]),
+                                                    );
+                                                  }).toList()),
+                                        ],
+                                      )
+                                    ],
+                                  )));});
                   });
                 },
                 icon: Icon(
