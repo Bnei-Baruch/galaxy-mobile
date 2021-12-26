@@ -214,7 +214,7 @@ class _PlayerStateWidget extends State<PlayerWidget> {
                                                       newValue;
                                                   widget.videoChange();
                                                   Navigator.pop(widget.dialogue);
-                                                  widget.dialogue = null;2
+                                                  widget.dialogue = null;
                                                 });
                                               },
                                               items: StreamConstants
