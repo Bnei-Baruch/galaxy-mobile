@@ -34,6 +34,7 @@ class VideoRoom extends StatefulWidget {
   String token;
   int roomNumber;
   VoidCallback callExitRoomUserExists;
+  VoidCallback updateGoingToBackground;
   UpdateUserCallback updateGlxUserCB;
   User user;
 
@@ -43,7 +44,7 @@ class VideoRoom extends StatefulWidget {
   Plugin pluginHandle;
   Plugin subscriberHandle;
   bool myAudioMuted = false;
-  bool myVideoMuted = false;
+  bool myVideoMuted = true;
   bool isQuestion = false;
 
   UpdateDots updateDots;
@@ -847,31 +848,42 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
       //plugin.webRTCHandle.pc.removeTrack(senders.firstWhere((sender) => sender.track.kind == "audio"));
       MediaStream stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
 
+
+
+
+
       widget.myStream = stream;
       widget.myStream
           .getAudioTracks()
           .first
           .setMicrophoneMute(true);
-      widget.myStream
-          .getVideoTracks()
-          .first
-          .enabled =
-          widget.myVideoMuted;
-      widget.myAudioMuted = true;
-      widget.updateVideoState(true);
+
       // });
 
 
 
+
     setState(() {
+      widget.myStream
+          .getVideoTracks()
+          .first
+          .enabled =
+          !widget.myVideoMuted;
+
+      widget.myAudioMuted = true;
+      widget.updateVideoState(true);
       widget._localRenderer.srcObject = widget.myStream;
     });
-    await  (senders.firstWhere((sender) => sender.track.kind == "video")).replaceTrack( widget.myStream
-        .getVideoTracks()
-        .first);
-    await  (senders.firstWhere((sender) => sender.track.kind == "audio")).replaceTrack( widget.myStream
+
+
+    Timer(Duration(seconds: 2),() async {
+      await ((senders.firstWhere((sender) => sender.track.kind == "video" )).replaceTrack( widget.myStream
+          .getVideoTracks()
+          .first));
+     await ((senders.firstWhere((sender) => sender.track.kind == "audio" )).replaceTrack( widget.myStream
         .getAudioTracks()
-        .first);
+        .first));
+    });
 
   }
   Future prepareAndRegisterMyStream(Plugin plugin) async {
@@ -882,7 +894,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     widget.myStream = stream;
     widget.myStream.getAudioTracks().first.setMicrophoneMute(true);
     widget.myStream.getVideoTracks().first.enabled =
-        widget.myVideoMuted;
+        !widget.myVideoMuted;
     widget.myAudioMuted = true;
     widget.updateVideoState(true);
 
@@ -1230,7 +1242,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                                   : Colors.black)), //Colors.lightGreenAccent
                       child: Stack(
                         children: [
-                          (widget.myVideoMuted)
+                          (!widget.myVideoMuted)
                               ? RTCVideoView(widget._localRenderer,
                                   mirror: true)
                               : Align(
@@ -1638,7 +1650,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
       case AppLifecycleState.inactive:
         FlutterLogs.logInfo(
             "videoRoom", "didChangeAppLifecycleState", 'inactive');
-        if (widget.myVideoMuted) {
+        // if (!widget.myVideoMuted) {
           FlutterLogs.logInfo(
               "videoRoom", "didChangeAppLifecycleState",
               'number of video tracks = ${widget.myStream
@@ -1648,7 +1660,14 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
               .getVideoTracks()
               .first
               .enabled = false;
-        }
+          setState(() {
+            widget.myVideoMuted = true;
+            widget.updateVideoState(true);
+          });
+
+
+          widget.updateGoingToBackground();
+        // }
 
         break;
       case AppLifecycleState.resumed:

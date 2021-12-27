@@ -195,6 +195,9 @@ class _DashboardState extends State<Dashboard>
       initMQTT();
       tapped();
     };
+    videoRoom.updateGoingToBackground = (){
+      updateRoomWithMyState(false);
+    };
     videoRoom.callExitRoomUserExists = () {
       stream.exit();
       videoRoom.exitRoom();
