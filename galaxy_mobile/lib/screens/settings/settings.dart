@@ -265,21 +265,7 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
                                               content: Text(
                                                   "Please select a room")));
                                     } else {
-                                      selfWidget.stopCamera();
-                                      Navigator.pushNamed(
-                                          context,
-                                          ''
-                                              '/dashboard')
-                                          .then((value) {
-                                        if (value == false) {
-                                          FlutterLogs.logInfo("Settings","pushNamed", "back from dashboard with failure");
-
-                                        }
-                                         setState(() {
-                                          selfWidget.restartCamera();
-                                        //   // selfWidget = SelfViewWidget();
-                                        });
-                                      });
+                                      enterDashBoard(context);
                                     }
                                   })),
                           SizedBox(width: 10.w)
@@ -288,6 +274,28 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
                       ])));
           SingleChildScrollView();
         }));
+  }
+
+  void enterDashBoard(BuildContext context) {
+     selfWidget.stopCamera();
+    Navigator.pushNamed(
+        context,
+        ''
+            '/dashboard')
+        .then((value) {
+      if (value == false) {
+        FlutterLogs.logInfo("Settings","pushNamed", "back from dashboard with failure");
+        //need to fix crash after several re-enter
+        // Timer(Duration(milliseconds: 1500),() {
+        //   enterDashBoard(context);
+        // }
+        // );
+      }
+       setState(() {
+        selfWidget.restartCamera();
+      //   // selfWidget = SelfViewWidget();
+      });
+    });
   }
 }
 

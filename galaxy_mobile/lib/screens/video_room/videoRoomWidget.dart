@@ -572,10 +572,17 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
               var event = msg['videoroom'];
               if (event != null) {
                 if (event == 'joined') {
-                  updateGxyUser(context, widget.user.toJson());
+                  widget.myid = msg["id"];
+                  var userJson = widget.user.toJson();
+                  userJson.putIfAbsent("rfid", () =>  widget.myid);
+
+                  widget.user = User.fromJson(userJson);
+
+                  updateGxyUser(context, userJson);
 
                   // widget._onUpdateVideoStateCallback();
-                  widget.myid = msg["id"];
+
+
                   widget.mypvtid = msg["private_id"];
                   var publishersList = msg['publishers'];
                   if (publishersList != null) {
@@ -868,7 +875,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
           .getVideoTracks()
           .first
           .enabled =
-          !widget.myVideoMuted;
+          false;
 
       widget.myAudioMuted = true;
       widget.updateVideoState(true);
