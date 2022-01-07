@@ -93,12 +93,28 @@ class _LoginState extends State<Login>  with WidgetsBindingObserver {
     final store = context.read<MainStore>();
     // if(store.getLastLogin().isAfter(DateTime.now().subtract(Duration(hours: 21))))
     //   FlutterLogs.clearLogs();
+
     final authResponse = await auth.signIn();
+
     final api = context.read<Api>();
     api.setAccessToken(authResponse.accessToken);
+
     await context.read<MainStore>().init();
-    store.setLastLogin(DateTime.now());
-    Navigator.pushNamed(context, '/settings');
+    if(!context.read<MainStore>().activeUser.roles.contains("gxy_user"))
+      {
+        showDialog(context: context, builder:  (BuildContext context) {
+          return AlertDialog(
+            title: Text("User Permission"),
+              content: Text("Not Allowed"),
+          );
+        },);
+      }
+    else {
+      store.setLastLogin(DateTime.now());
+
+
+      Navigator.pushNamed(context, '/settings');
+    }
   }
 
   Container getView(BuildContext context, BoxConstraints viewportConstraints) {

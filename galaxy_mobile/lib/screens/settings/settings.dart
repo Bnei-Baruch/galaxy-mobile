@@ -252,19 +252,21 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
                                         ConnectivityResult.none) {
                                       showDialog(
                                           context: context,
-                                          child: AlertDialog(
+                                          builder: (BuildContext context){
+                                          return AlertDialog(
                                               title: Text("No Internet"),
                                               content: Text(
-                                                  "Please reconnect")));
-                                    } else if (activeRoom == null) {
+                                                  "Please reconnect"));
+                                    });} else if (activeRoom == null) {
                                       showDialog(
                                           context: context,
-                                          child: AlertDialog(
+                                          builder:(BuildContext context){
+                                            return AlertDialog(
                                               title:
                                               Text("Room not selected"),
                                               content: Text(
-                                                  "Please select a room")));
-                                    } else {
+                                                  "Please select a room"));
+                                    });} else {
                                       enterDashBoard(context);
                                     }
                                   })),
