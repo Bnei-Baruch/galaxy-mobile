@@ -29,7 +29,7 @@ class PlayerWidget extends StatefulWidget {
     videoTypeValue = StreamConstants.videos_options
         .firstWhere((element) => element["value"] == video);
     audioTypeValue = StreamConstants.audiog_options
-        .firstWhere((element) => element["value"] == audio);
+        .firstWhere((element) => element["value"] == audio,orElse:()=>  {"key": 4, "value": 4, "flag": 'us', "text": 'English'});
   }
 
   toggleFullScreen() {

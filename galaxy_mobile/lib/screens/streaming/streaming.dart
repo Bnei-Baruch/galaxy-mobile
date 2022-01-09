@@ -277,7 +277,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
 
   @override
   void initState() {
-    // TODO: implement initState
+    FlutterLogs.logInfo("Streaming", "initState", "enter");
     super.initState();
 
     final s = context.read<MainStore>();
@@ -390,6 +390,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
   }
 
   void getPresets() {
+    FlutterLogs.logInfo("Streaming", "getPresets", "enter");
     final int audio =
         Provider.of<MainStore>(context, listen: false).audioPreset;
     int video = Provider.of<MainStore>(context, listen: false).videoPreset;
