@@ -193,6 +193,7 @@ class _DashboardState extends State<Dashboard>
     videoRoom.RoomReady = () {
       FlutterLogs.logInfo("Dashboard", "videoRoom", "RoomReady");
       initMQTT();
+      initAudioMgr();
       tapped();
     };
     videoRoom.updateGoingToBackground = (){
@@ -238,7 +239,7 @@ class _DashboardState extends State<Dashboard>
       });
     };
 
-    initAudioMgr();
+
 
     userTimer = Timer.periodic(Duration(seconds: 2), (timer) {
       FlutterLogs.logInfo(
