@@ -257,4 +257,25 @@ void main() {
     expect(newFeed.elementAt(3)["id"] ==  752170363902192, true);
 
   });
+  test('3 streams update cammute', () async {
+    var switchHelper = SwitchPageHelper(null, null, null, 3, false, null);
+    // = await rootBundle.loadString("feeds.json");
+    var newFeeds_3 = await Utils.parseJson("feeds3.json");
+
+
+    newFeeds_3[1]["cammute"] = false;
+    switchHelper.switchVideos(0, [], newFeeds_3);
+
+
+
+    newFeeds_3.forEach((feed) {
+     if(feed['cammute'] == true)
+       {
+         print("camera is muted");
+       }
+    });
+
+    //expect(newFeed.elementAt(3)["id"] ==  752170363902192, true);
+
+  });
 }

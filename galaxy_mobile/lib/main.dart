@@ -54,11 +54,13 @@ void main() async {
   await Firebase.initializeApp();
 
   Wakelock.enable();
-  await SentryFlutter.init(
-          (options) {
-        options.dsn = 'https://ac8b0f908e3c49d395c1fc47fb2022ca@sentry.kab.info/4';
-      },
-      appRunner: () => runApp(
+  // await SentryFlutter.init(
+  //         (options) {
+  //       options.dsn = 'https://ac8b0f908e3c49d395c1fc47fb2022ca@sentry.kab.info/4';
+  //     },
+  //     appRunner: () =>
+  //
+          runApp(
     /// Providers are above [MyApp] instead of inside it, so that tests
     /// can use [MyApp] while mocking the providers
     MultiProvider(
@@ -85,8 +87,8 @@ void main() async {
             child: MyApp())
       //MyApp()
     ),
-  )
-      );
+  );
+      // );
 
 }
 

@@ -81,7 +81,7 @@ class AppDrawer extends StatelessWidget {
 
                 ,
         subject: 'Send logs to developer',
-        recipients: ['igal.avraham@gmail.com'],
+        recipients: ['support@kli.one'],
         attachmentPaths: [path + "/galaxyLogs.zip"],
         isHTML: false);
     FlutterLogs.logInfo("AppDrawer", "archiveLogs", "6");

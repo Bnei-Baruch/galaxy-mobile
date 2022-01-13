@@ -32,8 +32,8 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard>
     with SingleTickerProviderStateMixin {
-  var stream = StreamingUnified();
-  var videoRoom = VideoRoom();
+  StreamingUnified stream = StreamingUnified();
+  VideoRoom videoRoom = VideoRoom();
   // var chat = Chat();
   var activeUser;
   bool callInProgress;

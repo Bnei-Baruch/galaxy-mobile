@@ -98,6 +98,8 @@ class VideoRoom extends StatefulWidget {
     pluginHandle = null;
     subscriberHandle = null;
     questionInRoom = null;
+    state.dispose();
+    state = null;
     mainToIsolateStream??[0]??mainToIsolateStream[0].kill();
     WidgetsBinding.instance.removeObserver(state);
   }
@@ -166,20 +168,47 @@ class VideoRoom extends StatefulWidget {
 
   void setUserState(var user) {
     FlutterLogs.logInfo("VideoRoom", "setUserState", "user ${user.toString()}");
-    List roomFeeds = state.getFeeds();
-    for (var feed in roomFeeds) {
-      if (feed != null && feed['id'] == user['rfid']) {
-        FlutterLogs.logInfo("VideoRoom", "setUserState", "found user in feed");
-        feed['cammute'] = !user['camera'];
-        feed['question'] = user['question'];
-        setUserQuestionInRoom(user);
-        if (state != null) {
-          state.setState(() {});
-        }
-        break;
-      } else
-        FlutterLogs.logInfo("VideoRoom", "setUserState", "could not find user");
+    if(state !=null && state.mounted) {
+      List roomFeeds = state.getFeeds();
+      for (var feed in roomFeeds) {
+        if (feed != null && feed['id'] == user['rfid']) {
+          FlutterLogs.logInfo(
+              "VideoRoom", "setUserState", "found user in feed ${roomFeeds}");
+
+          FlutterLogs.logInfo(
+              "VideoRoom", "setUserState", "before ${feed['cammute']}");
+
+
+          feed['cammute'] = !user['camera'];
+
+          FlutterLogs.logInfo(
+              "VideoRoom", "setUserState", "after ${feed['cammute']}");
+          feed['question'] = user['question'];
+
+          setUserQuestionInRoom(user);
+
+
+          if (state != null && state.mounted) {
+            state.setState(() {
+              FlutterLogs.logInfo("VideoRoom", "setUserState",
+                  "call setstate for cammute update");
+            });
+          }
+          else {
+            FlutterLogs.logInfo("VideoRoom", "setUserState",
+                "state not mounted");
+          }
+          break;
+        } else
+          FlutterLogs.logInfo(
+              "VideoRoom", "setUserState", "could not find user");
+      }
     }
+    else
+      {
+        FlutterLogs.logInfo(
+            "VideoRoom", "setUserState", "state not valid");
+      }
   }
 
   void setUserQuestionInRoom(var user) {
@@ -253,6 +282,8 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
 
   @override
   void initState() {
+    FlutterLogs.logInfo(
+        "VideoRoom", "initState", "");
     super.initState();
 
     WidgetsBinding.instance.addObserver(this);
@@ -261,7 +292,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     widget.state = this;
 
     (context.read<MainStore>() as MainStore).addListener(() {
-      if((widget.state.context!=null) && (widget.state.context.read<MainStore>() as MainStore).signal != signal)
+      if((widget.state !=null && widget.state.context!=null) && (widget.state.context.read<MainStore>() as MainStore).signal != signal)
         {
 
           setState(() {
@@ -418,6 +449,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                   "subscription to publishers FAILED: ${error.toString()}");
             },
           );
+          widget.RoomReady();
         },
         onError: (error) {
           FlutterLogs.logError("VideoRoom", "plugin:'remotefeed_user", error);
@@ -699,7 +731,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                   if (msg['configured'] == 'ok') {
                     FlutterLogs.logInfo(
                         "VideoRoom", "initPlatformState", "configured $msg");
-                    widget.RoomReady();
+
                     // User published own feed successfully.
                     // const user = {
                     //   ...this.state.user,
