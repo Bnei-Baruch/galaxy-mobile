@@ -1827,7 +1827,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     // await widget._localRenderer.dispose();
     // widget._localRenderer = new RTCVideoRenderer();
     // await widget._localRenderer.initialize();
-     Timer(Duration(seconds: 2), () {
+     Timer(Duration(seconds: 1), () {
        prepareAndRegisterMyStreamRecovery(widget.pluginHandle);
 
     });
