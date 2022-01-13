@@ -1,3 +1,4 @@
+import 'package:galaxy_mobile/screens/dashboard/dashboard.dart';
 import 'package:galaxy_mobile/utils/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -29,6 +30,10 @@ class SharedPrefs {
 
   int get videoPreset => _sharedPrefs.getInt('videoPreset') ?? 1;
   set videoPreset(int value) => _sharedPrefs.setInt('videoPreset', value);
+
+  int get audioDevice => _sharedPrefs.getInt('audioDevice') ?? AudioDevice.speaker.index;
+  set audioDevice(int value) => _sharedPrefs.setInt('audioDevice', value);
+
 
   DateTime get lastLogin => _sharedPrefs.getInt('lastLogin')!=null? DateTime.fromMicrosecondsSinceEpoch(_sharedPrefs.getInt('lastLogin')) : DateTime.now();
   set lastLogin(DateTime value) => _sharedPrefs.setInt('lastLogin', value.millisecondsSinceEpoch);

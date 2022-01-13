@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/src/interface/media_stream.dart';
 import 'package:galaxy_mobile/chat/chatMessage.dart';
 import 'package:galaxy_mobile/models/sharedPref.dart';
+import 'package:galaxy_mobile/screens/dashboard/dashboard.dart';
 import 'package:galaxy_mobile/services/api.dart';
 import 'package:galaxy_mobile/services/authService.dart';
 import 'package:galaxy_mobile/services/keycloak.dart';
@@ -40,6 +41,8 @@ class MainStore extends ChangeNotifier {
 
   SendPort monitorPort;
 
+  int audioDevice;
+
 
 
 
@@ -50,6 +53,7 @@ class MainStore extends ChangeNotifier {
     setAudioMode(SharedPrefs().audioMode);
     setAudioPreset(SharedPrefs().audioPreset);
     setVideoPreset(SharedPrefs().videoPreset);
+    setAudioDevice(SharedPrefs().audioDevice);
 
     _mqttClient.init(_auth.getUserEmail(),  _auth.getToken().accessToken, activeUser.id  );
   }
@@ -120,6 +124,13 @@ class MainStore extends ChangeNotifier {
   void setVideoPreset(int videoPreset) {
     SharedPrefs().videoPreset = videoPreset;
     this.videoPreset = videoPreset;
+    notifyListeners();
+  }
+
+  void setAudioDevice(int audioDevice)
+  {
+    SharedPrefs().audioDevice = audioDevice;
+    this.audioDevice = audioDevice;
     notifyListeners();
   }
 

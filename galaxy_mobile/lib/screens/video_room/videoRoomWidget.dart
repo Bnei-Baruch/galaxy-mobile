@@ -423,25 +423,25 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
               Map<String, dynamic> userJson = widget.user.toJson();
               userJson["room"] = widget.roomNumber;
               userJson["group"] = widget.groupName;
-              widget.mainToIsolateStream  = await initIsolate(context);
-              context.read<MainStore>().setMonitorPort(widget.mainToIsolateStream[1]);
-                // mainToIsolateStream = value,
-                // mainToIsolateStream = value,
-              widget.mainToIsolateStream[1].send({
-                  "type": "updateSpec",
-                  "spec": context.read<MainStore>().spec
-              });
-                widget.mainToIsolateStream[1].send({
-                  "type": 'setConnection',
-                  "user": userJson,
-                  // "localAudio": widget.myStream.getAudioTracks().first,
-                  // "localVideo": widget.myStream.getVideoTracks().first,
-                  // "plugin": context,
-                  "galaxyServer":context.read<MainStore>().activeStreamGateway.url
-                  // "userExtra": {},
-                  // "data": {}
-                });
-                widget.mainToIsolateStream[1].send({"type": "start"});
+              // widget.mainToIsolateStream  = await initIsolate(context);
+              // context.read<MainStore>().setMonitorPort(widget.mainToIsolateStream[1]);
+              //   // mainToIsolateStream = value,
+              //   // mainToIsolateStream = value,
+              // widget.mainToIsolateStream[1].send({
+              //     "type": "updateSpec",
+              //     "spec": context.read<MainStore>().spec
+              // });
+              //   widget.mainToIsolateStream[1].send({
+              //     "type": 'setConnection',
+              //     "user": userJson,
+              //     // "localAudio": widget.myStream.getAudioTracks().first,
+              //     // "localVideo": widget.myStream.getVideoTracks().first,
+              //     // "plugin": context,
+              //     "galaxyServer":context.read<MainStore>().activeStreamGateway.url
+              //     // "userExtra": {},
+              //     // "data": {}
+              //   });
+              //   widget.mainToIsolateStream[1].send({"type": "start"});
               // });
             },
             onError: (error) {
