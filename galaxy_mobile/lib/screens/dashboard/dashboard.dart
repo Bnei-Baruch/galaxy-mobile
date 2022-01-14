@@ -513,6 +513,7 @@ class _DashboardState extends State<Dashboard>
             mqttClient.removeOnMsgReceivedCallback();
             mqttClient.removeOnSubscribedCallback();
           }
+          changeAudioDevice(AudioDevice.speaker);
           return;
         },
         child: Scaffold(
