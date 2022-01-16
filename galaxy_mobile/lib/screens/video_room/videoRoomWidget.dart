@@ -880,42 +880,35 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         "optional": [],
       }
     };
-      var senders = await plugin.webRTCHandle.pc.senders;
-
 
 
       //plugin.webRTCHandle.pc.removeTrack(senders.firstWhere((sender) => sender.track.kind == "audio"));
       MediaStream stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
-
-
-
-
-
-      widget.myStream = stream;
-      widget.myStream
-          .getAudioTracks()
-          .first
-          .setMicrophoneMute(true);
-
-      // });
-
-
+    if(widget.myStream.getVideoTracks().first.enabled){
+      widget.myStream.getVideoTracks().first.enabled = false;
+    }
+    widget.myStream = stream;
+    widget.myStream
+        .getAudioTracks()
+        .first
+        .setMicrophoneMute(true);
+    widget.myAudioMuted = true;
+    widget.updateVideoState(true);
 
 
     setState(() {
-      widget.myStream
-          .getVideoTracks()
-          .first
-          .enabled =
-          false;
 
-      widget.myAudioMuted = true;
-      widget.updateVideoState(true);
+
+
       widget._localRenderer.srcObject = widget.myStream;
+
     });
 
 
     Timer(Duration(seconds: 2),() async {
+      var senders = await plugin.webRTCHandle.pc.senders;
+
+
       await ((senders.firstWhere((sender) => sender.track.kind == "video" )).replaceTrack( widget.myStream
           .getVideoTracks()
           .first));
@@ -1823,10 +1816,6 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
   void restartSelfVideo() async {
 
     FlutterLogs.logInfo("VideoRoom", "restartSelfVideo", "entering");
-    //FlutterLogs.logInfo("VideoRoom", "restartSelfVideo", "render video ${ widget._localRenderer.renderVideo} video = ${widget.myStream.getVideoTracks().length} video enabled = ${widget.myStream.getVideoTracks().first.enabled} video muted = ${widget.myStream.getVideoTracks().first.muted}" );
-    // await widget._localRenderer.dispose();
-    // widget._localRenderer = new RTCVideoRenderer();
-    // await widget._localRenderer.initialize();
      Timer(Duration(seconds: 1), () {
        prepareAndRegisterMyStreamRecovery(widget.pluginHandle);
 
