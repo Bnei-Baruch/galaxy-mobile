@@ -709,6 +709,7 @@ class _DashboardState extends State<Dashboard>
                                       child: ListTile(
                           leading: Icon(Icons.mobile_friendly_sharp),
                           title: Text('friends')),
+                                  enabled: false,
                                   value: "friends",),
                                 ],
 
