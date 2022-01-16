@@ -81,6 +81,11 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
       setState(() {
 
       });
+
+      mqttClient.subscribe("galaxy/users/broadcast");
+      var user = context.read<MainStore>().activeUser;
+      mqttClient.subscribe("galaxy/users/${user.id}");
+
     });
     mqttClient.addOnConnectionFailedCallback(() => {
       if(dialogContext == null)
