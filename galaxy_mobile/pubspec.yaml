@@ -99,6 +99,7 @@ dependencies:
   device_info: ^1.0.0
 
   new_version: ^0.0.6
+  webview_flutter: ^1.0.7
 
 
 dev_dependencies:

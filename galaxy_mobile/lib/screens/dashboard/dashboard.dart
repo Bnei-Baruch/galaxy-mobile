@@ -20,6 +20,7 @@ import 'package:galaxy_mobile/services/mqttClient.dart';
 import 'package:galaxy_mobile/widgets/loading_indicator.dart';
 import 'package:galaxy_mobile/chat/chatMessage.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 enum AudioDevice { receiver, speaker, bluetooth }
 
@@ -652,7 +653,7 @@ class _DashboardState extends State<Dashboard>
                                   : Icon(Mdi.dotsVertical,
                                       color: Colors.white)),
                         ],
-                        onTap: (value) {
+                        onTap: (value) async {
                           FlutterLogs.logInfo(
                               "Dashboard", "onTap", value.toString());
                           switch (value) {
@@ -692,6 +693,93 @@ class _DashboardState extends State<Dashboard>
                               });
                               videoRoom.toggleAudioMode();
                               break;
+                            case 4:
+                              final position = buttonMenuPosition(context);
+                              final result = await showMenu(
+                                context: context,
+                                position: position,
+                                items: <PopupMenuItem<String>>[
+                                  const PopupMenuItem<String>(
+                                      child: ListTile(
+                                          leading: Icon(Icons.how_to_vote),
+                                          title: Text('vote')),
+                                    value: "vote",
+                                  ),
+                                  const PopupMenuItem<String>(
+                                      child: ListTile(
+                          leading: Icon(Icons.mobile_friendly_sharp),
+                          title: Text('friends')),
+                                  value: "friends",),
+                                ],
+
+
+                              );
+                              switch(result)
+                              {
+                                case "vote":
+                                  print("user id ${activeUser.id}");
+                                  showDialog(
+                                      context: context,
+                                      useRootNavigator: false,
+                                      barrierDismissible: true,
+                                      builder: (BuildContext context) {
+
+                                        return WillPopScope(
+                                            onWillPop: () {
+                                              Navigator.of(context).pop();
+                                              return Future.value(true);
+                                            },
+                                                  child:
+                                                      Center(
+                                                        child:
+
+                                                  Row(
+                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    children: [
+                                                      Container(
+                                                        height: 50,
+                                                  width: 50,
+                                                  child:
+                                                      WebView(
+                                                        initialUrl: "https://vote.kli.one/button.html?answerId=1&userId=${activeUser.id}",
+                                                        javascriptMode: JavascriptMode.unrestricted,
+
+                                                      )
+                                                      ),
+                                                      Container(
+                                                        height: 50,
+                                                        width: 50,
+                                                        child:
+                                                      WebView(
+                                                        initialUrl: "https://vote.kli.one/button.html?answerId=2&userId=${activeUser.id}",
+                                                        javascriptMode: JavascriptMode.unrestricted,
+
+                                                      ),
+                                                      ),
+                                                    ],
+                                                  ),
+
+
+                                                      ),
+
+                                        );
+                                      });
+                                  break;
+                              }
+                             break;
+
+    // <Button.Group>
+    // <iframe
+    // title={`${t("oldClient.vote")} 1`}
+    // src={`https://vote.kli.one/button.html?answerId=1&userId=${user && user.id}`}
+    // frameBorder="0"
+    // />
+    // <iframe
+    // title={`${t("oldClient.vote")} 2`}
+    // src={`https://vote.kli.one/button.html?answerId=2&userId=${user && user.id}`}
+    // frameBorder="0"
+    // />
+    // </Button.Group>
                           }
                         },
                       ),
@@ -700,8 +788,21 @@ class _DashboardState extends State<Dashboard>
                 ),
         ));
     // );
+
   }
 
+  RelativeRect buttonMenuPosition(BuildContext c) {
+    final RenderBox bar = c.findRenderObject();
+    final RenderBox overlay = Overlay.of(c).context.findRenderObject();
+    final RelativeRect position = RelativeRect.fromRect(
+      Rect.fromPoints(
+        bar.localToGlobal(bar.size.bottomRight(Offset.zero), ancestor: overlay),
+        bar.localToGlobal(bar.size.bottomRight(Offset.zero), ancestor: overlay),
+      ),
+      Offset.zero & overlay.size,
+    );
+    return position;
+  }
   void showBottomBar() {
     setState(() {
       _show = true;
@@ -764,4 +865,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   // TODO: implement preferredSize
   @override
   Size get preferredSize => new Size.fromHeight(kToolbarHeight);
+
+
 }
