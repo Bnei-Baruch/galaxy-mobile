@@ -568,7 +568,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
       onIceConnectionState:(connection){
         FlutterLogs.logWarn("VideoRoom", "onIceConnectionState",
             "state: $connection");
-        (widget.mainToIsolateStream[1] as SendPort).send({"type":"iceState","state":connection.toString().split('.').last.toLowerCase().replaceFirst("rtciceconnectionstate", "")});
+       // (widget.mainToIsolateStream[1] as SendPort).send({"type":"iceState","state":connection.toString().split('.').last.toLowerCase().replaceFirst("rtciceconnectionstate", "")});
       },
         onRenegotiationNeededCallback: (){
           FlutterLogs.logWarn("VideoRoom", "onRenegotiationNeededCallback",

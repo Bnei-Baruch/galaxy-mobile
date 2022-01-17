@@ -123,7 +123,7 @@ class MQTTClient {
   }
 
   void subscribe(String topic) {
-    logger.error("subscribing to $topic");
+    logger.info("subscribing to $topic");
     _client.subscribe(topic, MqttQos.exactlyOnce);
   }
 
