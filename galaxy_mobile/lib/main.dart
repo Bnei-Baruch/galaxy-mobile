@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -11,6 +12,7 @@ import 'package:galaxy_mobile/services/api.dart';
 import 'package:galaxy_mobile/services/authService.dart';
 import 'package:galaxy_mobile/services/logger.dart';
 import 'package:galaxy_mobile/themes/default.dart';
+import 'package:mdi/mdi.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -60,34 +62,52 @@ void main() async {
   //     },
   //     appRunner: () =>
   //
+  runZoned(
+        () {
           runApp(
-    /// Providers are above [MyApp] instead of inside it, so that tests
-    /// can use [MyApp] while mocking the providers
-    MultiProvider(
-        providers: [
-          Provider<AuthService>(create: (_) => AuthService()),
-          Provider<Api>(create: (_) => Api()),
-          Provider<MQTTClient>(create: (_) => MQTTClient()),
 
-          // Provider<Dashboard>(create: (_) => Dashboard()),
-          ChangeNotifierProxyProvider3<AuthService, Api, MQTTClient, MainStore>(
-              create: (_) => MainStore(),
-              update: (_, auth, api, mqttClient, model) =>
-              model..update(auth, api, mqttClient)),
-        ],
-        child: EasyLocalization(
-            supportedLocales: [
-              Locale('en', 'US'),
-              Locale('ru', 'RU'),
-              Locale('he', 'IL'),
-              Locale('es', '')
-            ],
-            path: 'assets/translations',
-            fallbackLocale: Locale('en', 'US'),
-            child: MyApp())
-      //MyApp()
+            /// Providers are above [MyApp] instead of inside it, so that tests
+            /// can use [MyApp] while mocking the providers
+            MultiProvider(
+                providers: [
+                  Provider<AuthService>(create: (_) => AuthService()),
+                  Provider<Api>(create: (_) => Api()),
+                  Provider<MQTTClient>(create: (_) => MQTTClient()),
+
+                  // Provider<Dashboard>(create: (_) => Dashboard()),
+                  ChangeNotifierProxyProvider3<AuthService,
+                      Api,
+                      MQTTClient,
+                      MainStore>(
+                      create: (_) => MainStore(),
+                      update: (_, auth, api, mqttClient, model) =>
+                      model..update(auth, api, mqttClient)),
+                ],
+                child: EasyLocalization(
+                    supportedLocales: [
+                      Locale('en', 'US'),
+                      Locale('ru', 'RU'),
+                      Locale('he', 'IL'),
+                      Locale('es', '')
+                    ],
+                    path: 'assets/translations',
+                    fallbackLocale: Locale('en', 'US'),
+                    child: MyApp())
+              //MyApp()
+            ),
+          );
+        },
+    zoneSpecification: ZoneSpecification(
+      // Intercept all print calls
+      print: (self, parent, zone, line) async {
+
+        FlutterLogs.logInfo("internal", "plugin", line);
+     //   parent.print(zone, line);
+      },
     ),
-  );
+
+);
+
       // );
 
 }
