@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:dots_indicator/dots_indicator.dart';
+import 'package:icon_badge/icon_badge.dart';
 import 'package:mdi/mdi.dart';
 import 'package:provider/provider.dart';
 import 'package:phone_state_i/phone_state_i.dart';
@@ -246,7 +247,8 @@ class _DashboardState extends State<Dashboard>
       FlutterLogs.logInfo(
           "Dashboard", "updateUser step 1", "tick ${timer.tick}");
       if (timer.tick != 10) {
-        updateGxyUser(context, userMap);
+        if(userMap!=null)
+          updateGxyUser(context, userMap);
       } else {
         timer.cancel();
         userTimer = Timer.periodic(Duration(seconds: 30), (timer) {
@@ -649,9 +651,12 @@ class _DashboardState extends State<Dashboard>
                           BottomNavigationBarItem(
                               label: "more".tr(),
                               icon: audioMode
-                                  ? Icon(Mdi.dotsVertical, color: Colors.red)
-                                  : Icon(Mdi.dotsVertical,
-                                      color: Colors.white)),
+                                  ? IconBadge(
+                                  icon:Icon(Mdi.dotsVertical,color: Colors.red),
+                                  itemCount: 2):
+                                  IconBadge(icon:Icon(Mdi.dotsVertical,color: Colors.white),
+                              itemCount: 2)
+                          ),
                         ],
                         onTap: (value) async {
                           FlutterLogs.logInfo(

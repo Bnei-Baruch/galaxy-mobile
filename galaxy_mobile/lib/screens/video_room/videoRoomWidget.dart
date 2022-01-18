@@ -847,7 +847,9 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
             onIceConnectionState:(connection){
               FlutterLogs.logWarn("VideoRoom", "onIceConnectionState",
                   "state: $connection");
-             (widget.mainToIsolateStream[0] as SendPort).send({"type":"iceState","state":connection.toString()});
+              if(widget.mainToIsolateStream !=null && widget.mainToIsolateStream[0]!=null)
+
+                (widget.mainToIsolateStream[0] as SendPort).send({"type":"iceState","state":connection.toString()});
             },
             onRenegotiationNeededCallback: () async {
               FlutterLogs.logWarn("VideoRoom", "onRenegotiationNeededCallback",
@@ -892,8 +894,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         .getAudioTracks()
         .first
         .setMicrophoneMute(true);
-    widget.myAudioMuted = true;
-    widget.updateVideoState(true);
+
 
 
     setState(() {
@@ -901,11 +902,15 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
 
 
       widget._localRenderer.srcObject = widget.myStream;
+      widget.myAudioMuted = true;
+      widget.myVideoMuted = true;
+      widget.updateVideoState(true);
+      widget.myStream.getVideoTracks().first.enabled = false;
 
     });
 
 
-    Timer(Duration(seconds: 2),() async {
+    Timer(Duration(seconds: 4),() async {
       var senders = await plugin.webRTCHandle.pc.senders;
 
 

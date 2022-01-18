@@ -519,6 +519,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.1.4"
+  icon_badge:
+    dependency: "direct main"
+    description:
+      name: icon_badge
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.1+5"
   image:
     dependency: transitive
     description:
@@ -543,11 +550,9 @@ packages:
   janus_client:
     dependency: "direct main"
     description:
-      path: "."
-      ref: "0.0.4+8"
-      resolved-ref: "68f23e15d1e6885b5c716b1cb851f71f45b549a7"
-      url: "https://github.com/igala/flutter_janus_client.git"
-    source: git
+      path: "../../flutter_janus_client"
+      relative: true
+    source: path
     version: "0.0.4"
   js:
     dependency: transitive

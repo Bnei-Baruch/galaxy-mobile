@@ -82,11 +82,11 @@ dependencies:
   readmore: ^1.0.1
 
   janus_client: #^0.0.4
-        git:
-          url: https://github.com/igala/flutter_janus_client.git
-          #https://github.com/shivanshtalwar0/flutter_janus_client.git
-          ref: 0.0.4+8
-#    path: ../../flutter_janus_client
+#        git:
+#          url: https://github.com/igala/flutter_janus_client.git
+#          #https://github.com/shivanshtalwar0/flutter_janus_client.git
+#          ref: 0.0.4+8
+    path: ../../flutter_janus_client
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -97,6 +97,8 @@ dependencies:
   sentry_flutter: ^4.0.6
 
   device_info: ^1.0.0
+
+  icon_badge: ^0.0.1+5
 
   new_version: ^0.0.6
   webview_flutter: ^1.0.7

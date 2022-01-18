@@ -101,8 +101,10 @@ void main() async {
       // Intercept all print calls
       print: (self, parent, zone, line) async {
 
+        if(Platform.isAndroid)
         FlutterLogs.logInfo("internal", "plugin", line);
-     //   parent.print(zone, line);
+        else
+          parent.print(zone, line);
       },
     ),
 
