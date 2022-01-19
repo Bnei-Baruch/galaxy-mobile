@@ -563,7 +563,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         slowLink: (uplink, lost, mid) {
           FlutterLogs.logWarn("VideoRoom", "plugin: remotefeed_user",
               "slowLink: uplink ${uplink} lost ${lost} mid ${mid}");
-          (widget.mainToIsolateStream[1] as SendPort).send({"type":"slowLink","direction":uplink ? "sending":"receiving","lost":lost});
+        //  (widget.mainToIsolateStream[1] as SendPort).send({"type":"slowLink","direction":uplink ? "sending":"receiving","lost":lost});
         },
       onIceConnectionState:(connection){
         FlutterLogs.logWarn("VideoRoom", "onIceConnectionState",
