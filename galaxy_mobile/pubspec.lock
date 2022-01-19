@@ -550,9 +550,11 @@ packages:
   janus_client:
     dependency: "direct main"
     description:
-      path: "../../flutter_janus_client"
-      relative: true
-    source: path
+      path: "."
+      ref: "0.0.4+9"
+      resolved-ref: "9d333f9cff9d3cab686f14167637102cddb5a95c"
+      url: "https://github.com/igala/flutter_janus_client.git"
+    source: git
     version: "0.0.4"
   js:
     dependency: transitive
