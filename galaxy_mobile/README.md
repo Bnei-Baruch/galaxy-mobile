@@ -1,10 +1,16 @@
 # galaxy_mobile
 
-A new Flutter project.
-
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+### Installation
+1. Install Flutter: https://docs.flutter.dev/get-started/install/windows#get-the-flutter-sdk
+
+2. Downgrade Flutter:
+- `flutter branch stable`
+- `git checkout tags/1.22.6`
+- `flutter doctor`
+
+## More Info
 
 A few resources to get you started if this is your first Flutter project:
 
