@@ -208,6 +208,31 @@ class VideoRoom extends StatefulWidget {
       {
         FlutterLogs.logInfo(
             "VideoRoom", "setUserState", "state not valid");
+        if(state!=null)
+          {
+            List roomFeeds = state.getFeeds();
+            if(roomFeeds!=null) {
+              for (var feed in roomFeeds) {
+                if (feed != null && feed['id'] == user['rfid']) {
+                  FlutterLogs.logInfo(
+                      "VideoRoom", "setUserState",
+                      "found user in feed ${roomFeeds}");
+
+                  FlutterLogs.logInfo(
+                      "VideoRoom", "setUserState", "before ${feed['cammute']}");
+
+
+                  feed['cammute'] = !user['camera'];
+
+                  FlutterLogs.logInfo(
+                      "VideoRoom", "setUserState", "after ${feed['cammute']}");
+                  feed['question'] = user['question'];
+
+                  setUserQuestionInRoom(user);
+                }
+              }
+            }
+            }
       }
   }
 
