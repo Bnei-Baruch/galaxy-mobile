@@ -551,8 +551,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "0.0.4+8"
-      resolved-ref: "68f23e15d1e6885b5c716b1cb851f71f45b549a7"
+      ref: "0.0.4+9"
+      resolved-ref: "9d333f9cff9d3cab686f14167637102cddb5a95c"
       url: "https://github.com/igala/flutter_janus_client.git"
     source: git
     version: "0.0.4"

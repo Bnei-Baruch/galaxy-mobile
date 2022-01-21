@@ -33,6 +33,7 @@
   "camera" : "Cámara",
   "ask" : "Pedir",
   "audio_mode" : "Modo de audio",
-  "more" : "Más"
-
+  "more" : "Más",
+  "vote": "Voter",
+  "friends": "Amigos"
 }

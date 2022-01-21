@@ -704,25 +704,25 @@ class _DashboardState extends State<Dashboard>
                                 context: context,
                                 position: position,
                                 items: <PopupMenuItem<String>>[
-                                  const PopupMenuItem<String>(
+                                   PopupMenuItem<String>(
                                       child: ListTile(
                                           leading: Icon(Icons.how_to_vote),
-                                          title: Text('vote')),
-                                    value: "vote",
+                                          title: Text('vote'.tr())),
+                                    value: "4.1",
                                   ),
-                                  const PopupMenuItem<String>(
+                                   PopupMenuItem<String>(
                                       child: ListTile(
                           leading: Icon(Icons.mobile_friendly_sharp),
-                          title: Text('friends')),
+                          title: Text('friends'.tr())),
                                   enabled: false,
-                                  value: "friends",),
+                                  value: "4.2",),
                                 ],
 
 
                               );
                               switch(result)
                               {
-                                case "vote":
+                                case "4.1":
                                   print("user id ${activeUser.id}");
                                   showDialog(
                                       context: context,

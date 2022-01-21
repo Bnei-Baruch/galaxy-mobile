@@ -15,7 +15,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.29+30
+version: 1.0.33+34
 
 environment:
   sdk: ">=2.10.0 <3.0.0"
@@ -86,6 +86,7 @@ dependencies:
           url: https://github.com/igala/flutter_janus_client.git
           #https://github.com/shivanshtalwar0/flutter_janus_client.git
           ref: 0.0.4+8
+          ref: 0.0.4+9
 #    path: ../../flutter_janus_client
 
 
