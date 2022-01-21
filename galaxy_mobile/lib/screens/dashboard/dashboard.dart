@@ -27,6 +27,17 @@ enum AudioDevice { receiver, speaker, bluetooth }
 
 final int TIME_TO_SHOW_CONTROLS = 10;
 
+// TODO: User under keycloak may need to be more generalized and include this.
+class RoomUser {
+  String id;
+  String name;
+  bool camOn;
+  bool micOn;
+  bool isCurrentUser;
+
+  RoomUser({ this.id, this.name, this.camOn, this.micOn, this.isCurrentUser });
+}
+
 class Dashboard extends StatefulWidget {
   @override
   State createState() => _DashboardState();
@@ -704,25 +715,23 @@ class _DashboardState extends State<Dashboard>
                                 context: context,
                                 position: position,
                                 items: <PopupMenuItem<String>>[
-                                   PopupMenuItem<String>(
-                                      child: ListTile(
-                                          leading: Icon(Icons.how_to_vote),
-                                          title: Text('vote'.tr())),
+                                  PopupMenuItem<String>(
+                                    child: ListTile(
+                                    leading: Icon(Icons.how_to_vote),
+                                    title: Text('vote'.tr())),
                                     value: "4.1",
                                   ),
-                                   PopupMenuItem<String>(
-                                      child: ListTile(
-                          leading: Icon(Icons.mobile_friendly_sharp),
-                          title: Text('friends'.tr())),
-                                  enabled: false,
-                                  value: "4.2",),
-                                ],
-
-
+                                  PopupMenuItem<String>(
+                                    child: ListTile(
+                                    leading: Icon(Icons.supervisor_account_sharp),
+                                    title: Text('friends'.tr())),
+                                    enabled: true,
+                                    value: "4.2",),
+                                  ],
                               );
                               switch(result)
                               {
-                                case "4.1":
+                                case "4.1": // Vote
                                   print("user id ${activeUser.id}");
                                   showDialog(
                                       context: context,
@@ -771,6 +780,10 @@ class _DashboardState extends State<Dashboard>
                                         );
                                       });
                                   break;
+                                case "4.2": // Friends (Participants)
+                                  print("friends participants");
+                                  _displayParticipantsDialog(context);
+                                  break;
                               }
                              break;
 
@@ -795,6 +808,90 @@ class _DashboardState extends State<Dashboard>
         ));
     // );
 
+  }
+
+  _displayParticipantsDialog(BuildContext context) {
+
+    // TODO: get users from feeds
+    List<RoomUser> users = [
+      RoomUser(id: activeUser.id, name: activeUser.name, camOn: !videoMute, micOn: !audioMute, isCurrentUser: true),
+      RoomUser(id: "2", name: "Igal", camOn: false, micOn: true, isCurrentUser: true),
+      RoomUser(id: "333", name: "Itai", camOn: true, micOn: true, isCurrentUser: false),
+      RoomUser(id: "7", name: "Boris", camOn: true, micOn: false, isCurrentUser: false),
+      RoomUser(id: "8", name: "Eli", camOn: true, micOn: false, isCurrentUser: false),
+    ];
+
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: false,
+      transitionDuration: Duration(milliseconds: 200),
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: ScaleTransition(
+            scale: animation,
+            child: child,
+          ),
+        );
+      },
+      pageBuilder: (context, animation, secondaryAnimation) {
+
+        // get list of participants
+        // display in list
+        // highlight current user.
+
+
+        return WillPopScope(
+            onWillPop: () {
+              Navigator.of(context).pop();
+              return Future.value(true);
+            },
+            child: SafeArea(
+              child: Material(
+                child: Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                padding: EdgeInsets.all(20),
+                color: Colors.black,
+                child:Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children:<Widget> [
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: Text("Close", // TODO: translation.
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                    ...users.map(
+                          (user) => Row(
+                          children: <Widget>[
+                              Text(user.name, style: TextStyle(
+                                color: Colors.white,
+                                fontStyle: FontStyle.normal,
+                                fontWeight: FontWeight.normal,
+                              )),
+                              user.micOn
+                                  ? Icon(Icons.mic, color: Colors.white)
+                                  : Icon(Icons.mic_off, color: Colors.red),
+                              user.camOn
+                                  ? Icon(Icons.videocam, color: Colors.white)
+                                  : Icon(Icons.videocam_off, color: Colors.red),
+                            ]
+                            )
+                      ).toList()
+                  ],
+                ),
+              ),
+           )
+        )
+        );
+      },
+    );
   }
 
   RelativeRect buttonMenuPosition(BuildContext c) {

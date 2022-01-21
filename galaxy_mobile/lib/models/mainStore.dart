@@ -55,7 +55,7 @@ class MainStore extends ChangeNotifier {
     setVideoPreset(SharedPrefs().videoPreset);
     setAudioDevice(SharedPrefs().audioDevice);
 
-    _mqttClient.init(_auth.getUserEmail(),  _auth.getToken().accessToken, activeUser.id  );
+    _mqttClient.init(_auth.getUserEmail(),  _auth.getToken().accessToken, activeUser.id);
   }
 
   void update(AuthService auth, Api api, MQTTClient mqttClient) {
