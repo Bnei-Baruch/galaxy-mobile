@@ -811,7 +811,6 @@ class _DashboardState extends State<Dashboard>
   }
 
   _displayParticipantsDialog(BuildContext context) {
-
     // TODO: get users from feeds
     List<RoomUser> users = [
       RoomUser(id: activeUser.id, name: activeUser.name, camOn: !videoMute, micOn: !audioMute, isCurrentUser: true),
@@ -819,6 +818,30 @@ class _DashboardState extends State<Dashboard>
       RoomUser(id: "333", name: "Itai", camOn: true, micOn: true, isCurrentUser: false),
       RoomUser(id: "7", name: "Boris", camOn: true, micOn: false, isCurrentUser: false),
       RoomUser(id: "8", name: "Eli", camOn: true, micOn: false, isCurrentUser: false),
+      RoomUser(id: "2", name: "Igal", camOn: false, micOn: true, isCurrentUser: true),
+      RoomUser(id: "333", name: "Itai", camOn: true, micOn: true, isCurrentUser: false),
+      RoomUser(id: "7", name: "Boris", camOn: true, micOn: false, isCurrentUser: false),
+      RoomUser(id: "8", name: "Eli", camOn: true, micOn: false, isCurrentUser: false),
+      RoomUser(id: "2", name: "Igal", camOn: false, micOn: true, isCurrentUser: true),
+      RoomUser(id: "333", name: "Itai", camOn: true, micOn: true, isCurrentUser: false),
+      RoomUser(id: "7", name: "Boris", camOn: true, micOn: false, isCurrentUser: false),
+      RoomUser(id: "8", name: "Eli", camOn: true, micOn: false, isCurrentUser: false),RoomUser(id: "2", name: "Igal", camOn: false, micOn: true, isCurrentUser: true),
+      RoomUser(id: "333", name: "Itai", camOn: true, micOn: true, isCurrentUser: false),
+      RoomUser(id: "7", name: "Boris", camOn: true, micOn: false, isCurrentUser: false),
+      RoomUser(id: "8", name: "Eli", camOn: true, micOn: false, isCurrentUser: false),
+      RoomUser(id: "2", name: "Igal", camOn: false, micOn: true, isCurrentUser: true),
+      RoomUser(id: "333", name: "Itai", camOn: true, micOn: true, isCurrentUser: false),
+      RoomUser(id: "7", name: "Boris", camOn: true, micOn: false, isCurrentUser: false),
+      RoomUser(id: "8", name: "Eli", camOn: true, micOn: false, isCurrentUser: false),
+      RoomUser(id: "2", name: "Igal", camOn: false, micOn: true, isCurrentUser: true),
+      RoomUser(id: "333", name: "Itai", camOn: true, micOn: true, isCurrentUser: false),
+      RoomUser(id: "7", name: "Boris", camOn: true, micOn: false, isCurrentUser: false),
+      RoomUser(id: "8", name: "Eli", camOn: true, micOn: false, isCurrentUser: false),
+      RoomUser(id: "2", name: "Igal", camOn: false, micOn: true, isCurrentUser: true),
+      RoomUser(id: "333", name: "Itai", camOn: true, micOn: true, isCurrentUser: false),
+      RoomUser(id: "7", name: "Boris", camOn: true, micOn: false, isCurrentUser: false),
+      RoomUser(id: "8", name: "Eli", camOn: true, micOn: false, isCurrentUser: false),
+
     ];
 
     showGeneralDialog(
@@ -842,53 +865,84 @@ class _DashboardState extends State<Dashboard>
 
 
         return WillPopScope(
-            onWillPop: () {
-              Navigator.of(context).pop();
-              return Future.value(true);
-            },
-            child: SafeArea(
-              child: Material(
-                child: Container(
+          onWillPop: () {
+            Navigator.of(context).pop();
+            return Future.value(true);
+          },
+          child: SafeArea(
+            child: Material(
+              child: Container(
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height,
-                padding: EdgeInsets.all(20),
-                color: Colors.black,
-                child:Column(
+                padding: EdgeInsets.all(15),
+                color: Colors.black26,
+                child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  children:<Widget> [
-                    Align(
-                      alignment: Alignment.topLeft,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: Text("Close", // TODO: translation.
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
+                  children: <Widget>[
+                    Container(
+                      height: 45.0,
+                      child: Stack(
+                        children: <Widget>[
+                          Positioned(
+                            left: 0,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text("close".tr(),
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.center,
+                            child: Text("friends".tr() + " (" + users.length.toString() + ")",
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18))
+                          )
+                        ]
+                      )
                     ),
-                    ...users.map(
-                          (user) => Row(
-                          children: <Widget>[
-                              Text(user.name, style: TextStyle(
-                                color: Colors.white,
-                                fontStyle: FontStyle.normal,
-                                fontWeight: FontWeight.normal,
-                              )),
-                              user.micOn
-                                  ? Icon(Icons.mic, color: Colors.white)
-                                  : Icon(Icons.mic_off, color: Colors.red),
-                              user.camOn
-                                  ? Icon(Icons.videocam, color: Colors.white)
-                                  : Icon(Icons.videocam_off, color: Colors.red),
-                            ]
-                            )
-                      ).toList()
-                  ],
+                    Container(
+                      margin: const EdgeInsets.symmetric(vertical: 5.0),
+                      child: const Divider(
+                        thickness: 1,
+                        color: Colors.grey,
+                    )),
+                    Expanded(child: ListView(
+                      children: users.map(
+                          (user) => Container(
+                            padding: const EdgeInsets.symmetric(vertical: 5),
+                            child: Row(
+                              children: <Widget>[
+                                  const Icon(Icons.account_box, size: 50),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  Text(user.name, style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                  )),
+                                  const Spacer(),
+                                  Icon(
+                                      user.micOn ? Icons.mic : Icons.mic_off,
+                                      color: user.micOn ? Colors.white : Colors.red,
+                                      size: 30),
+                                  const SizedBox(
+                                    width: 6,
+                                  ),
+                                  Icon(
+                                      user.camOn ? Icons.videocam : Icons.videocam_off,
+                                      color: user.camOn ? Colors.white : Colors.red,
+                                      size: 30),
+                              ])
+                          )).toList()
+                      )
+                    )
+                  ]
                 ),
               ),
-           )
-        )
+            )
+          )
         );
       },
     );
