@@ -27,17 +27,6 @@ enum AudioDevice { receiver, speaker, bluetooth }
 
 final int TIME_TO_SHOW_CONTROLS = 10;
 
-// TODO: User under keycloak may need to be more generalized and include this.
-class RoomUser {
-  String id;
-  String name;
-  bool camOn;
-  bool micOn;
-  bool isCurrentUser;
-
-  RoomUser({ this.id, this.name, this.camOn, this.micOn, this.isCurrentUser });
-}
-
 class Dashboard extends StatefulWidget {
   @override
   State createState() => _DashboardState();
@@ -379,8 +368,6 @@ class _DashboardState extends State<Dashboard>
     }
     return res;
   }
-
-
 
   void handleCmdData(String msgPayload) {
     FlutterLogs.logInfo(
@@ -811,39 +798,6 @@ class _DashboardState extends State<Dashboard>
   }
 
   _displayParticipantsDialog(BuildContext context) {
-    // TODO: get users from feeds
-    List<RoomUser> users = [
-      RoomUser(id: "2", name: "Igal", camOn: false, micOn: true, isCurrentUser: false),
-      RoomUser(id: "333", name: "Itai", camOn: true, micOn: true, isCurrentUser: false),
-      RoomUser(id: "7", name: "Boris", camOn: true, micOn: false, isCurrentUser: false),
-      RoomUser(id: "8", name: "Eli", camOn: true, micOn: false, isCurrentUser: false),
-      RoomUser(id: activeUser.id, name: activeUser.name, camOn: !videoMute, micOn: !audioMute, isCurrentUser: true),
-      RoomUser(id: "2", name: "Igal", camOn: false, micOn: true, isCurrentUser: false),
-      RoomUser(id: "333", name: "Itai", camOn: true, micOn: true, isCurrentUser: false),
-      RoomUser(id: "7", name: "Boris", camOn: true, micOn: false, isCurrentUser: false),
-      RoomUser(id: "8", name: "Eli", camOn: true, micOn: false, isCurrentUser: false),
-      RoomUser(id: "2", name: "Igal", camOn: false, micOn: true, isCurrentUser: false),
-      RoomUser(id: "333", name: "Itai", camOn: true, micOn: true, isCurrentUser: false),
-      RoomUser(id: "7", name: "Boris", camOn: true, micOn: false, isCurrentUser: false),
-      RoomUser(id: "8", name: "Eli", camOn: true, micOn: false, isCurrentUser: false),RoomUser(id: "2", name: "Igal", camOn: false, micOn: true, isCurrentUser: false),
-      RoomUser(id: "333", name: "Itai", camOn: true, micOn: true, isCurrentUser: false),
-      RoomUser(id: "7", name: "Boris", camOn: true, micOn: false, isCurrentUser: false),
-      RoomUser(id: "8", name: "Eli", camOn: true, micOn: false, isCurrentUser: false),
-      RoomUser(id: "2", name: "Igal", camOn: false, micOn: true, isCurrentUser: false),
-      RoomUser(id: "333", name: "Itai", camOn: true, micOn: true, isCurrentUser: false),
-      RoomUser(id: "7", name: "Boris", camOn: true, micOn: false, isCurrentUser: false),
-      RoomUser(id: "8", name: "Eli", camOn: true, micOn: false, isCurrentUser: false),
-      RoomUser(id: "2", name: "Igal", camOn: false, micOn: true, isCurrentUser: false),
-      RoomUser(id: "333", name: "Itai", camOn: true, micOn: true, isCurrentUser: false),
-      RoomUser(id: "7", name: "Boris", camOn: true, micOn: false, isCurrentUser: false),
-      RoomUser(id: "8", name: "Eli", camOn: true, micOn: false, isCurrentUser: false),
-      RoomUser(id: "2", name: "Igal", camOn: false, micOn: true, isCurrentUser: false),
-      RoomUser(id: "333", name: "Itai", camOn: true, micOn: true, isCurrentUser: false),
-      RoomUser(id: "7", name: "Boris", camOn: true, micOn: false, isCurrentUser: false),
-      RoomUser(id: "8", name: "Eli", camOn: true, micOn: false, isCurrentUser: false),
-
-    ];
-
     showGeneralDialog(
       context: context,
       barrierDismissible: false,
@@ -858,6 +812,9 @@ class _DashboardState extends State<Dashboard>
         );
       },
       pageBuilder: (context, animation, secondaryAnimation) {
+        List<RoomUser> users =
+            [RoomUser(id: activeUser.id, name: activeUser.name, camOn: !videoMute, micOn: !audioMute, isCurrentUser: true)]
+                + context.watch<MainStore>().friendsInRoom;
         return WillPopScope(
           onWillPop: () {
             Navigator.of(context).pop();

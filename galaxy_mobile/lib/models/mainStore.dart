@@ -14,6 +14,17 @@ import 'package:galaxy_mobile/services/mqttClient.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:janus_client/Plugin.dart';
 
+// TODO: Find a place for this.
+class RoomUser {
+  String id;
+  String name;
+  bool camOn;
+  bool micOn;
+  bool isCurrentUser;
+
+  RoomUser({ this.id, this.name, this.camOn, this.micOn, this.isCurrentUser });
+}
+
 // TODO: change to prefernces store.
 class MainStore extends ChangeNotifier {
   Api _api;
@@ -28,6 +39,7 @@ class MainStore extends ChangeNotifier {
   Room activeRoom;
   RoomData activeGateway;
   RoomData activeStreamGateway;
+  List<RoomUser> friendsInRoom = [];
   bool audioMode; // TODO: doesn't belong here
   int audioPreset;
   int videoPreset;
@@ -83,6 +95,11 @@ class MainStore extends ChangeNotifier {
 
       notifyListeners();
     }
+  }
+
+  void setFriendsInRoom(List<RoomUser> friends) {
+    friendsInRoom = friends;
+    notifyListeners();
   }
 
   void setAudioMode(bool value) {
