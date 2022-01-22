@@ -813,31 +813,31 @@ class _DashboardState extends State<Dashboard>
   _displayParticipantsDialog(BuildContext context) {
     // TODO: get users from feeds
     List<RoomUser> users = [
+      RoomUser(id: "2", name: "Igal", camOn: false, micOn: true, isCurrentUser: false),
+      RoomUser(id: "333", name: "Itai", camOn: true, micOn: true, isCurrentUser: false),
+      RoomUser(id: "7", name: "Boris", camOn: true, micOn: false, isCurrentUser: false),
+      RoomUser(id: "8", name: "Eli", camOn: true, micOn: false, isCurrentUser: false),
       RoomUser(id: activeUser.id, name: activeUser.name, camOn: !videoMute, micOn: !audioMute, isCurrentUser: true),
-      RoomUser(id: "2", name: "Igal", camOn: false, micOn: true, isCurrentUser: true),
+      RoomUser(id: "2", name: "Igal", camOn: false, micOn: true, isCurrentUser: false),
       RoomUser(id: "333", name: "Itai", camOn: true, micOn: true, isCurrentUser: false),
       RoomUser(id: "7", name: "Boris", camOn: true, micOn: false, isCurrentUser: false),
       RoomUser(id: "8", name: "Eli", camOn: true, micOn: false, isCurrentUser: false),
-      RoomUser(id: "2", name: "Igal", camOn: false, micOn: true, isCurrentUser: true),
+      RoomUser(id: "2", name: "Igal", camOn: false, micOn: true, isCurrentUser: false),
+      RoomUser(id: "333", name: "Itai", camOn: true, micOn: true, isCurrentUser: false),
+      RoomUser(id: "7", name: "Boris", camOn: true, micOn: false, isCurrentUser: false),
+      RoomUser(id: "8", name: "Eli", camOn: true, micOn: false, isCurrentUser: false),RoomUser(id: "2", name: "Igal", camOn: false, micOn: true, isCurrentUser: false),
       RoomUser(id: "333", name: "Itai", camOn: true, micOn: true, isCurrentUser: false),
       RoomUser(id: "7", name: "Boris", camOn: true, micOn: false, isCurrentUser: false),
       RoomUser(id: "8", name: "Eli", camOn: true, micOn: false, isCurrentUser: false),
-      RoomUser(id: "2", name: "Igal", camOn: false, micOn: true, isCurrentUser: true),
-      RoomUser(id: "333", name: "Itai", camOn: true, micOn: true, isCurrentUser: false),
-      RoomUser(id: "7", name: "Boris", camOn: true, micOn: false, isCurrentUser: false),
-      RoomUser(id: "8", name: "Eli", camOn: true, micOn: false, isCurrentUser: false),RoomUser(id: "2", name: "Igal", camOn: false, micOn: true, isCurrentUser: true),
+      RoomUser(id: "2", name: "Igal", camOn: false, micOn: true, isCurrentUser: false),
       RoomUser(id: "333", name: "Itai", camOn: true, micOn: true, isCurrentUser: false),
       RoomUser(id: "7", name: "Boris", camOn: true, micOn: false, isCurrentUser: false),
       RoomUser(id: "8", name: "Eli", camOn: true, micOn: false, isCurrentUser: false),
-      RoomUser(id: "2", name: "Igal", camOn: false, micOn: true, isCurrentUser: true),
+      RoomUser(id: "2", name: "Igal", camOn: false, micOn: true, isCurrentUser: false),
       RoomUser(id: "333", name: "Itai", camOn: true, micOn: true, isCurrentUser: false),
       RoomUser(id: "7", name: "Boris", camOn: true, micOn: false, isCurrentUser: false),
       RoomUser(id: "8", name: "Eli", camOn: true, micOn: false, isCurrentUser: false),
-      RoomUser(id: "2", name: "Igal", camOn: false, micOn: true, isCurrentUser: true),
-      RoomUser(id: "333", name: "Itai", camOn: true, micOn: true, isCurrentUser: false),
-      RoomUser(id: "7", name: "Boris", camOn: true, micOn: false, isCurrentUser: false),
-      RoomUser(id: "8", name: "Eli", camOn: true, micOn: false, isCurrentUser: false),
-      RoomUser(id: "2", name: "Igal", camOn: false, micOn: true, isCurrentUser: true),
+      RoomUser(id: "2", name: "Igal", camOn: false, micOn: true, isCurrentUser: false),
       RoomUser(id: "333", name: "Itai", camOn: true, micOn: true, isCurrentUser: false),
       RoomUser(id: "7", name: "Boris", camOn: true, micOn: false, isCurrentUser: false),
       RoomUser(id: "8", name: "Eli", camOn: true, micOn: false, isCurrentUser: false),
@@ -858,12 +858,6 @@ class _DashboardState extends State<Dashboard>
         );
       },
       pageBuilder: (context, animation, secondaryAnimation) {
-
-        // get list of participants
-        // display in list
-        // highlight current user.
-
-
         return WillPopScope(
           onWillPop: () {
             Navigator.of(context).pop();
@@ -919,7 +913,7 @@ class _DashboardState extends State<Dashboard>
                                     width: 10,
                                   ),
                                   Text(user.name, style: TextStyle(
-                                    color: Colors.white,
+                                    color: user.isCurrentUser ? Color(0xff00c6d2) :Colors.white,
                                     fontSize: 18,
                                   )),
                                   const Spacer(),
