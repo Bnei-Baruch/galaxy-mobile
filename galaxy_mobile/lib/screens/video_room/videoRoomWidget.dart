@@ -307,8 +307,6 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
   }
 
   void onFeedsChanged(feeds) {
-    print("yanive");
-    print(feeds);
     context.read<MainStore>().setFriendsInRoom(feeds.map<RoomUser>((feed) {
       bool camMuted = feed['cammute'] ?? false;
       bool micOn = feed['talking'] ?? false;
@@ -318,6 +316,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
           name: name,
           camOn: !camMuted,
           micOn: micOn,
+          // Feeds are always of friends and not the current user.
           isCurrentUser: false);
     }).toList());
   }
@@ -399,7 +398,6 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         onMessage: (msg, jsep) async {
           FlutterLogs.logInfo(
               "VideoRoom", "_newRemoteFeed", "message: ${msg.toString()}");
-          print(msg);
           //update feed
           var event = msg["videoroom"];
           if (event == 'attached' ||
