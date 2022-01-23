@@ -812,9 +812,10 @@ class _DashboardState extends State<Dashboard>
         );
       },
       pageBuilder: (context, animation, secondaryAnimation) {
-        List<RoomUser> users =
+        final List<RoomUser> users =
             [RoomUser(id: activeUser.id, name: activeUser.name, camOn: !videoMute, micOn: !audioMute, isCurrentUser: true)]
-                + context.watch<MainStore>().friendsInRoom;
+                + context.select((MainStore s) => s.friendsInRoom);
+
         return WillPopScope(
           onWillPop: () {
             Navigator.of(context).pop();
