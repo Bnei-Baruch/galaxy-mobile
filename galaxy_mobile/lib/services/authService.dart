@@ -79,7 +79,7 @@ class AuthService {
     this.tokenResponse = null;
   }
 
-  Future<TokenResponse> refreshToken() async {
+  Future<void> refreshToken() async {
     this.tokenResponse = await this._appAuth.token(TokenRequest(
           APP_AUTH_CLIENT_ID,
           APP_AUTH_REDIRECT_URL,
@@ -87,8 +87,5 @@ class AuthService {
           grantType: GrantType.refreshToken,
           discoveryUrl: APP_AUTH_DISCOVERY_URL,
         ));
-    print("new access token ${tokenResponse.accessToken}");
-    print("refresh time=${tokenResponse.accessTokenExpirationDateTime.toIso8601String()}");
-    return tokenResponse;
   }
 }
