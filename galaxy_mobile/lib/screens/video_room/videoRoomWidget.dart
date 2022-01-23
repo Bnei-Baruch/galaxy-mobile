@@ -316,23 +316,29 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         switchVideoSlots, PAGE_SIZE, muteOtherCams, widget);
     widget.state = this;
 
-    (context.read<MainStore>() as MainStore).addListener(() {
-      if((widget.state !=null && widget.state.context!=null) && (widget.state.context.read<MainStore>() as MainStore).signal != signal)
-        {
+    (context.read<MainStore>() as MainStore).addListener(updateSignal);
+  }
 
-          setState(() {
-            signal = (widget.state.context.read<MainStore>() as MainStore).signal;
-          });
+  void updateSignal() {
+    if((widget.state !=null && widget.state.context!=null) && (widget.state.context.read<MainStore>() as MainStore).signal != signal)
+      {
 
-          FlutterLogs.logInfo(
-              "VideoRoom", "signal changed", "$signal");
-        }
-    });
+        setState(() {
+          signal = (widget.state.context.read<MainStore>() as MainStore).signal;
+        });
+
+        FlutterLogs.logInfo(
+            "VideoRoom", "signal changed", "$signal");
+      }
   }
 
   @override
   void dispose() {
+
     WidgetsBinding.instance.removeObserver(this);
+    (context.read<MainStore>() as MainStore).removeListener(updateSignal);
+    widget.mainToIsolateStream[1].send({"type": "stop"});
+    widget.mainToIsolateStream??[1]??widget.mainToIsolateStream[1].kill();
     super.dispose();
   }
 
@@ -448,25 +454,25 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
               Map<String, dynamic> userJson = widget.user.toJson();
               userJson["room"] = widget.roomNumber;
               userJson["group"] = widget.groupName;
-              // widget.mainToIsolateStream  = await initIsolate(context);
-              // context.read<MainStore>().setMonitorPort(widget.mainToIsolateStream[1]);
+              widget.mainToIsolateStream  = await initIsolate(context);
+              context.read<MainStore>().setMonitorPort(widget.mainToIsolateStream[1]);
               //   // mainToIsolateStream = value,
               //   // mainToIsolateStream = value,
-              // widget.mainToIsolateStream[1].send({
-              //     "type": "updateSpec",
-              //     "spec": context.read<MainStore>().spec
-              // });
-              //   widget.mainToIsolateStream[1].send({
-              //     "type": 'setConnection',
-              //     "user": userJson,
-              //     // "localAudio": widget.myStream.getAudioTracks().first,
-              //     // "localVideo": widget.myStream.getVideoTracks().first,
-              //     // "plugin": context,
-              //     "galaxyServer":context.read<MainStore>().activeStreamGateway.url
-              //     // "userExtra": {},
-              //     // "data": {}
-              //   });
-              //   widget.mainToIsolateStream[1].send({"type": "start"});
+              widget.mainToIsolateStream[1].send({
+                  "type": "updateSpec",
+                  "spec": context.read<MainStore>().spec
+              });
+                widget.mainToIsolateStream[1].send({
+                  "type": 'setConnection',
+                  "user": userJson,
+                  // "localAudio": widget.myStream.getAudioTracks().first,
+                  // "localVideo": widget.myStream.getVideoTracks().first,
+                  // "plugin": context,
+                  "galaxyServer":context.read<MainStore>().activeStreamGateway.url
+                  // "userExtra": {},
+                  // "data": {}
+                });
+                widget.mainToIsolateStream[1].send({"type": "start"});
               // });
             },
             onError: (error) {
@@ -588,12 +594,14 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         slowLink: (uplink, lost, mid) {
           FlutterLogs.logWarn("VideoRoom", "plugin: remotefeed_user",
               "slowLink: uplink ${uplink} lost ${lost} mid ${mid}");
-        //  (widget.mainToIsolateStream[1] as SendPort).send({"type":"slowLink","direction":uplink ? "sending":"receiving","lost":lost});
+  if(widget.mainToIsolateStream !=null && widget.mainToIsolateStream[1]!=null)
+        (widget.mainToIsolateStream[1] as SendPort).send({"type":"slowLink","direction":uplink ? "sending":"receiving","lost":lost});
         },
       onIceConnectionState:(connection){
         FlutterLogs.logWarn("VideoRoom", "onIceConnectionState",
             "state: $connection");
-       // (widget.mainToIsolateStream[1] as SendPort).send({"type":"iceState","state":connection.toString().split('.').last.toLowerCase().replaceFirst("rtciceconnectionstate", "")});
+  if(widget.mainToIsolateStream !=null && widget.mainToIsolateStream[1]!=null)
+       (widget.mainToIsolateStream[1] as SendPort).send({"type":"iceState","state":connection.toString().split('.').last.toLowerCase().replaceFirst("rtciceconnectionstate", "")});
       },
         onRenegotiationNeededCallback: (){
           FlutterLogs.logWarn("VideoRoom", "onRenegotiationNeededCallback",
@@ -867,7 +875,8 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
             slowLink: (uplink, lost, mid) {
               FlutterLogs.logWarn("VideoRoom", "plugin: janus.plugin.videoroom",
                   "slowLink: uplink ${uplink} lost ${lost} mid ${mid}");
-          //    (widget.mainToIsolateStream[0] as SendPort).send({"type":"slowLink","direction":uplink ? "sending":"receiving","lost":lost});
+              if(widget.mainToIsolateStream !=null && widget.mainToIsolateStream[0]!=null)
+                  (widget.mainToIsolateStream[0] as SendPort).send({"type":"slowLink","direction":uplink ? "sending":"receiving","lost":lost});
             },
             onIceConnectionState:(connection){
               FlutterLogs.logWarn("VideoRoom", "onIceConnectionState",

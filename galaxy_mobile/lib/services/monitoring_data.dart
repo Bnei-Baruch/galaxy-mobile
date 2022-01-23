@@ -530,6 +530,8 @@ class MonitoringData {
 
   updateBackend(String data) async {
     print("monitor updateBackend");
+    var  lastTimestamp = this.lastTimestamp();
+    this.lastFetchTimestamp = lastTimestamp;
     //this.userJson["network"] = (await Connectivity().checkConnectivity()).toString();
     //  userJson["diskFree"] = (await DiskSpace.getFreeDiskSpace).toString();
     var datatoSend = storedData.map((e)
@@ -547,7 +549,7 @@ class MonitoringData {
     datatoSend.isNotEmpty?print("going to send 3 ${jsonEncode(datatoSend.toList())}"):(){};
     var data = {
       "user": this.userJson,
-      "data": [[{"name": "audio", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}, {"name": "video", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch},datatoSend.isNotEmpty?(datatoSend.toList()):{"name": "Misc", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}]],
+      "data": [[{"name": "audio", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}, {"name": "video", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch},/*datatoSend.isNotEmpty?(datatoSend.toList()):*/{"name": "Misc", "reports": [], "timestamp": DateTime.now().millisecondsSinceEpoch}]],
     };
 
 
