@@ -813,6 +813,8 @@ class _DashboardState extends State<Dashboard>
       },
       pageBuilder: (context, animation, secondaryAnimation) {
         final List<RoomUser> users =
+            // TODO: before moving the friends list into its own widget, active user's multimedia (camOn, micOn) state should live
+            // in a model.
             [RoomUser(id: activeUser.id, name: activeUser.name, camOn: !videoMute, micOn: !audioMute, isCurrentUser: true)]
                 + context.select((MainStore s) => s.friendsInRoom);
 
