@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_appauth_platform_interface/src/token_response.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/models/sharedPref.dart';
 import 'package:galaxy_mobile/services/api.dart';
@@ -93,10 +96,15 @@ class _LoginState extends State<Login>  with WidgetsBindingObserver {
     final store = context.read<MainStore>();
     // if(store.getLastLogin().isAfter(DateTime.now().subtract(Duration(hours: 21))))
     //   FlutterLogs.clearLogs();
-
-    final authResponse = await auth.signIn();
-
     final api = context.read<Api>();
+    var authResponse = await auth.signIn();
+
+
+    refreshTimer(authResponse, auth, api);
+    print("access token ${authResponse.accessToken} ");
+    print("refresh time=${authResponse.accessTokenExpirationDateTime.toIso8601String()}");
+
+
     api.setAccessToken(authResponse.accessToken);
 
     await context.read<MainStore>().init();
@@ -115,6 +123,14 @@ class _LoginState extends State<Login>  with WidgetsBindingObserver {
 
       Navigator.pushNamed(context, '/settings');
     }
+  }
+
+  TokenResponse refreshTimer(TokenResponse authResponse, AuthService auth, Api api) {
+     Timer(Duration(milliseconds: authResponse.accessTokenExpirationDateTime.millisecondsSinceEpoch-DateTime.now().millisecondsSinceEpoch), () {
+      authResponse = auth.refreshToken() as TokenResponse;
+      api.setAccessToken(authResponse.accessToken);
+      refreshTimer(authResponse, auth, api);
+    });
   }
 
   Container getView(BuildContext context, BoxConstraints viewportConstraints) {
