@@ -168,6 +168,7 @@ class VideoRoom extends StatefulWidget {
   }
 
   void setUserState(var user) {
+    bool didFeedsUpdate = false;
     FlutterLogs.logInfo("VideoRoom", "setUserState", "user ${user.toString()}");
     if(state !=null && state.mounted) {
       List roomFeeds = state.getFeeds();
@@ -187,7 +188,7 @@ class VideoRoom extends StatefulWidget {
           feed['question'] = user['question'];
 
           setUserQuestionInRoom(user);
-
+          didFeedsUpdate = true;
 
           if (state != null && state.mounted) {
             state.setState(() {
@@ -230,11 +231,16 @@ class VideoRoom extends StatefulWidget {
                   feed['question'] = user['question'];
 
                   setUserQuestionInRoom(user);
+                  didFeedsUpdate = true;
                 }
               }
             }
             }
       }
+
+    if (didFeedsUpdate) {
+      state.onFeedsChanged(state.getFeeds());
+    }
   }
 
   void setUserQuestionInRoom(var user) {
@@ -301,14 +307,16 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
   }
 
   void onFeedsChanged(feeds) {
-    print("yanive");
-    print(feeds);
     context.read<MainStore>().setFriendsInRoom(feeds.map<RoomUser>((feed) {
+      bool camMuted = feed['cammute'] ?? false;
+      bool micOn = feed['talking'] ?? false;
+      String name = feed['display']['display'] ?? "";
       return RoomUser(
           id: feed['id'].toString(),
-          name: feed['display']['display'] ?? "",
-          camOn: !feed['cammute'],
-          micOn: feed['talking'] ?? false,
+          name: name,
+          camOn: !camMuted,
+          micOn: micOn,
+          // Feeds are always of friends and not the current user.
           isCurrentUser: false);
     }).toList());
   }
