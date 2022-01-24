@@ -63,11 +63,12 @@ class RoomSelector extends StatelessWidget {
             newList.removeWhere((element) =>
             element == Bidi.LRE.codeUnits.first || element == Bidi.LRM.codeUnits.first || element == Bidi.PDF.codeUnits.first
             );
-            String newString = String.fromCharCodes(newList);return room.description.toLowerCase().contains(newString);
+            String newString = String.fromCharCodes(newList);
+            return room.description.toLowerCase().contains(newString.toLowerCase());
           }
         else
           {
-            return room.description.toLowerCase().contains(string);
+            return room.description.toLowerCase().contains(string.toLowerCase());
           }
       } ,
       searchBoxDecoration: InputDecoration(

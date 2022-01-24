@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/services/keycloak.dart';
 import 'package:galaxy_mobile/services/monitoring_isolate.dart';
+import 'package:flutter/foundation.dart';
 import 'package:galaxy_mobile/utils/switch_page_helper.dart';
 import 'package:galaxy_mobile/utils/utils.dart';
 import 'package:janus_client/janus_client.dart';
@@ -167,6 +168,7 @@ class VideoRoom extends StatefulWidget {
   }
 
   void setUserState(var user) {
+    bool didFeedsUpdate = false;
     FlutterLogs.logInfo("VideoRoom", "setUserState", "user ${user.toString()}");
     if(state !=null && state.mounted) {
       List roomFeeds = state.getFeeds();
@@ -186,7 +188,7 @@ class VideoRoom extends StatefulWidget {
           feed['question'] = user['question'];
 
           setUserQuestionInRoom(user);
-
+          didFeedsUpdate = true;
 
           if (state != null && state.mounted) {
             state.setState(() {
@@ -229,11 +231,16 @@ class VideoRoom extends StatefulWidget {
                   feed['question'] = user['question'];
 
                   setUserQuestionInRoom(user);
+                  didFeedsUpdate = true;
                 }
               }
             }
             }
       }
+
+    if (didFeedsUpdate) {
+      state.onFeedsChanged(state.getFeeds());
+    }
   }
 
   void setUserQuestionInRoom(var user) {
@@ -298,6 +305,22 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
   List getFeeds() {
     return feeds;
   }
+
+  void onFeedsChanged(feeds) {
+    context.read<MainStore>().setFriendsInRoom(feeds.map<RoomUser>((feed) {
+      bool camMuted = feed['cammute'] ?? false;
+      bool micOn = feed['talking'] ?? false;
+      String name = feed['display']['display'] ?? "";
+      return RoomUser(
+          id: feed['id'].toString(),
+          name: name,
+          camOn: !camMuted,
+          micOn: micOn,
+          // Feeds are always of friends and not the current user.
+          isCurrentUser: false);
+    }).toList());
+  }
+
 
   @override
   void didChangeDependencies() async {
@@ -612,6 +635,13 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
       ,));
   }
 
+  void updateFeeds(List newFeeds) {
+   if (listEquals(feeds, newFeeds) == false) {
+      feeds = newFeeds;
+      onFeedsChanged(feeds);
+   }
+  }
+
   Future<void> initPlatformState() async {
     setState(() {
       widget.j = JanusClient(iceServers: [
@@ -705,7 +735,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                     List newFeedsState =
                         feeds != null ? (feeds + newFeeds) : newFeeds;
 
-                    feeds = newFeedsState;
+                    updateFeeds(newFeedsState);
                     // Merge new feed with existing feeds and sort.
                     switcher.makeSubscription(
                         newFeeds,
@@ -734,6 +764,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                   }
                   setState(() {
                     feed["talking"] = true;
+                    onFeedsChanged(feeds);
                   });
                 } else if (event == 'stopped-talking') {
                   FlutterLogs.logInfo(
@@ -751,6 +782,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                   }
                   setState(() {
                     feed["talking"] = false;
+                    onFeedsChanged(feeds);
                   });
 
                   // this.setState({ feeds });
@@ -818,7 +850,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                         /* page= */ page,
                         feeds,
                         feedsNewState);
-                    feeds = feedsNewState;
+                    updateFeeds(feedsNewState);
                   } else if (msg['leaving'] != null && msg['leaving'] != null) {
                     // User leaving the room which is same as publishers gone.
 
@@ -833,9 +865,9 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                         /* page= */ page,
                         feeds,
                         feedsNewState);
-                    feeds = feedsNewState;
+                    updateFeeds(feedsNewState);
                     // this.setState({ feeds: feedsNewState }, () => {
-                    if (page * PAGE_SIZE == feeds.length) {
+                    if (page * PAGE_SIZE == feedsNewState.length) {
                       this.switchPage(page - 1);
                     }
 

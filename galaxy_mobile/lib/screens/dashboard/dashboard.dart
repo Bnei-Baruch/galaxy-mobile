@@ -369,8 +369,6 @@ class _DashboardState extends State<Dashboard>
     return res;
   }
 
-
-
   void handleCmdData(String msgPayload) {
     FlutterLogs.logInfo(
         "Dashboard", "handleCmdData", "received message: $msgPayload");
@@ -704,25 +702,23 @@ class _DashboardState extends State<Dashboard>
                                 context: context,
                                 position: position,
                                 items: <PopupMenuItem<String>>[
-                                   PopupMenuItem<String>(
-                                      child: ListTile(
-                                          leading: Icon(Icons.how_to_vote),
-                                          title: Text('vote'.tr())),
+                                  PopupMenuItem<String>(
+                                    child: ListTile(
+                                    leading: Icon(Icons.how_to_vote),
+                                    title: Text('vote'.tr())),
                                     value: "4.1",
                                   ),
-                                   PopupMenuItem<String>(
-                                      child: ListTile(
-                          leading: Icon(Icons.mobile_friendly_sharp),
-                          title: Text('friends'.tr())),
-                                  enabled: false,
-                                  value: "4.2",),
-                                ],
-
-
+                                  PopupMenuItem<String>(
+                                    child: ListTile(
+                                    leading: Icon(Icons.supervisor_account_sharp),
+                                    title: Text('friends'.tr())),
+                                    enabled: true,
+                                    value: "4.2",),
+                                  ],
                               );
                               switch(result)
                               {
-                                case "4.1":
+                                case "4.1": // Vote
                                   print("user id ${activeUser.id}");
                                   showDialog(
                                       context: context,
@@ -771,6 +767,10 @@ class _DashboardState extends State<Dashboard>
                                         );
                                       });
                                   break;
+                                case "4.2": // Friends (Participants)
+                                  print("friends participants");
+                                  _displayParticipantsDialog(context);
+                                  break;
                               }
                              break;
 
@@ -795,6 +795,111 @@ class _DashboardState extends State<Dashboard>
         ));
     // );
 
+  }
+
+  _displayParticipantsDialog(BuildContext context) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: false,
+      transitionDuration: Duration(milliseconds: 200),
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: ScaleTransition(
+            scale: animation,
+            child: child,
+          ),
+        );
+      },
+      pageBuilder: (context, animation, secondaryAnimation) {
+        final List<RoomUser> users =
+            // TODO: before moving the friends list into its own widget, active user's multimedia (camOn, micOn) state should live
+            // in a model.
+            [RoomUser(id: activeUser.id, name: activeUser.name, camOn: !videoMute, micOn: !audioMute, isCurrentUser: true)]
+                + context.select((MainStore s) => s.friendsInRoom);
+
+        return WillPopScope(
+          onWillPop: () {
+            Navigator.of(context).pop();
+            return Future.value(true);
+          },
+          child: SafeArea(
+            child: Material(
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                padding: EdgeInsets.all(15),
+                color: Colors.black26,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Container(
+                      height: 45.0,
+                      child: Stack(
+                        children: <Widget>[
+                          Positioned(
+                            left: 0,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text("close".tr(),
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.center,
+                            child: Text("friends".tr() + " (" + users.length.toString() + ")",
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18))
+                          )
+                        ]
+                      )
+                    ),
+                    Container(
+                      margin: const EdgeInsets.symmetric(vertical: 5.0),
+                      child: const Divider(
+                        thickness: 1,
+                        color: Colors.grey,
+                    )),
+                    Expanded(child: ListView(
+                      children: users.map(
+                          (user) => Container(
+                            padding: const EdgeInsets.symmetric(vertical: 5),
+                            child: Row(
+                              children: <Widget>[
+                                  const Icon(Icons.account_box, size: 50),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  Text(user.name, style: TextStyle(
+                                    color: user.isCurrentUser ? Color(0xff00c6d2) :Colors.white,
+                                    fontSize: 18,
+                                  )),
+                                  const Spacer(),
+                                  Icon(
+                                      user.micOn ? Icons.mic : Icons.mic_off,
+                                      color: user.micOn ? Colors.white : Colors.red,
+                                      size: 30),
+                                  const SizedBox(
+                                    width: 6,
+                                  ),
+                                  Icon(
+                                      user.camOn ? Icons.videocam : Icons.videocam_off,
+                                      color: user.camOn ? Colors.white : Colors.red,
+                                      size: 30),
+                              ])
+                          )).toList()
+                      )
+                    )
+                  ]
+                ),
+              ),
+            )
+          )
+        );
+      },
+    );
   }
 
   RelativeRect buttonMenuPosition(BuildContext c) {
