@@ -317,7 +317,8 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
           camOn: !camMuted,
           micOn: micOn,
           // Feeds are always of friends and not the current user.
-          isCurrentUser: false);
+          isCurrentUser: false,
+          timeJoined: feed["display"]["timestamp"]);
     }).toList());
   }
 
@@ -628,6 +629,8 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
   }
 
   void updateFeeds(List newFeeds) {
+    print("yaniv");
+    print(newFeeds);
    if (listEquals(feeds, newFeeds) == false) {
       feeds = newFeeds;
       onFeedsChanged(feeds);
@@ -746,7 +749,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                   final id = msg['id'];
 
                   FlutterLogs.logInfo("VideoRoom", "initPlatformState",
-                      "user ${id.toString()} - stop talking");
+                      "user ${id.toString()} - is talking");
                   final feed = feeds.firstWhere((feed) => feed["id"] == id,
                       orElse: () => null);
                   if (feed == null) {

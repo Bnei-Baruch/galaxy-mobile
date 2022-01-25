@@ -21,8 +21,9 @@ class RoomUser {
   bool camOn;
   bool micOn;
   bool isCurrentUser;
+  int timeJoined;
 
-  RoomUser({ this.id, this.name, this.camOn, this.micOn, this.isCurrentUser });
+  RoomUser({ this.id, this.name, this.camOn, this.micOn, this.isCurrentUser, this.timeJoined });
 }
 
 // TODO: change to prefernces store.
