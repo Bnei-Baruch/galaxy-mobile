@@ -193,14 +193,16 @@ class _DashboardState extends State<Dashboard>
         });
       }
     };
+    videoRoom.onCurrentUserJoinedRoom = () {
+      setState(() {
+        activeUserJoinedRoomTimestamp = DateTime.now().millisecondsSinceEpoch;
+      });
+    };
     videoRoom.RoomReady = () {
       FlutterLogs.logInfo("Dashboard", "videoRoom", "RoomReady");
       initMQTT();
       initAudioMgr();
       tapped();
-      setState(() {
-        activeUserJoinedRoomTimestamp = DateTime.now().millisecondsSinceEpoch;
-      });
     };
     videoRoom.updateGoingToBackground = (){
       updateRoomWithMyState(false);

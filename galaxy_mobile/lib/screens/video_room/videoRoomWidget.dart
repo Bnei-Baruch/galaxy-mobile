@@ -36,6 +36,7 @@ class VideoRoom extends StatefulWidget {
   int roomNumber;
   VoidCallback callExitRoomUserExists;
   VoidCallback updateGoingToBackground;
+  VoidCallback onCurrentUserJoinedRoom;
   UpdateUserCallback updateGlxUserCB;
   User user;
 
@@ -492,6 +493,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
               //   });
               //   widget.mainToIsolateStream[1].send({"type": "start"});
               // });
+              widget.onCurrentUserJoinedRoom();
             },
             onError: (error) {
               FlutterLogs.logError("VideoRoom", "_newRemoteFeed",
@@ -629,8 +631,6 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
   }
 
   void updateFeeds(List newFeeds) {
-    print("yaniv");
-    print(newFeeds);
    if (listEquals(feeds, newFeeds) == false) {
       feeds = newFeeds;
       onFeedsChanged(feeds);
