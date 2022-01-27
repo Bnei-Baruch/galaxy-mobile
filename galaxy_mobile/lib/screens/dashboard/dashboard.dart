@@ -89,12 +89,16 @@ class _DashboardState extends State<Dashboard>
     _activeRoomId = activeRoom.room.toString();
 
 
+    Connectivity().checkConnectivity().then((value) =>
+        context.read<MainStore>().network = value
+    );
     callInProgress = false;
     subscription = Connectivity()
         .onConnectivityChanged
         .listen((ConnectivityResult result) {
       // Got a new connectivity status!
       FlutterLogs.logInfo("Dashboard", "ConnectivityResult", result.toString());
+      context.read<MainStore>().network = result;
       //if connection is none or type has changed we restart the room
       if (result == ConnectivityResult.none) {
         //mark no connection
@@ -132,7 +136,7 @@ class _DashboardState extends State<Dashboard>
         //if marked no connection then reneter room
         Navigator.pop(dialogPleaseWaitContext);
         dialogPleaseWaitContext = null;
-        FlutterLogs.logInfo("Dashboard", "ConnectivityResult", "connection");
+        FlutterLogs.logInfo("Dashboard", "ConnectivityResult", "connection ${result.toString()}");
         if (hadNoConnection) {
           FlutterLogs.logInfo(
               "Dashboard", "ConnectivityResult", "reconnecting - exit room");

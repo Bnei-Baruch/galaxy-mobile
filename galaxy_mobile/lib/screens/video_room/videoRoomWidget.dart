@@ -493,7 +493,11 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                   // "localAudio": widget.myStream.getAudioTracks().first,
                   // "localVideo": widget.myStream.getVideoTracks().first,
                   // "plugin": context,
-                  "galaxyServer":context.read<MainStore>().activeStreamGateway.url
+                  "galaxyServer":context.read<MainStore>().activeStreamGateway.url,
+                  "janus":context.read<MainStore>().activeGateway.url,
+                  "version":context.read<MainStore>().version,
+                  "network":context.read<MainStore>().network.toString()
+
                   // "userExtra": {},
                   // "data": {}
                 });

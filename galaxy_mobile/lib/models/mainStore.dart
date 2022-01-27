@@ -1,6 +1,7 @@
 import 'dart:isolate';
 import 'dart:math';
 
+import 'package:connectivity_plus_platform_interface/src/enums.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/src/interface/media_stream.dart';
@@ -46,6 +47,7 @@ class MainStore extends ChangeNotifier {
   int videoPreset;
   String signal;
 
+
   Function() chatUpdater;
 
   Plugin plugin;
@@ -55,6 +57,11 @@ class MainStore extends ChangeNotifier {
   SendPort monitorPort;
 
   int audioDevice;
+
+  String version;
+
+  ConnectivityResult network;
+
 
 
 

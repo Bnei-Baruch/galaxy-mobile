@@ -74,7 +74,10 @@ class MonitoringData {
       MediaStreamTrack localAudioTrack,
       MediaStreamTrack localVideoTrack,
       Map<String, dynamic> user,
-      String streamingGateway)  {
+      String streamingGateway,
+      String janus,
+      String version,
+      String network)  {
     // userJsonExtra = userExtra;
     // //userJson = user.toJson();
     // sentData = data;
@@ -87,16 +90,16 @@ class MonitoringData {
 
     userJson["ram"] = (SysInfo.getTotalPhysicalMemory()/1000/1000/1000).floor().toString();
 
-    userJson["network"] = "true";
+    userJson["network"] = network;
     userJson["streamingGateway"] = streamingGateway;
 
-    userJson["galaxyVersion"] = "1.0.8";
+    userJson["galaxyVersion"] = version;
 
     userJson["title"] = user["givenName"];
 
     userJson["display"] = user["givenName"];
 
-    userJson["janus"] = "gxy2";//janusGateway;
+    userJson["janus"] = janus;
 
 
   }

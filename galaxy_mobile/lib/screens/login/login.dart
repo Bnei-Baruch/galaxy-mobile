@@ -9,6 +9,7 @@ import 'package:galaxy_mobile/services/authService.dart';
 import 'package:galaxy_mobile/widgets/connectedDots.dart';
 import 'package:galaxy_mobile/widgets/uiLanguageSelector.dart';
 import 'package:new_version/new_version.dart';
+import 'package:package_info/package_info.dart';
 import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -103,7 +104,9 @@ class _LoginState extends State<Login>  with WidgetsBindingObserver {
     refreshTimer(authResponse, auth, api);
     print("access token ${authResponse.accessToken} ");
     print("refresh time=${authResponse.accessTokenExpirationDateTime.toIso8601String()}");
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
+    store.version = packageInfo.version;
 
     api.setAccessToken(authResponse.accessToken);
 
