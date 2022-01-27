@@ -126,8 +126,10 @@ class _LoginState extends State<Login>  with WidgetsBindingObserver {
   }
 
   TokenResponse refreshTimer(TokenResponse authResponse, AuthService auth, Api api) {
-     Timer(Duration(milliseconds: authResponse.accessTokenExpirationDateTime.millisecondsSinceEpoch-DateTime.now().millisecondsSinceEpoch), () {
-      authResponse = auth.refreshToken() as TokenResponse;
+    FlutterLogs.logInfo("login", "refreshTimer", "refresh request time=${authResponse.accessTokenExpirationDateTime.toIso8601String()}");
+     Timer(Duration(milliseconds: authResponse.accessTokenExpirationDateTime.millisecondsSinceEpoch-DateTime.now().millisecondsSinceEpoch), () async {
+      FlutterLogs.logInfo("login", "refreshTimer", "refresh execution ");
+      authResponse = await auth.refreshToken();
       api.setAccessToken(authResponse.accessToken);
       refreshTimer(authResponse, auth, api);
     });
@@ -219,7 +221,7 @@ class _LoginState extends State<Login>  with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    FlutterLogs.logInfo("main", "MyApp",
+    FlutterLogs.logInfo("login", "MyApp",
         "SCREEN WIDTH: ${MediaQuery.of(context).size.width.toString()}");
     return Scaffold(body: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints viewportConstraints) {
