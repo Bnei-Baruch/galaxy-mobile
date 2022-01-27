@@ -38,6 +38,7 @@ class _DashboardState extends State<Dashboard>
   VideoRoom videoRoom = VideoRoom();
   // var chat = Chat();
   var activeUser;
+  int activeUserJoinedRoomTimestamp = 0;
   bool callInProgress;
   String _activeRoomId;
   AudioDevice _audioDevice = AudioDevice.speaker;
@@ -191,6 +192,11 @@ class _DashboardState extends State<Dashboard>
           feedsLength = length;
         });
       }
+    };
+    videoRoom.onCurrentUserJoinedRoom = () {
+      setState(() {
+        activeUserJoinedRoomTimestamp = DateTime.now().millisecondsSinceEpoch;
+      });
     };
     videoRoom.RoomReady = () {
       FlutterLogs.logInfo("Dashboard", "videoRoom", "RoomReady");
@@ -812,11 +818,12 @@ class _DashboardState extends State<Dashboard>
         );
       },
       pageBuilder: (context, animation, secondaryAnimation) {
-        final List<RoomUser> users =
+        List<RoomUser> users =
             // TODO: before moving the friends list into its own widget, active user's multimedia (camOn, micOn) state should live
             // in a model.
-            [RoomUser(id: activeUser.id, name: activeUser.name, camOn: !videoMute, micOn: !audioMute, isCurrentUser: true)]
+        [RoomUser(id: activeUser.id, name: activeUser.name, camOn: !videoMute, micOn: !audioMute, isCurrentUser: true, timeJoined: activeUserJoinedRoomTimestamp)]
                 + context.select((MainStore s) => s.friendsInRoom);
+        users.sort((a, b) => a.timeJoined.compareTo(b.timeJoined));
 
         return WillPopScope(
           onWillPop: () {
