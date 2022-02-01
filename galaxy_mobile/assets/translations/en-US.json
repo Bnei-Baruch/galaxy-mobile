@@ -13,6 +13,12 @@
   "registered_users": "Arvut",
   "room": "Room",
   "select_room": "Select Room",
+  "questions": {
+    "sendQuestion": "Send a question",
+    "enterQuestionLabel": "My question is...",
+    "userNameLabel": "My name",
+    "roomLabel": "Ten name"
+  },
   "screen_name": "Screen Name",
   "interface_language": "Interface Language",
   "select_language": "Select Language",

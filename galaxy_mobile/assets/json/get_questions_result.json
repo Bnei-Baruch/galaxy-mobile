@@ -1,0 +1,220 @@
+{
+  "feed": [
+    {
+      "_id": "61f4986feb8a45ecc68a8c10",
+      "timestamp": 1643419759213,
+      "__v": 0,
+      "hasBeenRead": true,
+      "discard": false,
+      "hasBeenAsked": false,
+      "clear": false,
+      "broadcastOrderingIndex": 1643419811397,
+      "approvedForBroadcast": true,
+      "user": {
+        "name": "Giò Sonci long long long long long long long long long long long long ",
+        "gender": "female",
+        "galaxyRoom": "W ITA 6",
+        "serialUserId": "03c0ed41-9002-4a23-ab28-bc28a81e67c0"
+      },
+      "question": {
+        "content": "What does it mean to feel the emptiness inside us and how to fill it?",
+        "translation": {
+          "he": "מה זה אומר להרגיש את הריקנות שבתוכנו ואיך למלא אותה?"
+        }
+      },
+      "askForMe": true
+    },
+    {
+      "_id": "61f497efeb8a45ecc68a8c0f",
+      "timestamp": 1643419631017,
+      "__v": 0,
+      "hasBeenRead": true,
+      "discard": false,
+      "hasBeenAsked": false,
+      "clear": false,
+      "broadcastOrderingIndex": 1643419246465,
+      "approvedForBroadcast": true,
+      "user": {
+        "name": "Эли",
+        "gender": "female",
+        "galaxyRoom": "W Moscow  18",
+        "serialUserId": "e94ebca7-3d3a-42e4-92d8-9a14e8ae90a5"
+      },
+      "question": {
+        "content": "Если всё приходит от Творца, как разграничить, материальные и духовные состояния?Можно тогда сказать, что духовные состояния только относительно группы?",
+        "translation": {
+          "he": "אם הכל בא מהבורא, איך להבחין בין מצבים גשמיים לרוחניים? האם נוכל אז לומר שמצבים רוחניים הם רק יחסיים לקבוצה?"
+        }
+      },
+      "askForMe": true
+    },
+    {
+      "_id": "61f497a5eb8a45ecc68a8c0e",
+      "timestamp": 1643419557049,
+      "__v": 0,
+      "hasBeenRead": true,
+      "discard": false,
+      "hasBeenAsked": false,
+      "clear": false,
+      "broadcastOrderingIndex": 1643419510335,
+      "approvedForBroadcast": true,
+      "user": {
+        "name": "תלמידה",
+        "gender": "female",
+        "galaxyRoom": "W PT ",
+        "serialUserId": "699fdd04-a42b-4a86-b1dd-7bd1e6f26707"
+      },
+      "question": {
+        "content": "רב כשאתה אומר למיין רצונות שלנו במשך היום, מוצאת את עצמי לא מסוגלת לעקוב אחרי רצונות שלי. איך בכל זאת לאתר אותם,לראות שינווים בהם",
+        "translation": {
+          "he": "רב כשאתה אומר למיין רצונות שלנו במשך היום, מוצאת את עצמי לא מסוגלת לעקוב אחרי רצונות שלי. איך בכל זאת לאתר אותם, לראות שינווים בהם"
+        }
+      },
+      "askForMe": true
+    },
+    {
+      "_id": "61f49785eb8a45ecc68a8c0d",
+      "timestamp": 1643419525153,
+      "__v": 0,
+      "hasBeenRead": true,
+      "discard": false,
+      "hasBeenAsked": false,
+      "clear": false,
+      "broadcastOrderingIndex": 1643419349283,
+      "approvedForBroadcast": true,
+      "user": {
+        "name": "W PT ",
+        "gender": "female",
+        "galaxyRoom": "W PT ",
+        "serialUserId": "2766f877-455f-4d7d-963f-961c20788169"
+      },
+      "question": {
+        "content": "אמרת שלהכניע את עצמי זה לקבל שהכל מגיע מאין עוד מלבדו, וגם אמרת שזה שייך רק למצבים רוחניים ולא גשמיים. למה? מצבים גשמיים לא צריך לייחס לבורא?",
+        "translation": {
+          "he": "אמרת שלהכניע את עצמי זה לקבל שהכל מגיע מאין עוד מלבדו, וגם אמרת שזה שייך רק למצבים רוחניים ולא גשמיים. למה? מצבים גשמיים לא צריך לייחס לבורא?"
+        }
+      },
+      "askForMe": true
+    },
+    {
+      "_id": "61f496faeb8a45ecc68a8c0c",
+      "timestamp": 1643419386524,
+      "__v": 0,
+      "hasBeenRead": true,
+      "discard": false,
+      "hasBeenAsked": false,
+      "clear": false,
+      "broadcastOrderingIndex": 1643419567846,
+      "approvedForBroadcast": true,
+      "user": {
+        "name": "МАК 30",
+        "gender": "female",
+        "galaxyRoom": "W MAK 30",
+        "serialUserId": "d06e059a-e844-490d-a560-79221d64ced6"
+      },
+      "question": {
+        "content": "Должны ли мы насильно прерывать мысли-помехи мыслями о святости? ",
+        "translation": {
+          "he": "<div style=\"margin-top: 10px;\">Должны ли мы насильно прерывать мысли-помехи мыслями о святости?</div><div><br></div><div>האם אנחנו צריכים בכוח לקטוע מחשבות מפריעות ולהחליף אותן למחשבות של קדושה?</div><div style=\"margin-top: 10px;\"></div>"
+        }
+      },
+      "askForMe": true
+    },
+    {
+      "_id": "61f496d9eb8a45ecc68a8c0b",
+      "timestamp": 1643419353122,
+      "__v": 0,
+      "hasBeenRead": true,
+      "discard": false,
+      "hasBeenAsked": false,
+      "clear": false,
+      "broadcastOrderingIndex": 1643419516826,
+      "approvedForBroadcast": true,
+      "user": {
+        "name": "תלמידה",
+        "gender": "female",
+        "galaxyRoom": "W PT ",
+        "serialUserId": "f4b298d6-3a1a-4c2e-8e61-1224a1b9d0cd"
+      },
+      "question": {
+        "content": "זאת אומרת, שמחשבות העולם הזה הן רק מגבר לחשוב יותר על החברים?",
+        "translation": {
+          "he": "זאת אומרת, שמחשבות העולם הזה הן רק מגבר לחשוב יותר על החברים?"
+        }
+      },
+      "askForMe": true
+    },
+    {
+      "_id": "61f496c9eb8a45ecc68a8c0a",
+      "timestamp": 1643419337532,
+      "__v": 0,
+      "hasBeenRead": true,
+      "discard": false,
+      "hasBeenAsked": false,
+      "clear": false,
+      "broadcastOrderingIndex": 1643419696317,
+      "approvedForBroadcast": true,
+      "user": {
+        "name": "МАК15",
+        "gender": "female",
+        "galaxyRoom": "W MAK 15",
+        "serialUserId": "f551b965-625f-41b3-8e1f-97e212afe441"
+      },
+      "question": {
+        "content": "Человек принижает своё знание, смиряет его перед святостью, некое состояние глупца- \"ничего не понимаю, но делаю\",  чтобы не испытывать страдания, человек может смирять перед всеми и вся, а как прийти к истинному состоянию  и всегда находить место для работы?",
+        "translation": {
+          "he": "<div style=\"margin-top: 10px;\">Человек принижает своё знание, смиряет его перед святостью, некое состояние глупца- \"ничего не понимаю, но делаю\", чтобы не испытывать страдания, человек может смирять перед всеми и вся, а как прийти к истинному состоянию и всегда находить место для работы?</div><div style=\"margin-top: 10px;\"><br></div><div style=\"margin-top: 10px;\">לבטל את עצמו בפני הקדושה זה כמו מצב של טיפשות, שהאדם אומר שאני לא מבין כלום אבל פועל בכל זאת,&nbsp;</div><div style=\"margin-top: 10px;\">האדם מסוגל לעשות זאת תמיד כדי לא להרגיש ייסורים,</div><div style=\"margin-top: 10px;\">אבל איך להגיע למצב של הכנעה אמיתית, של עבודה, ולא בריחה מייסורים</div><div><br></div><div style=\"margin-top: 10px;\"></div>"
+        }
+      },
+      "askForMe": true
+    },
+    {
+      "_id": "61f4969ceb8a45ecc68a8c09",
+      "timestamp": 1643419292565,
+      "__v": 0,
+      "hasBeenRead": true,
+      "discard": false,
+      "hasBeenAsked": false,
+      "clear": false,
+      "broadcastOrderingIndex": 1643419468298,
+      "approvedForBroadcast": true,
+      "user": {
+        "name": "תלמידה",
+        "gender": "female",
+        "galaxyRoom": "W Hebrew",
+        "serialUserId": "9ec46206-950a-4575-b21f-6dbf94ceabb3"
+      },
+      "question": {
+        "content": "בדרך כלל אנחנו אומרים שרק הבורא מתקן אותנו, האם בכל זאת יש לנו כוח להכניע את הרצון שלנו בעצמנו?",
+        "translation": {
+          "he": "בדרך כלל אנחנו אומרים שרק הבורא מתקן אותנו, האם בכל זאת יש לנו כוח להכניע את הרצון שלנו בעצמנו?"
+        }
+      },
+      "askForMe": true
+    },
+    {
+      "_id": "61f4926aeb8a45ecc68a8bf3",
+      "timestamp": 1643418218637,
+      "__v": 0,
+      "hasBeenRead": true,
+      "discard": false,
+      "hasBeenAsked": false,
+      "clear": false,
+      "broadcastOrderingIndex": 1643419689308,
+      "approvedForBroadcast": true,
+      "user": {
+        "gender": "male",
+        "name": "Luthien Kennedy",
+        "galaxyRoom": "Dashboard Area",
+        "serialUserId": "2c19eafa-8e26-4750-8d6b-9f080e4e7564"
+      },
+      "question": {
+        "content": "From W Kabu3: Does Holy mean Form?",
+        "translation": {
+          "he": "<div style=\"margin-top: 10px;\">From W Kabu3: Does Holy mean Form?</div><div><br></div><div>האם קדוש זו צורה?&nbsp;</div><div style=\"margin-top: 10px;\"></div>"
+        }
+      },
+      "askForMe": true
+    }
+  ]
+}

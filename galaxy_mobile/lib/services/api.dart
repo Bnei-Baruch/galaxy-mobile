@@ -6,7 +6,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:galaxy_mobile/config/env.dart';
 import 'package:galaxy_mobile/main.dart';
+import 'package:galaxy_mobile/models/question.dart';
 import 'package:galaxy_mobile/utils/dio_log.dart';
+import 'package:galaxy_mobile/utils/utils.dart';
 
 class Room {
   final num room;
@@ -60,27 +62,33 @@ class RoomData {
 }
 
 class Api {
-  Dio _dio;
+  Dio _galaxyBackend;
+  Dio _questionsBackend;
   Dio _monitor;
 
   Api() {
-    this._dio = new Dio();
-    this._dio.options.baseUrl = APP_API_BACKEND;
+    this._galaxyBackend = new Dio();
+    this._galaxyBackend.options.baseUrl = APP_API_BACKEND;
+
+    this._questionsBackend = new Dio();
+    this._questionsBackend.options.baseUrl = APP_API_QUESTIONS_BACKEND;
 
     this._monitor = new Dio();
     this._monitor.options.baseUrl = APP_MONITORING_BACKEND;
 
-    this._dio.interceptors.add(LogInterceptors());
+    this._galaxyBackend.interceptors.add(LogInterceptors());
+    this._questionsBackend.interceptors.add(LogInterceptors());
   }
 
   setAccessToken(String accessToken) {
-    _dio.options.headers["Authorization"] = "Bearer $accessToken";
+    _galaxyBackend.options.headers["Authorization"] = "Bearer $accessToken";
+    _questionsBackend.options.headers["Authorization"] = "Bearer $accessToken";
   }
 
   // fetchConfig = () =>
   //         this.logAndParse('fetch config', fetch(this.urlFor('/v2/config'), this.defaultOptions()));
   Future<List<List<RoomData>>> fetchConfig() async {
-    final response = await _dio.get('/v2/config');
+    final response = await _galaxyBackend.get('/v2/config');
 
     Map<String, dynamic> gateways = response.data['gateways'];
     Map<String, dynamic> roomsData = gateways['rooms'];
@@ -98,7 +106,7 @@ class Api {
   //     this.logAndParse('fetch available rooms',
   //         fetch(`${this.urlFor('/groups')}?${Api.makeParams(params)}`, this.defaultOptions()));
   Future<List<Room>> fetchAvailableRooms([bool withNumUsers = true]) async {
-    final response = await _dio
+    final response = await _galaxyBackend
         .get('/groups', queryParameters: {'with_num_users': withNumUsers});
     List<Object> rooms = response.data['rooms'];
     FlutterLogs.logInfo("Api", "fetchAvailableRooms",
@@ -112,7 +120,7 @@ class Api {
   // fetchRoom = (id) =>
   //     this.logAndParse(`fetch room ${id}`, fetch(this.urlFor(`/room/${id}`), this.defaultOptions()));
   Future<Room> fetchRoom(num roomId) async {
-    final response = await _dio.get('/room/$roomId');
+    final response = await _galaxyBackend.get('/room/$roomId');
     return Room.fromJson(response.data);
   }
 
@@ -152,17 +160,43 @@ class Api {
   }
 
   Future<Response> updateUser(String id, Map<String, dynamic> user) async {
-    _dio.options.headers["Content-Type"] = "application/json";
+    _galaxyBackend.options.headers["Content-Type"] = "application/json";
 
     try {
       print(
-          "calling updateUser with params userId = ${id} and url = ${_dio.options.baseUrl} ");
-      final response = await _dio.put("/users/${id}", data: user);
+          "calling updateUser with params userId = ${id} and url = ${_galaxyBackend.options.baseUrl} ");
+      final response = await _galaxyBackend.put("/users/${id}", data: user);
       return response;
     } catch (error, requestOptions) {
       logger.error(error.toString());
       return Response(statusCode: -1);
     }
+  }
+
+  Future<List<Question>> getQuestions(String userId) async {
+    // Uncomment for mock data.
+    // final response = await Utils.parseJson("get_questions_result.json");
+    // await Future.delayed(Duration(seconds: 4));
+
+    final response = await _questionsBackend
+        .post('/feed', data: {'serialUserId': userId});
+    FlutterLogs.logInfo("Api", "getQuestions", "questions result: ${response.data}");
+
+    List<dynamic> questionsJson = (response.data['feed'] ?? []) as List<dynamic>;
+    return questionsJson.map((feed) => Question.fromJson(feed)).toList();
+  }
+
+  Future<Response> sendQuestion(String userId, String senderName, String roomName, String content, String gender) async {
+    var data = {
+      'serialUserId': userId,
+      'question': {'content': content},
+      'user': {
+        'name': senderName,
+        'gender': gender,
+        'galaxyRoom': roomName
+      }
+    };
+    return _questionsBackend.post('/ask', data: data);
   }
 
   //   fetchUsers = () =>

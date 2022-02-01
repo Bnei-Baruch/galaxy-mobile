@@ -19,6 +19,7 @@ import 'package:galaxy_mobile/screens/streaming/streaming.dart';
 import 'package:galaxy_mobile/screens/video_room/videoRoomWidget.dart';
 import 'package:galaxy_mobile/services/mqttClient.dart';
 import 'package:galaxy_mobile/widgets/loading_indicator.dart';
+import 'package:galaxy_mobile/widgets/questions/questions_dialog_content.dart';
 import 'package:galaxy_mobile/chat/chatMessage.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -544,12 +545,19 @@ class _DashboardState extends State<Dashboard>
                       title: Text(activeRoom.description,
                           textAlign: TextAlign.center),
                       centerTitle: true,
-                      leading: IconButton(
+                      leadingWidth: 100,
+                      leading: Row(children: <Widget>[
+                        IconButton(
                           icon: setIcon(),
                           onPressed: () async {
                             await switchAudioDevice();
                             setState(() {});
                           }),
+                        IconButton(
+                            icon: Icon(Icons.chat, color: Colors.white),
+                            onPressed: () => _displayTextQuestionsDialog(context)
+                        ),
+            ]),
                       actions: <Widget>[
                           // IconButton(
                           //     icon: Icon(Icons.chat, color: Colors.white),
@@ -723,8 +731,9 @@ class _DashboardState extends State<Dashboard>
                                     leading: Icon(Icons.supervisor_account_sharp),
                                     title: Text('friends'.tr())),
                                     enabled: true,
-                                    value: "4.2",),
-                                  ],
+                                    value: "4.2",
+                                  ),
+                                ],
                               );
                               switch(result)
                               {
@@ -805,6 +814,86 @@ class _DashboardState extends State<Dashboard>
         ));
     // );
 
+  }
+
+  _displayTextQuestionsDialog(BuildContext context) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: false,
+      transitionDuration: Duration(milliseconds: 200),
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: ScaleTransition(
+            scale: animation,
+            child: child,
+          ),
+        );
+      },
+      pageBuilder: (context, animation, secondaryAnimation) {
+        // TODO: move dialog widget to widgets to resuse it - header styling is
+        // the same in questions and friends (padding around container vs
+        // padding around header).
+        Widget dialogHeader = Container(
+            padding: EdgeInsets.only(top: 15, left: 15, right: 15),
+            child: Container(
+          height: 45.0,
+          child: Stack(
+            children: <Widget>[
+              Positioned(
+                left: 0,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("close".tr(),
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+              Align(
+                alignment: Alignment.center,
+                  child: Text("questions.sendQuestion".tr(),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)
+                  )
+              )
+            ]
+          )
+        ));
+
+        Widget divider = Container(
+          margin: const EdgeInsets.symmetric(vertical: 5.0),
+          child: const Divider(
+            thickness: 1,
+            color: Colors.grey,
+          )
+        );
+
+        return WillPopScope(
+          onWillPop: () {
+            Navigator.of(context).pop();
+            return Future.value(true);
+          },
+          child: SafeArea(
+            child: Material(
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                color: Colors.black26,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    dialogHeader,
+                    divider,
+                    Expanded(child: QuestionsDialogContent())
+                  ]
+                ),
+              ),
+            )
+          )
+        );
+      },
+    );
   }
 
   _displayParticipantsDialog(BuildContext context) {
