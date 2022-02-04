@@ -14,6 +14,12 @@
   "registered_users": "Arvut",
   "room": "Habitación",
   "select_room": "Seleccionar habitación",
+  "questions": {
+    "sendQuestion": "Enviar una pregunta",
+    "enterQuestionLabel": "Mi pregunta es...",
+    "userNameLabel": "Mi nombre",
+    "roomLabel": "Nombre de decena"
+  },
   "screen_name": "Nombre de pantalla",
   "interface_language": "Lenguaje de interfaz",
   "select_language": "Seleccione el idioma",
