@@ -164,7 +164,7 @@ class Api {
 
     try {
       print(
-          "calling updateUser with params userId = ${id} and url = ${_galaxyBackend.options.baseUrl} ");
+          "calling updateUser with params userId = ${id} and url = ${_galaxyBackend.options.baseUrl} access token=${_galaxyBackend.options.headers["Authorization"]} ");
       final response = await _galaxyBackend.put("/users/${id}", data: user);
       return response;
     } catch (error, requestOptions) {

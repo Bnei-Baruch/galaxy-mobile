@@ -73,6 +73,12 @@ class MQTTClient {
     _onConnectionFailedCallbackList.clear();
   }
 
+  void updateToken(String token)
+  {
+    print("update mqtt token");
+    _client.connectionMessage.authenticateAs(_username, token);
+  }
+
   Future<MqttServerClient> connect({bool internalRetry = false}) async {
     if(!internalRetry)
       _connectionAttempt = 0;

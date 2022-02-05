@@ -6,6 +6,7 @@ import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/models/sharedPref.dart';
 import 'package:galaxy_mobile/services/api.dart';
 import 'package:galaxy_mobile/services/authService.dart';
+import 'package:galaxy_mobile/services/mqttClient.dart';
 import 'package:galaxy_mobile/widgets/connectedDots.dart';
 import 'package:galaxy_mobile/widgets/uiLanguageSelector.dart';
 import 'package:new_version/new_version.dart';
@@ -25,6 +26,8 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login>  with WidgetsBindingObserver {
+  Timer refresher;
+
   Future<String> getFileData(String path) async {
     return await rootBundle.loadString(path);
   }
@@ -101,6 +104,9 @@ class _LoginState extends State<Login>  with WidgetsBindingObserver {
     var authResponse = await auth.signIn();
 
 
+    if(refresher!=null)
+      refresher.cancel();
+
     refreshTimer(authResponse, auth, api);
     print("access token ${authResponse.accessToken} ");
     print("refresh time=${authResponse.accessTokenExpirationDateTime.toIso8601String()}");
@@ -130,10 +136,12 @@ class _LoginState extends State<Login>  with WidgetsBindingObserver {
 
   TokenResponse refreshTimer(TokenResponse authResponse, AuthService auth, Api api) {
     FlutterLogs.logInfo("login", "refreshTimer", "refresh request time=${authResponse.accessTokenExpirationDateTime.toIso8601String()}");
-     Timer(Duration(milliseconds: authResponse.accessTokenExpirationDateTime.millisecondsSinceEpoch-DateTime.now().millisecondsSinceEpoch), () async {
+     refresher = Timer(Duration(milliseconds: authResponse.accessTokenExpirationDateTime.millisecondsSinceEpoch-DateTime.now().millisecondsSinceEpoch), () async {
       FlutterLogs.logInfo("login", "refreshTimer", "refresh execution ");
       authResponse = await auth.refreshToken();
       api.setAccessToken(authResponse.accessToken);
+      var mqttClient = context.read<MQTTClient>();
+      mqttClient.updateToken("33"+authResponse.accessToken+"33");
       refreshTimer(authResponse, auth, api);
     });
   }
