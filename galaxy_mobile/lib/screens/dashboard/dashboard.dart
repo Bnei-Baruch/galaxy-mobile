@@ -554,7 +554,7 @@ class _DashboardState extends State<Dashboard>
                             setState(() {});
                           }),
                         IconButton(
-                            icon: Icon(Icons.chat, color: Colors.white),
+                            icon: Icon(Mdi.forum, color: Colors.white),
                             onPressed: () => _displayTextQuestionsDialog(context)
                         ),
             ]),
