@@ -141,7 +141,7 @@ class _LoginState extends State<Login>  with WidgetsBindingObserver {
       authResponse = await auth.refreshToken();
       api.setAccessToken(authResponse.accessToken);
       var mqttClient = context.read<MQTTClient>();
-      mqttClient.updateToken("33"+authResponse.accessToken+"33");
+      mqttClient.updateToken(authResponse.accessToken);
       refreshTimer(authResponse, auth, api);
     });
   }
