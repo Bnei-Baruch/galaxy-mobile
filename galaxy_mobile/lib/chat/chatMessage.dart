@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-
+// TODO: delete this as it is in models folder..
 class ChatMessage{
   String senderName;
   String messageContent;

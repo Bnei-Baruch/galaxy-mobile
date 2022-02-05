@@ -9,6 +9,7 @@ import 'package:galaxy_mobile/services/keycloak.dart';
 
 import 'dart:convert';
 
+// TODO: remove this file.
 class Chat extends StatefulWidget {
   @override
   _ChatPageState createState() => _ChatPageState();
