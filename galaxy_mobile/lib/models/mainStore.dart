@@ -5,7 +5,6 @@ import 'package:connectivity_plus_platform_interface/src/enums.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/src/interface/media_stream.dart';
-import 'package:galaxy_mobile/chat/chatMessage.dart';
 import 'package:galaxy_mobile/models/sharedPref.dart';
 import 'package:galaxy_mobile/screens/dashboard/dashboard.dart';
 import 'package:galaxy_mobile/services/api.dart';
@@ -35,7 +34,6 @@ class MainStore extends ChangeNotifier {
 
   List<List<RoomData>> config; // TODO: available gatways
   List<Room> availableRooms;
-  List<ChatMessage> chatMessageList = [];
   Map<String,Object> spec;
   User activeUser;
   Room activeRoom;
@@ -46,9 +44,6 @@ class MainStore extends ChangeNotifier {
   int audioPreset;
   int videoPreset;
   String signal;
-
-
-  Function() chatUpdater;
 
   Plugin plugin;
 
@@ -168,23 +163,6 @@ class MainStore extends ChangeNotifier {
   Future<Response> updaterUser(Map<String, dynamic> user) {
     FlutterLogs.logInfo("MainStore", "updaterUser", "");
     return _api.updateUser(user["id"], user);
-  }
-
-  // CR: doesn't belong here, should be in the chat widget state,
-  // this is never cleared, will eventually bloat memory.
-  List<ChatMessage> getChatMessages() {
-    return chatMessageList;
-  }
-
-  void addChatMessage(ChatMessage msg) {
-    chatMessageList.add(msg);
-    if (chatUpdater != null) {
-      chatUpdater();
-    }
-  }
-
-  void setChatUpdater(Function() callback) {
-    chatUpdater = callback;
   }
 
   void setVideoRoomParams(Plugin pluginHandle, MediaStream myStream) {

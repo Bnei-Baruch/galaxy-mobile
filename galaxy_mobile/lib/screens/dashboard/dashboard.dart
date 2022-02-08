@@ -5,6 +5,9 @@ import 'dart:ui';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:dots_indicator/dots_indicator.dart';
+import 'package:galaxy_mobile/models/chat_message.dart';
+import 'package:galaxy_mobile/utils/topics.dart';
+import 'package:galaxy_mobile/viewmodels/chat_view_model.dart';
 import 'package:icon_badge/icon_badge.dart';
 import 'package:mdi/mdi.dart';
 import 'package:provider/provider.dart';
@@ -37,7 +40,7 @@ class _DashboardState extends State<Dashboard>
     with SingleTickerProviderStateMixin {
   StreamingUnified stream = StreamingUnified();
   VideoRoom videoRoom = VideoRoom();
-  // var chat = Chat();
+  ChatViewModel chatViewModel = ChatViewModel();
   var activeUser;
   int activeUserJoinedRoomTimestamp = 0;
   bool callInProgress;
@@ -380,36 +383,40 @@ class _DashboardState extends State<Dashboard>
     return res;
   }
 
-  void handleCmdData(String msgPayload) {
+  void handleCmdData(String msgPayload, String topic) {
     FlutterLogs.logInfo(
-        "Dashboard", "handleCmdData", "received message: $msgPayload");
+        "Dashboard", "handleCmdData", "received message: $msgPayload topic: $topic");
     try {
       var jsonCmd = JsonDecoder().convert(msgPayload);
-      if (jsonCmd["textroom"] != null) {
-        String textElem = jsonCmd["text"];
-        var chatCmd = JsonDecoder().convert(textElem);
-        String msgText = chatCmd["text"];
-       // context.read<MainStore>().addChatMessage(
-       //     ChatMessage(chatCmd["user"]["display"], msgText, "message"));
-      } else {
-        switch (jsonCmd["type"]) {
-          case "client-state":
-            videoRoom.setUserState(jsonCmd["user"]);
-            setState(() {
-              //disable question at bottom in case other friends ask question
-              if (jsonCmd["user"]["id"] != userMap["id"]) {
-                questionDisabled = jsonCmd["user"]["question"];
-              }
-            });
-            break;
-          case "audio-out":
-            if (videoRoom.getIsQuestion()) {
-              videoRoom.toggleQuestion();
-              updateRoomWithMyState(false);
+      TopicType topicType = Topics.parse(topic);
+      switch (jsonCmd["type"]) {
+        case "client-chat":
+          if (topicType == TopicType.ROOM_CHAT) {
+            chatViewModel.addChatMessage(
+                ChatMessage.fromMQTTJson(
+                    jsonCmd,
+                    activeUser.id
+                        ? ChatMessageSender.ACTIVE_USER
+                        : ChatMessageSender.FRIEND,
+                    DateTime.now().millisecondsSinceEpoch));
+          }
+          break;
+        case "client-state":
+          videoRoom.setUserState(jsonCmd["user"]);
+          setState(() {
+            //disable question at bottom in case other friends ask question
+            if (jsonCmd["user"]["id"] != userMap["id"]) {
+              questionDisabled = jsonCmd["user"]["question"];
             }
-            stream.toggleOnAir(jsonCmd);
-            break;
-        }
+          });
+          break;
+        case "audio-out":
+          if (videoRoom.getIsQuestion()) {
+            videoRoom.toggleQuestion();
+            updateRoomWithMyState(false);
+          }
+          stream.toggleOnAir(jsonCmd);
+          break;
       }
     } on FormatException catch (e) {
       FlutterLogs.logError("Dashboard", "handleCmdData",
@@ -519,6 +526,7 @@ class _DashboardState extends State<Dashboard>
           userTimer.cancel();
           if (mqttClient != null) {
             mqttClient.unsubscribe("galaxy/room/$_activeRoomId");
+            // TODO: move to a function.
             mqttClient.unsubscribe("galaxy/room/$_activeRoomId/chat");
             mqttClient.removeOnConnectedCallback();
             mqttClient.removeOnConnectionFailedCallback();
@@ -559,13 +567,6 @@ class _DashboardState extends State<Dashboard>
                         ),
             ]),
                       actions: <Widget>[
-                          // IconButton(
-                          //     icon: Icon(Icons.chat, color: Colors.white),
-                          //     onPressed: () {
-                          //       setState(() {
-                          //         isChatVisible = !isChatVisible;
-                          //       });
-                          //     }),
                           Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: TextButton(
@@ -589,6 +590,7 @@ class _DashboardState extends State<Dashboard>
                                     if (mqttClient != null) {
                                       mqttClient.unsubscribe(
                                           "galaxy/room/$_activeRoomId");
+                                      // TODO: move to central place.
                                       mqttClient.unsubscribe(
                                           "galaxy/room/$_activeRoomId/chat");
                                      // mqttClient.disconnect();
@@ -896,7 +898,12 @@ class _DashboardState extends State<Dashboard>
                         children: <Widget>[
                           dialogHeader,
                           divider,
-                          Expanded(child: ChatRoom())
+                          Expanded(
+                            child: ChangeNotifierProvider.value(
+                              value: chatViewModel,
+                              child: ChatRoom()
+                            )
+                          )
                         ]
                     ),
                   ),
@@ -1143,7 +1150,7 @@ class _DashboardState extends State<Dashboard>
     mqttClient.subscribe("galaxy/room/$_activeRoomId/chat");
 
     mqttClient.addOnSubscribedCallback((topic) => subscribedToTopic(topic));
-    mqttClient.addOnMsgReceivedCallback((payload) => handleCmdData(payload));
+    mqttClient.addOnMsgReceivedCallback((payload, topic) => handleCmdData(payload, topic));
     mqttClient.addOnConnectionFailedCallback(() => handleConnectionFailed());
   }
 }

@@ -40,5 +40,8 @@
   "audio_mode" : "Audio Mode",
   "more" : "More",
   "vote": "Vote",
-  "friends": "Friends"
+  "friends": "Friends",
+  "virtual_chat": {
+    "msgRoomInfo": "Messages here will be seen by all the members of the ten connected now."
+  }
 }

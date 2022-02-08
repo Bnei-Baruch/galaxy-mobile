@@ -21,6 +21,7 @@ class _SendChatMessageBarState extends State<SendChatMessageBar> {
     final text = _textController.text;
     _textController.clear();
 
+    // TODO(yanive): remove print or use flutter log if we want to log submission.
     print("submitting: " + text);
     // widget._onSubmit
   }
@@ -69,7 +70,7 @@ class _SendChatMessageBarState extends State<SendChatMessageBar> {
                         child: TextField(
                           maxLines: null,
                           decoration: InputDecoration(
-                            hintText: 'Message', // TODO: translate
+                            hintText: 'Write to your ten...', // TODO: translate
                             border: InputBorder.none,
                           ),
                           controller: _textController,
@@ -91,7 +92,7 @@ class _SendChatMessageBarState extends State<SendChatMessageBar> {
             onTap: _onSubmit,
             child: CircleAvatar(
               radius: 24,
-              backgroundColor:isSendEnabled ? Color(0xFF265B4C) : Colors.grey,
+              backgroundColor: isSendEnabled ? Color(0xFF0062B0) : Colors.grey,
               foregroundColor: Colors.white,
               child: Icon(Icons.send_sharp),
             ),
