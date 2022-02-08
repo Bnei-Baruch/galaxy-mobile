@@ -43,6 +43,7 @@
   "vote": "Voter",
   "friends": "Amigos",
   "virtual_chat": {
-    "msgRoomInfo": "Los mensajes de aquí serán vistos por todos los miembros de la decena que están conectados ahora."
+    "msgRoomInfo": "Los mensajes de aquí serán vistos por todos los miembros de la decena que están conectados ahora.",
+    "enterMessage": "Escriba su mensaje"
   }
 }

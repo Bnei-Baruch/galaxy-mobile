@@ -6,17 +6,31 @@ import 'package:galaxy_mobile/models/chat_message.dart';
 import 'package:galaxy_mobile/utils/utils.dart';
 
 
-// TODO: have color buckets for possible user names, that will make it visible
-// against the background.
 // TODO: show "read more" for long messages.
 // TODO: handle links properly.
-
-const int COLOR_RANGE = 16777216;
-const int BRIGHTNESS = 0x222222;
 
 const Color ACTIVE_USER_USERNAME_COLOR = Color(0xFF92B6D1);
 const Color ACTIVE_USER_BUBBLE_BACKGROUND = Color(0xFF00488B);
 const Color FRIEND_BUBBLE_BACKGROUND = Color(0xFF232C32);
+const List<Color> USERNAME_COLORS = [
+  Color(0xFFFFEBCD),
+  Color(0xFFFFC75F),
+  Color(0xFFFF9671),
+  Color(0xFF8D7257),
+  Color(0xFFFF6F91),
+  Color(0xFF845EC2),
+  Color(0xFFF3C5FF),
+  Color(0xFFB0A8B9),
+  Color(0xFF007C4C),
+  Color(0xFF008F7A),
+  Color(0xFF32B27E),
+  Color(0xFFD3FBD8),
+  Color(0xFFBBC6CE),
+  Color(0xFF008E9B),
+  Color(0xFF0089BA),
+  Color(0xFF2C73D2),
+  Color(0xFFD5CABD)
+];
 
 class ChatMessageBubble extends StatelessWidget {
   // Whether this bubble is the first in the thread.
@@ -28,26 +42,7 @@ class ChatMessageBubble extends StatelessWidget {
 
   // Randomly generate a color from the hash of the username.
   Color _getUserNameColor() {
-    final hashInColorRange = (chatMessage.senderName.hashCode.abs() % COLOR_RANGE) + BRIGHTNESS;
-    final red = ((hashInColorRange & 0xFF0000) >> 16);
-    final green = ((hashInColorRange & 0xFF00) >> 8);
-    final blue = ((hashInColorRange & 0xFF));
-    final color = Color.fromRGBO(red, green, blue, 1);
-    return color;
-  }
-
-  BorderRadius _getBorderRadius(bool isMessageFromActiveUser, Radius radius) {
-    if (!isFirstInThread) {
-      return BorderRadius.all(radius);
-    }
-
-    return isMessageFromActiveUser
-        ? BorderRadius.only(topLeft: radius,
-        bottomLeft: radius,
-        bottomRight: radius)
-        : BorderRadius.only(topRight: radius,
-        bottomLeft: radius,
-        bottomRight: radius);
+    return USERNAME_COLORS[chatMessage.senderName.hashCode.abs() % USERNAME_COLORS.length];
   }
 
   Widget build(BuildContext context) {
@@ -57,9 +52,6 @@ class ChatMessageBubble extends StatelessWidget {
     ui.TextDirection textDirection = isContentRTL
         ? ui.TextDirection.rtl
         : ui.TextDirection.ltr;
-    ui.TextAlign textAlign = isContentRTL
-        ? ui.TextAlign.right
-        : ui.TextAlign.left;
 
     Widget message =
       CustomPaint(
@@ -91,10 +83,11 @@ class ChatMessageBubble extends StatelessWidget {
                   chatMessage.messageContent,
                   softWrap: true,
                   textDirection: textDirection,
+                  style: TextStyle(fontSize: 14)
                 ),
                 Text(
                     Utils.formatTimestampAsDate(chatMessage.messageTime, "hh:mm"),
-                    style: TextStyle(color: Colors.white.withOpacity(0.5))
+                    style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)
                 )
               ]),
         )
@@ -156,7 +149,7 @@ class BubblePainter extends CustomPainter {
             0.0,
             size.width,
             size.height,
-            topRight: Radius.circular(6),
+            topRight: Radius.circular(5),
           ),
           Paint()
             ..color = this.color
@@ -189,7 +182,7 @@ class BubblePainter extends CustomPainter {
             0.0,
             _x,
             size.height,
-            topLeft: Radius.circular(6),
+            topLeft: Radius.circular(5),
           ),
           Paint()
             ..color = this.color

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class SendChatMessageBar extends StatefulWidget {
   //final ValueChanged<String> _onSubmit;
@@ -70,7 +71,7 @@ class _SendChatMessageBarState extends State<SendChatMessageBar> {
                         child: TextField(
                           maxLines: null,
                           decoration: InputDecoration(
-                            hintText: 'Write to your ten...', // TODO: translate
+                            hintText: 'virtual_chat.enterMessage'.tr(),
                             border: InputBorder.none,
                           ),
                           controller: _textController,

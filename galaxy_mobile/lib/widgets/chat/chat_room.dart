@@ -5,6 +5,7 @@ import 'package:galaxy_mobile/viewmodels/chat_view_model.dart';
 import 'package:galaxy_mobile/widgets/chat/chat_message_bubble.dart';
 import 'package:galaxy_mobile/widgets/chat/send_chat_message_bar.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 
 // TODO: add keys
@@ -15,30 +16,30 @@ import 'package:flutter_logs/flutter_logs.dart';
 class ChatRoom extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO: For testing
-    // List<ChatMessage> chatMessages = [
-    //   ChatMessage("a", "משה", ChatMessageSender.FRIEND, "שלום חברים", 1644050115),
-    //   ChatMessage("a", "משה", ChatMessageSender.FRIEND, "נתחיל סדנא?", 1644051115),
-    //   ChatMessage("a", "משה", ChatMessageSender.FRIEND, r'''חברים
-    //       מישהו
-    //       כאן?
-    //
-    //       יש פה מישהו?''', 1644051115),
-    //   ChatMessage("b", "boris", ChatMessageSender.FRIEND, "da", 1644062115),
-    //   ChatMessage("c", "יולי", ChatMessageSender.FRIEND, "אנחנו התאספנו כאן to do a workshop עם החברים", 1644063115),
-    //   ChatMessage("me", "yaniv", ChatMessageSender.ACTIVE_USER, "אין עוד מלבדו", 1644074015),
-    //   ChatMessage("me", "yaniv", ChatMessageSender.ACTIVE_USER, "עוד הודעה", 1644084115),
-    //   ChatMessage("b", "boris", ChatMessageSender.FRIEND, "long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long ", 1644089115),
-    //   ChatMessage("a", "משה", ChatMessageSender.FRIEND, r'''line breaks long long long long long long long long
-    //       long long long long long long long long long long
-    //       long long long long long long long long long long
-    //       long long long long long long long long long long
-    //       long long long long long long long long long long long long long long
-    //       long long long long long long long long long long long long long long long
-    //        long long long long long long long long long long long long long long
-    //         long long''', 1644094115),
-    //   ChatMessage("a", "משה", ChatMessageSender.FRIEND, "לחיים", 1644095115),
+    List<ChatMessage> chatMessages = [
+      ChatMessage("a", "משה", ChatMessageSender.FRIEND, "שלום חברים", 1644050115),
+      ChatMessage("a", "משה", ChatMessageSender.FRIEND, "נתחיל סדנא?", 1644051115),
+      ChatMessage("a", "משה", ChatMessageSender.FRIEND, r'''חברים
+          מישהו
+          כאן?
+
+          יש פה מישהו?''', 1644051115),
+      ChatMessage("b", "boris", ChatMessageSender.FRIEND, "da", 1644062115),
+      ChatMessage("c", "יולי", ChatMessageSender.FRIEND, "אנחנו התאספנו כאן to do a workshop עם החברים", 1644063115),
+      ChatMessage("me", "yaniv", ChatMessageSender.ACTIVE_USER, "אין עוד מלבדו", 1644074015),
+      ChatMessage("me", "yaniv", ChatMessageSender.ACTIVE_USER, "עוד הודעה", 1644084115),
+      ChatMessage("b", "boris", ChatMessageSender.FRIEND, "long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long ", 1644089115),
+      ChatMessage("a", "משה", ChatMessageSender.FRIEND, r'''line breaks long long long long long long long long
+          long long long long long long long long long long
+          long long long long long long long long long long
+          long long long long long long long long long long
+          long long long long long long long long long long long long long long
+          long long long long long long long long long long long long long long long
+           long long long long long long long long long long long long long long
+            long long''', 1644094115),
+      ChatMessage("a", "משה", ChatMessageSender.FRIEND, "לחיים", 1644095115),
     ];
-    List<ChatMessage> chatMessages = context.select((ChatViewModel model) => model.chatMessages);
+    //List<ChatMessage> chatMessages = context.select((ChatViewModel model) => model.chatMessages);
 
     return Container(
       color: Colors.black,
@@ -62,9 +63,9 @@ class ChatRoom extends StatelessWidget {
                       ),
                       padding: EdgeInsets.all(10.0),
                       margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-
                       child: Text('virtual_chat.msgRoomInfo'.tr(),
-                        style: TextStyle(color: Colors.black))
+                        style: TextStyle(color: Colors.black)
+                      )
                     );
                   }
                   // Chat message start at index 1.
