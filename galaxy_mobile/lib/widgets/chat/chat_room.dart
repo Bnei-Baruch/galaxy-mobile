@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:galaxy_mobile/models/chat_message.dart';
+import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/viewmodels/chat_view_model.dart';
 import 'package:galaxy_mobile/widgets/chat/chat_message_bubble.dart';
 import 'package:galaxy_mobile/widgets/chat/send_chat_message_bar.dart';
@@ -13,15 +14,37 @@ import 'package:flutter_logs/flutter_logs.dart';
 // TODO: * control height from where we won't scroll down on new messages.
 // TODO: scroll to bottom on first render, and new messages given * above.
 // TODO: make sure scroll is kept with new messages.
-class ChatRoom extends StatelessWidget {
+class ChatRoom extends StatefulWidget {
+  @override
+  _ChatRoomState createState() => _ChatRoomState();
+}
+
+class _ChatRoomState extends State<ChatRoom> {
+
+  void _sendNewChatMessage(String content) {
+    ChatViewModel model = context.read<ChatViewModel>();
+    if (model.canPublishNewMessage) {
+      MainStore mainStore = context.read<MainStore>();
+      ChatMessage message =
+        ChatMessage(
+            mainStore.activeUser.id,
+            mainStore.activeUser.name,
+            ChatMessageSender.ACTIVE_USER,
+            content,
+            // TODO: doesn't MQTT publish the timestamp rather than the client?
+            DateTime.now().millisecondsSinceEpoch);
+      model.publishNewChatMessage(message);
+    }
+  }
+
   Widget build(BuildContext context) {
     // TODO: For testing
-    List<ChatMessage> chatMessages = [
+    /*List<ChatMessage> chatMessages = [
       ChatMessage("a", "משה", ChatMessageSender.FRIEND, "שלום חברים", 1644050115),
       ChatMessage("a", "משה", ChatMessageSender.FRIEND, "נתחיל סדנא?", 1644051115),
       ChatMessage("a", "משה", ChatMessageSender.FRIEND, r'''חברים
           מישהו
-          כאן?
+          כאן? 
 
           יש פה מישהו?''', 1644051115),
       ChatMessage("b", "boris", ChatMessageSender.FRIEND, "da", 1644062115),
@@ -38,8 +61,9 @@ class ChatRoom extends StatelessWidget {
            long long long long long long long long long long long long long long
             long long''', 1644094115),
       ChatMessage("a", "משה", ChatMessageSender.FRIEND, "לחיים", 1644095115),
-    ];
-    //List<ChatMessage> chatMessages = context.select((ChatViewModel model) => model.chatMessages);
+    ];*/
+    List<ChatMessage> chatMessages = context.select((ChatViewModel model) => model.chatMessages);
+    bool canPublishMessages = context.select((ChatViewModel model) => model.canPublishNewMessage);
 
     return Container(
       color: Colors.black,
@@ -58,8 +82,8 @@ class ChatRoom extends StatelessWidget {
                   if (index == 0) {
                     return Container(
                       decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.all(Radius.circular(6))
+                        color: Colors.white,
+                        borderRadius: BorderRadius.all(Radius.circular(6))
                       ),
                       padding: EdgeInsets.all(10.0),
                       margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -77,7 +101,9 @@ class ChatRoom extends StatelessWidget {
               )
             )
           ),
-          SendChatMessageBar()
+          SendChatMessageBar(
+              enabled: canPublishMessages ,
+              onMessageSent: _sendNewChatMessage)
         ]
       )
     );

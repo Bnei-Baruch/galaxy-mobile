@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-class SendChatMessageBar extends StatefulWidget {
-  //final ValueChanged<String> _onSubmit;
+typedef OnSubmitMessageCallback = Function(String);
 
-  //SendChatMessageBar(this._onSubmit);
+class SendChatMessageBar extends StatefulWidget {
+  final OnSubmitMessageCallback onMessageSent;
+  final bool enabled;
+
+  SendChatMessageBar({this.enabled, this.onMessageSent});
 
   @override
   _SendChatMessageBarState createState() => _SendChatMessageBarState();
@@ -12,7 +15,7 @@ class SendChatMessageBar extends StatefulWidget {
 
 class _SendChatMessageBarState extends State<SendChatMessageBar> {
   final _textController = TextEditingController();
-  bool isSendEnabled = false;
+  bool isSendButtonEnabled = false;
 
   void _onSubmit() {
     if (_textController.text.isEmpty) {
@@ -22,21 +25,28 @@ class _SendChatMessageBarState extends State<SendChatMessageBar> {
     final text = _textController.text;
     _textController.clear();
 
-    // TODO(yanive): remove print or use flutter log if we want to log submission.
-    print("submitting: " + text);
-    // widget._onSubmit
+    widget.onMessageSent(text);
   }
 
-  _updateSendState() {
+  _updateSendButtonState() {
     setState(() {
-      isSendEnabled = _textController.text.isNotEmpty;
+      isSendButtonEnabled = widget.enabled && _textController.text.isNotEmpty;
+    });
+  }
+
+  @override
+  void didUpdateWidget(SendChatMessageBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    this.setState(() {
+      isSendButtonEnabled = isSendButtonEnabled && widget.enabled;
     });
   }
 
   @override
   void initState() {
     super.initState();
-    _textController.addListener(_updateSendState);
+    _updateSendButtonState();
+    _textController.addListener(_updateSendButtonState);
   }
 
   @override
@@ -93,7 +103,7 @@ class _SendChatMessageBarState extends State<SendChatMessageBar> {
             onTap: _onSubmit,
             child: CircleAvatar(
               radius: 24,
-              backgroundColor: isSendEnabled ? Color(0xFF0062B0) : Colors.grey,
+              backgroundColor: isSendButtonEnabled ? Color(0xFF0062B0) : Colors.grey,
               foregroundColor: Colors.white,
               child: Icon(Icons.send_sharp),
             ),

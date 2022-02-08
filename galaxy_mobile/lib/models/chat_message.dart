@@ -20,7 +20,7 @@ class ChatMessage {
       this.messageContent,
       this.messageTime);
 
-  factory ChatMessage.fromMQTTJson(var json, ChatMessageSender sender, int messageTime) {
+  factory ChatMessage.fromMQTTJson(var json, String activeUserId, int messageTime) {
     String senderId = json['user']['id'] ?? '';
     String text = json['text'] ?? '';
     String senderName = json['user']['display'] ?? '';
@@ -29,7 +29,9 @@ class ChatMessage {
     return ChatMessage(
         senderId,
         senderName,
-        sender,
+        senderId == activeUserId
+            ? ChatMessageSender.ACTIVE_USER
+            : ChatMessageSender.FRIEND,
         decodedText,
         messageTime);
   }

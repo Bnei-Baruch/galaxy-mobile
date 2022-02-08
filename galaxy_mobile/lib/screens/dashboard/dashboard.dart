@@ -395,9 +395,9 @@ class _DashboardState extends State<Dashboard>
             chatViewModel.addChatMessage(
                 ChatMessage.fromMQTTJson(
                     jsonCmd,
-                    activeUser.id
-                        ? ChatMessageSender.ACTIVE_USER
-                        : ChatMessageSender.FRIEND,
+                    activeUser.id,
+                    // TODO: the web version also does this. Doesn't MQTT
+                    // have a timestamp as metadata?
                     DateTime.now().millisecondsSinceEpoch));
           }
           break;
@@ -475,6 +475,12 @@ class _DashboardState extends State<Dashboard>
           // stream.toggleAudioMode();
           videoRoom.toggleAudioMode();
         }
+      });
+    } else if (topic == "galaxy/room/$_activeRoomId/chat") {
+      chatViewModel.setOnNewMessageCallback((ChatMessage message) {
+        final mqttClient = context.read<MQTTClient>();
+        mqttClient.send(topic, JsonEncoder().convert(message.toMQTTJson()));
+        return true;
       });
     }
   }
@@ -1144,7 +1150,6 @@ class _DashboardState extends State<Dashboard>
   void initMQTT() {
     FlutterLogs.logInfo("dashboard", "initMQTT", "xxxx setup mqtt in dashboard");
     final mqttClient = context.read<MQTTClient>();
-
 
     mqttClient.subscribe("galaxy/room/$_activeRoomId");
     mqttClient.subscribe("galaxy/room/$_activeRoomId/chat");
