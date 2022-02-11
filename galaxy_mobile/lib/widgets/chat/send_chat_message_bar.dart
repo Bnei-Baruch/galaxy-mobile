@@ -100,7 +100,7 @@ class _SendChatMessageBarState extends State<SendChatMessageBar> {
             width: 12.0,
           ),
           GestureDetector(
-            onTap: _onSubmit,
+            onTap: (isSendButtonEnabled) ? _onSubmit : null,
             child: CircleAvatar(
               radius: 24,
               backgroundColor: isSendButtonEnabled ? Color(0xFF0062B0) : Colors.grey,

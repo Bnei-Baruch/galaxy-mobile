@@ -743,8 +743,12 @@ class _DashboardState extends State<Dashboard>
                                   ),
                                   PopupMenuItem<String>(
                                     child: ListTile(
-                                        leading: Icon(Icons.chat_bubble),
-                                        title: Text('chat')), // TODO: translate
+                                        leading: ChangeNotifierProvider.value(
+                                          value: chatViewModel,
+                                          child: ChatMenuIcon()
+                                        ),
+                                        title: Text('chat'.tr())
+                                    ),
                                     enabled: true,
                                     value: "4.3",
                                   ),
@@ -905,10 +909,7 @@ class _DashboardState extends State<Dashboard>
                           dialogHeader,
                           divider,
                           Expanded(
-                            child: ChangeNotifierProvider.value(
-                              value: chatViewModel,
-                              child: ChatRoom()
-                            )
+                            child: ChatRoom(chatViewModel: chatViewModel)
                           )
                         ]
                     ),
@@ -1181,4 +1182,117 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => new Size.fromHeight(kToolbarHeight);
 
 
+}
+
+class ChatMenuIcon extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return CustomMenuIconBadge(
+        right: 0,
+        top: 10,
+        width: 28,
+        hideZero: true,
+        icon: Icon(
+            Icons.chat_bubble,
+            color: Colors.white
+        ),
+        itemCount: context.select((ChatViewModel model) => model.unreadMessagesCount)
+    );
+  }
+}
+
+//
+class CustomMenuIconBadge extends StatelessWidget {
+  final double width;
+  final Icon icon;
+  final VoidCallback onTap;
+  final int itemCount;
+  final bool hideZero;
+  final Color badgeColor;
+  final Color itemColor;
+  final double top;
+  final double right;
+  final int maxCount;
+
+  const CustomMenuIconBadge({
+    Key key,
+    this.onTap,
+    @required this.icon,
+    this.itemCount = 0,
+    this.hideZero = false,
+    this.badgeColor = Colors.red,
+    this.itemColor = Colors.white,
+    this.width = 72,
+    this.maxCount = 99,
+    this.top = 3.0,
+    this.right = 6.0,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return itemCount == 0 && hideZero
+        ? GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: width,
+        padding: const EdgeInsets.symmetric(horizontal: 0),
+        child: Stack(
+          alignment: Alignment.centerLeft,
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                icon,
+              ],
+            ),
+          ],
+        ),
+      ),
+    )
+        : GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: width,
+        padding: const EdgeInsets.symmetric(horizontal: 0),
+        child: Stack(
+          alignment: Alignment.centerLeft,
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                icon,
+              ],
+            ),
+            Positioned(
+              top: top,
+              right: right,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(50.0),
+                  color: badgeColor,
+                ),
+                alignment: Alignment.center,
+                child: itemCount > maxCount
+                    ? Text(
+                  '$maxCount+',
+                  style: TextStyle(
+                    color: itemColor,
+                    fontSize: 12.0,
+                  ),
+                )
+                    : Text(
+                  '$itemCount',
+                  style: TextStyle(
+                    color: itemColor,
+                    fontSize: 12.0,
+                  ),
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
 }

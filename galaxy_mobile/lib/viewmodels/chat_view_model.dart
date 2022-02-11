@@ -2,17 +2,27 @@ import 'package:flutter/foundation.dart';
 import 'package:galaxy_mobile/models/chat_message.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 
-// TODO: add unread messages
-// TODO: add chat visibility
 typedef OnNewMessageCallback = bool Function(ChatMessage);
 
 class ChatViewModel extends ChangeNotifier {
   List<ChatMessage> _chatMessages = [];
   OnNewMessageCallback _onNewMessageCallback;
+  int _lastSeenMessageIndex = -1;
 
   get chatMessages => _chatMessages;
 
   get canPublishNewMessage => _onNewMessageCallback != null;
+
+  get unreadMessagesCount => _chatMessages.length - lastSeenMessageIndex - 1;
+
+  get lastSeenMessageIndex => _lastSeenMessageIndex;
+
+  void setReadUpToMessageIndex(int messageIndex) {
+    if (messageIndex > _lastSeenMessageIndex) {
+      _lastSeenMessageIndex = messageIndex;
+      notifyListeners();
+    }
+  }
 
   void addChatMessage(ChatMessage message) {
     _chatMessages = [..._chatMessages, message];
@@ -32,7 +42,7 @@ class ChatViewModel extends ChangeNotifier {
     }
 
     _onNewMessageCallback(message);
-    //addChatMessage(message);
+    addChatMessage(message);
   }
 
   void setOnNewMessageCallback(OnNewMessageCallback callback) {

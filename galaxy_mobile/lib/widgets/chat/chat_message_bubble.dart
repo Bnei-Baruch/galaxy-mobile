@@ -7,7 +7,7 @@ import 'package:galaxy_mobile/utils/utils.dart';
 
 
 // TODO: show "read more" for long messages.
-// TODO: handle links properly.
+// TODO: handle links.
 
 const Color ACTIVE_USER_USERNAME_COLOR = Color(0xFF92B6D1);
 const Color ACTIVE_USER_BUBBLE_BACKGROUND = Color(0xFF00488B);
@@ -41,8 +41,8 @@ class ChatMessageBubble extends StatelessWidget {
   ChatMessageBubble({this.isFirstInThread = true, @required this.chatMessage});
 
   // Randomly generate a color from the hash of the username.
-  Color _getUserNameColor() {
-    return USERNAME_COLORS[chatMessage.senderName.hashCode.abs() % USERNAME_COLORS.length];
+  Color _getUserNameColor(hash) {
+    return USERNAME_COLORS[hash.abs() % USERNAME_COLORS.length];
   }
 
   Widget build(BuildContext context) {
@@ -76,7 +76,7 @@ class ChatMessageBubble extends StatelessWidget {
                   style: TextStyle(
                       color: isMessageFromActiveUser
                           ? ACTIVE_USER_USERNAME_COLOR
-                          : _getUserNameColor()
+                          : _getUserNameColor(chatMessage.senderName.hashCode)
                   )
                 ),
                 Text(

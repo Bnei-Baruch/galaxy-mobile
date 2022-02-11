@@ -12,6 +12,7 @@ class ChatMessage {
   ChatMessageSender senderType;
   String messageContent;
   int messageTime;
+  bool unread = true;
 
   ChatMessage(
       this.senderId,
