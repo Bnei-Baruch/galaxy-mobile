@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -69,6 +68,7 @@ class ChatMessageBubble extends StatelessWidget {
               isMessageFromActiveUser ? 18.0 : 8.0,
               8.0),
           child: Column(
+              textDirection: ui.TextDirection.ltr,
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -96,6 +96,7 @@ class ChatMessageBubble extends StatelessWidget {
     return Container(
       margin: EdgeInsets.only(top: isFirstInThread ? 10 : 2),
       child: Row(
+        textDirection: ui.TextDirection.ltr,
         children: <Widget>[
           isMessageFromActiveUser ? Spacer() : message,
           isMessageFromActiveUser ? message : Spacer()

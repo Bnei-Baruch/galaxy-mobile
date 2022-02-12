@@ -10,7 +10,6 @@ import 'package:galaxy_mobile/widgets/chat/chat_message_bubble.dart';
 import 'package:galaxy_mobile/widgets/chat/send_chat_message_bar.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_logs/flutter_logs.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class ChatRoom extends StatefulWidget {
@@ -162,7 +161,6 @@ class _ChatRoomState extends State<ChatRoom> {
     return Container(
       color: Colors.black,
       padding: EdgeInsets.only(
-        // TODO: This pushes just the message bar up, but not the list itself. It should push it up when it's at the bottom
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
       child: Column(

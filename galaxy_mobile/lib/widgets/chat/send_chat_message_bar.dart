@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'dart:ui' as ui;
 
 typedef OnSubmitMessageCallback = Function(String);
 
@@ -60,6 +61,7 @@ class _SendChatMessageBarState extends State<SendChatMessageBar> {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 8.0),
       child: Row(
+        textDirection: ui.TextDirection.ltr,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
           Expanded(

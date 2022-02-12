@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:dots_indicator/dots_indicator.dart';
+import 'package:galaxy_mobile/mocks/chat.dart';
 import 'package:galaxy_mobile/models/chat_message.dart';
 import 'package:galaxy_mobile/utils/topics.dart';
 import 'package:galaxy_mobile/viewmodels/chat_view_model.dart';
@@ -279,6 +280,9 @@ class _DashboardState extends State<Dashboard>
       videoRoom.setFullScreen(fullscreen);
       setState(() {});
     };
+
+    // For testing: Uncomment to mock incoming chat messages every 3 seconds.
+    // createPeriodicMockChatMessages(chatViewModel, Duration(seconds: 3));
   }
 
   Future<void> initAudioMgr() async {
