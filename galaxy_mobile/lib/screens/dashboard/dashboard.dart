@@ -860,36 +860,36 @@ class _DashboardState extends State<Dashboard>
         // the same in questions and friends (padding around container vs
         // padding around header).
         Widget dialogHeader = Container(
-            padding: EdgeInsets.only(top: 15, left: 15, right: 15),
-            child: Container(
-                height: 45.0,
-                child: Stack(
-                    children: <Widget>[
-                      Positioned(
-                        left: 0,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: Text("close".tr(),
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ),
-                      Align(
-                          alignment: Alignment.center,
-                          child: Text("Chat", // TODO: translate
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)
-                          )
-                      )
-                    ]
-                )
-            ));
+          padding: EdgeInsets.only(top: 5, left: 5, right: 5),
+          height: 45,
+          child: Stack(
+            children: <Widget>[
+              Align(
+                alignment: Alignment.centerLeft,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("close".tr(),
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+              Align(
+                  alignment: Alignment.center,
+                  child: Text("Chat", // TODO: translate
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)
+                  )
+              )
+            ]
+          )
+        );
 
         Widget divider = Container(
-            margin: const EdgeInsets.symmetric(vertical: 5.0),
+            margin: EdgeInsets.symmetric(vertical: (MediaQuery.of(context).orientation == Orientation.landscape ? 1.0 : 5.0)),
             child: const Divider(
               thickness: 1,
+              height: 1,
               color: Colors.grey,
             )
         );

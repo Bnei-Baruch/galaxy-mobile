@@ -42,7 +42,6 @@ class ChatViewModel extends ChangeNotifier {
     }
 
     _onNewMessageCallback(message);
-    addChatMessage(message);
   }
 
   void setOnNewMessageCallback(OnNewMessageCallback callback) {
