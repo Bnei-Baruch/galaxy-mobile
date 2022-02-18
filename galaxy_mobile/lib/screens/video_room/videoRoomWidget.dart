@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/services/keycloak.dart';
 import 'package:galaxy_mobile/services/monitoring_isolate.dart';
+import 'package:galaxy_mobile/widgets/directional_child.dart';
 import 'package:flutter/foundation.dart';
 import 'package:galaxy_mobile/utils/switch_page_helper.dart';
 import 'package:galaxy_mobile/utils/utils.dart';
@@ -1670,7 +1671,10 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                   alignment: Alignment.centerRight,
                   child: IconButton(
                     color: Colors.blue,
-                    icon: Icon(Icons.arrow_forward),
+                    icon: DirectionalChild(
+                        ltrChildBuilder: (context) => Icon(Icons.arrow_forward),
+                        rtlChildBuilder: (context) => Icon(Icons.arrow_back)
+                    ),
                     onPressed: () {
                       setState(() {
                         switchPage(page + 1);
@@ -1682,7 +1686,10 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                   alignment: Alignment.centerLeft,
                   child: IconButton(
                     color: Colors.blue,
-                    icon: Icon(Icons.arrow_back),
+                    icon: DirectionalChild(
+                      ltrChildBuilder: (context) => Icon(Icons.arrow_back),
+                      rtlChildBuilder: (context) => Icon(Icons.arrow_forward)
+                    ),
                     onPressed: () {
                       setState(() {
                         switchPage(page - 1);
