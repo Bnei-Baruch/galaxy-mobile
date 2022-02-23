@@ -570,10 +570,14 @@ class _DashboardState extends State<Dashboard>
                           onPressed: () async {
                             await switchAudioDevice();
                             setState(() {});
-                          }),
+                          }
+                        ),
                         IconButton(
-                            icon: Icon(Mdi.forum, color: Colors.white),
-                            onPressed: () => _displayTextQuestionsDialog(context)
+                          icon: ChangeNotifierProvider.value(
+                            value: chatViewModel,
+                                child: CommunicationsMenuIcon()
+                            ),
+                          onPressed: () => _displayTextQuestionsDialog(context)
                         ),
             ]),
                       actions: <Widget>[
@@ -745,17 +749,6 @@ class _DashboardState extends State<Dashboard>
                                     enabled: true,
                                     value: "4.2",
                                   ),
-                                  PopupMenuItem<String>(
-                                    child: ListTile(
-                                        leading: ChangeNotifierProvider.value(
-                                          value: chatViewModel,
-                                          child: ChatMenuIcon()
-                                        ),
-                                        title: Text('chat'.tr())
-                                    ),
-                                    enabled: true,
-                                    value: "4.3",
-                                  ),
                                 ],
                               );
                               switch(result)
@@ -811,9 +804,6 @@ class _DashboardState extends State<Dashboard>
                                   break;
                                 case "4.2": // Friends (Participants)
                                   _displayParticipantsDialog(context);
-                                  break;
-                                case "4.3": // Chat
-                                  _displayChatDialog(context);
                                   break;
                               }
                              break;
@@ -1188,16 +1178,16 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
 }
 
-class ChatMenuIcon extends StatelessWidget {
+class CommunicationsMenuIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return CustomMenuIconBadge(
+    return CommunicationsIconBadge(
         right: 0,
-        top: 10,
-        width: 28,
+        top: 0,
+        width: 36,
         hideZero: true,
         icon: Icon(
-            Icons.chat_bubble,
+            Mdi.forum,
             color: Colors.white
         ),
         itemCount: context.select((ChatViewModel model) => model.unreadMessagesCount)
@@ -1205,8 +1195,7 @@ class ChatMenuIcon extends StatelessWidget {
   }
 }
 
-//
-class CustomMenuIconBadge extends StatelessWidget {
+class CommunicationsIconBadge extends StatelessWidget {
   final double width;
   final Icon icon;
   final VoidCallback onTap;
@@ -1218,7 +1207,7 @@ class CustomMenuIconBadge extends StatelessWidget {
   final double right;
   final int maxCount;
 
-  const CustomMenuIconBadge({
+  const CommunicationsIconBadge({
     Key key,
     this.onTap,
     @required this.icon,
@@ -1282,14 +1271,14 @@ class CustomMenuIconBadge extends StatelessWidget {
                   '$maxCount+',
                   style: TextStyle(
                     color: itemColor,
-                    fontSize: 12.0,
+                    fontSize: 10.0,
                   ),
                 )
                     : Text(
                   '$itemCount',
                   style: TextStyle(
                     color: itemColor,
-                    fontSize: 12.0,
+                    fontSize: 10.0,
                   ),
                 ),
               ),
