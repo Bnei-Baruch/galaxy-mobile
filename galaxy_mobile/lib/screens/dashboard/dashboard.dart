@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ui';
+import 'dart:ui' as ui;
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
@@ -577,7 +577,7 @@ class _DashboardState extends State<Dashboard>
                             value: chatViewModel,
                                 child: CommunicationsMenuIcon()
                             ),
-                          onPressed: () => _displayTextQuestionsDialog(context)
+                          onPressed: () => _displayCommunicationDialog(context)
                         ),
             ]),
                       actions: <Widget>[
@@ -831,7 +831,7 @@ class _DashboardState extends State<Dashboard>
 
   }
 
-  _displayChatDialog(BuildContext context) {
+  _displayCommunicationDialog(BuildContext context) {
     showGeneralDialog(
       context: context,
       barrierDismissible: false,
@@ -846,45 +846,48 @@ class _DashboardState extends State<Dashboard>
         );
       },
       pageBuilder: (context, animation, secondaryAnimation) {
-        // TODO: move dialog widget to widgets to resuse it - header styling is
-        // the same in questions and friends (padding around container vs
-        // padding around header).
         Widget dialogHeader = Container(
-          padding: EdgeInsets.only(top: 5, left: 5, right: 5),
-          height: 45,
+          padding: EdgeInsets.all(4),
+          height: 46,
           child: Stack(
             children: <Widget>[
               Align(
                 alignment: Alignment.centerLeft,
-                child: ElevatedButton(
+                child: TextButton(
+                  style: TextButton.styleFrom(padding: EdgeInsets.all(0)),
+                  child: Container(
+                    height: 46,
+                    child: Stack(
+                      children: <Widget>[
+                        Positioned(
+                          left: -4,
+                          top: -2,
+                          child: Icon(Mdi.chevronLeft, color: Colors.white, size: 42)
+                        ),
+                        Positioned(
+                          left: 30,
+                          top: 12,
+                          child: Text("BACK", // TODO: translate
+                            style: TextStyle(color: Colors.white, fontSize: 12)
+                          )
+                        )
+                      ]
+                    )
+                  ),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: Text("close".tr(),
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
+                )
               ),
               Align(
                   alignment: Alignment.center,
-                  child: Text("Chat", // TODO: translate
+                  child: Text("Communication", // TODO: translate
                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)
                   )
               )
             ]
           )
         );
-
-        Widget divider = Container(
-            margin: EdgeInsets.symmetric(vertical: (MediaQuery.of(context).orientation == Orientation.landscape ? 1.0 : 5.0)),
-            child: const Divider(
-              thickness: 1,
-              height: 1,
-              color: Colors.grey,
-            )
-        );
-
-
 
         return WillPopScope(
             onWillPop: () {
@@ -896,12 +899,11 @@ class _DashboardState extends State<Dashboard>
                   child: Container(
                     width: MediaQuery.of(context).size.width,
                     height: MediaQuery.of(context).size.height,
-                    color: Colors.black26,
+                    //color: Colors.black26,
                     child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
                           dialogHeader,
-                          divider,
                           Expanded(
                             child: ChatRoom(chatViewModel: chatViewModel)
                           )
