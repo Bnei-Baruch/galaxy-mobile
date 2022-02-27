@@ -912,26 +912,19 @@ class _DashboardState extends State<Dashboard>
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
                           dialogHeader,
-                          Expanded(child: DefaultTabController(
-                            length: 2,
-                            child: Column(
-                              children: <Widget>[
-                                TabBar(
-                                  tabs: [
-                                    Tab(text: 'CHAT'), // TODO: translate
-                                    Tab(text: 'SEND A QUESTION'), // TODO: translate
-                                    // TODO: add support tab here.
-                                  ],
-                                ),
-                                Expanded(child: TabBarView(
-                                  children: [
-                                    ChatRoom(chatViewModel: chatViewModel),
-                                    QuestionsDialogContent()
-                                  ]))
+                          Expanded(child:
+                            TabContainer(
+                              tabTitles: [
+                                'CHAT', // TODO: translate
+                                'SEND A QUESTION', // TODO: translate
+                                // TODO: add support tab here.
                               ],
+                              children: [
+                                ChatRoom(chatViewModel: chatViewModel),
+                                QuestionsDialogContent()
+                              ]
                             )
-                          )),
-                          // Expanded(
+                          ) // Expanded
                           //   child: ChatRoom(chatViewModel: chatViewModel)
                           // )
                         ]
@@ -1236,5 +1229,90 @@ class CommunicationsIconBadge extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class TabContainer extends StatefulWidget {
+  final List<Widget> children;
+  final List<String> tabTitles;
+
+  TabContainer({
+    Key key,
+    @required this.children,
+    @required this.tabTitles
+  }) : assert(children != null),
+        assert(children.length == tabTitles.length),
+        super(key: key);
+
+  @override
+  _TabContainerState createState() => _TabContainerState();
+}
+
+class _TabContainerState extends State<TabContainer> {
+  int _activeIndex;
+
+  void _changeTab(int index) {
+    if (index != _activeIndex) {
+      this.setState(() {
+        _activeIndex = index;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _activeIndex = 0;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Orientation orientation = MediaQuery.of(context).orientation;
+    return Flex(
+            mainAxisAlignment: MainAxisAlignment.start,
+            direction: orientation == Orientation.landscape
+                ? Axis.horizontal
+                : Axis.vertical,
+        children: [
+          Flex(
+            mainAxisAlignment: MainAxisAlignment.start,
+              direction: orientation == Orientation.landscape
+                  ? Axis.vertical
+                  : Axis.horizontal,
+            children: widget.tabTitles.asMap().entries.map((entry) {
+              int idx = entry.key;
+              String title = entry.value;
+            return Expanded(
+                flex: orientation == Orientation.landscape ? 0 : 1,
+                child:
+              GestureDetector(
+                onTap: () => this._changeTab(idx),
+                child: Container(
+                  margin: orientation == Orientation.landscape ? EdgeInsets.symmetric(horizontal: 6) : null,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.white),
+                    color: idx == _activeIndex ? Colors.white : Colors.black12,
+                  ),
+                  child: SizedBox(
+                    width: orientation == Orientation.landscape ? 160 : null,
+                    height: 40,
+                    child: Center(
+                      child: Text(title,
+                          softWrap: false,
+                          overflow: TextOverflow.fade,
+                          style: TextStyle(
+                              color: idx == _activeIndex ? Colors.black87 : Colors.white,
+                              fontWeight: FontWeight.bold
+                            )
+                          ),
+                      widthFactor: 1.0,
+                    ),
+                  )
+                )
+              )
+            );
+          }).toList()),
+      Expanded(child: widget.children[_activeIndex])
+    ]);
   }
 }
