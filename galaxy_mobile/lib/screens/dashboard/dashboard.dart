@@ -880,10 +880,10 @@ class _DashboardState extends State<Dashboard>
                 )
               ),
               Align(
-                  alignment: Alignment.center,
-                  child: Text("Communication", // TODO: translate
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)
-                  )
+                alignment: Alignment.center,
+                child: Text("Communication", // TODO: translate
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)
+                )
               )
             ]
           )
@@ -904,9 +904,28 @@ class _DashboardState extends State<Dashboard>
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
                           dialogHeader,
-                          Expanded(
-                            child: ChatRoom(chatViewModel: chatViewModel)
-                          )
+                          Expanded(child: DefaultTabController(
+                            length: 2,
+                            child: Column(
+                              children: <Widget>[
+                                TabBar(
+                                  tabs: [
+                                    Tab(text: 'CHAT'), // TODO: translate
+                                    Tab(text: 'SEND A QUESTION'), // TODO: translate
+                                    // TODO: add support tab here.
+                                  ],
+                                ),
+                                Expanded(child: TabBarView(
+                                  children: [
+                                  ChatRoom(chatViewModel: chatViewModel),
+                                  Icon(Icons.directions_transit),
+                                  ]))
+                              ],
+                            )
+                          )),
+                          // Expanded(
+                          //   child: ChatRoom(chatViewModel: chatViewModel)
+                          // )
                         ]
                     ),
                   ),
