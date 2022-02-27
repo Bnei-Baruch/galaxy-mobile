@@ -59,7 +59,7 @@ class _SendChatMessageBarState extends State<SendChatMessageBar> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 8.0),
+      padding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 8.0),
       child: Row(
         textDirection: ui.TextDirection.ltr,
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -68,7 +68,7 @@ class _SendChatMessageBarState extends State<SendChatMessageBar> {
             child: Container(
               decoration: BoxDecoration(
                 color:  Color(0xFF232C32),
-                borderRadius: BorderRadius.circular(24.0)
+                borderRadius: BorderRadius.circular(20.0)
               ),
               child: Row(
                 children: <Widget>[
@@ -81,8 +81,13 @@ class _SendChatMessageBarState extends State<SendChatMessageBar> {
                         constraints: BoxConstraints(
                         maxHeight: 140.0),
                         child: TextField(
+                          style: TextStyle(
+                              fontSize: 15.0,
+                          ),
                           maxLines: null,
+                          minLines: 1,
                           decoration: InputDecoration(
+                            isDense: true,
                             hintText: 'virtual_chat.enterMessage'.tr(),
                             border: InputBorder.none,
                           ),
@@ -104,7 +109,7 @@ class _SendChatMessageBarState extends State<SendChatMessageBar> {
           GestureDetector(
             onTap: (isSendButtonEnabled) ? _onSubmit : null,
             child: CircleAvatar(
-              radius: 24,
+              radius: 17,
               backgroundColor: isSendButtonEnabled ? Color(0xFF0062B0) : Colors.grey,
               foregroundColor: Colors.white,
               child: Icon(Icons.send_sharp),

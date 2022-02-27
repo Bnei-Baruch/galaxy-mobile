@@ -168,7 +168,7 @@ class _ChatRoomState extends State<ChatRoom> {
             Expanded(
               child: Stack(children: <Widget>[
                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+                    padding: EdgeInsets.fromLTRB(8, 0, 8, 4),
                     child: ScrollablePositionedList.builder(
                       itemScrollController: _itemScrollController,
                       itemPositionsListener: _itemPositionsListener,
