@@ -847,8 +847,8 @@ class _DashboardState extends State<Dashboard>
       },
       pageBuilder: (context, animation, secondaryAnimation) {
         Widget dialogHeader = Container(
-          padding: EdgeInsets.all(4),
-          height: 46,
+          padding: EdgeInsets.symmetric(horizontal: 4.0),
+          height: 42,
           child: Stack(
             children: <Widget>[
               Align(
@@ -856,7 +856,7 @@ class _DashboardState extends State<Dashboard>
                 child: TextButton(
                   style: TextButton.styleFrom(padding: EdgeInsets.all(0)),
                   child: Container(
-                    height: 46,
+                    height: 42,
                     child: Stack(
                       children: <Widget>[
                         Positioned(
@@ -882,7 +882,7 @@ class _DashboardState extends State<Dashboard>
               Align(
                 alignment: Alignment.center,
                 child: Text("Communication", // TODO: translate
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)
                 )
               )
             ]
@@ -895,7 +895,15 @@ class _DashboardState extends State<Dashboard>
               return Future.value(true);
             },
             child: SafeArea(
-                child: Material(
+              child: GestureDetector(
+                  onTap: () {
+                    // Hide keyboard when clicked outside a text field.
+                    FocusScopeNode currentFocus = FocusScope.of(context);
+                    if (!currentFocus.hasPrimaryFocus) {
+                      currentFocus.unfocus();
+                    }
+                  },
+                  child: Material(
                   child: Container(
                     width: MediaQuery.of(context).size.width,
                     height: MediaQuery.of(context).size.height,
@@ -917,8 +925,8 @@ class _DashboardState extends State<Dashboard>
                                 ),
                                 Expanded(child: TabBarView(
                                   children: [
-                                  ChatRoom(chatViewModel: chatViewModel),
-                                  Icon(Icons.directions_transit),
+                                    ChatRoom(chatViewModel: chatViewModel),
+                                    QuestionsDialogContent()
                                   ]))
                               ],
                             )
@@ -931,87 +939,7 @@ class _DashboardState extends State<Dashboard>
                   ),
                 )
             )
-        );
-      },
-    );
-  }
-
-  _displayTextQuestionsDialog(BuildContext context) {
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: false,
-      transitionDuration: Duration(milliseconds: 200),
-      transitionBuilder: (context, animation, secondaryAnimation, child) {
-        return FadeTransition(
-          opacity: animation,
-          child: ScaleTransition(
-            scale: animation,
-            child: child,
-          ),
-        );
-      },
-      pageBuilder: (context, animation, secondaryAnimation) {
-        // TODO: move dialog widget to widgets to resuse it - header styling is
-        // the same in questions and friends (padding around container vs
-        // padding around header).
-        Widget dialogHeader = Container(
-            padding: EdgeInsets.only(top: 15, left: 15, right: 15),
-            child: Container(
-          height: 45.0,
-          child: Stack(
-            children: <Widget>[
-              Positioned(
-                left: 0,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text("close".tr(),
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ),
-              Align(
-                alignment: Alignment.center,
-                  child: Text("questions.sendQuestion".tr(),
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)
-                  )
-              )
-            ]
-          )
         ));
-
-        Widget divider = Container(
-          margin: const EdgeInsets.symmetric(vertical: 5.0),
-          child: const Divider(
-            thickness: 1,
-            color: Colors.grey,
-          )
-        );
-
-        return WillPopScope(
-          onWillPop: () {
-            Navigator.of(context).pop();
-            return Future.value(true);
-          },
-          child: SafeArea(
-            child: Material(
-              child: Container(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height,
-                color: Colors.black26,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    dialogHeader,
-                    divider,
-                    Expanded(child: QuestionsDialogContent())
-                  ]
-                ),
-              ),
-            )
-          )
-        );
       },
     );
   }
