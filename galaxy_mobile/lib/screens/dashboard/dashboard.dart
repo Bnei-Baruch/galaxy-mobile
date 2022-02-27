@@ -924,9 +924,7 @@ class _DashboardState extends State<Dashboard>
                                 QuestionsDialogContent()
                               ]
                             )
-                          ) // Expanded
-                          //   child: ChatRoom(chatViewModel: chatViewModel)
-                          // )
+                          )
                         ]
                     ),
                   ),
