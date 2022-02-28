@@ -4,7 +4,6 @@ import 'package:galaxy_mobile/screens/login/login.dart';
 import 'package:galaxy_mobile/screens/settings/settings.dart';
 import 'package:galaxy_mobile/screens/streaming/components/playerWIdget.dart';
 import 'package:galaxy_mobile/screens/streaming/streaming.dart';
-import 'package:galaxy_mobile/chat/chat.dart';
 import 'package:galaxy_mobile/screens/video_room/videoRoomWidget.dart';
 
 final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -13,6 +12,5 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
   '/dashboard': (BuildContext context) => Dashboard(),
   '/streaming': (BuildContext context) => StreamingUnified(),
   '/play_widget': (BuildContext context) => PlayerWidget(),
-  '/chat': (BuildContext context) => Chat(),
   // '/roomWidget': (BuildContext context) => VideoRoom(),
 };

@@ -67,7 +67,6 @@ class Utils {
   /// [timestamp] must be in milliseconds and [format] must be suitable for
   /// use in [DateFormat].
   static String formatTimestampAsDate(int timestamp, String format) {
-    print(timestamp);
     DateTime dateTime = new DateTime.fromMillisecondsSinceEpoch(timestamp);
     DateFormat dateFormat = new DateFormat(format);
     return dateFormat.format(dateTime);

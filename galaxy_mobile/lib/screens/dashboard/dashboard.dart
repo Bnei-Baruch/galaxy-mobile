@@ -1,10 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ui';
+import 'dart:ui' as ui;
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:dots_indicator/dots_indicator.dart';
+import 'package:galaxy_mobile/mocks/chat.dart';
+import 'package:galaxy_mobile/models/chat_message.dart';
+import 'package:galaxy_mobile/utils/topics.dart';
+import 'package:galaxy_mobile/viewmodels/chat_view_model.dart';
 import 'package:icon_badge/icon_badge.dart';
 import 'package:mdi/mdi.dart';
 import 'package:provider/provider.dart';
@@ -17,10 +21,10 @@ import 'package:flutter_audio_manager/flutter_audio_manager.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/screens/streaming/streaming.dart';
 import 'package:galaxy_mobile/screens/video_room/videoRoomWidget.dart';
+import 'package:galaxy_mobile/widgets/chat/chat_room.dart';
 import 'package:galaxy_mobile/services/mqttClient.dart';
 import 'package:galaxy_mobile/widgets/loading_indicator.dart';
 import 'package:galaxy_mobile/widgets/questions/questions_dialog_content.dart';
-import 'package:galaxy_mobile/chat/chatMessage.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -37,7 +41,7 @@ class _DashboardState extends State<Dashboard>
     with SingleTickerProviderStateMixin {
   StreamingUnified stream = StreamingUnified();
   VideoRoom videoRoom = VideoRoom();
-  // var chat = Chat();
+  ChatViewModel chatViewModel = ChatViewModel();
   var activeUser;
   int activeUserJoinedRoomTimestamp = 0;
   bool callInProgress;
@@ -276,6 +280,9 @@ class _DashboardState extends State<Dashboard>
       videoRoom.setFullScreen(fullscreen);
       setState(() {});
     };
+
+    // For testing: Uncomment to mock incoming chat messages every 3 seconds.
+    // createPeriodicMockChatMessages(chatViewModel, Duration(seconds: 3));
   }
 
   Future<void> initAudioMgr() async {
@@ -380,36 +387,40 @@ class _DashboardState extends State<Dashboard>
     return res;
   }
 
-  void handleCmdData(String msgPayload) {
+  void handleCmdData(String msgPayload, String topic) {
     FlutterLogs.logInfo(
-        "Dashboard", "handleCmdData", "received message: $msgPayload");
+        "Dashboard", "handleCmdData", "received message: $msgPayload topic: $topic");
     try {
       var jsonCmd = JsonDecoder().convert(msgPayload);
-      if (jsonCmd["textroom"] != null) {
-        String textElem = jsonCmd["text"];
-        var chatCmd = JsonDecoder().convert(textElem);
-        String msgText = chatCmd["text"];
-        context.read<MainStore>().addChatMessage(
-            ChatMessage(chatCmd["user"]["display"], msgText, "message"));
-      } else {
-        switch (jsonCmd["type"]) {
-          case "client-state":
-            videoRoom.setUserState(jsonCmd["user"]);
-            setState(() {
-              //disable question at bottom in case other friends ask question
-              if (jsonCmd["user"]["id"] != userMap["id"]) {
-                questionDisabled = jsonCmd["user"]["question"];
-              }
-            });
-            break;
-          case "audio-out":
-            if (videoRoom.getIsQuestion()) {
-              videoRoom.toggleQuestion();
-              updateRoomWithMyState(false);
+      TopicType topicType = Topics.parse(topic);
+      switch (jsonCmd["type"]) {
+        case "client-chat":
+          if (topicType == TopicType.ROOM_CHAT) {
+            chatViewModel.addChatMessage(
+                ChatMessage.fromMQTTJson(
+                    jsonCmd,
+                    activeUser.id,
+                    // TODO: the web version also does this. Doesn't MQTT
+                    // have a timestamp as metadata?
+                    DateTime.now().millisecondsSinceEpoch));
+          }
+          break;
+        case "client-state":
+          videoRoom.setUserState(jsonCmd["user"]);
+          setState(() {
+            //disable question at bottom in case other friends ask question
+            if (jsonCmd["user"]["id"] != userMap["id"]) {
+              questionDisabled = jsonCmd["user"]["question"];
             }
-            stream.toggleOnAir(jsonCmd);
-            break;
-        }
+          });
+          break;
+        case "audio-out":
+          if (videoRoom.getIsQuestion()) {
+            videoRoom.toggleQuestion();
+            updateRoomWithMyState(false);
+          }
+          stream.toggleOnAir(jsonCmd);
+          break;
       }
     } on FormatException catch (e) {
       FlutterLogs.logError("Dashboard", "handleCmdData",
@@ -469,6 +480,12 @@ class _DashboardState extends State<Dashboard>
           videoRoom.toggleAudioMode();
         }
       });
+    } else if (topic == "galaxy/room/$_activeRoomId/chat") {
+      chatViewModel.setOnNewMessageCallback((ChatMessage message) {
+        final mqttClient = context.read<MQTTClient>();
+        mqttClient.send(topic, JsonEncoder().convert(message.toMQTTJson()));
+        return true;
+      });
     }
   }
 
@@ -519,6 +536,7 @@ class _DashboardState extends State<Dashboard>
           userTimer.cancel();
           if (mqttClient != null) {
             mqttClient.unsubscribe("galaxy/room/$_activeRoomId");
+            // TODO: move to a function.
             mqttClient.unsubscribe("galaxy/room/$_activeRoomId/chat");
             mqttClient.removeOnConnectedCallback();
             mqttClient.removeOnConnectionFailedCallback();
@@ -552,20 +570,17 @@ class _DashboardState extends State<Dashboard>
                           onPressed: () async {
                             await switchAudioDevice();
                             setState(() {});
-                          }),
+                          }
+                        ),
                         IconButton(
-                            icon: Icon(Mdi.forum, color: Colors.white),
-                            onPressed: () => _displayTextQuestionsDialog(context)
+                          icon: ChangeNotifierProvider.value(
+                            value: chatViewModel,
+                                child: CommunicationsMenuIcon()
+                            ),
+                          onPressed: () => _displayCommunicationDialog(context)
                         ),
             ]),
                       actions: <Widget>[
-                          // IconButton(
-                          //     icon: Icon(Icons.chat, color: Colors.white),
-                          //     onPressed: () {
-                          //       setState(() {
-                          //         isChatVisible = !isChatVisible;
-                          //       });
-                          //     }),
                           Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: TextButton(
@@ -589,6 +604,7 @@ class _DashboardState extends State<Dashboard>
                                     if (mqttClient != null) {
                                       mqttClient.unsubscribe(
                                           "galaxy/room/$_activeRoomId");
+                                      // TODO: move to central place.
                                       mqttClient.unsubscribe(
                                           "galaxy/room/$_activeRoomId/chat");
                                      // mqttClient.disconnect();
@@ -787,7 +803,6 @@ class _DashboardState extends State<Dashboard>
                                       });
                                   break;
                                 case "4.2": // Friends (Participants)
-                                  print("friends participants");
                                   _displayParticipantsDialog(context);
                                   break;
                               }
@@ -816,7 +831,7 @@ class _DashboardState extends State<Dashboard>
 
   }
 
-  _displayTextQuestionsDialog(BuildContext context) {
+  _displayCommunicationDialog(BuildContext context) {
     showGeneralDialog(
       context: context,
       barrierDismissible: false,
@@ -831,67 +846,91 @@ class _DashboardState extends State<Dashboard>
         );
       },
       pageBuilder: (context, animation, secondaryAnimation) {
-        // TODO: move dialog widget to widgets to resuse it - header styling is
-        // the same in questions and friends (padding around container vs
-        // padding around header).
         Widget dialogHeader = Container(
-            padding: EdgeInsets.only(top: 15, left: 15, right: 15),
-            child: Container(
-          height: 45.0,
+          padding: EdgeInsets.symmetric(horizontal: 4.0),
+          height: 42,
           child: Stack(
             children: <Widget>[
-              Positioned(
-                left: 0,
-                child: ElevatedButton(
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton(
+                  style: TextButton.styleFrom(padding: EdgeInsets.all(0)),
+                  child: Container(
+                    height: 42,
+                    child: Stack(
+                      children: <Widget>[
+                        Positioned(
+                          left: -4,
+                          top: -2,
+                          child: Icon(Mdi.chevronLeft, color: Colors.white, size: 42)
+                        ),
+                        Positioned(
+                          left: 30,
+                          top: 12,
+                          child: Text("BACK", // TODO: translate
+                            style: TextStyle(color: Colors.white, fontSize: 12)
+                          )
+                        )
+                      ]
+                    )
+                  ),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: Text("close".tr(),
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
+                )
               ),
               Align(
                 alignment: Alignment.center,
-                  child: Text("questions.sendQuestion".tr(),
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)
-                  )
+                child: Text("Communication", // TODO: translate
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)
+                )
               )
             ]
-          )
-        ));
-
-        Widget divider = Container(
-          margin: const EdgeInsets.symmetric(vertical: 5.0),
-          child: const Divider(
-            thickness: 1,
-            color: Colors.grey,
           )
         );
 
         return WillPopScope(
-          onWillPop: () {
-            Navigator.of(context).pop();
-            return Future.value(true);
-          },
-          child: SafeArea(
-            child: Material(
-              child: Container(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height,
-                color: Colors.black26,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    dialogHeader,
-                    divider,
-                    Expanded(child: QuestionsDialogContent())
-                  ]
-                ),
-              ),
+            onWillPop: () {
+              Navigator.of(context).pop();
+              return Future.value(true);
+            },
+            child: SafeArea(
+              child: GestureDetector(
+                  onTap: () {
+                    // Hide keyboard when clicked outside a text field.
+                    FocusScopeNode currentFocus = FocusScope.of(context);
+                    if (!currentFocus.hasPrimaryFocus) {
+                      currentFocus.unfocus();
+                    }
+                  },
+                  child: Material(
+                  child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height,
+                    //color: Colors.black26,
+                    child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          dialogHeader,
+                          Expanded(child:
+                            TabContainer(
+                              tabTitles: [
+                                'CHAT', // TODO: translate
+                                'SEND A QUESTION', // TODO: translate
+                                // TODO: add support tab here.
+                              ],
+                              children: [
+                                ChatRoom(chatViewModel: chatViewModel),
+                                QuestionsDialogContent()
+                              ]
+                            )
+                          )
+                        ]
+                    ),
+                  ),
+                )
             )
-          )
-        );
+        ));
       },
     );
   }
@@ -1047,12 +1086,11 @@ class _DashboardState extends State<Dashboard>
     FlutterLogs.logInfo("dashboard", "initMQTT", "xxxx setup mqtt in dashboard");
     final mqttClient = context.read<MQTTClient>();
 
-
     mqttClient.subscribe("galaxy/room/$_activeRoomId");
     mqttClient.subscribe("galaxy/room/$_activeRoomId/chat");
 
     mqttClient.addOnSubscribedCallback((topic) => subscribedToTopic(topic));
-    mqttClient.addOnMsgReceivedCallback((payload) => handleCmdData(payload));
+    mqttClient.addOnMsgReceivedCallback((payload, topic) => handleCmdData(payload, topic));
     mqttClient.addOnConnectionFailedCallback(() => handleConnectionFailed());
   }
 }
@@ -1078,4 +1116,201 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => new Size.fromHeight(kToolbarHeight);
 
 
+}
+
+class CommunicationsMenuIcon extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return CommunicationsIconBadge(
+        right: 0,
+        top: 0,
+        width: 36,
+        hideZero: true,
+        icon: Icon(
+            Mdi.forum,
+            color: Colors.white
+        ),
+        itemCount: context.select((ChatViewModel model) => model.unreadMessagesCount)
+    );
+  }
+}
+
+class CommunicationsIconBadge extends StatelessWidget {
+  final double width;
+  final Icon icon;
+  final VoidCallback onTap;
+  final int itemCount;
+  final bool hideZero;
+  final Color badgeColor;
+  final Color itemColor;
+  final double top;
+  final double right;
+  final int maxCount;
+
+  const CommunicationsIconBadge({
+    Key key,
+    this.onTap,
+    @required this.icon,
+    this.itemCount = 0,
+    this.hideZero = false,
+    this.badgeColor = Colors.red,
+    this.itemColor = Colors.white,
+    this.width = 72,
+    this.maxCount = 99,
+    this.top = 3.0,
+    this.right = 6.0,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return itemCount == 0 && hideZero
+        ? GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: width,
+        padding: const EdgeInsets.symmetric(horizontal: 0),
+        child: Stack(
+          alignment: Alignment.centerLeft,
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                icon,
+              ],
+            ),
+          ],
+        ),
+      ),
+    )
+        : GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: width,
+        padding: const EdgeInsets.symmetric(horizontal: 0),
+        child: Stack(
+          alignment: Alignment.centerLeft,
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                icon,
+              ],
+            ),
+            Positioned(
+              top: top,
+              right: right,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(50.0),
+                  color: badgeColor,
+                ),
+                alignment: Alignment.center,
+                child: itemCount > maxCount
+                    ? Text(
+                  '$maxCount+',
+                  style: TextStyle(
+                    color: itemColor,
+                    fontSize: 10.0,
+                  ),
+                )
+                    : Text(
+                  '$itemCount',
+                  style: TextStyle(
+                    color: itemColor,
+                    fontSize: 10.0,
+                  ),
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class TabContainer extends StatefulWidget {
+  final List<Widget> children;
+  final List<String> tabTitles;
+
+  TabContainer({
+    Key key,
+    @required this.children,
+    @required this.tabTitles
+  }) : assert(children != null),
+        assert(children.length == tabTitles.length),
+        super(key: key);
+
+  @override
+  _TabContainerState createState() => _TabContainerState();
+}
+
+class _TabContainerState extends State<TabContainer> {
+  int _activeIndex;
+
+  void _changeTab(int index) {
+    if (index != _activeIndex) {
+      this.setState(() {
+        _activeIndex = index;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _activeIndex = 0;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Orientation orientation = MediaQuery.of(context).orientation;
+    return Flex(
+            mainAxisAlignment: MainAxisAlignment.start,
+            direction: orientation == Orientation.landscape
+                ? Axis.horizontal
+                : Axis.vertical,
+        children: [
+          Flex(
+            mainAxisAlignment: MainAxisAlignment.start,
+              direction: orientation == Orientation.landscape
+                  ? Axis.vertical
+                  : Axis.horizontal,
+            children: widget.tabTitles.asMap().entries.map((entry) {
+              int idx = entry.key;
+              String title = entry.value;
+            return Expanded(
+                flex: orientation == Orientation.landscape ? 0 : 1,
+                child:
+              GestureDetector(
+                onTap: () => this._changeTab(idx),
+                child: Container(
+                  margin: orientation == Orientation.landscape ? EdgeInsets.symmetric(horizontal: 6) : null,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.white),
+                    color: idx == _activeIndex ? Colors.white : Colors.black12,
+                  ),
+                  child: SizedBox(
+                    width: orientation == Orientation.landscape ? 160 : null,
+                    height: 40,
+                    child: Center(
+                      child: Text(title,
+                          softWrap: false,
+                          overflow: TextOverflow.fade,
+                          style: TextStyle(
+                              color: idx == _activeIndex ? Colors.black87 : Colors.white,
+                              fontWeight: FontWeight.bold
+                            )
+                          ),
+                      widthFactor: 1.0,
+                    ),
+                  )
+                )
+              )
+            );
+          }).toList()),
+      Expanded(child: widget.children[_activeIndex])
+    ]);
+  }
 }

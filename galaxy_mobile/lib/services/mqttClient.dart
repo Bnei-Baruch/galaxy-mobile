@@ -49,7 +49,7 @@ class MQTTClient {
     _onSubscribedCallbackList.add(onSubscribedCallback);
   }
 
-  void addOnMsgReceivedCallback(Function(String) onMsgReceivedCallback) {
+  void addOnMsgReceivedCallback(Function(String payload, String topic) onMsgReceivedCallback) {
     _onMsgReceivedCallbackList.add(onMsgReceivedCallback);
   }
 
@@ -115,11 +115,12 @@ class MQTTClient {
         final MqttPublishMessage message = c[0].payload;
         final payload =
             MqttPublishPayload.bytesToStringAsString(message.payload.message);
+        final String topic = c[0].topic;
 
-        logger.info("Received message: $payload from topic: ${c[0].topic}>");
-        for (Function(String) msgReceivedCallback
+        logger.info("Received message: $payload from topic: $topic>");
+        for (Function(String payload, String topic) msgReceivedCallback
             in _onMsgReceivedCallbackList) {
-          msgReceivedCallback(payload);
+          msgReceivedCallback(payload, topic);
         }
       });
 
