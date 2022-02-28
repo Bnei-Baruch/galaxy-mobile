@@ -79,14 +79,16 @@ class VideoRoom extends StatefulWidget {
 
   String streamingServer;
 
-  void exitRoom() {
+  void exitRoom() async {
     if (j != null) j.destroy();
     if (pluginHandle != null) pluginHandle.hangup();
     if (subscriberHandle != null) subscriberHandle.destroy();
     if (_localRenderer != null) {
-      _localRenderer.dispose();
+
       _localRenderer.srcObject = null;
+      await _localRenderer.dispose();
       // _localRenderer.dispose();
+
     }
     if (_remoteRenderer != null && _remoteRenderer.isNotEmpty) {
       _remoteRenderer.map((e) => e.srcObject = null);

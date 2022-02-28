@@ -295,7 +295,7 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
         FlutterLogs.logInfo("Settings","pushNamed", "back from dashboard with failure");
         //need to fix crash after several re-enter
         // Timer(Duration(milliseconds: 1500),() {
-        //   enterDashBoard(context);
+           enterDashBoard(context);
         // }
         // );
       }
