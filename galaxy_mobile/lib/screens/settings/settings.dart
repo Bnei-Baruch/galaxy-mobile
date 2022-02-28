@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:isolate';
+import 'dart:ui' as ui;
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
@@ -12,10 +13,10 @@ import 'package:galaxy_mobile/services/mqttClient.dart';
 import 'package:galaxy_mobile/utils/utils.dart';
 import 'package:galaxy_mobile/widgets/audioMode.dart';
 import 'package:galaxy_mobile/widgets/drawer.dart';
-import 'package:galaxy_mobile/widgets/loading_indicator.dart';
 import 'package:galaxy_mobile/widgets/roomSelector.dart';
 import 'package:galaxy_mobile/widgets/screenLoader.dart';
 import 'package:galaxy_mobile/widgets/uiLanguageSelector.dart';
+import 'package:galaxy_mobile/widgets/horizontal_flip.dart';
 
 import 'package:provider/provider.dart';
 import 'package:galaxy_mobile/widgets/screenName.dart';
@@ -145,8 +146,6 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     var activeUser = context.select((MainStore s) => s.activeUser);
-    var rooms = context.select((MainStore s) => s.availableRooms);
-
 
     _isThinScreen = MediaQuery.of(context).size.width < 400;
     final mqttClient = context.read<MQTTClient>();
@@ -227,14 +226,11 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
                               height: 60.0,
                               child: RaisedButton(
                                   shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                      BorderRadius.circular(10.0)),
-
+                                      borderRadius: BorderRadius.circular(10.0)
+                                  ),
                                   child: Row(
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment.center,
-                                      mainAxisAlignment:
-                                      MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         Text(
                                             _isThinScreen
@@ -242,13 +238,18 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
                                                 : 'join_room'.tr(),
                                             style: TextStyle(
                                                 color: Colors.white,
-                                                fontSize: 20)),
+                                                fontSize: 20)
+                                        ),
                                         SizedBox(
-                                            width:
-                                            _isThinScreen ? 0 : 10.w),
-                                        Icon(Icons.double_arrow,
-                                            color: Colors.white)
-                                      ]),
+                                            width: _isThinScreen ? 0 : 10.w),
+                                        HorizontalFlip(
+                                          flipDirection: ui.TextDirection.rtl,
+                                          child: Icon(
+                                              Icons.double_arrow,
+                                              color: Colors.white)
+                                        )
+                                      ]
+                                  ),
                                   onPressed: () {
                                     final activeRoom = context.select(
                                             (MainStore s) => s.activeRoom);
