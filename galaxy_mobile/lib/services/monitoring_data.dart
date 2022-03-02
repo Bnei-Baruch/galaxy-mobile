@@ -88,7 +88,7 @@ class MonitoringData {
     userJson["cpu"] = (Platform.isAndroid ? "Android " : "iOS ") +
         Platform.operatingSystemVersion;
 
-    userJson["ram"] = (SysInfo.getTotalPhysicalMemory()/1000/1000/1000).floor().toString();
+    userJson["ram"] = (Platform.isAndroid?(SysInfo.getTotalPhysicalMemory()/1000/1000/1000).floor().toString():"na");
 
     userJson["network"] = network;
     userJson["streamingGateway"] = streamingGateway;
