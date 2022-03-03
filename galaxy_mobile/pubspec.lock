@@ -750,10 +750,12 @@ packages:
   phone_state_i:
     dependency: "direct main"
     description:
-      name: phone_state_i
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.0.3"
+      path: "."
+      ref: "0.0.3.1"
+      resolved-ref: "3f99d68df74db7fd04689bade84ca426bb7fa53e"
+      url: "https://github.com/igala/PhoneCallState.git"
+    source: git
+    version: "0.0.1"
   platform:
     dependency: transitive
     description:

@@ -63,7 +63,10 @@ dependencies:
   flutter_fgbg: ^0.0.1
   url_launcher: ^5.7.10
   connectivity_plus: ^0.8.1
-  phone_state_i: ^0.0.3
+  phone_state_i:
+    git:
+      url: https://github.com/igala/PhoneCallState.git
+      ref: 0.0.3.1
 #    path: ../../Documents/GitHub/PhoneCallState-fork
   logcat: #^1.0.2
     git:
