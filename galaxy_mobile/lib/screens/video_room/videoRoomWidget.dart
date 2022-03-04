@@ -174,16 +174,14 @@ class VideoRoom extends StatefulWidget {
   void setUserState(var user) {
     bool didFeedsUpdate = false;
     FlutterLogs.logInfo("VideoRoom", "setUserState", "user ${user.toString()}");
-    if(state !=null && state.mounted) {
+    if (state != null && state.mounted) {
       List roomFeeds = state.getFeeds();
       for (var feed in roomFeeds) {
         if (feed != null && feed['id'] == user['rfid']) {
           FlutterLogs.logInfo(
               "VideoRoom", "setUserState", "found user in feed ${roomFeeds}");
-
           FlutterLogs.logInfo(
               "VideoRoom", "setUserState", "before ${feed['cammute']}");
-
 
           feed['cammute'] = !user['camera'];
 
@@ -199,48 +197,46 @@ class VideoRoom extends StatefulWidget {
               FlutterLogs.logInfo("VideoRoom", "setUserState",
                   "call setstate for cammute update");
             });
-          }
-          else {
+          } else {
             FlutterLogs.logInfo("VideoRoom", "setUserState",
                 "state not mounted");
           }
           break;
-        } else
+        } else {
           FlutterLogs.logInfo(
               "VideoRoom", "setUserState", "could not find user");
+        }
       }
     }
-    else
-      {
-        FlutterLogs.logInfo(
-            "VideoRoom", "setUserState", "state not valid");
-        if(state!=null)
-          {
-            List roomFeeds = state.getFeeds();
-            if(roomFeeds!=null) {
-              for (var feed in roomFeeds) {
-                if (feed != null && feed['id'] == user['rfid']) {
-                  FlutterLogs.logInfo(
-                      "VideoRoom", "setUserState",
-                      "found user in feed ${roomFeeds}");
+    else {
+      FlutterLogs.logInfo(
+          "VideoRoom", "setUserState", "state not valid");
+      if (state != null) {
+        List roomFeeds = state.getFeeds();
+        if (roomFeeds != null) {
+          for (var feed in roomFeeds) {
+            if (feed != null && feed['id'] == user['rfid']) {
+              FlutterLogs.logInfo(
+                  "VideoRoom", "setUserState",
+                  "found user in feed ${roomFeeds}");
 
-                  FlutterLogs.logInfo(
-                      "VideoRoom", "setUserState", "before ${feed['cammute']}");
+              FlutterLogs.logInfo(
+                  "VideoRoom", "setUserState", "before ${feed['cammute']}");
 
 
-                  feed['cammute'] = !user['camera'];
+              feed['cammute'] = !user['camera'];
 
-                  FlutterLogs.logInfo(
-                      "VideoRoom", "setUserState", "after ${feed['cammute']}");
-                  feed['question'] = user['question'];
+              FlutterLogs.logInfo(
+                  "VideoRoom", "setUserState", "after ${feed['cammute']}");
+              feed['question'] = user['question'];
 
-                  setUserQuestionInRoom(user);
-                  didFeedsUpdate = true;
-                }
-              }
+              setUserQuestionInRoom(user);
+              didFeedsUpdate = true;
             }
-            }
+          }
+        }
       }
+    }
 
     if (didFeedsUpdate) {
       state.onFeedsChanged(state.getFeeds());
@@ -270,38 +266,21 @@ class VideoRoom extends StatefulWidget {
 
 class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
   List<MediaStream> remoteStream = new List<MediaStream>();
-
   List<Map> roomFeeds;
-
-  int tempConter = 0;
-
   List streams;
-
   bool creatingFeed = false;
-
   List feeds = List.empty();
-
   List newStreamsMids = List.empty(growable: true);
-
   bool muteOtherCams = false;
-
   int page = 0;
-
   bool initialized = false;
-
   int fromVideoIndex;
-
   int toVideoIndex;
   String signal = "good";
-
   bool recoverFromBackground = false;
-
   List<MediaDeviceInfo> cameras;
 
-
-
   set id(id) {}
-
   set subscription(List subscription) {}
 
   SwitchPageHelper switcher;
@@ -348,8 +327,8 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
   }
 
   void updateSignal() {
-    if((widget.state !=null && widget.state.context!=null) && (widget.state.context.read<MainStore>() as MainStore).signal != signal)
-      {
+    if ((widget.state != null && widget.state.context != null)
+        && (widget.state.context.read<MainStore>() as MainStore).signal != signal) {
 
         setState(() {
           signal = (widget.state.context.read<MainStore>() as MainStore).signal;
@@ -470,14 +449,10 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
               FlutterLogs.logInfo("VideoRoom", "_newRemoteFeed",
                   "subscription to publishers successful");
 
-
               //set the pc and local streams to main store
               // Provider.of<MainStore>(context).setVideoRoomParams(widget.pluginHandle,widget.myStream);
               context.read<MainStore>().plugin = widget.pluginHandle;
               context.read<MainStore>().localStream = widget.myStream;
-
-
-
 
               Map<String, dynamic> userJson = widget.user.toJson();
               userJson["room"] = widget.roomNumber;
@@ -490,21 +465,21 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                   "type": "updateSpec",
                   "spec": context.read<MainStore>().spec
               });
-                widget.mainToIsolateStream[1].send({
-                  "type": 'setConnection',
-                  "user": userJson,
-                  // "localAudio": widget.myStream.getAudioTracks().first,
-                  // "localVideo": widget.myStream.getVideoTracks().first,
-                  // "plugin": context,
-                  "galaxyServer":context.read<MainStore>().activeStreamGateway.url,
-                  "janus":context.read<MainStore>().activeGateway.url,
-                  "version":context.read<MainStore>().version,
-                  "network":context.read<MainStore>().network.toString()
+              widget.mainToIsolateStream[1].send({
+                "type": 'setConnection',
+                "user": userJson,
+                // "localAudio": widget.myStream.getAudioTracks().first,
+                // "localVideo": widget.myStream.getVideoTracks().first,
+                // "plugin": context,
+                "galaxyServer":context.read<MainStore>().activeStreamGateway.url,
+                "janus":context.read<MainStore>().activeGateway.url,
+                "version":context.read<MainStore>().version,
+                "network":context.read<MainStore>().network.toString()
 
-                  // "userExtra": {},
-                  // "data": {}
-                });
-                widget.mainToIsolateStream[1].send({"type": "start"});
+                // "userExtra": {},
+                // "data": {}
+              });
+              widget.mainToIsolateStream[1].send({"type": "start"});
               // });
               widget.onCurrentUserJoinedRoom();
             },
@@ -627,15 +602,26 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         slowLink: (uplink, lost, mid) {
           FlutterLogs.logWarn("VideoRoom", "plugin: remotefeed_user",
               "slowLink: uplink ${uplink} lost ${lost} mid ${mid}");
-  if(widget.mainToIsolateStream !=null && widget.mainToIsolateStream[1]!=null)
-        (widget.mainToIsolateStream[1] as SendPort).send({"type":"slowLink","direction":uplink ? "sending":"receiving","lost":lost});
+          if (widget.mainToIsolateStream != null && widget.mainToIsolateStream[1] != null) {
+            (widget.mainToIsolateStream[1] as SendPort).send({
+              "type": "slowLink",
+              "direction": uplink ? "sending" : "receiving",
+              "lost": lost});
+          }
         },
-      onIceConnectionState:(connection){
-        FlutterLogs.logWarn("VideoRoom", "onIceConnectionState",
+        onIceConnectionState: (connection) {
+          FlutterLogs.logWarn("VideoRoom", "onIceConnectionState",
             "state: $connection");
-  if(widget.mainToIsolateStream !=null && widget.mainToIsolateStream[1]!=null)
-       (widget.mainToIsolateStream[1] as SendPort).send({"type":"iceState","state":connection.toString().split('.').last.toLowerCase().replaceFirst("rtciceconnectionstate", "")});
-      },
+          if (widget.mainToIsolateStream != null && widget.mainToIsolateStream[1] != null) {
+            (widget.mainToIsolateStream[1] as SendPort).send(
+                {"type": "iceState", "state": connection
+                    .toString()
+                    .split('.')
+                    .last
+                    .toLowerCase()
+                    .replaceFirst("rtciceconnectionstate", "")});
+          }
+        },
         onRenegotiationNeededCallback: (){
           FlutterLogs.logWarn("VideoRoom", "onRenegotiationNeededCallback",
               "_newRemoteFeed");
@@ -959,9 +945,8 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
       }
     };
 
-
-      //plugin.webRTCHandle.pc.removeTrack(senders.firstWhere((sender) => sender.track.kind == "audio"));
-      MediaStream stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+    //plugin.webRTCHandle.pc.removeTrack(senders.firstWhere((sender) => sender.track.kind == "audio"));
+    MediaStream stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
     if(widget.myStream.getVideoTracks().first.enabled){
       widget.myStream.getVideoTracks().first.enabled = false;
     }
@@ -971,29 +956,20 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         .first
         .setMicrophoneMute(true);
 
-
-
     setState(() {
-
-
-
       widget._localRenderer.srcObject = widget.myStream;
       widget.myAudioMuted = true;
       widget.myVideoMuted = true;
       widget.updateVideoState(true);
       widget.myStream.getVideoTracks().first.enabled = false;
-
     });
-
 
     Timer(Duration(seconds: 4),() async {
       var senders = await plugin.webRTCHandle.pc.senders;
-
-
-      await ((senders.firstWhere((sender) => sender.track.kind == "video" )).replaceTrack( widget.myStream
-          .getVideoTracks()
-          .first));
-     await ((senders.firstWhere((sender) => sender.track.kind == "audio" )).replaceTrack( widget.myStream
+      await ((senders.firstWhere((sender) => sender.track.kind == "video" )).replaceTrack(widget.myStream
+        .getVideoTracks()
+        .first));
+      await ((senders.firstWhere((sender) => sender.track.kind == "audio" )).replaceTrack(widget.myStream
         .getAudioTracks()
         .first));
     });
@@ -1011,12 +987,9 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     widget.myAudioMuted = true;
     widget.updateVideoState(true);
 
-
-    // });
     setState(() {
       widget._localRenderer.srcObject = widget.myStream;
     });
-
 
     var register = {
       "request": "join",
@@ -1183,7 +1156,6 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     if (!initialized) {
       initialized = true;
       initInfra();
-
     }
 
     final double userGridHeight =
@@ -1368,7 +1340,6 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
             widget.updateVideoState(true);
           });
 
-
           widget.updateGoingToBackground();
         // }
 
@@ -1452,37 +1423,28 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     setState(() {});
   }
 
- 
-
   void restartSelfVideo() async {
-
     FlutterLogs.logInfo("VideoRoom", "restartSelfVideo", "entering");
      Timer(Duration(seconds: 1), () {
        prepareAndRegisterMyStreamRecovery(widget.pluginHandle);
-
     });
-
   }
 
   void removeSelfVideo() {
-
     removeMyStreamWhenInBackground(widget.pluginHandle);
   }
+
   Future removeMyStreamWhenInBackground(Plugin plugin) async {
-
-
-    if(widget.myStream!=null && widget.myStream.getTracks()!=null)
-      {
-        widget.myStream.getTracks().forEach((element) {
-          element.enabled = false;
-          element.stop();
-        });
-      }
+    if (widget.myStream?.getTracks() != null) {
+      widget.myStream.getTracks().forEach((element) {
+        element.enabled = false;
+        element.stop();
+      });
+    }
     var publish = {
-      "request":"configure",
+      "request": "configure",
     };
-    RTCSessionDescription offer =
-    await plugin.createOffer(offerOptions: {
+    RTCSessionDescription offer = await plugin.createOffer(offerOptions: {
       //  "mandatory":{
       // "audioRecv": false,
       // "videoRecv": false,
@@ -1495,13 +1457,11 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
       }
     });
     plugin.send(
-        message: publish, jsep: offer, onSuccess: () {
+      message: publish, jsep: offer, onSuccess: () {
       print("xxxz plugin offer success");
-    },onError:(error){
+    }, onError: (error) {
       print("xxxz plugin offer error: ${error}");
     });
-
-
   }
 }
 
@@ -1517,16 +1477,15 @@ class RoomArguments {
 }
 
 class VideoGridItem extends StatelessWidget {
-
-  RTCVideoRenderer videoRenderer;
-  bool shouldShowVideo;
-  String displayName;
-  double itemWidth;
-  bool mirrorVideo;
-  bool isTalking;
-  bool hasQuestion;
+  final RTCVideoRenderer videoRenderer;
+  final bool shouldShowVideo;
+  final String displayName;
+  final double itemWidth;
+  final bool mirrorVideo;
+  final bool isTalking;
+  final bool hasQuestion;
   // If null, will not show signal strength.
-  String connectivitySignalStrength;
+  final String connectivitySignalStrength;
 
   VideoGridItem({
     @required this.videoRenderer,
@@ -1556,7 +1515,7 @@ class VideoGridItem extends StatelessWidget {
         child: Stack(children: [
           // If cam muted show icon, otherwise render the stream.
           shouldShowVideo
-              ? RTCVideoView(videoRenderer)
+              ? RTCVideoView(videoRenderer, mirror: mirrorVideo)
               : Align(
             alignment: Alignment.center,
             child: Icon(
