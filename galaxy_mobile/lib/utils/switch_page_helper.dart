@@ -83,22 +83,17 @@ class SwitchPageHelper {
         .toList();
 
     // Update video slots.
-    // oldVideoFeeds.forEach((feed) => {
-    //       if (feed != null) {feed["videoSlot"] = -1}
-    //     });
-    oldVideoFeeds.isNotEmpty
-        ? oldVideoFeeds.forEach((feed) {
-            if (feed != null) {
-              feed["videoSlot"] = null;
-            }
-          })
-        : null;
-    newVideoFeeds.isNotEmpty
-        ? newVideoFeeds.forEach((feed) {
-            var index = newVideoFeeds.indexOf(feed);
-            if (feed != null && feed.isNotEmpty) feed["videoSlot"] = index;
-          })
-        : null;
+    oldVideoFeeds.forEach((feed) {
+      if (feed != null) {
+        feed["videoSlot"] = null;
+      }
+    });
+    newVideoFeeds.forEach((feed) {
+      int index = newVideoFeeds.indexOf(feed);
+      if (feed != null && feed.isNotEmpty) {
+        feed["videoSlot"] = index;
+      }
+    });
 
     FlutterLogs.logInfo(
         "SwitchPageHelper",
@@ -156,29 +151,32 @@ class SwitchPageHelper {
               "unsubscribeFeeds: ${unsubscribeFeeds.toString()} | "
               "switchFeeds: ${switchFeeds.toString()}");
 
-      (this.makeSubscription != null)
-          ? this.makeSubscription(
-              subscribeFeeds,
-              /* feedsJustJoined= */ false,
-              /* subscribeToVideo= */ true,
-              /* subscribeToAudio= */ false,
-              /* subscribeToData= */ false)
-          : null;
-      (this.unsubscribeFrom != null)
-          ? this.unsubscribeFrom(
-              unsubscribeFeeds.map((feed) => feed["id"]).toList(),
-              /* onlyVideo= */ true)
-          : null;
-      switchFeeds.forEach((element) {
-        (this.switchVideoSlots != null)
-            ? this.switchVideoSlots(element["from"], element["to"])
-            : null;
-      });
+      if (this.makeSubscription != null) {
+        this.makeSubscription(
+            subscribeFeeds,
+            /* feedsJustJoined= */ false,
+            /* subscribeToVideo= */ true,
+            /* subscribeToAudio= */ false,
+            /* subscribeToData= */ false);
+      }
+      if (this.unsubscribeFrom != null) {
+        this.unsubscribeFrom(
+            unsubscribeFeeds.map((feed) => feed["id"]).toList(),
+            /* onlyVideo= */ true);
+      }
+      if (this.switchVideoSlots != null) {
+        switchFeeds.forEach((element) {
+          this.switchVideoSlots(element["from"], element["to"]);
+        });
+      }
       //first(({ from, to }) => this.switchVideoSlots(from, to));
     } else {
       FlutterLogs.logWarn("SwitchPageHelper", "switchVideos",
           "ignoring subscribe/unsubscribe/switch; other cams on mute mode");
     }
-    widget!=null?widget.updateDots(page, newFeeds.length):(){};
+
+    if (widget != null) {
+      widget.updateDots(page, newFeeds.length);
+    }
   }
 }
