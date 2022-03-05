@@ -1506,14 +1506,16 @@ class VideoGridItem extends StatelessWidget {
 
   Widget build(BuildContext context) {
     return Container(
-        decoration: BoxDecoration(
-          // If talking, change border color.
-            border: Border.all(
-                color: isTalking
-                    ? Colors.lightGreen
-                    : Colors.black)),
-        child: Stack(children: [
-          // If cam muted show icon, otherwise render the stream.
+      decoration: BoxDecoration(
+        // If talking, change border color.
+        border: Border.all(
+            color: isTalking
+                ? Colors.lightGreen
+                : Colors.black)
+      ),
+      child: Stack(
+        children: [
+          // Render the stream or show an icon.
           shouldShowVideo
               ? RTCVideoView(videoRenderer, mirror: mirrorVideo)
               : Align(
@@ -1538,28 +1540,31 @@ class VideoGridItem extends StatelessWidget {
                 ),
                 Text(displayName),
                 if (connectivitySignalStrength != null) Icon(
-                    Mdi.signal,
-                    size:15,
-                    color: connectivitySignalStrength == "good"
-                        ? Colors.white
-                        : Colors.red
+                  Mdi.signal,
+                  size:15,
+                  color: connectivitySignalStrength == "good"
+                      ? Colors.white
+                      : Colors.red
                 )
               ],
             ),
           ),
           // Show the question mark
           Align(
-              alignment: Alignment.topRight,
-              child: Container(
-                  margin: const EdgeInsets.only(
-                      top: 8.0, right: 8.0),
-                  child: Icon(
-                    Icons.live_help_rounded,
-                    color: hasQuestion
-                        ? Colors.red
-                        : Colors.transparent,
-                    size: 50,
-                  )))
-        ]));
+            alignment: Alignment.topRight,
+            child: Container(
+              margin: const EdgeInsets.only(top: 8.0, right: 8.0),
+              child: Icon(
+                Icons.live_help_rounded,
+                color: hasQuestion
+                    ? Colors.red
+                    : Colors.transparent,
+                size: 50,
+              )
+            )
+          )
+        ]
+      )
+    );
   }
 }
