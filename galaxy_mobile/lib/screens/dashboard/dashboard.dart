@@ -20,7 +20,7 @@ import 'package:flutter_audio_manager/flutter_audio_manager.dart';
 
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/screens/streaming/streaming.dart';
-import 'package:galaxy_mobile/screens/video_room/videoRoomWidget.dart';
+import 'package:galaxy_mobile/screens/video_room/video_room_widget.dart';
 import 'package:galaxy_mobile/widgets/chat/chat_room.dart';
 import 'package:galaxy_mobile/services/mqttClient.dart';
 import 'package:galaxy_mobile/widgets/loading_indicator.dart';

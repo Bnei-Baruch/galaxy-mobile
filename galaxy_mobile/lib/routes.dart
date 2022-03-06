@@ -4,7 +4,7 @@ import 'package:galaxy_mobile/screens/login/login.dart';
 import 'package:galaxy_mobile/screens/settings/settings.dart';
 import 'package:galaxy_mobile/screens/streaming/components/playerWIdget.dart';
 import 'package:galaxy_mobile/screens/streaming/streaming.dart';
-import 'package:galaxy_mobile/screens/video_room/videoRoomWidget.dart';
+import 'package:galaxy_mobile/screens/video_room/video_room_widget.dart';
 
 final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
   '/': (BuildContext context) => Login(),

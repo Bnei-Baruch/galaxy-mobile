@@ -1,5 +1,5 @@
 import 'package:flutter_logs/flutter_logs.dart';
-import 'package:galaxy_mobile/screens/video_room/videoRoomWidget.dart';
+import 'package:galaxy_mobile/screens/video_room/video_room_widget.dart';
 
 typedef unsub = Function(List<dynamic>, bool);
 
