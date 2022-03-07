@@ -345,7 +345,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     (context.read<MainStore>() as MainStore).removeListener(updateSignal);
     widget.mainToIsolateStream[1].send({"type": "stop"});
-    widget.mainToIsolateStream??[1]??widget.mainToIsolateStream[1].kill();
+    widget.mainToIsolateStream??[0]??widget.mainToIsolateStream[0].kill();
     super.dispose();
   }
 

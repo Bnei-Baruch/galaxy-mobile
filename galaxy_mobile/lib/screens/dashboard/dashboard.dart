@@ -1092,12 +1092,14 @@ class _DashboardState extends State<Dashboard>
     FlutterLogs.logInfo("dashboard", "initMQTT", "xxxx setup mqtt in dashboard");
     final mqttClient = context.read<MQTTClient>();
 
-    mqttClient.subscribe("galaxy/room/$_activeRoomId");
-    mqttClient.subscribe("galaxy/room/$_activeRoomId/chat");
+
 
     mqttClient.addOnSubscribedCallback((topic) => subscribedToTopic(topic));
     mqttClient.addOnMsgReceivedCallback((payload, topic) => handleCmdData(payload, topic));
     mqttClient.addOnConnectionFailedCallback(() => handleConnectionFailed());
+
+    mqttClient.subscribe("galaxy/room/$_activeRoomId");
+    mqttClient.subscribe("galaxy/room/$_activeRoomId/chat");
   }
 }
 
