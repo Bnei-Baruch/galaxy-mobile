@@ -304,6 +304,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
         _remoteStreamAudio.getAudioTracks().last.enabled = false;
         _remoteStreamAudio.dispose();
         widget.audioStreamingPlugin.send(message: {"request": "stop"});
+        widget.audioStreamingPlugin.destroy();
         //  widget.audioTrlStreamingPlugin.send(message: {"request": "stop"});
         _remoteStreamAudio = null;
         setState(() {
@@ -325,7 +326,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
 
     playerOverlay.mute = (muted) {
       FlutterLogs.logInfo("Streaming", "&&&&&&&&&&&&&&&&",
-          "playerOverlay.mute: ${muted.toString()}");
+          "playerOverlay.mute: ${muted.toString()},  ${_remoteStreamAudio.getAudioTracks().last.id}");
       _remoteStreamAudio.getAudioTracks().last.enabled =
           !muted; //.setVolume(muted ? 0 : 0.5);
       // FlutterLogs.logInfo("Streaming", "&&&&&&&&&&&&&&&&", "audio trl");
