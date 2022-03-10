@@ -83,17 +83,21 @@ class SwitchPageHelper {
         .toList();
 
     // Update video slots.
-    oldVideoFeeds.forEach((feed) {
-      if (feed != null) {
-        feed["videoSlot"] = null;
-      }
-    });
-    newVideoFeeds.forEach((feed) {
-      int index = newVideoFeeds.indexOf(feed);
-      if (feed != null && feed.isNotEmpty) {
-        feed["videoSlot"] = index;
-      }
-    });
+    if (oldVideoFeeds.isNotEmpty) {
+      oldVideoFeeds.forEach((feed) {
+        if (feed != null) {
+          feed["videoSlot"] = null;
+        }
+      });
+    }
+    if (newVideoFeeds.isNotEmpty) {
+      newVideoFeeds.forEach((feed) {
+        int index = newVideoFeeds.indexOf(feed);
+        if (feed != null && feed.isNotEmpty) {
+          feed["videoSlot"] = index;
+        }
+      });
+    }
 
     FlutterLogs.logInfo(
         "SwitchPageHelper",
