@@ -116,14 +116,17 @@ class SwitchPageHelper {
     List subscribeFeeds = [];
     List unsubscribeFeeds = [];
     List switchFeeds = [];
-    newVideoFeeds.forEach((newFeed) {
-      if (newFeed != null &&
-          !oldVideoFeeds.any(
-            (oldFeed) => oldFeed != null && oldFeed["id"] == newFeed["id"],
-          )) {
-        subscribeFeeds.add(newFeed);
-      }
-    });
+    if (newVideoFeeds.isNotEmpty) {
+      newVideoFeeds.forEach((newFeed) {
+        if (newFeed != null &&
+            !oldVideoFeeds.any(
+                  (oldFeed) =>
+              oldFeed != null && oldFeed["id"] == newFeed["id"],
+            )) {
+          subscribeFeeds.add(newFeed);
+        }
+      });
+    }
 
     if (oldVideoFeeds.isNotEmpty) {
       oldVideoFeeds.forEach((oldFeed) {
