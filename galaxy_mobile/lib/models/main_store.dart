@@ -106,7 +106,7 @@ class MainStore extends ChangeNotifier {
     if (config == null) {
       config = await _api.fetchConfig();
     }
-    if( spec == null) {
+    if (spec == null) {
       spec = await _api.getMonitorSpec();
     }
     notifyListeners();

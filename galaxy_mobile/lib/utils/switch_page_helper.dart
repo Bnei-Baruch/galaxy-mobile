@@ -17,7 +17,6 @@ class SwitchPageHelper {
   PageSwitchFunction switchVideoSlots;
   UnsubscribeFunction unsubscribeFrom;
   OnSwitchVideosCallback onSwitchVideosCallback;
-  VideoRoom widget;
 
   SwitchPageHelper(
       UnsubscribeFunction unsubscribeFrom,
@@ -26,13 +25,10 @@ class SwitchPageHelper {
       int pageSize,
       bool muteOtherCams,
       OnSwitchVideosCallback onSwitchVideosCallback) {
-    this.widget = widget;
-    pageSize = pageSize;
-    muteOtherCams = muteOtherCams;
-    makeSubscription = makeSubscription;
-    unsubscribeFrom = unsubscribeFrom;
-    switchVideoSlots = switchVideoSlots;
-    onSwitchVideosCallback = onSwitchVideosCallback;
+    this.pageSize = pageSize;
+    this.muteOtherCams = muteOtherCams;
+    this.switchVideoSlots = switchVideoSlots;
+    this.onSwitchVideosCallback = onSwitchVideosCallback;
 
     if (unsubscribeFrom == null) {
       unsubscribeFrom = (list, camOnly) {
@@ -40,6 +36,7 @@ class SwitchPageHelper {
             "unsubscribe from: ${list.toString()}");
       };
     }
+    this.unsubscribeFrom = unsubscribeFrom;
 
     if (makeSubscription == null) {
       makeSubscription = (list, bool1, bool2, bool3, bool4) {
@@ -47,6 +44,7 @@ class SwitchPageHelper {
             "subscribing top: ${list.toString()}");
       };
     }
+    this.makeSubscription = makeSubscription;
   }
 
   void switchVideos(
