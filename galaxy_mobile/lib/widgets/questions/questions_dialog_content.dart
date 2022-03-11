@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_logs/flutter_logs.dart';
-import 'package:galaxy_mobile/models/mainStore.dart';
+import 'package:galaxy_mobile/models/main_store.dart';
 import 'package:galaxy_mobile/models/question.dart';
 import 'package:galaxy_mobile/services/api.dart';
 import 'package:galaxy_mobile/widgets/questions/questions_list.dart';

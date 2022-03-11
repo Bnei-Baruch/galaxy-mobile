@@ -5,8 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SharedPrefs {
   static SharedPreferences _sharedPrefs;
 
-
-
   factory SharedPrefs() => SharedPrefs._internal();
 
   SharedPrefs._internal();
@@ -25,7 +23,8 @@ class SharedPrefs {
   bool get audioMode => _sharedPrefs.getBool('audioMode') ?? false;
   set audioMode(bool value) => _sharedPrefs.setBool('audioMode', value);
 
-  int get audioPreset => _sharedPrefs.getInt('audioPreset') ?? Utils.getDefaultAudioOnLocal();//2
+  int get audioPreset =>
+      _sharedPrefs.getInt('audioPreset') ?? Utils.getDefaultAudioOnLocal();
   set audioPreset(int value) => _sharedPrefs.setInt('audioPreset', value);
 
   int get videoPreset => _sharedPrefs.getInt('videoPreset') ?? 1;
@@ -35,6 +34,9 @@ class SharedPrefs {
   set audioDevice(int value) => _sharedPrefs.setInt('audioDevice', value);
 
 
-  DateTime get lastLogin => _sharedPrefs.getInt('lastLogin')!=null? DateTime.fromMicrosecondsSinceEpoch(_sharedPrefs.getInt('lastLogin')) : DateTime.now();
-  set lastLogin(DateTime value) => _sharedPrefs.setInt('lastLogin', value.millisecondsSinceEpoch);
+  DateTime get lastLogin => _sharedPrefs.getInt('lastLogin') != null
+      ? DateTime.fromMicrosecondsSinceEpoch(_sharedPrefs.getInt('lastLogin'))
+      : DateTime.now();
+  set lastLogin(DateTime value) =>
+      _sharedPrefs.setInt('lastLogin', value.millisecondsSinceEpoch);
 }

@@ -6,22 +6,22 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_plugin/flutter_foreground_plugin.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:galaxy_mobile/models/mainStore.dart';
+import 'package:galaxy_mobile/models/main_store.dart';
 import 'package:galaxy_mobile/routes.dart';
 import 'package:galaxy_mobile/services/api.dart';
-import 'package:galaxy_mobile/services/authService.dart';
+import 'package:galaxy_mobile/services/auth_service.dart';
 import 'package:galaxy_mobile/services/logger.dart';
 import 'package:galaxy_mobile/themes/default.dart';
 import 'package:mdi/mdi.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-import 'models/sharedPref.dart';
+import 'models/shared_pref.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:flutter_fgbg/flutter_fgbg.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:galaxy_mobile/services/mqttClient.dart';
+import 'package:galaxy_mobile/services/mqtt_client.dart';
 
 // Compile notes:
 // - to generate luncher icons run:
@@ -63,40 +63,40 @@ void main() async {
   //     appRunner: () =>
   //
   runZoned(
-        () {
-          runApp(
+    () {
+      runApp(
 
-            /// Providers are above [MyApp] instead of inside it, so that tests
-            /// can use [MyApp] while mocking the providers
-            MultiProvider(
-                providers: [
-                  Provider<AuthService>(create: (_) => AuthService()),
-                  Provider<Api>(create: (_) => Api()),
-                  Provider<MQTTClient>(create: (_) => MQTTClient()),
+        /// Providers are above [MyApp] instead of inside it, so that tests
+        /// can use [MyApp] while mocking the providers
+        MultiProvider(
+            providers: [
+              Provider<AuthService>(create: (_) => AuthService()),
+              Provider<Api>(create: (_) => Api()),
+              Provider<MQTTClient>(create: (_) => MQTTClient()),
 
-                  // Provider<Dashboard>(create: (_) => Dashboard()),
-                  ChangeNotifierProxyProvider3<AuthService,
-                      Api,
-                      MQTTClient,
-                      MainStore>(
-                      create: (_) => MainStore(),
-                      update: (_, auth, api, mqttClient, model) =>
-                      model..update(auth, api, mqttClient)),
+              // Provider<Dashboard>(create: (_) => Dashboard()),
+              ChangeNotifierProxyProvider3<AuthService,
+                  Api,
+                  MQTTClient,
+                  MainStore>(
+                  create: (_) => MainStore(),
+                  update: (_, auth, api, mqttClient, model) =>
+                  model..update(auth, api, mqttClient)),
+            ],
+            child: EasyLocalization(
+                supportedLocales: [
+                  Locale('en', 'US'),
+                  Locale('ru', 'RU'),
+                  Locale('he', 'IL'),
+                  Locale('es', '')
                 ],
-                child: EasyLocalization(
-                    supportedLocales: [
-                      Locale('en', 'US'),
-                      Locale('ru', 'RU'),
-                      Locale('he', 'IL'),
-                      Locale('es', '')
-                    ],
-                    path: 'assets/translations',
-                    fallbackLocale: Locale('en', 'US'),
-                    child: MyApp())
-              //MyApp()
-            ),
-          );
-        },
+                path: 'assets/translations',
+                fallbackLocale: Locale('en', 'US'),
+                child: MyApp())
+          //MyApp()
+        ),
+      );
+    },
     zoneSpecification: ZoneSpecification(
       // Intercept all print calls
       print: (self, parent, zone, line) async {
@@ -107,11 +107,7 @@ void main() async {
           parent.print(zone, line);
       },
     ),
-
-);
-
-      // );
-
+  );
 }
 
 class MyApp extends StatelessWidget with WidgetsBindingObserver {
@@ -140,7 +136,9 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
                 locale: context.locale,
                 theme: appTheme(),
                 initialRoute: '/',
-                routes: routes)));
+                routes: routes)
+        )
+    );
   }
 }
 
@@ -148,7 +146,6 @@ Future<RemoteConfig> setupRemoteConfig() async {
   await Firebase.initializeApp();
   final RemoteConfig remoteConfig = RemoteConfig.instance as RemoteConfig;
   await remoteConfig.setConfigSettings(RemoteConfigSettings(
-
     fetchTimeoutMillis:  10*1000,
     minimumFetchIntervalMillis: 1*60*1000,
   ));

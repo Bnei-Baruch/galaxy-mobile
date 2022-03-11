@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
-import 'package:galaxy_mobile/models/mainStore.dart';
+import 'package:galaxy_mobile/models/main_store.dart';
 
 typedef OnSubmitCallback = Future<void> Function(String userName, String roomName, String questionContent);
 

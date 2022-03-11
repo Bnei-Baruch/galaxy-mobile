@@ -4,7 +4,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:galaxy_mobile/models/chat_message.dart';
-import 'package:galaxy_mobile/models/mainStore.dart';
+import 'package:galaxy_mobile/models/main_store.dart';
 import 'package:galaxy_mobile/viewmodels/chat_view_model.dart';
 import 'package:galaxy_mobile/widgets/chat/chat_message_bubble.dart';
 import 'package:galaxy_mobile/widgets/chat/send_chat_message_bar.dart';

@@ -78,20 +78,21 @@ class UILanguageSelector extends StatelessWidget {
             items: languages,
             selectedItem: getLanguage(context),
             onChanged: (String language) => {
-                  FlutterLogs.logInfo(
-                      "UILanguageSelector",
-                      "DropdownSearch.onChanged",
-                      "selected language: $language"),
-                  setLanguage(context, language)
-                },
+              FlutterLogs.logInfo(
+                "UILanguageSelector",
+                "DropdownSearch.onChanged",
+                "selected language: $language"),
+              setLanguage(context, language)
+            },
             dropdownSearchDecoration: InputDecoration.collapsed(
-                filled: true,
-                //border: OutlineInputBorder(),
-                // contentPadding: EdgeInsets.fromLTRB(12, 12, 8, 0),
-                fillColor: Colors
-                    .transparent //Theme.of(context).inputDecorationTheme.fillColor,
-                ),
+              filled: true,
+              //border: OutlineInputBorder(),
+              // contentPadding: EdgeInsets.fromLTRB(12, 12, 8, 0),
+              fillColor: Colors
+                  .transparent //Theme.of(context).inputDecorationTheme.fillColor,
+            ),
             showClearButton: false,
-            showSearchBox: false));
+            showSearchBox: false)
+        );
   }
 }
