@@ -37,7 +37,7 @@ int getNumPages(int feedCount) {
 }
 
 // Given available feed count, get the last available page index to switch to.
-// Lower index is 0.
+// Lowest index is 0.
 int getLastPageIndex(int feedCount) {
   int numPages = getNumPages(feedCount);
   return numPages == 0 ? 0 : numPages - 1;
@@ -1241,7 +1241,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                   mainAxisSpacing: 0,
                   crossAxisCount: 2,
                 ),
-                if (numPages > 0 && page + 1 < numPages) Align(
+                if (page < getLastPageIndex(feeds.length)) Align(
                   alignment: Alignment.centerRight,
                   child: IconButton(
                     color: Colors.blue,
