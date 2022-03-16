@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 import 'package:flutter/material.dart';
+import 'package:galaxy_mobile/main.dart';
 import 'package:galaxy_mobile/models/mainStore.dart';
 import 'package:galaxy_mobile/services/keycloak.dart';
 import 'package:galaxy_mobile/services/monitoring_isolate.dart';
@@ -79,6 +80,8 @@ class VideoRoom extends StatefulWidget {
 
   String streamingServer;
 
+  String configuredStreams;
+
   void exitRoom() async {
     if (j != null) j.destroy();
     if (pluginHandle != null) pluginHandle.hangup();
@@ -105,8 +108,7 @@ class VideoRoom extends StatefulWidget {
     questionInRoom = null;
     state.dispose();
     state = null;
-    mainToIsolateStream??[0]??mainToIsolateStream[0].kill();
-    WidgetsBinding.instance.removeObserver(state);
+
   }
 
   @override
@@ -344,15 +346,15 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         switchVideoSlots, PAGE_SIZE, muteOtherCams, widget);
     widget.state = this;
 
-    (context.read<MainStore>() as MainStore).addListener(updateSignal);
+    (context.read<MainStore>()).addListener(updateSignal);
   }
 
   void updateSignal() {
-    if((widget.state !=null && widget.state.context!=null) && (widget.state.context.read<MainStore>() as MainStore).signal != signal)
+    if((widget.state !=null && widget.state.context!=null) && (widget.state.context.read<MainStore>()).signal != signal)
       {
 
         setState(() {
-          signal = (widget.state.context.read<MainStore>() as MainStore).signal;
+          signal = (widget.state.context.read<MainStore>()).signal;
         });
 
         FlutterLogs.logInfo(
@@ -365,8 +367,18 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
 
     WidgetsBinding.instance.removeObserver(this);
     (context.read<MainStore>() as MainStore).removeListener(updateSignal);
-    widget.mainToIsolateStream??[1]??widget.mainToIsolateStream[1].send({"type": "stop"});
-    widget.mainToIsolateStream??[0]??widget.mainToIsolateStream[0].kill();
+    if(widget.mainToIsolateStream != null)
+    {
+      if(widget.mainToIsolateStream[1] != null)
+      {
+        widget.mainToIsolateStream[1].send({"type": "stop"});
+      }
+      if(widget.mainToIsolateStream[0] != null)
+      {
+        widget.mainToIsolateStream[0].kill();
+      }
+    }
+
     super.dispose();
   }
 
@@ -806,21 +818,14 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                   if (msg['configured'] == 'ok') {
                     FlutterLogs.logInfo(
                         "VideoRoom", "initPlatformState", "configured $msg");
+                    FlutterLogs.logInfo(
+                        "VideoRoom", "initPlatformState", "streams ${msg["streams"]}");
 
-                    // User published own feed successfully.
-                    // const user = {
-                    //   ...this.state.user,
-                    //   extra: {
-                    //     ...(this.state.user.extra || {}),
-                    //     streams: msg.streams
-                    //   }
-                    // };
-                    // this.setState({ user });
-                    // if (this.state.muteOtherCams) {
-                    //   this.camMute(/* cammuted= */ false);
-                    //   this.setState({ videos: NO_VIDEO_OPTION_VALUE });
-                    //   this.state.virtualStreamingJanus.setVideo(NO_VIDEO_OPTION_VALUE);
-                    // }
+                    widget.configuredStreams = json.encode(msg["streams"]);
+                    var userJson = widget.user.toJson();
+                    widget.user = User.fromJson(userJson);
+                    updateGxyUser(context, userJson);
+
                   } else if (msg['publishers'] != null &&
                       msg['publishers'] != null) {
                     FlutterLogs.logInfo(
@@ -1742,7 +1747,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
           onSuccess: () {
             FlutterLogs.logInfo("VideoRoom", "unsubscribeFrom",
                 "unsubscribed successfully: ${unsubscribe.toString()}");
-            if ((widget.state as State).mounted) setState(() {});
+            if ((widget.state).mounted) setState(() {});
           },
           onError: (error) {
             FlutterLogs.logError("VideoRoom", "unsubscribeFrom",
@@ -1823,6 +1828,9 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     userData["country"] = Platform.localeName;
     userData["session"] = widget.j.sessionId;
     userData["handle"] = widget.pluginHandle.handleId;
+    userData["extra"] = {};
+    userData["extra"]["streams"]= json.decode(widget.configuredStreams);
+    print("## extra = ${widget.configuredStreams}");
     widget.updateGlxUserCB(userData);
   }
 
