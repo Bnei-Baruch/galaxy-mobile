@@ -4,14 +4,14 @@ import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_logs/flutter_logs.dart';
-import 'package:galaxy_mobile/models/mainStore.dart';
+import 'package:galaxy_mobile/models/main_store.dart';
 import 'package:galaxy_mobile/screens/streaming/constants.dart';
 import 'package:janus_client/Plugin.dart';
 import 'package:janus_client/janus_client.dart';
 import 'package:janus_client/utils.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
-import 'components/playerWIdget.dart';
+import 'components/player_widget.dart';
 import 'package:provider/provider.dart';
 
 class StreamingUnified extends StatefulWidget {

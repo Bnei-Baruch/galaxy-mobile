@@ -1,29 +1,34 @@
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:galaxy_mobile/screens/video_room/video_room_widget.dart';
 
-typedef unsub = Function(List<dynamic>, bool);
+typedef UnsubscribeFunction = Function(List<dynamic>, bool);
 
-typedef make = dynamic Function(
+typedef MakeSubscriptionFunction = dynamic Function(
     List<dynamic>, dynamic, dynamic, dynamic, dynamic);
 
-typedef switcher = Function(int, int);
+typedef PageSwitchFunction = Function(int, int);
+
+typedef OnSwitchVideosCallback = Function(int page, int feedsLength);
 
 class SwitchPageHelper {
-  int PAGE_SIZE;
+  int pageSize;
   bool muteOtherCams;
-  make makeSubscription;
-  switcher switchVideoSlots;
-  unsub unsubscribeFrom;
-  VideoRoom widget;
+  MakeSubscriptionFunction makeSubscription;
+  PageSwitchFunction switchVideoSlots;
+  UnsubscribeFunction unsubscribeFrom;
+  OnSwitchVideosCallback onSwitchVideosCallback;
 
-  SwitchPageHelper(unsub unsubscriber, make makeSub, switcher Switcher,
-      int pageSize, bool mute, VideoRoom widget) {
-    this.widget = widget;
-    PAGE_SIZE = pageSize;
-    muteOtherCams = mute;
-    makeSubscription = makeSub;
-    unsubscribeFrom = unsubscriber;
-    switchVideoSlots = Switcher;
+  SwitchPageHelper(
+      UnsubscribeFunction unsubscribeFrom,
+      MakeSubscriptionFunction makeSubscription,
+      PageSwitchFunction switchVideoSlots,
+      int pageSize,
+      bool muteOtherCams,
+      OnSwitchVideosCallback onSwitchVideosCallback) {
+    this.pageSize = pageSize;
+    this.muteOtherCams = muteOtherCams;
+    this.switchVideoSlots = switchVideoSlots;
+    this.onSwitchVideosCallback = onSwitchVideosCallback;
 
     if (unsubscribeFrom == null) {
       unsubscribeFrom = (list, camOnly) {
@@ -31,13 +36,15 @@ class SwitchPageHelper {
             "unsubscribe from: ${list.toString()}");
       };
     }
+    this.unsubscribeFrom = unsubscribeFrom;
 
-    if (makeSub == null) {
+    if (makeSubscription == null) {
       makeSubscription = (list, bool1, bool2, bool3, bool4) {
         FlutterLogs.logInfo("SwitchPageHelper", "SwitchPageHelper",
             "subscribing top: ${list.toString()}");
       };
     }
+    this.makeSubscription = makeSubscription;
   }
 
   void switchVideos(
@@ -49,12 +56,12 @@ class SwitchPageHelper {
         "SwitchPageHelper",
         "switchVideos",
         "switchVideos >> page: ${page.toString()} | "
-            "pageSize: ${PAGE_SIZE.toString()} | "
+            "pageSize: ${pageSize.toString()} | "
             "old feeds: ${oldFeeds.length.toString()} | "
             "new feeds: ${newFeeds.length.toString()}");
 
     List oldVideoSlots = List();
-    for (int index = 0; index < PAGE_SIZE; index++) {
+    for (int index = 0; index < pageSize; index++) {
       oldVideoSlots
           .add(oldFeeds.indexWhere((feed) => feed["videoSlot"] == index));
     }
@@ -66,10 +73,10 @@ class SwitchPageHelper {
         : List.empty();
 
     List newVideoSlots = List();
-    for (int index = 0; index < PAGE_SIZE; index++) {
-      newVideoSlots.add((page * PAGE_SIZE) + index >= newFeeds.length
+    for (int index = 0; index < pageSize; index++) {
+      newVideoSlots.add((page * pageSize) + index >= newFeeds.length
           ? -1
-          : (page * PAGE_SIZE) + index);
+          : (page * pageSize) + index);
     }
 
     FlutterLogs.logInfo(
@@ -182,8 +189,8 @@ class SwitchPageHelper {
           "ignoring subscribe/unsubscribe/switch; other cams on mute mode");
     }
 
-    if (widget != null) {
-      widget.updateDots(page, newFeeds.length);
+    if (onSwitchVideosCallback != null) {
+      onSwitchVideosCallback(page, newFeeds.length);
     }
   }
 }

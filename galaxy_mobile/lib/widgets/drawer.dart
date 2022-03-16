@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_logs/flutter_logs.dart';
-import 'package:galaxy_mobile/models/mainStore.dart';
-import 'package:galaxy_mobile/services/authService.dart';
+import 'package:galaxy_mobile/models/main_store.dart';
+import 'package:galaxy_mobile/services/auth_service.dart';
 import 'package:logcat/logcat.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';

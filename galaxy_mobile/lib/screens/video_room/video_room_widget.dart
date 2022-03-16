@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 import 'package:flutter/material.dart';
-import 'package:galaxy_mobile/models/mainStore.dart';
+import 'package:galaxy_mobile/models/main_store.dart';
 import 'package:galaxy_mobile/services/keycloak.dart';
 import 'package:galaxy_mobile/services/monitoring_isolate.dart';
 import 'package:galaxy_mobile/widgets/directional_child.dart';
@@ -41,7 +41,7 @@ class VideoRoom extends StatefulWidget {
   UpdateUserCallback updateGlxUserCB;
   User user;
 
-  JanusClient j;
+  JanusClient _janusClient;
   RTCVideoRenderer _localRenderer = new RTCVideoRenderer();
   List<RTCVideoRenderer> _remoteRenderers = new List<RTCVideoRenderer>();
   Plugin pluginHandle;
@@ -58,41 +58,28 @@ class VideoRoom extends StatefulWidget {
   _VideoRoomState state;
 
   int myid;
-
   int mypvtid;
-
   BoolCallback updateVideoState;
-
   VoidCallback RoomReady;
-
   bool myVideoNeedsRecreation = false;
-
   Plugin chatHandle;
-
   String janusName;
-
   String groupName;
-
   bool isFullScreen = false;
-
   List mainToIsolateStream;
-
   String streamingServer;
 
   void exitRoom() async {
-    if (j != null) j.destroy();
+    if (_janusClient != null) _janusClient.destroy();
     if (pluginHandle != null) pluginHandle.hangup();
     if (subscriberHandle != null) subscriberHandle.destroy();
     if (_localRenderer != null) {
-
       _localRenderer.srcObject = null;
       await _localRenderer.dispose();
-      // _localRenderer.dispose();
 
     }
     if (_remoteRenderers != null && _remoteRenderers.isNotEmpty) {
       _remoteRenderers.map((e) => e.srcObject = null);
-      //_remoteRenderers.map((e) => e.dispose());
     }
     if (myStream != null) {
       myStream.getAudioTracks().first.setMicrophoneMute(false);
@@ -133,8 +120,9 @@ class VideoRoom extends StatefulWidget {
       state.setState(() {
         myAudioMuted = !myAudioMuted;
       });
-    else
+    else {
       myAudioMuted = !myAudioMuted;
+    }
   }
 
   void toggleVideo() {
@@ -320,7 +308,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
 
     WidgetsBinding.instance.addObserver(this);
     switcher = SwitchPageHelper(unsubscribeFrom, makeSubscription,
-        switchVideoSlots, PAGE_SIZE, muteOtherCams, widget);
+        switchVideoSlots, PAGE_SIZE, muteOtherCams, widget.updateDots);
     widget.state = this;
 
     (context.read<MainStore>() as MainStore).addListener(updateSignal);
@@ -378,11 +366,11 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
 
   userFeeds(feeds) => feeds.map((feed) => feed["display"]["role"] == 'user');
 
-  _newRemoteFeed(JanusClient j, List<Map> feeds) async {
+  _newRemoteFeed(JanusClient janusClient, List<Map> feeds) async {
     roomFeeds = feeds;
     FlutterLogs.logInfo(
         "VideoRoom", "_newRemoteFeed", "remote plugin attached");
-    j.attach(Plugin(
+    janusClient.attach(Plugin(
         opaqueId: 'remotefeed_user',
         plugin: 'janus.plugin.videoroom',
         onMessage: (msg, jsep) async {
@@ -640,23 +628,23 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
 
   Future<void> initPlatformState() async {
     setState(() {
-      widget.j = JanusClient(iceServers: [
+      widget._janusClient = JanusClient(iceServers: [
         RTCIceServer(
             url: "stun:galaxy.kli.one:3478", username: "", credential: ""),
       ], server: [
         widget.server,
       ], withCredentials: true, isUnifiedPlan: true, token: widget.token);
-      widget.j.connect(onSuccess: (sessionId) async {
+      widget._janusClient.connect(onSuccess: (sessionId) async {
         FlutterLogs.logInfo(
             "VideoRoom",
             "initPlatformState",
             "voila! connection established with session id as "
                 "${sessionId.toString()}");
         // Map<String, dynamic> configuration = {
-        //   "iceServers": widget.j.iceServers.map((e) => e.toMap()).toList()
+        //   "iceServers": widget._janusClient.iceServers.map((e) => e.toMap()).toList()
         // };
 
-        widget.j.attach(Plugin(
+        widget._janusClient.attach(Plugin(
             opaqueId: widget.user.sub,
             plugin: 'janus.plugin.videoroom',
             onMessage: (msg, jsep) async {
@@ -1128,7 +1116,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
 
     // We are not creating the feed, so let's do it.
     creatingFeed = true;
-    _newRemoteFeed(widget.j, subscription);
+    _newRemoteFeed(widget._janusClient, subscription);
   }
 
   @override
@@ -1376,7 +1364,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     userData["system"] = Platform.isAndroid ? "Android" : "iOS";
     userData["ip"] = await printIps();
     userData["country"] = Platform.localeName;
-    userData["session"] = widget.j.sessionId;
+    userData["session"] = widget._janusClient.sessionId;
     userData["handle"] = widget.pluginHandle.handleId;
     widget.updateGlxUserCB(userData);
   }

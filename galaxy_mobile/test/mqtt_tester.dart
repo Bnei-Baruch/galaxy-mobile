@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:galaxy_mobile/services/mqttClient.dart';
+import 'package:galaxy_mobile/services/mqtt_client.dart';
 import 'package:galaxy_mobile/utils/utils.dart';
 
 void main() {
