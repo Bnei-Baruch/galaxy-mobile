@@ -18,11 +18,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_audio_manager/flutter_audio_manager.dart';
 
-import 'package:galaxy_mobile/models/mainStore.dart';
+import 'package:galaxy_mobile/models/main_store.dart';
 import 'package:galaxy_mobile/screens/streaming/streaming.dart';
-import 'package:galaxy_mobile/screens/video_room/videoRoomWidget.dart';
+import 'package:galaxy_mobile/screens/video_room/video_room_widget.dart';
 import 'package:galaxy_mobile/widgets/chat/chat_room.dart';
-import 'package:galaxy_mobile/services/mqttClient.dart';
+import 'package:galaxy_mobile/services/mqtt_client.dart';
 import 'package:galaxy_mobile/widgets/loading_indicator.dart';
 import 'package:galaxy_mobile/widgets/questions/questions_dialog_content.dart';
 import 'package:easy_localization/easy_localization.dart';

@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_appauth_platform_interface/src/token_response.dart';
-import 'package:galaxy_mobile/models/mainStore.dart';
-import 'package:galaxy_mobile/models/sharedPref.dart';
+import 'package:galaxy_mobile/models/main_store.dart';
+import 'package:galaxy_mobile/models/shared_pref.dart';
 import 'package:galaxy_mobile/services/api.dart';
-import 'package:galaxy_mobile/services/authService.dart';
-import 'package:galaxy_mobile/services/mqttClient.dart';
-import 'package:galaxy_mobile/widgets/connectedDots.dart';
-import 'package:galaxy_mobile/widgets/uiLanguageSelector.dart';
+import 'package:galaxy_mobile/services/auth_service.dart';
+import 'package:galaxy_mobile/services/mqtt_client.dart';
+import 'package:galaxy_mobile/widgets/connected_dots.dart';
+import 'package:galaxy_mobile/widgets/ui_language_selector.dart';
 import 'package:new_version/new_version.dart';
 import 'package:package_info/package_info.dart';
 import 'package:provider/provider.dart';
@@ -27,26 +27,22 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login>  with WidgetsBindingObserver {
   Timer refresher;
+  var newVersion;
 
   Future<String> getFileData(String path) async {
     return await rootBundle.loadString(path);
   }
-  var newVersion;
 
   @override
-  initState()
-  {
+  initState() {
      newVersion = NewVersion(
         iOSId: 'com.galaxy.mobile',
         androidId: 'com.galaxy_mobile',
         context: context
     );
     WidgetsBinding.instance.addObserver(this);
-
-     advancedStatusCheck(newVersion);
-
+    advancedStatusCheck(newVersion);
   }
-
 
   basicStatusCheck(NewVersion newVersion) {
     newVersion.showAlertIfNecessary();
@@ -55,14 +51,13 @@ class _LoginState extends State<Login>  with WidgetsBindingObserver {
   advancedStatusCheck(NewVersion newVersion) async {
     final status = await newVersion.getVersionStatus();
     if (status != null) {
-
       debugPrint(status.appStoreLink);
       debugPrint(status.localVersion);
       debugPrint(status.storeVersion);
       debugPrint(status.canUpdate.toString());
-      int intA = int.parse(status.localVersion.replaceAll(".",""));
-      int intB = int.parse(status.storeVersion.replaceAll(".",""));
-      if(intA<intB)
+      int localVersion = int.parse(status.localVersion.replaceAll(".",""));
+      int storeVersion = int.parse(status.storeVersion.replaceAll(".",""));
+      if (localVersion < storeVersion)
         newVersion.showUpdateDialog(status);
     }
   }
@@ -103,9 +98,9 @@ class _LoginState extends State<Login>  with WidgetsBindingObserver {
     final api = context.read<Api>();
     var authResponse = await auth.signIn();
 
-
-    if(refresher!=null)
+    if (refresher != null) {
       refresher.cancel();
+    }
 
     refreshTimer(authResponse, auth, api);
     print("access token ${authResponse.accessToken} ");
@@ -117,24 +112,22 @@ class _LoginState extends State<Login>  with WidgetsBindingObserver {
     api.setAccessToken(authResponse.accessToken);
 
     await context.read<MainStore>().init();
-    if(!context.read<MainStore>().activeUser.roles.contains("gxy_user"))
-      {
-        showDialog(context: context, builder:  (BuildContext context) {
+    if (!context.read<MainStore>().activeUser.roles.contains("gxy_user")) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
           return AlertDialog(
             title: Text("User Permission"),
               content: Text("Not Allowed"),
           );
-        },);
-      }
-    else {
+        });
+    } else {
       store.setLastLogin(DateTime.now());
-
-
       Navigator.pushNamed(context, '/settings');
     }
   }
 
-  TokenResponse refreshTimer(TokenResponse authResponse, AuthService auth, Api api) {
+  void refreshTimer(TokenResponse authResponse, AuthService auth, Api api) {
     FlutterLogs.logInfo("login", "refreshTimer", "refresh request time=${authResponse.accessTokenExpirationDateTime.toIso8601String()}");
      refresher = Timer(Duration(milliseconds: authResponse.accessTokenExpirationDateTime.millisecondsSinceEpoch-DateTime.now().millisecondsSinceEpoch), () async {
       FlutterLogs.logInfo("login", "refreshTimer", "refresh execution ");

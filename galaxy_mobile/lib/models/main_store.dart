@@ -5,12 +5,12 @@ import 'package:connectivity_plus_platform_interface/src/enums.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/src/interface/media_stream.dart';
-import 'package:galaxy_mobile/models/sharedPref.dart';
+import 'package:galaxy_mobile/models/shared_pref.dart';
 import 'package:galaxy_mobile/screens/dashboard/dashboard.dart';
 import 'package:galaxy_mobile/services/api.dart';
-import 'package:galaxy_mobile/services/authService.dart';
+import 'package:galaxy_mobile/services/auth_service.dart';
 import 'package:galaxy_mobile/services/keycloak.dart';
-import 'package:galaxy_mobile/services/mqttClient.dart';
+import 'package:galaxy_mobile/services/mqtt_client.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:janus_client/Plugin.dart';
 
@@ -48,18 +48,11 @@ class MainStore extends ChangeNotifier {
   Plugin plugin;
 
   MediaStream localStream;
-
   SendPort monitorPort;
-
   int audioDevice;
-
   String version;
 
   ConnectivityResult network;
-
-
-
-
 
   Future init() async {
     await Future.wait([fetchUser(), fetchConfig(), fetchAvailableRooms(false)]);
@@ -77,8 +70,6 @@ class MainStore extends ChangeNotifier {
     _auth = auth;
     _api = api;
     _mqttClient = mqttClient;
-
-
   }
 
   void setActiveRoom(String roomName) {
@@ -115,10 +106,9 @@ class MainStore extends ChangeNotifier {
     if (config == null) {
       config = await _api.fetchConfig();
     }
-    if(spec == null)
-      {
-        spec = await _api.getMonitorSpec();
-      }
+    if (spec == null) {
+      spec = await _api.getMonitorSpec();
+    }
     notifyListeners();
   }
 
@@ -131,7 +121,6 @@ class MainStore extends ChangeNotifier {
 
   Future fetchUser() async {
     activeUser = await _auth.getUser();
-
     notifyListeners();
   }
 
@@ -147,8 +136,7 @@ class MainStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setAudioDevice(int audioDevice)
-  {
+  void setAudioDevice(int audioDevice) {
     SharedPrefs().audioDevice = audioDevice;
     this.audioDevice = audioDevice;
     notifyListeners();
@@ -170,14 +158,22 @@ class MainStore extends ChangeNotifier {
     localStream = myStream;
   }
 
-   getStats() async {
+  getStats() async {
     var audio = await plugin.webRTCHandle.pc.getStats(localStream.getAudioTracks().first);
     var video = await plugin.webRTCHandle.pc.getStats(localStream.getVideoTracks().first);
     var general = await plugin.webRTCHandle.pc.getStats(null);
     // monitorPort.send({"type":"report","value" :{"audio":audio,"video":video,"general":general,"videoTrackId":localStream.getVideoTracks().first.id,"audioTrackId":localStream.getAudioTracks().first.id}});
-    monitorPort.send({"type":"report","value" :{"audio":null,"video":null,"general":null,"videoTrackId":localStream.getVideoTracks().first.id,"audioTrackId":localStream.getAudioTracks().first.id}});
-
-   }
+    monitorPort.send({
+      "type": "report",
+      "value":{
+        "audio": null,
+        "video": null,
+        "general": null,
+        "videoTrackId": localStream.getVideoTracks().first.id,
+        "audioTrackId": localStream.getAudioTracks().first.id
+      }
+    });
+  }
 
   void setMonitorPort(SendPort mainToIsolateStream) {
     monitorPort = mainToIsolateStream;
@@ -189,14 +185,13 @@ class MainStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  DateTime getLastLogin()
-  {
+  DateTime getLastLogin() {
     FlutterLogs.logInfo("MainStore", "last login date", SharedPrefs().lastLogin.toString());
     return SharedPrefs().lastLogin;
   }
+
   void setLastLogin(DateTime dateTime) {
     FlutterLogs.logInfo("MainStore", "set last login date", dateTime.toString());
     SharedPrefs().lastLogin = dateTime;
-
   }
 }

@@ -30,20 +30,21 @@ class Utils {
         (b["display"]["timestamp"] as int));
     return feeds;
   }
-  static int getDefaultAudioOnLocal()
-  {
-    if(Platform.localeName.contains("en")) {
+
+  static int getDefaultAudioOnLocal() {
+    if (Platform.localeName.contains("en")) {
       return 4;
     }
-    if(Platform.localeName.contains("ru")) {
+    if (Platform.localeName.contains("ru")) {
       return 3;
     }
-    if(Platform.localeName.contains("he")) {
+    if (Platform.localeName.contains("he")) {
       return 2;
     }
-    if(Platform.localeName.contains("es")) {
+    if (Platform.localeName.contains("es")) {
       return 6;
     }
+    // TODO: what is the default value?
   }
 
   static bool isRTLString(String str) {
