@@ -1187,6 +1187,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
 
     final double itemHeight = userGridHeight / 2;
     final double itemWidth = userGridWidth / 2;
+    int pageCount = getNumPages(feeds.length);
 
     FlutterLogs.logInfo(
         "VideoRoom",
@@ -1240,7 +1241,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                   mainAxisSpacing: 0,
                   crossAxisCount: 2,
                 ),
-                if (page < getLastPageIndex(feeds.length)) Align(
+                if (pageCount > 1) Align(
                   alignment: Alignment.centerRight,
                   child: IconButton(
                     color: Colors.blue,
@@ -1251,7 +1252,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                     onPressed: () => switchPage(page + 1),
                   ),
                 ),
-                if (page > 0) Align(
+                if (pageCount > 1) Align(
                   alignment: Alignment.centerLeft,
                   child: IconButton(
                     color: Colors.blue,
