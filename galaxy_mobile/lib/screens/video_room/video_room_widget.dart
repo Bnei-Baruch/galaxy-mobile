@@ -1153,11 +1153,14 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
       initInfra();
     }
 
+    final double heightWithoutBars =
+        MediaQuery.of(context).size.height
+            - kBottomNavigationBarHeight
+            - Scaffold.of(context).appBarMaxHeight;
     final double userGridHeight =
         MediaQuery.of(context).orientation == Orientation.portrait
-            ? (MediaQuery.of(context).size.height - kBottomNavigationBarHeight ) / 2
-            : (MediaQuery.of(context).size.height - kBottomNavigationBarHeight - Scaffold.of(context).appBarMaxHeight);
-
+            ? heightWithoutBars / 2
+            : heightWithoutBars;
     final double userGridWidth =
         MediaQuery.of(context).orientation == Orientation.portrait
             ? MediaQuery.of(context).size.width
