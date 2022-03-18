@@ -1186,7 +1186,6 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                   alignment: Alignment.center,
                   child: GridView.count(
                     childAspectRatio: itemWidth / itemHeight,
-                    shrinkWrap: true,
                     children: [
                       // Render current user's item.
                       VideoGridItem(
