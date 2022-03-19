@@ -649,8 +649,8 @@ class _DashboardState extends State<Dashboard>
                           child: Align(
                             alignment: Alignment.center,
                             child: DotsIndicator(
-                                dotsCount: (feedsLength / PAGE_SIZE).ceil() > 0
-                                    ? (feedsLength / PAGE_SIZE).ceil()
+                                dotsCount: getNumPages(feedsLength) > 0
+                                    ? getNumPages(feedsLength)
                                     : 1,
                                 position: pagePosition.toDouble()),
                           ),

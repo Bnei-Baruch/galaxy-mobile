@@ -29,7 +29,20 @@ import '../../foreground.dart';
 typedef BoolCallback = Function(bool);
 typedef UpdateUserCallback = Function(Map<String, dynamic> user);
 typedef UpdateDots = Function(int position, int length);
+// Since active user is always in the page, PAGE_SIZE is the number of remote
+// feeds in the page.
 final int PAGE_SIZE = 3;
+
+int getNumPages(int feedCount) {
+  return (feedCount / PAGE_SIZE).ceil();
+}
+
+// Given available feed count, get the last available page index to switch to.
+// Lowest index is 0.
+int getLastPageIndex(int feedCount) {
+  int numPages = getNumPages(feedCount);
+  return numPages == 0 ? 0 : numPages - 1;
+}
 
 class VideoRoom extends StatefulWidget {
   List<RTCVideoView> remote_videos = new List();
@@ -368,13 +381,15 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
   }
 
   void switchPage(int page) {
-    // Normalize page, e.g., if it is -1 or too large...
     FlutterLogs.logInfo(
         "VideoRoom", "switchPage", "switch page to: ${page.toString()}");
-    int numPages = (feeds.length / PAGE_SIZE).ceil();
-    this.page = numPages == 0 ? 0 : (numPages + page) % numPages;
-
-    switcher.switchVideos(this.page, feeds, feeds);
+    int numPages = getNumPages(feeds.length);
+    // Normalize page, e.g., if it is -1 or too large...
+    int normalizedPage = numPages == 0 ? 0 : (numPages + page) % numPages;
+    switcher.switchVideos(normalizedPage, feeds, feeds);
+    this.setState(() {
+      this.page = normalizedPage;
+    });
   }
 
   userFeeds(feeds) => feeds.map((feed) => feed["display"]["role"] == 'user');
@@ -843,7 +858,6 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                     updateFeeds(feedsNewState);
                   } else if (msg['leaving'] != null && msg['leaving'] != null) {
                     // User leaving the room which is same as publishers gone.
-
                     final leaving = msg['leaving'];
                     FlutterLogs.logInfo("VideoRoom", "leaving",
                         "publisher: ${leaving.toString()} is leaving");
@@ -856,8 +870,9 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                         feeds,
                         feedsNewState);
                     updateFeeds(feedsNewState);
-                    // this.setState({ feeds: feedsNewState }, () => {
-                    if (page * PAGE_SIZE == feedsNewState.length) {
+                    // After user has left, if the current page index is
+                    // overflowing, go back one page.
+                    if (page > getLastPageIndex(feedsNewState.length)) {
                       this.switchPage(page - 1);
                     }
 
@@ -1166,6 +1181,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
 
     final double itemHeight = userGridHeight / 2;
     final double itemWidth = userGridWidth / 2;
+    int pageCount = getNumPages(feeds.length);
 
     FlutterLogs.logInfo(
         "VideoRoom",
@@ -1219,7 +1235,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                   mainAxisSpacing: 0,
                   crossAxisCount: 2,
                 ),
-                Align(
+                if (pageCount > 1) Align(
                   alignment: Alignment.centerRight,
                   child: IconButton(
                     color: Colors.blue,
@@ -1227,14 +1243,10 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                         ltrChildBuilder: (context) => Icon(Icons.arrow_forward),
                         rtlChildBuilder: (context) => Icon(Icons.arrow_back)
                     ),
-                    onPressed: () {
-                      setState(() {
-                        switchPage(page + 1);
-                      });
-                    },
+                    onPressed: () => switchPage(page + 1),
                   ),
                 ),
-                Align(
+                if (pageCount > 1) Align(
                   alignment: Alignment.centerLeft,
                   child: IconButton(
                     color: Colors.blue,
@@ -1242,11 +1254,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                       ltrChildBuilder: (context) => Icon(Icons.arrow_back),
                       rtlChildBuilder: (context) => Icon(Icons.arrow_forward)
                     ),
-                    onPressed: () {
-                      setState(() {
-                        switchPage(page - 1);
-                      });
-                    },
+                    onPressed: () => switchPage(page - 1),
                   ),
                 ),
 
