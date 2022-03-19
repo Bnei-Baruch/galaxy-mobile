@@ -57,11 +57,21 @@ class _LoginState extends State<Login>  with WidgetsBindingObserver {
       debugPrint(status.canUpdate.toString());
       int localVersion = int.parse(status.localVersion.replaceAll(".",""));
       int storeVersion = int.parse(status.storeVersion.replaceAll(".",""));
-      if (localVersion < storeVersion)
+      if (isVersionGreaterThan(status.storeVersion,status.localVersion))
         newVersion.showUpdateDialog(status);
     }
   }
 
+  bool isVersionGreaterThan(String newVersion, String currentVersion){
+    List<String> currentV = currentVersion.split(".");
+    List<String> newV = newVersion.split(".");
+    bool a = false;
+    for (var i = 0 ; i <= 2; i++){
+      a = int.parse(newV[i]) > int.parse(currentV[i]);
+      if(int.parse(newV[i]) != int.parse(currentV[i])) break;
+    }
+    return a;
+  }
   Future<void> showTAndCDialog(BuildContext context) async {
     String tAndCText = await getFileData('assets/res/t_and_c_'
         '${EasyLocalization.of(context).locale.languageCode}.txt');

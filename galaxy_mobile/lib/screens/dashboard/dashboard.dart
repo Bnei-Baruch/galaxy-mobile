@@ -471,6 +471,8 @@ class _DashboardState extends State<Dashboard>
   }
 
   void subscribedToTopic(String topic) {
+    FlutterLogs.logInfo(
+        "Dashboard", "subscribedToTopic", "topic = $topic");
     if (topic == "galaxy/room/" + _activeRoomId) {
       Future.delayed(const Duration(milliseconds: 1000), () {
         updateRoomWithMyState(false);
