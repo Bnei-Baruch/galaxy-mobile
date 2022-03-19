@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:math';
 import 'package:flutter/material.dart';
 
 import 'package:galaxy_mobile/models/main_store.dart';
@@ -1167,13 +1168,14 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
       initInfra();
     }
 
+    final double heightWithoutBars =
+        MediaQuery.of(context).size.height
+            - kBottomNavigationBarHeight
+            - Scaffold.of(context).appBarMaxHeight;
     final double userGridHeight =
         MediaQuery.of(context).orientation == Orientation.portrait
-            ? (MediaQuery.of(context).size.height / 3 * 1.5 -
-                kBottomNavigationBarHeight)
-            : (MediaQuery.of(context).size.height+2*
-            kBottomNavigationBarHeight+20);
-
+            ? heightWithoutBars / 2
+            : heightWithoutBars;
     final double userGridWidth =
         MediaQuery.of(context).orientation == Orientation.portrait
             ? MediaQuery.of(context).size.width
@@ -1196,44 +1198,46 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
             width: userGridWidth,
             child: Stack(
               children: [
-                GridView.count(
-                  childAspectRatio:
-                      MediaQuery.of(context).orientation == Orientation.portrait
-                          ? (itemWidth / itemHeight)
-                          : (itemHeight / itemWidth),
-                  children: [
-                    // Render current user's item.
-                    VideoGridItem(
-                        videoRenderer: widget._localRenderer,
-                        mirrorVideo: true,
-                        displayName: widget.user.givenName ?? "",
-                        itemWidth: itemWidth,
-                        shouldShowVideo: !widget.myVideoMuted,
-                        isTalking: !widget.myAudioMuted,
-                        hasQuestion: widget.isQuestion,
-                        connectivitySignalStrength: signal),
-                    // Render friends' items.
-                    ...([0, 1, 2].map((slotIndex) {
-                      RTCVideoRenderer slotRenderer = widget._remoteRenderers?.elementAt(slotIndex);
-                      var slotFeed = feeds?.firstWhere((element) => element["videoSlot"] == slotIndex, orElse: () => null);
-                      if (slotRenderer?.srcObject == null || slotFeed == null) {
-                        return Container();
-                      }
+                Align(
+                  alignment: Alignment.center,
+                  child: GridView.count(
+                    childAspectRatio: itemWidth / itemHeight,
+                    children: [
+                      // Render current user's item.
+                      VideoGridItem(
+                          videoRenderer: widget._localRenderer,
+                          mirrorVideo: true,
+                          displayName: widget.user.givenName ?? "",
+                          itemWidth: itemWidth,
+                          itemHeight: itemHeight,
+                          shouldShowVideo: !widget.myVideoMuted,
+                          isTalking: !widget.myAudioMuted,
+                          hasQuestion: widget.isQuestion,
+                          connectivitySignalStrength: signal),
+                      // Render friends' items.
+                      ...([0, 1, 2].map((slotIndex) {
+                        RTCVideoRenderer slotRenderer = widget._remoteRenderers?.elementAt(slotIndex);
+                        var slotFeed = feeds?.firstWhere((element) => element["videoSlot"] == slotIndex, orElse: () => null);
+                        if (slotRenderer?.srcObject == null || slotFeed == null) {
+                          return Container();
+                        }
 
-                      return VideoGridItem(
-                        videoRenderer: slotRenderer,
-                        displayName:  slotFeed["display"]["display"] ?? "",
-                        shouldShowVideo: slotFeed["cammute"] == false && !muteOtherCams,
-                        itemWidth: itemWidth,
-                        isTalking: slotFeed["talking"] == true,
-                        hasQuestion: slotFeed["question"] == true);
-                    }).toList()),
-                  ],
-                  primary: false,
-                  padding: const EdgeInsets.all(0),
-                  crossAxisSpacing: 0,
-                  mainAxisSpacing: 0,
-                  crossAxisCount: 2,
+                        return VideoGridItem(
+                          videoRenderer: slotRenderer,
+                          displayName:  slotFeed["display"]["display"] ?? "",
+                          shouldShowVideo: slotFeed["cammute"] == false && !muteOtherCams,
+                          itemWidth: itemWidth,
+                          itemHeight: itemHeight,
+                          isTalking: slotFeed["talking"] == true,
+                          hasQuestion: slotFeed["question"] == true);
+                      }).toList()),
+                    ],
+                    primary: false,
+                    padding: const EdgeInsets.all(0),
+                    crossAxisSpacing: 0,
+                    mainAxisSpacing: 0,
+                    crossAxisCount: 2,
+                  )
                 ),
                 if (pageCount > 1) Align(
                   alignment: Alignment.centerRight,
@@ -1486,6 +1490,7 @@ class VideoGridItem extends StatelessWidget {
   final bool shouldShowVideo;
   final String displayName;
   final double itemWidth;
+  final double itemHeight;
   final bool mirrorVideo;
   final bool isTalking;
   final bool hasQuestion;
@@ -1497,6 +1502,7 @@ class VideoGridItem extends StatelessWidget {
     @required this.shouldShowVideo,
     @required this.displayName,
     @required this.itemWidth,
+    @required this.itemHeight,
     this.mirrorVideo = false,
     this.isTalking = false,
     this.hasQuestion = false,
@@ -1505,12 +1511,14 @@ class VideoGridItem extends StatelessWidget {
        assert(shouldShowVideo != null),
        assert(displayName != null),
        assert(itemWidth != null),
+       assert(itemHeight != null),
        assert(mirrorVideo != null),
        assert(isTalking != null),
        assert(hasQuestion != null);
 
   Widget build(BuildContext context) {
     return Container(
+      height: itemHeight,
       decoration: BoxDecoration(
         // If talking, change border color.
         border: Border.all(
@@ -1528,7 +1536,7 @@ class VideoGridItem extends StatelessWidget {
             child: Icon(
               Icons.account_circle,
               color: Colors.white,
-              size: itemWidth - 60,
+              size: min(itemHeight, itemWidth) - 60,
             ),
           ),
           // Render label
@@ -1546,7 +1554,7 @@ class VideoGridItem extends StatelessWidget {
                 Text(displayName),
                 if (connectivitySignalStrength != null) Icon(
                   Mdi.signal,
-                  size:15,
+                  size: 15,
                   color: connectivitySignalStrength == "good"
                       ? Colors.white
                       : Colors.red
