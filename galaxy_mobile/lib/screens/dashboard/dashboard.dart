@@ -491,7 +491,7 @@ class _DashboardState extends State<Dashboard>
     } else if (topic == "galaxy/room/$_activeRoomId/chat") {
       chatViewModel.setOnNewMessageCallback((ChatMessage message) {
         final mqttClient = context.read<MQTTClient>();
-        mqttClient.send(topic, JsonEncoder().convert(message.toMQTTJson()));
+        mqttClient.send(topic,  String.fromCharCodes(JsonUtf8Encoder().convert(message.toMQTTJson())));
         return true;
       });
     }
