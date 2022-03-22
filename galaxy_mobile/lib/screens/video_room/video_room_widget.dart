@@ -1358,12 +1358,17 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         stopForegroundService();
         restartSelfVideo();
 
+        //fix for background task killed after 10 min in ios
+        if(Platform.isIOS)
+          widget.mainToIsolateStream[1].send({"type": "start"});
         break;
       case AppLifecycleState.paused:
         FlutterLogs.logInfo(
             "videoRoom", "didChangeAppLifecycleState", 'paused');
         startForegroundService();
-
+        //fix for background task killed after 10 min in ios
+        if(Platform.isIOS)
+          widget.mainToIsolateStream[1].send({"type": "stop"});
         break;
       case AppLifecycleState.detached:
         FlutterLogs.logInfo(

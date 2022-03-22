@@ -15,7 +15,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.1.0+38
+version: 1.1.2+40
 
 environment:
   sdk: ">=2.10.0 <3.0.0"
@@ -74,9 +74,9 @@ dependencies:
 #    path: ../../Documents/GitHub/logcat-fork/
   flutter_foreground_plugin: #^0.6.0
     git:
-      url: https://github.com/igala/flutter_foreground_service_plugin.git
+        url: https://github.com/igala/flutter_foreground_service_plugin.git
     #https://github.com/shivanshtalwar0/flutter_janus_client.git
-      ref: 0.6.0_taskRemovedFix
+        ref: 0.6.0.1
   #    path: ../../Documents/Github/flutter_foreground_service_plugin/
   dots_indicator: ^1.2.0
   flutter_audio_manager: #^0.2.3.1

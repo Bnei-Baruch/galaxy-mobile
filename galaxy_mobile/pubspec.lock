@@ -411,8 +411,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "0.6.0_taskRemovedFix"
-      resolved-ref: "50bf13e32f44f9903e8d77464f85589bf385d5f9"
+      ref: "0.6.0.1"
+      resolved-ref: "9f852c180c0f693a5d6471b7925c6a7f1cf605b1"
       url: "https://github.com/igala/flutter_foreground_service_plugin.git"
     source: git
     version: "0.6.0"

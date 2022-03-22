@@ -318,7 +318,7 @@ class MonitoringData {
     if (datas.length > 0) {
       this.storedData.add(datas);
     }
-    print("storedData type is: ${storedData.runtimeType}");
+    print("storedData type is: ${storedData.runtimeType} storedata size ${storedData.length} before sort and remove $storedData");
     // This is Async callback. Sort stored data.
     this.storedData.sort((a, b) => a[0]["timestamp"] - b[0]["timestamp"]);
     // Throw old stats, STORE_INTERVAL from last timestamp stored.
@@ -562,7 +562,7 @@ class MonitoringData {
           "type": 'updateBackend',
           "data": data_to_send,
         });
-
+    lastUpdateTimestamp = lastTimestamp;
 
   }
 
