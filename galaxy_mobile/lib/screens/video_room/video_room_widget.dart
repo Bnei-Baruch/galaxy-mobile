@@ -29,7 +29,7 @@ import '../../foreground.dart';
 
 typedef BoolCallback = Function(bool);
 typedef UpdateUserCallback = Function(Map<String, dynamic> user);
-typedef UpdateDots = Function(int position, int length);
+typedef OnPageChangeCallback = Function(int position, int length);
 // Since active user is always in the page, PAGE_SIZE is the number of remote
 // feeds in the page.
 final int PAGE_SIZE = 3;
@@ -65,7 +65,7 @@ class VideoRoom extends StatefulWidget {
   bool myVideoMuted = true;
   bool isQuestion = false;
 
-  UpdateDots updateDots;
+  OnPageChangeCallback onPageChange;
   var questionInRoom;
 
   MediaStream myStream;
@@ -324,7 +324,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
 
     WidgetsBinding.instance.addObserver(this);
     switcher = SwitchPageHelper(unsubscribeFrom, makeSubscription,
-        switchVideoSlots, PAGE_SIZE, muteOtherCams, widget.updateDots);
+        switchVideoSlots, PAGE_SIZE, muteOtherCams, widget.onPageChange);
     widget.state = this;
 
     (context.read<MainStore>()).addListener(updateSignal);

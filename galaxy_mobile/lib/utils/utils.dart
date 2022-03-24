@@ -72,5 +72,4 @@ class Utils {
     DateFormat dateFormat = new DateFormat(format);
     return dateFormat.format(dateTime);
   }
-
 }

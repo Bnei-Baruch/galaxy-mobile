@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui' as ui;
 
 import 'package:async/async.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -7,6 +8,7 @@ import 'package:dio/dio.dart';
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:galaxy_mobile/mocks/chat.dart';
 import 'package:galaxy_mobile/models/chat_message.dart';
+import 'package:galaxy_mobile/utils/ambient_direction.dart';
 import 'package:galaxy_mobile/utils/topics.dart';
 import 'package:galaxy_mobile/viewmodels/chat_view_model.dart';
 import 'package:icon_badge/icon_badge.dart';
@@ -201,11 +203,12 @@ class _DashboardState extends State<Dashboard>
       }
     });
 
-    videoRoom.updateDots = (int position, int length) {
+    videoRoom.onPageChange = (int position, int feedsLength) {
       if (mounted) {
         setState(() {
-          pagePosition = position;
-          feedsLength = length;
+          hideBars();
+          this.pagePosition = position;
+          this.feedsLength = feedsLength;
         });
       }
     };
@@ -622,7 +625,6 @@ class _DashboardState extends State<Dashboard>
                                   }))
                         ]),
           body: GestureDetector(
-              behavior: HitTestBehavior.opaque,
               onTap: () => toggleBarsVisibility(),
               child: OrientationBuilder(builder: (context, orientation) {
                 return Stack(children: <Widget>[
@@ -653,6 +655,7 @@ class _DashboardState extends State<Dashboard>
                           child: Align(
                             alignment: Alignment.center,
                             child: DotsIndicator(
+                                reversed: getAmbientDirection(context) == ui.TextDirection.rtl,
                                 dotsCount: getNumPages(feedsLength) > 0
                                     ? getNumPages(feedsLength)
                                     : 1,
@@ -1087,6 +1090,7 @@ class _DashboardState extends State<Dashboard>
       _barsShown = false;
       controller?.forward();
     });
+    _hideBarsTimer.cancel();
   }
 
   void toggleBarsVisibility() {

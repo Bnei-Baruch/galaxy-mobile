@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:galaxy_mobile/utils/ambient_direction.dart';
 
 class HorizontalFlip extends StatelessWidget {
   HorizontalFlip({
@@ -13,17 +14,10 @@ class HorizontalFlip extends StatelessWidget {
   final ui.TextDirection flipDirection;
   final Widget child;
 
-  ui.TextDirection _getAmbientDirection(BuildContext context) {
-    ui.TextDirection ambientTextDirection = Directionality.of(context);
-    if (ambientTextDirection == null) {
-      ambientTextDirection = defaultAmbientDirection;
-    }
-    return ambientTextDirection;
-  }
-
   @override
   Widget build(BuildContext context) {
-    ui.TextDirection ambientTextDirection = _getAmbientDirection(context);
+    ui.TextDirection ambientTextDirection =
+      getAmbientDirection(context, defaultAmbientDirection);
     bool shouldFlip = ambientTextDirection == flipDirection;
 
     return shouldFlip
