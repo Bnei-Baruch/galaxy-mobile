@@ -89,7 +89,7 @@ class ChatMessageBubble extends StatelessWidget {
                           : _getUserNameColor(chatMessage.senderName.hashCode)
                   )
                 ),
-                // TODO: Bidi is not supported very well: <hebrew><link><hebrew> doesn't render well.
+                // TODO: Bidi is not supported very well: <hebrew><english><hebrew> doesn't render well.
                 Directionality(
                   textDirection: textDirection,
                   child: Linkify(
