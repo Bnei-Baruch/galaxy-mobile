@@ -5,10 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 class Utils {
-  static final RegExp _isEnglishOrNonLetterCharRegex = RegExp(r'[\x00-\x7F]');
-  static final RegExp _isEnglishCharRegex = RegExp(r'[a-zA-Z]');
-  static final RegExp _isRTLCharRegex = RegExp(r'[\u0590-\u07FF\u200F\u202B\u202E\uFB1D-\uFDFD\uFE70-\uFEFC]');
-
   static Future<String> _loadJsonFromAsset(String jsonName) async {
     return await rootBundle.loadString("assets/json/" + jsonName);
   }
@@ -45,22 +41,6 @@ class Utils {
       return 6;
     }
     // TODO: what is the default value?
-  }
-
-  static bool isRTLString(String str) {
-    int rtlCharCount = 0;
-    int ltrCharCount = 0;
-    str.runes.forEach((c) {
-      String char = String.fromCharCode(c);
-      if (_isRTLCharRegex.hasMatch(char)) {
-        rtlCharCount++;
-      } else if (_isEnglishCharRegex.hasMatch(char)) {
-        ltrCharCount++;
-      } else if (!_isEnglishOrNonLetterCharRegex.hasMatch(char)) { // Non RTL & non-English characters.
-        ltrCharCount++;
-      }
-    });
-    return rtlCharCount > ltrCharCount;
   }
 
   /// Formats a date string for the [timestamp] in the provided [format].

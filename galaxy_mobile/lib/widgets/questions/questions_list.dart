@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:galaxy_mobile/models/question.dart';
 import 'package:galaxy_mobile/utils/utils.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:mdi/mdi.dart';
 
 class QuestionsList extends StatelessWidget {
@@ -26,7 +27,7 @@ class QuestionCard extends StatelessWidget {
   QuestionCard(this.question);
 
   Widget build(BuildContext context) {
-    bool isContentRTL = Utils.isRTLString(question.content);
+    bool isContentRTL = intl.Bidi.detectRtlDirectionality(question.content);
     ui.TextDirection textDirection = isContentRTL
         ? ui.TextDirection.rtl
         : ui.TextDirection.ltr;

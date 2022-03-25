@@ -1,12 +1,14 @@
 import 'dart:ui' as ui;
 
+import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_logs/flutter_logs.dart';
 import 'package:galaxy_mobile/models/chat_message.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:galaxy_mobile/utils/utils.dart';
-
+import 'package:intl/intl.dart' as intl;
 
 // TODO: show "read more" for long messages.
-// TODO: handle links.
 
 const Color ACTIVE_USER_USERNAME_COLOR = Color(0xFF92B6D1);
 const Color ACTIVE_USER_BUBBLE_BACKGROUND = Color(0xFF00488B);
@@ -44,10 +46,18 @@ class ChatMessageBubble extends StatelessWidget {
     return USERNAME_COLORS[hash.abs() % USERNAME_COLORS.length];
   }
 
+  Future<void> _onLinkOpen(LinkableElement link) async {
+    if (await canLaunch(link.url)) {
+      await launch(link.url);
+    } else {
+      FlutterLogs.logInfo("ChatMessageBubble", "_onLinkOpen", "Could not open link $link");
+    }
+  }
+
   Widget build(BuildContext context) {
     bool isMessageFromActiveUser = chatMessage.senderType == ChatMessageSender.ACTIVE_USER;
 
-    bool isContentRTL = Utils.isRTLString(chatMessage.messageContent);
+    bool isContentRTL = intl.Bidi.detectRtlDirectionality(chatMessage.messageContent);
     ui.TextDirection textDirection = isContentRTL
         ? ui.TextDirection.rtl
         : ui.TextDirection.ltr;
@@ -79,11 +89,17 @@ class ChatMessageBubble extends StatelessWidget {
                           : _getUserNameColor(chatMessage.senderName.hashCode)
                   )
                 ),
-                Text(
-                  chatMessage.messageContent,
-                  softWrap: true,
+                // TODO: Bidi is not supported very well: <hebrew><link><hebrew> doesn't render well.
+                Directionality(
                   textDirection: textDirection,
-                  style: TextStyle(fontSize: 14)
+                  child: Linkify(
+                    options: LinkifyOptions(humanize: false),
+                    onOpen: _onLinkOpen,
+                    softWrap: true,
+                    style: TextStyle(fontSize: 14),
+                    text: chatMessage.messageContent,
+                    textDirection: textDirection,
+                 )
                 ),
                 Text(
                     Utils.formatTimestampAsDate(chatMessage.messageTime, "hh:mm"),
