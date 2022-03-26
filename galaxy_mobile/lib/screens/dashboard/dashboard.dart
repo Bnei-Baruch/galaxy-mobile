@@ -2,11 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui;
 
+import 'package:async/async.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:galaxy_mobile/mocks/chat.dart';
 import 'package:galaxy_mobile/models/chat_message.dart';
+import 'package:galaxy_mobile/utils/ambient_direction.dart';
 import 'package:galaxy_mobile/utils/topics.dart';
 import 'package:galaxy_mobile/viewmodels/chat_view_model.dart';
 import 'package:icon_badge/icon_badge.dart';
@@ -30,7 +32,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 enum AudioDevice { receiver, speaker, bluetooth }
 
-final int TIME_TO_SHOW_CONTROLS = 10;
+final int SECONDS_TO_SHOW_CONTROLS = 10;
 
 class Dashboard extends StatefulWidget {
   @override
@@ -66,7 +68,8 @@ class _DashboardState extends State<Dashboard>
   StreamSubscription<ConnectivityResult> subscription;
   StreamSubscription streamSubscription;
 
-  bool _show = false;
+  bool _barsShown = false;
+  RestartableTimer _hideBarsTimer;
 
   int pagePosition = 0;
 
@@ -200,11 +203,12 @@ class _DashboardState extends State<Dashboard>
       }
     });
 
-    videoRoom.updateDots = (int position, int length) {
+    videoRoom.onPageChange = (int position, int feedsLength) {
       if (mounted) {
         setState(() {
-          pagePosition = position;
-          feedsLength = length;
+          hideBars();
+          this.pagePosition = position;
+          this.feedsLength = feedsLength;
         });
       }
     };
@@ -217,7 +221,7 @@ class _DashboardState extends State<Dashboard>
       FlutterLogs.logInfo("Dashboard", "videoRoom", "RoomReady");
       initMQTT();
       initAudioMgr();
-      tapped();
+      toggleBarsVisibility();
     };
     videoRoom.updateGoingToBackground = (){
       updateRoomWithMyState(false);
@@ -262,8 +266,6 @@ class _DashboardState extends State<Dashboard>
       });
     };
 
-
-
     userTimer = Timer.periodic(Duration(seconds: 2), (timer) {
       FlutterLogs.logInfo(
           "Dashboard", "updateUser step 1", "tick ${timer.tick}");
@@ -287,6 +289,9 @@ class _DashboardState extends State<Dashboard>
       setState(() {});
     };
 
+    _hideBarsTimer = RestartableTimer(Duration(seconds: SECONDS_TO_SHOW_CONTROLS), hideBars);
+    // The timer starts as inactive.
+    _hideBarsTimer.cancel();
     // For testing: Uncomment to mock incoming chat messages every 3 seconds.
     // createPeriodicMockChatMessages(chatViewModel, Duration(seconds: 3));
   }
@@ -557,14 +562,14 @@ class _DashboardState extends State<Dashboard>
         child: Scaffold(
           appBar: isFullScreen
               ? null
-              : !_show
+              : !_barsShown
                   ? CustomAppBar(
                       appBar: AppBar(
                         backgroundColor: Colors.transparent,
                         iconTheme: IconThemeData(color: Colors.transparent),
                         automaticallyImplyLeading: false,
                       ),
-                      onTap: () => tapped(),
+                      onTap: () => toggleBarsVisibility(),
                     )
                   : AppBar(
                       backgroundColor: Colors.black26,
@@ -620,8 +625,7 @@ class _DashboardState extends State<Dashboard>
                                   }))
                         ]),
           body: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => tapped(),
+              onTap: () => toggleBarsVisibility(),
               child: OrientationBuilder(builder: (context, orientation) {
                 return Stack(children: <Widget>[
                   Flex(
@@ -644,13 +648,14 @@ class _DashboardState extends State<Dashboard>
                   children: [
                     GestureDetector(
                         behavior: HitTestBehavior.opaque,
-                        onTap: () => tapped(),
+                        onTap: () => toggleBarsVisibility(),
                         child: Container(
                           color: Colors.black,
                           height: kBottomNavigationBarHeight,
                           child: Align(
                             alignment: Alignment.center,
                             child: DotsIndicator(
+                                reversed: getAmbientDirection(context) == ui.TextDirection.rtl,
                                 dotsCount: getNumPages(feedsLength) > 0
                                     ? getNumPages(feedsLength)
                                     : 1,
@@ -1061,32 +1066,38 @@ class _DashboardState extends State<Dashboard>
     );
     return position;
   }
-  void showBottomBar() {
-    setState(() {
-      _show = true;
-      if (controller != null) controller.reverse();
-    });
-    Timer(Duration(seconds: TIME_TO_SHOW_CONTROLS), hideBottomBar);
-    Timer(Duration(seconds: TIME_TO_SHOW_CONTROLS), stream.hideBar);
-  }
 
-  void hideBottomBar() {
-    if (mounted) {
-      setState(() {
-        _show = false;
-        controller.forward();
-      });
+  void showBars() {
+    if (!mounted) {
+      return;
     }
+
+    stream.showBar();
+    setState(() {
+      _barsShown = true;
+      controller?.reverse();
+    });
+    _hideBarsTimer.reset();
   }
 
-  void tapped() {
-    //if shown then hide  else show
-    if (_show) {
-      stream.hideBar();
-      hideBottomBar();
+  void hideBars() {
+    if (!mounted) {
+      return;
+    }
+
+    stream.hideBar();
+    setState(() {
+      _barsShown = false;
+      controller?.forward();
+    });
+    _hideBarsTimer.cancel();
+  }
+
+  void toggleBarsVisibility() {
+    if (_barsShown) {
+      hideBars();
     } else {
-      stream.showBar();
-      showBottomBar();
+      showBars();
     }
   }
 

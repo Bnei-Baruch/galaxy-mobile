@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:galaxy_mobile/utils/ambient_direction.dart';
 
 class DirectionalChild extends StatelessWidget {
   DirectionalChild({
@@ -13,17 +14,10 @@ class DirectionalChild extends StatelessWidget {
   final Widget Function(BuildContext) ltrChildBuilder;
   final Widget Function(BuildContext) rtlChildBuilder;
 
-  ui.TextDirection _getAmbientDirection(BuildContext context) {
-    ui.TextDirection ambientTextDirection = Directionality.of(context);
-    if (ambientTextDirection == null) {
-      ambientTextDirection = defaultAmbientDirection;
-    }
-    return ambientTextDirection;
-  }
-
   @override
   Widget build(BuildContext context) {
-    ui.TextDirection ambientTextDirection = _getAmbientDirection(context);
+    ui.TextDirection ambientTextDirection =
+      getAmbientDirection(context, defaultAmbientDirection);
 
     return ambientTextDirection == ui.TextDirection.ltr
         ? ltrChildBuilder(context)
