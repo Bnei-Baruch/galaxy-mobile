@@ -44,5 +44,11 @@
   "virtual_chat": {
     "msgRoomInfo": "Messages here will be seen by all the members of the ten connected now.",
     "enterMessage": "Type your message"
+  },
+  "dialog_back": "back",
+  "communication": {
+    "title": "Communication",
+    "chat_tab_title": "chat",
+    "question_tab_title": "send a question"
   }
 }

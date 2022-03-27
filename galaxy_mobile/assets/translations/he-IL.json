@@ -45,5 +45,11 @@
   "virtual_chat": {
     "msgRoomInfo": "ההודעות כאן יוצגו לכל חברי העשיריה המחוברים כעת.",
     "enterMessage": "הקלד/י את ההודעה"
+  },
+  "dialog_back": "חזור",
+  "communication": {
+    "title": "תקשורת",
+    "chat_tab_title": "צ'ט",
+    "question_tab_title": "שלח שאלה"
   }
 }
