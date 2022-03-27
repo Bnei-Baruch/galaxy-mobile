@@ -45,5 +45,11 @@
   "virtual_chat": {
     "msgRoomInfo": "Сообщения будут видны всем подключенным участникам Десятки.",
     "enterMessage": "Введите сообщение"
+  },
+  "dialog_back": "назад",
+  "communication": {
+    "title": "Коммуникация",
+    "chat_tab_title": "Чат",
+    "question_tab_title": "Отправить вопрос"
   }
 }

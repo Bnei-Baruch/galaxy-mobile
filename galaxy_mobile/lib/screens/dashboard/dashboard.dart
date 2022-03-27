@@ -880,7 +880,7 @@ class _DashboardState extends State<Dashboard>
                         Positioned(
                           left: 30,
                           top: 12,
-                          child: Text("BACK", // TODO: translate
+                          child: Text("dialog_back".tr().toUpperCase(),
                             style: TextStyle(color: Colors.white, fontSize: 12)
                           )
                         )
@@ -894,7 +894,7 @@ class _DashboardState extends State<Dashboard>
               ),
               Align(
                 alignment: Alignment.center,
-                child: Text("Communication", // TODO: translate
+                child: Text("communication.title".tr(),
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)
                 )
               )
@@ -928,8 +928,8 @@ class _DashboardState extends State<Dashboard>
                           Expanded(child:
                             TabContainer(
                               tabTitles: [
-                                'CHAT', // TODO: translate
-                                'SEND A QUESTION', // TODO: translate
+                                "communication.chat_tab_title".tr().toUpperCase(),
+                                "communication.question_tab_title".tr().toUpperCase(),
                                 // TODO: add support tab here.
                               ],
                               children: [

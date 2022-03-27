@@ -45,5 +45,11 @@
   "virtual_chat": {
     "msgRoomInfo": "Los mensajes de aquí serán vistos por todos los miembros de la decena que están conectados ahora.",
     "enterMessage": "Escriba su mensaje"
+  },
+  "dialog_back": "Volver",
+  "communication": {
+    "title": "Comunicación",
+    "chat_tab_title": "Chat",
+    "question_tab_title": "Enviar una pregunta"
   }
 }
