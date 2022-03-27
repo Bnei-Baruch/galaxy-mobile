@@ -24,6 +24,8 @@ import 'package:galaxy_mobile/models/main_store.dart';
 import 'package:galaxy_mobile/screens/streaming/streaming.dart';
 import 'package:galaxy_mobile/screens/video_room/video_room_widget.dart';
 import 'package:galaxy_mobile/widgets/chat/chat_room.dart';
+import 'package:galaxy_mobile/widgets/dialog/main_dialog_header.dart';
+import 'package:galaxy_mobile/widgets/study_materials.dart';
 import 'package:galaxy_mobile/services/mqtt_client.dart';
 import 'package:galaxy_mobile/widgets/loading_indicator.dart';
 import 'package:galaxy_mobile/widgets/questions/questions_dialog_content.dart';
@@ -762,6 +764,14 @@ class _DashboardState extends State<Dashboard>
                                     enabled: true,
                                     value: "4.2",
                                   ),
+                                  PopupMenuItem<String>(
+                                    child: ListTile(
+                                      // TODO: change icon
+                                        leading: Icon(Icons.supervisor_account_sharp),
+                                        title: Text('study_material'.tr())),
+                                    enabled: true,
+                                    value: "4.3",
+                                  ),
                                 ],
                               );
                               switch(result)
@@ -818,6 +828,9 @@ class _DashboardState extends State<Dashboard>
                                 case "4.2": // Friends (Participants)
                                   _displayParticipantsDialog(context);
                                   break;
+                                case "4.3": // Study material
+                                  _displayStudyMaterialDialog(context);
+                                  break;
                               }
                              break;
 
@@ -844,6 +857,52 @@ class _DashboardState extends State<Dashboard>
 
   }
 
+  // TODO: implement dialog
+  _displayStudyMaterialDialog(BuildContext context) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: false,
+      transitionDuration: Duration(milliseconds: 200),
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: ScaleTransition(
+            scale: animation,
+            child: child,
+          ),
+        );
+      },
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return WillPopScope(
+          onWillPop: () {
+            Navigator.of(context).pop();
+            return Future.value(true);
+          },
+          child: SafeArea(
+            child: Material(
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    MainDialogHeader(
+                        title: "study_material".tr(),
+                        onBackPressed: () {
+                          Navigator.of(context).pop();
+                        }
+                    ),
+                    Expanded(child: StudyMaterials())
+                  ]
+                ),
+              ),
+            )
+          )
+        );
+      },
+    );
+  }
+
   _displayCommunicationDialog(BuildContext context) {
     showGeneralDialog(
       context: context,
@@ -859,49 +918,6 @@ class _DashboardState extends State<Dashboard>
         );
       },
       pageBuilder: (context, animation, secondaryAnimation) {
-        Widget dialogHeader = Container(
-          padding: EdgeInsets.symmetric(horizontal: 4.0),
-          height: 42,
-          child: Stack(
-            children: <Widget>[
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton(
-                  style: TextButton.styleFrom(padding: EdgeInsets.all(0)),
-                  child: Container(
-                    height: 42,
-                    child: Stack(
-                      children: <Widget>[
-                        Positioned(
-                          left: -4,
-                          top: -2,
-                          child: Icon(Mdi.chevronLeft, color: Colors.white, size: 42)
-                        ),
-                        Positioned(
-                          left: 30,
-                          top: 12,
-                          child: Text("dialog_back".tr().toUpperCase(),
-                            style: TextStyle(color: Colors.white, fontSize: 12)
-                          )
-                        )
-                      ]
-                    )
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                )
-              ),
-              Align(
-                alignment: Alignment.center,
-                child: Text("communication.title".tr(),
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)
-                )
-              )
-            ]
-          )
-        );
-
         return WillPopScope(
             onWillPop: () {
               Navigator.of(context).pop();
@@ -920,11 +936,15 @@ class _DashboardState extends State<Dashboard>
                   child: Container(
                     width: MediaQuery.of(context).size.width,
                     height: MediaQuery.of(context).size.height,
-                    //color: Colors.black26,
                     child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
-                          dialogHeader,
+                          MainDialogHeader(
+                              title: "communication.title".tr(),
+                              onBackPressed: () {
+                                Navigator.of(context).pop();
+                              }
+                          ),
                           Expanded(child:
                             TabContainer(
                               tabTitles: [
