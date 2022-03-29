@@ -70,7 +70,7 @@ class _QuestionsDialogContentState extends State<QuestionsDialogContent> {
         ),
         Expanded(
           child: Loader<List<Question>>(
-            resultBuilder: (BuildContext context, dynamic questions) {
+            resultBuilder: (BuildContext context, List<Question> questions) {
               return QuestionsList(questions: questions);
             },
             controller: _loaderController,

@@ -753,22 +753,24 @@ class _DashboardState extends State<Dashboard>
                                 items: <PopupMenuItem<String>>[
                                   PopupMenuItem<String>(
                                     child: ListTile(
-                                    leading: Icon(Icons.how_to_vote),
-                                    title: Text('vote'.tr())),
+                                      leading: Icon(Icons.how_to_vote),
+                                      title: Text('vote'.tr())
+                                    ),
                                     value: "4.1",
                                   ),
                                   PopupMenuItem<String>(
                                     child: ListTile(
-                                    leading: Icon(Icons.supervisor_account_sharp),
-                                    title: Text('friends'.tr())),
+                                      leading: Icon(Icons.supervisor_account_sharp),
+                                      title: Text('friends'.tr())
+                                    ),
                                     enabled: true,
                                     value: "4.2",
                                   ),
                                   PopupMenuItem<String>(
                                     child: ListTile(
-                                      // TODO: change icon
-                                        leading: Icon(Icons.supervisor_account_sharp),
-                                        title: Text('study_material'.tr())),
+                                      leading: Icon(Icons.auto_stories),
+                                      title: Text('study_material'.tr())
+                                    ),
                                     enabled: true,
                                     value: "4.3",
                                   ),
@@ -895,9 +897,7 @@ class _DashboardState extends State<Dashboard>
                         children: <Widget>[
                           MainDialogHeader(
                               title: "communication.title".tr(),
-                              onBackPressed: () {
-                                Navigator.of(context).pop();
-                              }
+                              onBackPressed: () => Navigator.of(context).pop()
                           ),
                           Expanded(child:
                             TabContainer(
