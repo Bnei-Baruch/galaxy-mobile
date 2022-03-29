@@ -16,7 +16,7 @@ class Loader<T> extends StatefulWidget {
   final LoadFunction load;
   // May be null.
   final LoaderController controller;
-  final Widget loaderWidget;
+  final Widget loadingWidget;
   final bool loadOnInit;
 
   Loader({
@@ -24,13 +24,13 @@ class Loader<T> extends StatefulWidget {
     @required this.load,
     this.controller,
     this.loadOnInit = true,
-    this.loaderWidget = const Center(
+    this.loadingWidget = const Center(
       child: SizedBox(width: 30, height: 30, child: CircularProgressIndicator())
     )
   }) : assert(resultBuilder != null),
        assert(load != null),
        assert(loadOnInit != null),
-       assert(loaderWidget != null);
+       assert(loadingWidget != null);
 
   @override
   _LoaderState<T> createState() => _LoaderState<T>();
@@ -75,7 +75,7 @@ class _LoaderState<T> extends State<Loader<T>> {
   @override
   Widget build(BuildContext context) {
     return _isLoading
-      ? widget.loaderWidget
+      ? widget.loadingWidget
       : widget.resultBuilder(context, _result);
   }
 }

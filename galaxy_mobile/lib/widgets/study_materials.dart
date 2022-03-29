@@ -20,10 +20,23 @@ class StudyMaterials extends StatelessWidget {
     }
   }
 
+  Future<List<StudyMaterial>> _loadStudyMaterials(BuildContext context) async {
+    List<StudyMaterial> studyMaterials = [];
+    try {
+      studyMaterials = await context.read<Api>().fetchStudyMaterials();
+    } catch (e) {
+      FlutterLogs.logInfo(
+          "StudyMaterials",
+          "_loadStudyMaterials",
+          "Failed to fetch study materials: " + e.toString());
+    }
+    return studyMaterials;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Loader<List<StudyMaterial>>(
-      load: () => context.read<Api>().fetchStudyMaterials(),
+      load: () => _loadStudyMaterials(context),
       resultBuilder: (BuildContext context, List<StudyMaterial> studyMaterials) {
         return ListView.separated(
           separatorBuilder: (BuildContext context, int index) => Divider(
