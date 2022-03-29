@@ -43,9 +43,7 @@ class MainDialogHeader extends StatelessWidget {
                             ]
                         )
                     ),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
+                    onPressed: onBackPressed,
                   )
               ),
               Align(

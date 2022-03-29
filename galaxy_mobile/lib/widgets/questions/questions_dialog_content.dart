@@ -74,7 +74,6 @@ class _QuestionsDialogContentState extends State<QuestionsDialogContent> {
               return QuestionsList(questions: questions);
             },
             controller: _loaderController,
-            loadOnInit: true,
             load: () => _loadQuestions()
           )
         )

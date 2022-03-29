@@ -23,7 +23,7 @@ class Loader<T> extends StatefulWidget {
     @required this.resultBuilder,
     @required this.load,
     this.controller,
-    this.loadOnInit = false,
+    this.loadOnInit = true,
     this.loaderWidget = const Center(
       child: SizedBox(width: 30, height: 30, child: CircularProgressIndicator())
     )
@@ -37,7 +37,7 @@ class Loader<T> extends StatefulWidget {
 }
 
 class _LoaderState<T> extends State<Loader<T>> {
-  bool _isLoading;
+  bool _isLoading = false;
   T _result;
 
   void runLoad() {
@@ -48,10 +48,12 @@ class _LoaderState<T> extends State<Loader<T>> {
       _isLoading = true;
     });
     widget.load().then((T result) {
-      setState(() {
-        _isLoading = false;
-        _result = result;
-      });
+      if (this.mounted) {
+        setState(() {
+          _isLoading = false;
+          _result = result;
+        });
+      }
     });
   }
 

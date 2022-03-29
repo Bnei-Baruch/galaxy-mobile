@@ -857,52 +857,6 @@ class _DashboardState extends State<Dashboard>
 
   }
 
-  // TODO: implement dialog
-  _displayStudyMaterialDialog(BuildContext context) {
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: false,
-      transitionDuration: Duration(milliseconds: 200),
-      transitionBuilder: (context, animation, secondaryAnimation, child) {
-        return FadeTransition(
-          opacity: animation,
-          child: ScaleTransition(
-            scale: animation,
-            child: child,
-          ),
-        );
-      },
-      pageBuilder: (context, animation, secondaryAnimation) {
-        return WillPopScope(
-          onWillPop: () {
-            Navigator.of(context).pop();
-            return Future.value(true);
-          },
-          child: SafeArea(
-            child: Material(
-              child: Container(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    MainDialogHeader(
-                        title: "study_material".tr(),
-                        onBackPressed: () {
-                          Navigator.of(context).pop();
-                        }
-                    ),
-                    Expanded(child: StudyMaterials())
-                  ]
-                ),
-              ),
-            )
-          )
-        );
-      },
-    );
-  }
-
   _displayCommunicationDialog(BuildContext context) {
     showGeneralDialog(
       context: context,
@@ -1069,6 +1023,49 @@ class _DashboardState extends State<Dashboard>
               ),
             )
           )
+        );
+      },
+    );
+  }
+
+  _displayStudyMaterialDialog(BuildContext context) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: false,
+      transitionDuration: Duration(milliseconds: 200),
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: ScaleTransition(
+            scale: animation,
+            child: child,
+          ),
+        );
+      },
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return WillPopScope(
+            onWillPop: () {
+              Navigator.of(context).pop();
+              return Future.value(true);
+            },
+            child: SafeArea(
+                child: Material(
+                  child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height,
+                    child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          MainDialogHeader(
+                              title: "study_material".tr(),
+                              onBackPressed: () => Navigator.of(context).pop(),
+                          ),
+                          Expanded(child: StudyMaterials())
+                        ]
+                    ),
+                  ),
+                )
+            )
         );
       },
     );

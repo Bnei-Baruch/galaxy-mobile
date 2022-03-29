@@ -205,12 +205,11 @@ class Api {
   }
 
   Future<List<StudyMaterial>> fetchStudyMaterials() async {
-    final response = await _studyMaterialsBackend.get(APP_STUDY_MATERIALS);
-    // TODO: get right response fields.
-    List<StudyMaterial> rooms = response.data['rooms'];
-    FlutterLogs.logInfo("Api", "fetchStudyMaterials",
-        "rooms: " + response.data['rooms'].toString());
-    return rooms;
+    final Response<String> response = await _studyMaterialsBackend.get(APP_STUDY_MATERIALS);
+    FlutterLogs.logInfo("Api", "fetchStudyMaterials",  "study material response: $response");
+
+    List<dynamic> studyMaterialsJson = (json.decode(response.data) ?? []) as List<dynamic>;
+    return studyMaterialsJson.map((material) => StudyMaterial.fromJson(material)).toList();
   }
 
   //   fetchUsers = () =>
