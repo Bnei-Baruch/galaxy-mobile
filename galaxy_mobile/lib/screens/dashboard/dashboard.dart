@@ -25,7 +25,7 @@ import 'package:galaxy_mobile/screens/streaming/streaming.dart';
 import 'package:galaxy_mobile/screens/video_room/video_room_widget.dart';
 import 'package:galaxy_mobile/widgets/chat/chat_room.dart';
 import 'package:galaxy_mobile/widgets/dialog/main_dialog_header.dart';
-import 'package:galaxy_mobile/widgets/study_materials.dart';
+import 'package:galaxy_mobile/widgets/dialog/study_materials_dialog.dart';
 import 'package:galaxy_mobile/services/mqtt_client.dart';
 import 'package:galaxy_mobile/widgets/loading_indicator.dart';
 import 'package:galaxy_mobile/widgets/questions/questions_dialog_content.dart';
@@ -590,11 +590,11 @@ class _DashboardState extends State<Dashboard>
                         IconButton(
                           icon: ChangeNotifierProvider.value(
                             value: chatViewModel,
-                                child: CommunicationsMenuIcon()
-                            ),
+                            child: CommunicationsMenuIcon()
+                          ),
                           onPressed: () => _displayCommunicationDialog(context)
                         ),
-            ]),
+                      ]),
                       actions: <Widget>[
                           Padding(
                               padding: const EdgeInsets.all(8.0),
@@ -702,7 +702,7 @@ class _DashboardState extends State<Dashboard>
                                   icon:Icon(Mdi.dotsVertical,color: Colors.red),
                                   itemCount: 2):
                                   IconBadge(icon:Icon(Mdi.dotsVertical,color: Colors.white),
-                              itemCount: 2)
+                              itemCount: 3)
                           ),
                         ],
                         onTap: (value) async {
@@ -831,7 +831,7 @@ class _DashboardState extends State<Dashboard>
                                   _displayParticipantsDialog(context);
                                   break;
                                 case "4.3": // Study material
-                                  _displayStudyMaterialDialog(context);
+                                  displayStudyMaterialDialog(context);
                                   break;
                               }
                              break;
@@ -1023,49 +1023,6 @@ class _DashboardState extends State<Dashboard>
               ),
             )
           )
-        );
-      },
-    );
-  }
-
-  _displayStudyMaterialDialog(BuildContext context) {
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: false,
-      transitionDuration: Duration(milliseconds: 200),
-      transitionBuilder: (context, animation, secondaryAnimation, child) {
-        return FadeTransition(
-          opacity: animation,
-          child: ScaleTransition(
-            scale: animation,
-            child: child,
-          ),
-        );
-      },
-      pageBuilder: (context, animation, secondaryAnimation) {
-        return WillPopScope(
-            onWillPop: () {
-              Navigator.of(context).pop();
-              return Future.value(true);
-            },
-            child: SafeArea(
-                child: Material(
-                  child: Container(
-                    width: MediaQuery.of(context).size.width,
-                    height: MediaQuery.of(context).size.height,
-                    child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          MainDialogHeader(
-                              title: "study_material".tr(),
-                              onBackPressed: () => Navigator.of(context).pop(),
-                          ),
-                          Expanded(child: StudyMaterials())
-                        ]
-                    ),
-                  ),
-                )
-            )
         );
       },
     );

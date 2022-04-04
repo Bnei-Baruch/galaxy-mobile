@@ -19,40 +19,42 @@ class MainDialogHeader extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 4.0),
         height: 42,
         child: Stack(
-            children: <Widget>[
-              Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton(
-                    style: TextButton.styleFrom(padding: EdgeInsets.all(0)),
-                    child: Container(
-                        height: 42,
-                        child: Stack(
-                            children: <Widget>[
-                              Positioned(
-                                  left: -4,
-                                  top: -2,
-                                  child: Icon(Mdi.chevronLeft, color: Colors.white, size: 42)
-                              ),
-                              Positioned(
-                                  left: 30,
-                                  top: 12,
-                                  child: Text("dialog_back".tr().toUpperCase(),
-                                      style: TextStyle(color: Colors.white, fontSize: 12)
-                                  )
-                              )
-                            ]
+          children: <Widget>[
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                style: TextButton.styleFrom(padding: EdgeInsets.all(0)),
+                child: Container(
+                  height: 42,
+                  child: Stack(
+                    children: <Widget>[
+                      Positioned(
+                        left: -4,
+                        top: -2,
+                        child: Icon(Mdi.chevronLeft, color: Colors.white, size: 42)
+                      ),
+                      Positioned(
+                        left: 30,
+                        top: 12,
+                        child: Text("dialog_back".tr().toUpperCase(),
+                          style: TextStyle(color: Colors.white, fontSize: 12)
                         )
-                    ),
-                    onPressed: onBackPressed,
+                      )
+                    ]
                   )
-              ),
-              Align(
-                  alignment: Alignment.center,
-                  child: Text(title,
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)
-                  )
+                ),
+                onPressed: () {
+                  onBackPressed();
+                },
               )
-            ]
+            ),
+            Align(
+              alignment: Alignment.center,
+              child: Text(title,
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)
+              )
+            )
+          ]
         )
     );
   }
