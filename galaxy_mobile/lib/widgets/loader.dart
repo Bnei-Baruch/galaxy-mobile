@@ -14,10 +14,9 @@ class LoaderController extends ChangeNotifier {
 class Loader<T> extends StatefulWidget {
   final LoaderResultBuilder<T> resultBuilder;
   final LoadFunction load;
-  // May be null.
-  final LoaderController controller;
   final Widget loadingWidget;
   final bool loadOnInit;
+  final LoaderController controller; // May be null.
 
   Loader({
     @required this.resultBuilder,
