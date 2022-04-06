@@ -697,12 +697,11 @@ class _DashboardState extends State<Dashboard>
                                       color: Colors.white)),
                           BottomNavigationBarItem(
                               label: "more".tr(),
-                              icon: audioMode
-                                  ? IconBadge(
-                                  icon:Icon(Mdi.dotsVertical,color: Colors.red),
-                                  itemCount: 2):
-                                  IconBadge(icon:Icon(Mdi.dotsVertical,color: Colors.white),
-                              itemCount: 3)
+                              icon: IconBadge(
+                                  icon: Icon(
+                                    Mdi.dotsVertical, color: Colors.white),
+                                  itemCount: 3
+                              )
                           ),
                         ],
                         onTap: (value) async {
