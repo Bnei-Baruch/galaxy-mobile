@@ -10,6 +10,7 @@ import 'package:galaxy_mobile/models/main_store.dart';
 import 'package:galaxy_mobile/services/logger.dart';
 import 'package:galaxy_mobile/services/mqtt_client.dart';
 import 'package:galaxy_mobile/utils/utils.dart';
+import 'package:galaxy_mobile/widgets/dialog/study_materials_dialog.dart';
 import 'package:galaxy_mobile/widgets/audio_mode.dart';
 import 'package:galaxy_mobile/widgets/drawer.dart';
 import 'package:galaxy_mobile/widgets/room_selector.dart';
@@ -136,7 +137,16 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
     return (!mqttClient.isConnected())
         ? ScreenLoader()
         : Scaffold(
-        appBar: AppBar(title: Text("settings".tr())),
+        appBar: AppBar(
+          title: Text("settings".tr()),
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.auto_stories),
+              onPressed: () {
+                displayStudyMaterialDialog(context);
+              }
+          )]
+        ),
         drawer: AppDrawer(),
         body: LayoutBuilder(builder:
             (BuildContext context, BoxConstraints viewportConstraints) {

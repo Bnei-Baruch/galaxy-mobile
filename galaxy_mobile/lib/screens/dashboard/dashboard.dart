@@ -24,6 +24,8 @@ import 'package:galaxy_mobile/models/main_store.dart';
 import 'package:galaxy_mobile/screens/streaming/streaming.dart';
 import 'package:galaxy_mobile/screens/video_room/video_room_widget.dart';
 import 'package:galaxy_mobile/widgets/chat/chat_room.dart';
+import 'package:galaxy_mobile/widgets/dialog/main_dialog_header.dart';
+import 'package:galaxy_mobile/widgets/dialog/study_materials_dialog.dart';
 import 'package:galaxy_mobile/services/mqtt_client.dart';
 import 'package:galaxy_mobile/widgets/loading_indicator.dart';
 import 'package:galaxy_mobile/widgets/questions/questions_dialog_content.dart';
@@ -589,11 +591,11 @@ class _DashboardState extends State<Dashboard>
                         IconButton(
                           icon: ChangeNotifierProvider.value(
                             value: chatViewModel,
-                                child: CommunicationsMenuIcon()
-                            ),
+                            child: CommunicationsMenuIcon()
+                          ),
                           onPressed: () => _displayCommunicationDialog(context)
                         ),
-            ]),
+                      ]),
                       actions: <Widget>[
                           Padding(
                               padding: const EdgeInsets.all(8.0),
@@ -696,12 +698,11 @@ class _DashboardState extends State<Dashboard>
                                       color: Colors.white)),
                           BottomNavigationBarItem(
                               label: "more".tr(),
-                              icon: audioMode
-                                  ? IconBadge(
-                                  icon:Icon(Mdi.dotsVertical,color: Colors.red),
-                                  itemCount: 2):
-                                  IconBadge(icon:Icon(Mdi.dotsVertical,color: Colors.white),
-                              itemCount: 2)
+                              icon: IconBadge(
+                                  icon: Icon(
+                                    Mdi.dotsVertical, color: Colors.white),
+                                  itemCount: 4
+                              )
                           ),
                         ],
                         onTap: (value) async {
@@ -752,24 +753,38 @@ class _DashboardState extends State<Dashboard>
                                 items: <PopupMenuItem<String>>[
                                   PopupMenuItem<String>(
                                     child: ListTile(
-                                    leading: Icon(Icons.how_to_vote),
-                                    title: Text('vote'.tr())),
+                                      leading: Icon(Icons.how_to_vote),
+                                      title: Text('vote'.tr())
+                                    ),
                                     value: "4.1",
                                   ),
                                   PopupMenuItem<String>(
                                     child: ListTile(
-                                    leading: Icon(Icons.supervisor_account_sharp),
-                                    title: Text('friends'.tr())),
+                                      leading: Icon(Icons.supervisor_account_sharp),
+                                      title: Text('friends'.tr())
+                                    ),
                                     enabled: true,
                                     value: "4.2",
                                   ),
                                   PopupMenuItem<String>(
                                     child: ListTile(
-                                        leading: Icon(Icons.favorite,color: Colors.red,),
-                                        title: Text('donate'.tr())),
+
+                                      leading: Icon(Icons.auto_stories),
+                                      title: Text('study_material'.tr())
+                                    ),
                                     enabled: true,
                                     value: "4.3",
                                   ),
+                                    PopupMenuItem<String>(
+                                    child: ListTile(
+
+                                     leading: Icon(Icons.favorite,color: Colors.red,),
+                                      title: Text('donate'.tr()),
+                                    ),
+                                    enabled: true,
+                                    value: "4.4",
+                                    ),
+
                                 ],
                               );
                               switch(result)
@@ -826,10 +841,16 @@ class _DashboardState extends State<Dashboard>
                                 case "4.2": // Friends (Participants)
                                   _displayParticipantsDialog(context);
                                   break;
-                                case "4.3": // Friends (Participants)
-                                  _openDonationLink(context);
+
+                                case "4.3": // Study material
+                                  displayStudyMaterialDialog(context);
+
                                   break;
+                              case "4.3": // Friends (Participants)
+                              _openDonationLink(context);
+                                break;
                               }
+
                              break;
 
     // <Button.Group>
@@ -870,49 +891,6 @@ class _DashboardState extends State<Dashboard>
         );
       },
       pageBuilder: (context, animation, secondaryAnimation) {
-        Widget dialogHeader = Container(
-          padding: EdgeInsets.symmetric(horizontal: 4.0),
-          height: 42,
-          child: Stack(
-            children: <Widget>[
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton(
-                  style: TextButton.styleFrom(padding: EdgeInsets.all(0)),
-                  child: Container(
-                    height: 42,
-                    child: Stack(
-                      children: <Widget>[
-                        Positioned(
-                          left: -4,
-                          top: -2,
-                          child: Icon(Mdi.chevronLeft, color: Colors.white, size: 42)
-                        ),
-                        Positioned(
-                          left: 30,
-                          top: 12,
-                          child: Text("dialog_back".tr().toUpperCase(),
-                            style: TextStyle(color: Colors.white, fontSize: 12)
-                          )
-                        )
-                      ]
-                    )
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                )
-              ),
-              Align(
-                alignment: Alignment.center,
-                child: Text("communication.title".tr(),
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)
-                )
-              )
-            ]
-          )
-        );
-
         return WillPopScope(
             onWillPop: () {
               Navigator.of(context).pop();
@@ -931,11 +909,13 @@ class _DashboardState extends State<Dashboard>
                   child: Container(
                     width: MediaQuery.of(context).size.width,
                     height: MediaQuery.of(context).size.height,
-                    //color: Colors.black26,
                     child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
-                          dialogHeader,
+                          MainDialogHeader(
+                              title: "communication.title".tr(),
+                              onBackPressed: () => Navigator.of(context).pop()
+                          ),
                           Expanded(child:
                             TabContainer(
                               tabTitles: [

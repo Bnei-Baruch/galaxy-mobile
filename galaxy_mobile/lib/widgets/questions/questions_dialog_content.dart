@@ -4,6 +4,7 @@ import 'package:flutter_logs/flutter_logs.dart';
 import 'package:galaxy_mobile/models/main_store.dart';
 import 'package:galaxy_mobile/models/question.dart';
 import 'package:galaxy_mobile/services/api.dart';
+import 'package:galaxy_mobile/widgets/loader.dart';
 import 'package:galaxy_mobile/widgets/questions/questions_list.dart';
 import 'package:galaxy_mobile/widgets/questions/send_question_form.dart';
 import 'package:provider/provider.dart';
@@ -15,13 +16,9 @@ class QuestionsDialogContent extends StatefulWidget {
 
 class _QuestionsDialogContentState extends State<QuestionsDialogContent> {
 
-  List<Question> questions = [];
-  bool _isLoading = false;
+  LoaderController _loaderController;
 
-  Future<void> _loadQuestions() async {
-    setState(() {
-      _isLoading = true;
-    });
+  Future<List<Question>> _loadQuestions() async {
     List<Question> fetchedQuestions = [];
     String userId = context.read<MainStore>().activeUser.id;
     try {
@@ -29,10 +26,7 @@ class _QuestionsDialogContentState extends State<QuestionsDialogContent> {
     } catch (e) {
       FlutterLogs.logInfo("QuestionsDialogContent", "loadQuestions", "Failed to load questions: " + e.toString());
     }
-    setState(() {
-      _isLoading = false;
-      questions = fetchedQuestions;
-    });
+    return fetchedQuestions;
   }
 
   Future<void> _sendQuestion(String userName, String roomName, String questionContent) async {
@@ -43,15 +37,20 @@ class _QuestionsDialogContentState extends State<QuestionsDialogContent> {
 
   Future<void> _questionFormSubmissionCallback(String userName, String roomName, String questionContent) async {
     await _sendQuestion(userName, roomName, questionContent);
-    // Load questions after question was sent.
-    // Don't await for loading questions.
-    _loadQuestions();
+    // Reload questions after question was sent.
+    _loaderController.reload();
   }
 
   @override
   void initState() {
     super.initState();
-    _loadQuestions();
+    _loaderController = LoaderController();
+  }
+
+  @override
+  void dispose() {
+    _loaderController.dispose();
+    super.dispose();
   }
 
   @override
@@ -61,14 +60,23 @@ class _QuestionsDialogContentState extends State<QuestionsDialogContent> {
           ? Axis.horizontal  // as Row
           : Axis.vertical, // as Column
       children: [
-        Expanded(child: Container(
+        Expanded(
+          child: Container(
             padding: EdgeInsets.only(left: 15.0, right: 15.0),
-            child: SendQuestionForm(onSubmit: _questionFormSubmissionCallback))),
-        _isLoading
-            ? Expanded(child: Center(
-                child: SizedBox(width: 30, height: 30, child: CircularProgressIndicator())
-            ))
-            : Expanded(child: QuestionsList(questions: questions))
+            child: SendQuestionForm(
+              onSubmit: _questionFormSubmissionCallback
+            )
+          )
+        ),
+        Expanded(
+          child: Loader<List<Question>>(
+            resultBuilder: (BuildContext context, List<Question> questions) {
+              return QuestionsList(questions: questions);
+            },
+            controller: _loaderController,
+            load: () => _loadQuestions()
+          )
+        )
       ]
     );
   }
