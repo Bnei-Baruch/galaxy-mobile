@@ -29,6 +29,7 @@ import 'package:galaxy_mobile/widgets/loading_indicator.dart';
 import 'package:galaxy_mobile/widgets/questions/questions_dialog_content.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 enum AudioDevice { receiver, speaker, bluetooth }
 
@@ -762,6 +763,13 @@ class _DashboardState extends State<Dashboard>
                                     enabled: true,
                                     value: "4.2",
                                   ),
+                                  PopupMenuItem<String>(
+                                    child: ListTile(
+                                        leading: Icon(Icons.favorite,color: Colors.red,),
+                                        title: Text('donate'.tr())),
+                                    enabled: true,
+                                    value: "4.3",
+                                  ),
                                 ],
                               );
                               switch(result)
@@ -817,6 +825,9 @@ class _DashboardState extends State<Dashboard>
                                   break;
                                 case "4.2": // Friends (Participants)
                                   _displayParticipantsDialog(context);
+                                  break;
+                                case "4.3": // Friends (Participants)
+                                  _openDonationLink(context);
                                   break;
                               }
                              break;
@@ -1113,6 +1124,18 @@ class _DashboardState extends State<Dashboard>
 
     mqttClient.subscribe("galaxy/room/$_activeRoomId");
     mqttClient.subscribe("galaxy/room/$_activeRoomId/chat");
+  }
+
+  void _openDonationLink(BuildContext context) {
+
+
+        var urllaunchable =  canLaunch("donation_url".tr()); //canLaunch is from url_launcher package
+        if(urllaunchable != null){
+           launch("donation_url".tr()); //launch is from url_launcher package to launch URL
+        }else{
+          print("URL can't be launched.");
+        }
+
   }
 }
 

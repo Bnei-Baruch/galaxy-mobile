@@ -50,5 +50,7 @@
     "title": "Communication",
     "chat_tab_title": "chat",
     "question_tab_title": "send a question"
-  }
+  },
+  "donate": "Donate",
+  "donation_url": "https://www.kab1.com/en?utm_source=arvut_app&utm_medium=button&utm_campaign=donations&utm_id=donations&utm_term=eng&utm_content=button_donate"
 }
