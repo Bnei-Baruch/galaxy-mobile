@@ -8,7 +8,7 @@ import 'package:galaxy_mobile/config/env.dart';
 import 'package:galaxy_mobile/main.dart';
 import 'package:galaxy_mobile/models/question.dart';
 import 'package:galaxy_mobile/utils/dio_log.dart';
-import 'package:galaxy_mobile/utils/utils.dart';
+import 'package:galaxy_mobile/models/study_material.dart';
 
 class Room {
   final num room;
@@ -64,6 +64,7 @@ class RoomData {
 class Api {
   Dio _galaxyBackend;
   Dio _questionsBackend;
+  Dio _studyMaterialsBackend;
   Dio _monitor;
 
   Api() {
@@ -73,16 +74,20 @@ class Api {
     this._questionsBackend = new Dio();
     this._questionsBackend.options.baseUrl = APP_API_QUESTIONS_BACKEND;
 
+    this._studyMaterialsBackend = new Dio();
+
     this._monitor = new Dio();
     this._monitor.options.baseUrl = APP_MONITORING_BACKEND;
 
     this._galaxyBackend.interceptors.add(LogInterceptors());
     this._questionsBackend.interceptors.add(LogInterceptors());
+    this._studyMaterialsBackend.interceptors.add(LogInterceptors());
   }
 
   setAccessToken(String accessToken) {
     _galaxyBackend.options.headers["Authorization"] = "Bearer $accessToken";
     _questionsBackend.options.headers["Authorization"] = "Bearer $accessToken";
+    _studyMaterialsBackend.options.headers["Authorization"] = "Bearer $accessToken";
   }
 
   // fetchConfig = () =>
@@ -197,6 +202,14 @@ class Api {
       }
     };
     return _questionsBackend.post('/ask', data: data);
+  }
+
+  Future<List<StudyMaterial>> fetchStudyMaterials() async {
+    final Response<String> response = await _studyMaterialsBackend.get(APP_STUDY_MATERIALS);
+    FlutterLogs.logInfo("Api", "fetchStudyMaterials",  "study material response: $response");
+
+    List<dynamic> studyMaterialsJson = (json.decode(response.data) ?? []) as List<dynamic>;
+    return studyMaterialsJson.map((material) => StudyMaterial.fromJson(material)).toList();
   }
 
   //   fetchUsers = () =>
