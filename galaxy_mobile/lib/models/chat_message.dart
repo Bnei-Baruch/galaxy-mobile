@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 enum ChatMessageSender {
   UNKNOWN,
@@ -25,15 +24,14 @@ class ChatMessage {
     String senderId = json['user']['id'] ?? '';
     String text = json['text'] ?? '';
     String senderName = json['user']['display'] ?? '';
-    // UTF8 decoding is required to handle Hebrew.
-    String decodedText = utf8.decode(text.runes.toList());
+
     return ChatMessage(
         senderId,
         senderName,
         senderId == activeUserId
             ? ChatMessageSender.ACTIVE_USER
             : ChatMessageSender.FRIEND,
-        decodedText,
+        text,
         messageTime);
   }
 
