@@ -62,6 +62,7 @@ class _SelfViewWidgetState extends State<SelfViewWidget>
   Future<void> stopCamera() async {
     try {
       await myStream?.dispose();
+      myStream = null;
 
       if (!mounted) {
         return;
