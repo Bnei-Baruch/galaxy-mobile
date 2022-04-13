@@ -5,49 +5,81 @@ import 'package:janus_client/Plugin.dart';
 
 import 'dart:async';
 
+var DEFAULT_MEDIA_CONSTRAINTS = {
+  "audio": false,
+  "video": {
+    "mandatory": {
+      "minWidth":
+      320, // Provide your own width, height and frame rate here
+      "minHeight": 180,
+      "minFrameRate": 15,
+    },
+    "facingMode": "user",
+    "optional": [],
+  }
+};
+
+class MediaStreamController extends ChangeNotifier {
+  MediaStream mediaStream;
+
+  bool _isEnabled() => mediaStream != null;
+
+  Future<void> enable() async {
+    if (!_isEnabled()) {
+      try {
+        MediaStream stream =
+        await navigator.mediaDevices.getUserMedia(DEFAULT_MEDIA_CONSTRAINTS);
+        mediaStream = stream;
+      } catch (e) {
+        FlutterLogs.logInfo("MediaStreamController",
+            "enable",
+            "error: ${e.toString()}");
+      }
+    }
+    notifyListeners();
+  }
+
+  Future<void> disable() async {
+    try {
+      await mediaStream?.dispose();
+      mediaStream = null;
+    } catch (e) {
+      FlutterLogs.logInfo("MediaStreamController",
+                          "disable",
+                          "error: ${e.toString()}");
+    }
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    mediaStream?.dispose();
+    super.dispose();
+  }
+}
+
 class SelfViewWidget extends StatefulWidget {
+  final MediaStreamController mediaStreamController;
+
+  SelfViewWidget({
+    this.mediaStreamController,
+  }) : assert(mediaStreamController != null);
+
   @override
   _SelfViewWidgetState createState() => _SelfViewWidgetState();
-
-  var state;
-  void restartCamera() {
-    if (state != null && state.mounted) {
-      FlutterLogs.logInfo("SelfViewWidget", "restartCamera", "state mounted, activating camera.");
-      state.activateCamera();
-    }
-  }
-
-  void stopCamera() {
-    FlutterLogs.logInfo("SelfViewWidget", "stopCamera", "");
-    if (state != null && state.mounted) {
-      state.stopCamera();
-    }
-  }
 }
 
 class _SelfViewWidgetState extends State<SelfViewWidget>
     with WidgetsBindingObserver {
   RTCVideoRenderer _localRenderer = RTCVideoRenderer();
-  Plugin pluginHandle;
-  Plugin subscriberHandle;
-  MediaStream myStream;
-
-  @override
-  void didChangeDependencies() async {
-    FlutterLogs.logInfo("SelfViewWidget", "didChangeDependencies", "");
-
-    // TODO: implement didChangeDependencies
-    super.didChangeDependencies();
-  }
 
   @override
   void initState() {
     super.initState();
-    widget.state = this;
     FlutterLogs.logInfo("SelfViewWidget", "initState", "");
     WidgetsBinding.instance.addObserver(this);
-
-    initRenderers().then((_) => activateCamera());
+    widget.mediaStreamController.addListener(_updateRendererStream);
+    initRenderers().then((_) => widget.mediaStreamController.enable());
   }
 
   @override
@@ -55,55 +87,18 @@ class _SelfViewWidgetState extends State<SelfViewWidget>
     FlutterLogs.logInfo("SelfViewWidget", "dispose", "");
   
     WidgetsBinding.instance.removeObserver(this);
+    widget.mediaStreamController.removeListener(_updateRendererStream);
     _localRenderer.dispose();
     super.dispose();
   }
 
-  Future<void> stopCamera() async {
-    try {
-      await myStream?.dispose();
-      myStream = null;
-
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        _localRenderer.srcObject = null;
-      });
-    } catch (e) {
-      FlutterLogs.logInfo("_SelfViewWidgetState", "stopCamera", "error: ${e.toString()}");
-    }
-  }
-
-  Future<void> activateCamera() async {
-    var mediaConstraints = {
-      "audio": false,
-      "video": {
-        "mandatory": {
-          "minWidth":
-          320, // Provide your own width, height and frame rate here
-          "minHeight": 180,
-          "minFrameRate": 15,
-        },
-        "facingMode": "user",
-        "optional": [],
-      }
-    };
-
-    try {
-      MediaStream stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
-      myStream = stream;
-    } catch (e) {
-      FlutterLogs.logInfo("_SelfViewWidgetState", "activateCamera", "error: ${e.toString()}");
-    }
-
+  void _updateRendererStream() {
     if (!mounted) {
       return;
     }
 
     setState(() {
-      _localRenderer.srcObject = myStream;
+      _localRenderer.srcObject = widget.mediaStreamController.mediaStream;
     });
   }
 

@@ -1332,6 +1332,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         FlutterLogs.logInfo(
             "videoRoom", "didChangeAppLifecycleState", 'inactive');
         // TODO: FIXME: we go to inactive state when moving from Settings to Dashboard (??????)
+        // Maybe this happens when requesting permissions to audio/video.
         if (widget.myStream != null) {
           FlutterLogs.logInfo(
               "videoRoom", "didChangeAppLifecycleState",

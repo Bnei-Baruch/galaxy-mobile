@@ -73,6 +73,10 @@ class MQTTClient {
     _onConnectionFailedCallbackList.clear();
   }
 
+  void removeOnDisconnectedCallback() {
+    _onDisconnectionFailedCallbackList.clear();
+  }
+
   void updateToken(String token)
   {
     print("update mqtt token");

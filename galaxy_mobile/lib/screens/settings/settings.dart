@@ -9,7 +9,7 @@ import 'package:flutter_logs/flutter_logs.dart';
 import 'package:galaxy_mobile/models/main_store.dart';
 import 'package:galaxy_mobile/services/logger.dart';
 import 'package:galaxy_mobile/services/mqtt_client.dart';
-import 'package:galaxy_mobile/utils/utils.dart';
+import 'package:galaxy_mobile/utils/topics.dart';
 import 'package:galaxy_mobile/widgets/dialog/study_materials_dialog.dart';
 import 'package:galaxy_mobile/widgets/audio_mode.dart';
 import 'package:galaxy_mobile/widgets/drawer.dart';
@@ -32,38 +32,38 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> with WidgetsBindingObserver {
-  SelfViewWidget selfWidget;
+  MediaStreamController _mediaStreamController;
 
-  StreamSubscription<ConnectivityResult> subscription;
+  StreamSubscription<ConnectivityResult> connectivitySubscription;
   ConnectivityResult connectionStatus;
   SendPort mainToIsolateStream;
-
-  var userJsonExtra;
-  var monitorData;
 
   BuildContext dialogPleaseWaitContext;
   BuildContext dialogContext;
 
   // Whether lifecycle methods should have any effect.
-  bool lifeCycleEnabled;
+  bool _lifeCycleEnabled;
+
+  // Called by dispose when we want to clean all MQTT callbacks.
+  VoidCallback _cleanUpMqttFunc;
 
   @override
   void initState() {
     super.initState();
-    lifeCycleEnabled = true;
+    _mediaStreamController = MediaStreamController();
+    _lifeCycleEnabled = true;
     logger.info("starting settings");
     WidgetsBinding.instance.addObserver(this);
     final mqttClient = context.read<MQTTClient>();
-    selfWidget = SelfViewWidget();
+    // The topics we subscribed MQTT to. We unsubscribe from all of these on
+    // dispose.
+    List<String> activeMqttTopicSubscriptions = [];
 
-    subscription = Connectivity()
+    connectivitySubscription = Connectivity()
         .onConnectivityChanged
         .listen((ConnectivityResult result) {
           connectionStatus = result;
         });
-    Utils.parseJson("user_monitor_example.json")
-        .then((value) => userJsonExtra = value);
-    Utils.parseJson("monitor_data.json").then((value) => monitorData = value);
 
     mqttClient.addOnDisconnectedCallback(()  {
       FlutterLogs.logError("Settings", "onDisconnected","mqtt got disconnected" );
@@ -75,9 +75,13 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
       }
       setState(() {});
 
-      mqttClient.subscribe("galaxy/users/broadcast");
+      mqttClient.subscribe(USERS_BROADCAST_TOPIC);
+      activeMqttTopicSubscriptions.add(USERS_BROADCAST_TOPIC);
+
       var user = context.read<MainStore>().activeUser;
-      mqttClient.subscribe("galaxy/users/${user.id}");
+      String currentUserTopic = "galaxy/users/${user.id}";
+      mqttClient.subscribe(currentUserTopic);
+      activeMqttTopicSubscriptions.add(currentUserTopic);
     });
     mqttClient.addOnConnectionFailedCallback(() => {
       if (dialogContext == null) {
@@ -107,38 +111,50 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
     });
 
     mqttClient.connect();
+
+    // ** If adding anything above, add its removal here. **
+    _cleanUpMqttFunc = () {
+      for (String topic in activeMqttTopicSubscriptions) {
+        mqttClient.unsubscribe(topic);
+      }
+      mqttClient.removeOnConnectedCallback();
+      mqttClient.removeOnConnectionFailedCallback();
+      mqttClient.removeOnDisconnectedCallback();
+    };
   }
 
   @override
   void dispose() {
-    subscription.cancel();
-    // TODO: disconnect from MQTT?
-    // TODO: dipose of selfViewWidget? We should have a contorller instead.
+    WidgetsBinding.instance.removeObserver(this);
+    connectivitySubscription.cancel();
+    _mediaStreamController.dispose();
+    _cleanUpMqttFunc();
+    // TODO: also disconnect from MQTT?
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    if (!lifeCycleEnabled) {
+    if (!_lifeCycleEnabled) {
       return;
     }
     switch (state) {
       case AppLifecycleState.inactive:
         FlutterLogs.logInfo("Settings", "appLifeCycleState", "inactive");
-        selfWidget.stopCamera();
+        _mediaStreamController.disable();
         break;
       case AppLifecycleState.resumed:
         FlutterLogs.logInfo("Settings", "appLifeCycleState", "resumed");
-        selfWidget.restartCamera();
+        _mediaStreamController.enable();
         break;
       case AppLifecycleState.paused:
         FlutterLogs.logInfo("Settings", "appLifeCycleState", "paused");
-        selfWidget.stopCamera();
+        _mediaStreamController.disable();
         break;
       case AppLifecycleState.detached:
         FlutterLogs.logInfo("Settings", "appLifeCycleState", "detached");
-        selfWidget.stopCamera();
+        _mediaStreamController.disable();
         break;
     }
   }
@@ -218,7 +234,11 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
                         Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [selfWidget]),
+                            children: [
+                              SelfViewWidget(
+                                mediaStreamController: _mediaStreamController
+                              )
+                            ]),
                         SizedBox(height: 20.h),
                         // Opacity(
                         // opacity: 0.3,
@@ -295,13 +315,13 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
   }
 
   void enterDashBoard(BuildContext context) {
-    selfWidget.stopCamera();
+    _mediaStreamController.disable();
     // We don't want lifecycle methods to be called while on a different route.
-    lifeCycleEnabled = false;
+    _lifeCycleEnabled = false;
 
     Navigator.pushNamed(context, '/dashboard')
         .then((value) {
-      lifeCycleEnabled = true;
+      _lifeCycleEnabled = true;
       if (value == false) {
         FlutterLogs.logInfo("Settings","pushNamed", "back from dashboard with failure");
         //need to fix crash after several re-enter
@@ -310,9 +330,7 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
         // }
         // );
       } else {
-        setState(() {
-          selfWidget.restartCamera();
-        });
+        _mediaStreamController.enable();
       }
     });
   }

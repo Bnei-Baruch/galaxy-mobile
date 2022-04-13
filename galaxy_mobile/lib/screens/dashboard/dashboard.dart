@@ -554,6 +554,10 @@ class _DashboardState extends State<Dashboard>
             mqttClient.unsubscribe("galaxy/room/$_activeRoomId");
             // TODO: move to a function.
             mqttClient.unsubscribe("galaxy/room/$_activeRoomId/chat");
+            // TODO: we probably want to support a keyed removal. This currently
+            // removes all callbacks, even the ones set in the Settings screen,
+            // so after we run this code, the previous screen (Settings), will
+            // no longer handle these.
             mqttClient.removeOnConnectedCallback();
             mqttClient.removeOnConnectionFailedCallback();
             mqttClient.removeOnMsgReceivedCallback();
