@@ -84,7 +84,7 @@ class VideoRoom extends StatefulWidget {
   List mainToIsolateStream;
   String streamingServer;
 
-  String configuredStreams;
+  String configuredStreams = "{}";
 
   void exitRoom() async {
     if (_janusClient != null) _janusClient.destroy();
@@ -1331,7 +1331,8 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
       case AppLifecycleState.inactive:
         FlutterLogs.logInfo(
             "videoRoom", "didChangeAppLifecycleState", 'inactive');
-        // if (!widget.myVideoMuted) {
+        // TODO: FIXME: we go to inactive state when moving from Settings to Dashboard (??????)
+        if (widget.myStream != null) {
           FlutterLogs.logInfo(
               "videoRoom", "didChangeAppLifecycleState",
               'number of video tracks = ${widget.myStream
@@ -1341,13 +1342,17 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
               .getVideoTracks()
               .first
               .enabled = false;
-          setState(() {
-            widget.myVideoMuted = true;
-            widget.updateVideoState(true);
-          });
+        } else {
+          FlutterLogs.logInfo(
+              "videoRoom", "didChangeAppLifecycleState",
+              "Widget myStream is null when going to inactive lifecycle state");
+        }
+        setState(() {
+          widget.myVideoMuted = true;
+          widget.updateVideoState(true);
+        });
 
-          widget.updateGoingToBackground();
-        // }
+        widget.updateGoingToBackground();
 
         break;
       case AppLifecycleState.resumed:
@@ -1390,7 +1395,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     userData["session"] = widget._janusClient.sessionId;
     userData["handle"] = widget.pluginHandle.handleId;
     userData["extra"] = {};
-    userData["extra"]["streams"]= json.decode(widget.configuredStreams);
+    userData["extra"]["streams"] = json.decode(widget.configuredStreams);
     print("## extra = ${widget.configuredStreams}");
     widget.updateGlxUserCB(userData);
   }
