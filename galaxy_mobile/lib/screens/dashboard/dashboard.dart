@@ -524,6 +524,7 @@ class _DashboardState extends State<Dashboard>
     var message = {};
     message["type"] = "client-state";
     message["user"] = userData;
+    FlutterLogs.logInfo("dashboard", "updateRoomWithMyState", "${mqttClient.getStatus()}");
     mqttClient.send(
         "galaxy/room/" + _activeRoomId, String.fromCharCodes(JsonUtf8Encoder().convert(message)));
     userMap = userData;
