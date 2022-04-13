@@ -44,9 +44,13 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
   BuildContext dialogPleaseWaitContext;
   BuildContext dialogContext;
 
+  // Whether lifecycle methods should have any effect.
+  bool lifeCycleEnabled;
+
   @override
-  Future<void> initState() {
+  void initState() {
     super.initState();
+    lifeCycleEnabled = true;
     logger.info("starting settings");
     WidgetsBinding.instance.addObserver(this);
     final mqttClient = context.read<MQTTClient>();
@@ -106,8 +110,19 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
   }
 
   @override
+  void dispose() {
+    subscription.cancel();
+    // TODO: disconnect from MQTT?
+    // TODO: dipose of selfViewWidget? We should have a contorller instead.
+    super.dispose();
+  }
+
+  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
+    if (!lifeCycleEnabled) {
+      return;
+    }
     switch (state) {
       case AppLifecycleState.inactive:
         FlutterLogs.logInfo("Settings", "appLifeCycleState", "inactive");
@@ -281,8 +296,12 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
 
   void enterDashBoard(BuildContext context) {
     selfWidget.stopCamera();
+    // We don't want lifecycle methods to be called while on a different route.
+    lifeCycleEnabled = false;
+
     Navigator.pushNamed(context, '/dashboard')
         .then((value) {
+      lifeCycleEnabled = true;
       if (value == false) {
         FlutterLogs.logInfo("Settings","pushNamed", "back from dashboard with failure");
         //need to fix crash after several re-enter
@@ -290,10 +309,11 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
            enterDashBoard(context);
         // }
         // );
+      } else {
+        setState(() {
+          selfWidget.restartCamera();
+        });
       }
-      setState(() {
-        selfWidget.restartCamera();
-      });
     });
   }
 }
