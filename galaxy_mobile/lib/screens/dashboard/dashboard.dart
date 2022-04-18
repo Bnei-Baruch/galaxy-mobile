@@ -846,7 +846,7 @@ class _DashboardState extends State<Dashboard>
                                   displayStudyMaterialDialog(context);
 
                                   break;
-                              case "4.3": // Friends (Participants)
+                              case "4.4": // Donate
                               _openDonationLink(context);
                                 break;
                               }
