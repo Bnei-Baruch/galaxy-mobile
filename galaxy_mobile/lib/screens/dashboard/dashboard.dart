@@ -404,41 +404,49 @@ class _DashboardState extends State<Dashboard>
   void handleCmdData(String msgPayload, String topic) {
     FlutterLogs.logInfo(
         "Dashboard", "handleCmdData", "received message: $msgPayload topic: $topic");
+    var jsonCmd;
     try {
-      var jsonCmd = JsonDecoder().convert(msgPayload);
-      TopicType topicType = Topics.parse(topic);
-      switch (jsonCmd["type"]) {
-        case "client-chat":
-          if (topicType == TopicType.ROOM_CHAT) {
-            chatViewModel.addChatMessage(
-                ChatMessage.fromMQTTJson(
-                    jsonCmd,
-                    activeUser.id,
-                    // TODO: the web version also does this. Doesn't MQTT
-                    // have a timestamp as metadata?
-                    DateTime.now().millisecondsSinceEpoch));
-          }
-          break;
-        case "client-state":
-          videoRoom.setUserState(jsonCmd["user"]);
-          setState(() {
-            //disable question at bottom in case other friends ask question
-            if (jsonCmd["user"]["id"] != userMap["id"]) {
-              questionDisabled = jsonCmd["user"]["question"];
-            }
-          });
-          break;
-        case "audio-out":
-          if (videoRoom.getIsQuestion()) {
-            videoRoom.toggleQuestion();
-            updateRoomWithMyState(false);
-          }
-          stream.toggleOnAir(jsonCmd);
-          break;
-      }
+      String utf8DecodedPayload = utf8.decode(
+          msgPayload.runes.toList(),
+          allowMalformed: true);
+      jsonCmd = json.decode(utf8DecodedPayload);
     } on FormatException catch (e) {
       FlutterLogs.logError("Dashboard", "handleCmdData",
-          "The provided string is not valid JSON: ${e.toString()}");
+          "Could not decode JSON in UTF8: ${e.toString()}");
+      return;
+    }
+
+    FlutterLogs.logInfo(
+        "Dashboard", "handleCmdData", "decoded json: $jsonCmd");
+    TopicType topicType = Topics.parse(topic);
+    switch (jsonCmd["type"]) {
+      case "client-chat":
+        if (topicType == TopicType.ROOM_CHAT) {
+          chatViewModel.addChatMessage(
+              ChatMessage.fromMQTTJson(
+                  jsonCmd,
+                  activeUser.id,
+                  // TODO: the web version also does this. Doesn't MQTT
+                  // have a timestamp as metadata?
+                  DateTime.now().millisecondsSinceEpoch));
+        }
+        break;
+      case "client-state":
+        videoRoom.setUserState(jsonCmd["user"]);
+        setState(() {
+          //disable question at bottom in case other friends ask question
+          if (jsonCmd["user"]["id"] != userMap["id"]) {
+            questionDisabled = jsonCmd["user"]["question"];
+          }
+        });
+        break;
+      case "audio-out":
+        if (videoRoom.getIsQuestion()) {
+          videoRoom.toggleQuestion();
+          updateRoomWithMyState(false);
+        }
+        stream.toggleOnAir(jsonCmd);
+        break;
     }
   }
 
@@ -521,7 +529,7 @@ class _DashboardState extends State<Dashboard>
     message["user"] = userData;
     FlutterLogs.logInfo("dashboard", "updateRoomWithMyState", "${mqttClient.getStatus()}");
     mqttClient.send(
-        "galaxy/room/" + _activeRoomId, JsonEncoder().convert(message));
+        "galaxy/room/" + _activeRoomId, String.fromCharCodes(JsonUtf8Encoder().convert(message)));
     userMap = userData;
   }
 
