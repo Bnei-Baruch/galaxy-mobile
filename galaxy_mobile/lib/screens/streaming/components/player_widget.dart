@@ -39,6 +39,14 @@ class PlayerWidget extends StatefulWidget {
 
   @override
   _PlayerStateWidget createState() => _PlayerStateWidget();
+
+  void muteStreamIfNeeded() {
+    if(!isMuted)
+      {
+        isMuted = !isMuted;
+        mute(isMuted);
+      }
+  }
 }
 
 class _PlayerStateWidget extends State<PlayerWidget> {

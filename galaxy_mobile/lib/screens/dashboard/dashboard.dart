@@ -184,8 +184,10 @@ class _DashboardState extends State<Dashboard>
       //if had a ring or connected need to re-enter
       if (event.stateC == "true") {
         //mark re-enter
-        FlutterLogs.logInfo("Dashboard", "phoneCall", "mark re-enter");
+        FlutterLogs.logInfo("Dashboard", "phoneCall", "mark re-enter, conversation is in progress");
         callInProgress = true;
+        stream.state.playerOverlay.muteStreamIfNeeded();
+
       } else if (callInProgress) {
         callInProgress = false;
         FlutterLogs.logInfo(
