@@ -346,6 +346,8 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    // Clear friends in room.
+    context.read<MainStore>().setFriendsInRoom([]);
 
     WidgetsBinding.instance.removeObserver(this);
     (context.read<MainStore>() as MainStore).removeListener(updateSignal);
