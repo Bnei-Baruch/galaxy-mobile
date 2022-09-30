@@ -79,13 +79,18 @@ class MainStore extends ChangeNotifier {
       SharedPrefs().roomName = null;
     } else if (roomName.isNotEmpty) {
       activeRoom = availableRooms
-          .firstWhere((element) => element.description == roomName);
-      activeGateway = config[0].firstWhere((e) => e.name == activeRoom.janus);
+          .firstWhere((element) => element.description == roomName,orElse: () => null);
+      if(activeRoom!=null) {
+        activeGateway = config[0].firstWhere((e) => e.name == activeRoom.janus);
 
-      activeStreamGateway =
-          config[1][(Random().nextDouble() * config[1].length).floor()];
-      // TODO: what if the room doesn't exists anymore ?
-      SharedPrefs().roomName = roomName;
+        activeStreamGateway =
+        config[1][(Random().nextDouble() * config[1].length).floor()];
+        // TODO: what if the room doesn't exists anymore ?
+
+        SharedPrefs().roomName = roomName;
+      }
+      else
+        SharedPrefs().roomName = null;
 
       notifyListeners();
     }
