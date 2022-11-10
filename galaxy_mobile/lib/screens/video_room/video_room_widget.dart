@@ -3,11 +3,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 
 import 'package:galaxy_mobile/models/main_store.dart';
 import 'package:galaxy_mobile/services/keycloak.dart';
 import 'package:galaxy_mobile/services/monitoring_isolate.dart';
+import 'package:galaxy_mobile/services/mqtt_client.dart';
 import 'package:galaxy_mobile/widgets/directional_child.dart';
 import 'package:flutter/foundation.dart';
 import 'package:galaxy_mobile/utils/switch_page_helper.dart';
@@ -17,6 +19,7 @@ import 'package:janus_client/utils.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:janus_client/Plugin.dart';
 import 'package:mdi/mdi.dart';
+import 'package:mqtt5_client/mqtt5_client.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 
@@ -30,6 +33,7 @@ import '../../foreground.dart';
 typedef BoolCallback = Function(bool);
 typedef UpdateUserCallback = Function(Map<String, dynamic> user);
 typedef OnPageChangeCallback = Function(int position, int length);
+// typedef sendJanusMQTT = Function(String msg);
 // Since active user is always in the page, PAGE_SIZE is the number of remote
 // feeds in the page.
 final int PAGE_SIZE = 3;
@@ -55,6 +59,7 @@ class VideoRoom extends StatefulWidget {
   VoidCallback onCurrentUserJoinedRoom;
   UpdateUserCallback updateGlxUserCB;
   User user;
+  // sendJanusMQTT sender;
 
   JanusClient _janusClient;
   RTCVideoRenderer _localRenderer = new RTCVideoRenderer();
@@ -87,6 +92,7 @@ class VideoRoom extends StatefulWidget {
   String configuredStreams;
 
   void exitRoom() async {
+    state.unRegisterMqtt();
     if (_janusClient != null) _janusClient.destroy();
     if (pluginHandle != null) pluginHandle.hangup();
     if (subscriberHandle != null) subscriberHandle.destroy();
@@ -659,283 +665,313 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
 
   Future<void> initPlatformState() async {
     setState(() {
+
       widget._janusClient = JanusClient(iceServers: [
         RTCIceServer(
             url: "stun:galaxy.kli.one:3478", username: "", credential: ""),
       ], server: [
         widget.server,
+        // "https://gxydev.kab.sh/janusgxy",
       ], withCredentials: true, isUnifiedPlan: true, token: widget.token);
-      widget._janusClient.connect(onSuccess: (sessionId) async {
-        FlutterLogs.logInfo(
-            "VideoRoom",
-            "initPlatformState",
-            "voila! connection established with session id as "
-                "${sessionId.toString()}");
-        // Map<String, dynamic> configuration = {
-        //   "iceServers": widget._janusClient.iceServers.map((e) => e.toMap()).toList()
-        // };
 
-        widget._janusClient.attach(Plugin(
-            opaqueId: widget.user.sub,
-            plugin: 'janus.plugin.videoroom',
-            onMessage: (msg, jsep) async {
-              var event = msg['videoroom'];
-              if (event != null) {
-                if (event == 'joined') {
-                  widget.myid = msg["id"];
-                  var userJson = widget.user.toJson();
-                  userJson.putIfAbsent("rfid", () =>  widget.myid);
+      registerMQTTTopics();
+      if (widget._janusClient.mqttSender != null) {
+        context.read<MQTTClient>().addOnSubscribedCallback((topic) => {
+              if (topic.contains("from-janus") &&
+                  widget._janusClient.status.isEmpty)
+                janusConnect()
+            });
+      } else {
+        janusConnect();
+      }
+    });
+  }
 
-                  widget.user = User.fromJson(userJson);
+  Future<Set> janusConnect() async {
+    return {
+        widget._janusClient.connect(onSuccess: (sessionId)
+    async {
+      FlutterLogs.logInfo(
+          "VideoRoom",
+          "initPlatformState",
+          "voila! connection established with session id as "
+              "${sessionId.toString()}");
+      // Map<String, dynamic> configuration = {
+      //   "iceServers": widget._janusClient.iceServers.map((e) => e.toMap()).toList()
+      // };
 
-                  updateGxyUser(context, userJson);
+      widget._janusClient.attach(Plugin(
+          opaqueId: widget.user.sub,
+          plugin: 'janus.plugin.videoroom',
+          onMessage: (msg, jsep) async {
+            FlutterLogs.logInfo(
+                "VideoRoom", "attach", "message: ${msg.toString()}");
+            var event = msg['videoroom'];
+            if (event != null) {
+              if (event == 'joined') {
+                widget.myid = msg["id"];
+                var userJson = widget.user.toJson();
+                userJson.putIfAbsent("rfid", () => widget.myid);
 
-                  // widget._onUpdateVideoStateCallback();
+                widget.user = User.fromJson(userJson);
+
+                updateGxyUser(context, userJson);
+
+                // widget._onUpdateVideoStateCallback();
 
 
-                  widget.mypvtid = msg["private_id"];
-                  var publishersList = msg['publishers'];
-                  if (publishersList != null) {
-                    FlutterLogs.logInfo("VideoRoom", "initPlatformState",
-                        "got publishers: ${publishersList.toString()}");
+                widget.mypvtid = msg["private_id"];
+                var publishersList = msg['publishers'];
+                if (publishersList != null) {
+                  FlutterLogs.logInfo("VideoRoom", "initPlatformState",
+                      "got publishers: ${publishersList.toString()}");
 
-                    List<Map> subscription = new List<Map>();
-                    final filteredList = List.from(publishersList);
-                    filteredList.forEach((item) => {
-                          if ((item["streams"] as List).length == 2)
-                            {
-                              subscription.add({
-                                "feed": LinkedHashMap.of(item).remove("id"),
-                                "mid": "1"
-                              })
-                            }
-                        });
-
-                    (publishersList as List).forEach((value) =>
-                        value["display"] = (jsonDecode(value["display"])));
-                    //( (l)  => l["display"] = (jsonDecode(l["display"])) as Map);
-                    //          List newFeeds = sortAndFilterFeeds();
-                    publishersList = Utils.sortAndFilterFeeds(publishersList);
-                    List newFeeds = publishersList;
-                    FlutterLogs.logInfo(
-                        "VideoRoom",
-                        "initPlatformState",
-                        "New list of available publishers/feeds: "
-                            "${newFeeds.toString()}");
-
-                    //check if mhy user id is already in the room
-                    newFeeds.forEach((element) {
-                      if (element["display"]["id"] == widget.user.id) {
-                        //notify on exit room
-                        //request to disbale TRL-75
-                        // widget.callExitRoomUserExists();
+                  List<Map> subscription = new List<Map>();
+                  final filteredList = List.from(publishersList);
+                  filteredList.forEach((item) =>
+                  {
+                    if ((item["streams"] as List).length == 2)
+                      {
+                        subscription.add({
+                          "feed": LinkedHashMap.of(item).remove("id"),
+                          "mid": "1"
+                        })
                       }
-                    });
+                  });
 
-                    Set newFeedsIds = new Set();
-                    // var tempset = newFeeds.map((feed) => feed["id"]).toSet();
-                    newFeedsIds
-                        .addAll(newFeeds.map((feed) => feed["id"]).toSet());
-                    if (feeds != null &&
-                        feeds.any((feed) => newFeedsIds.lookup(feed["id"]))) {
-                      FlutterLogs.logInfo(
-                          "VideoRoom",
-                          "initPlatformState",
-                          "new feed joining but one of the feeds already exist: "
-                              "${newFeeds.toString()} | "
-                              "${publishersList.toString()}");
-                      return;
+                  (publishersList as List).forEach((value) =>
+                  value["display"] = (jsonDecode(value["display"])));
+                  //( (l)  => l["display"] = (jsonDecode(l["display"])) as Map);
+                  //          List newFeeds = sortAndFilterFeeds();
+                  publishersList = Utils.sortAndFilterFeeds(publishersList);
+                  List newFeeds = publishersList;
+                  FlutterLogs.logInfo(
+                      "VideoRoom",
+                      "initPlatformState",
+                      "New list of available publishers/feeds: "
+                          "${newFeeds.toString()}");
+
+                  //check if mhy user id is already in the room
+                  newFeeds.forEach((element) {
+                    if (element["display"]["id"] == widget.user.id) {
+                      //notify on exit room
+                      //request to disbale TRL-75
+                      // widget.callExitRoomUserExists();
                     }
-                    // Merge new feed with existing feeds and sort.
-                    List newFeedsState =
-                        feeds != null ? (feeds + newFeeds) : newFeeds;
-
-                    updateFeeds(newFeedsState);
-                    // Merge new feed with existing feeds and sort.
-                    switcher.makeSubscription(
-                        newFeeds,
-                        /* feedsJustJoined= */ true,
-                        /* subscribeToVideo= */ false,
-                        /* subscribeToAudio= */ true,
-                        /* subscribeToData= */ true);
-                    switcher.switchVideos(
-                        /* page= */ page,
-                        List.empty(),
-                        newFeedsState);
-                  }
-                } else if (event == 'talking') {
-                  FlutterLogs.logInfo(
-                      "VideoRoom", "initPlatformState", "talking");
-                  final id = msg['id'];
-
-                  FlutterLogs.logInfo("VideoRoom", "initPlatformState",
-                      "user ${id.toString()} - is talking");
-                  final feed = feeds.firstWhere((feed) => feed["id"] == id,
-                      orElse: () => null);
-                  if (feed == null) {
-                    FlutterLogs.logWarn("VideoRoom", "initPlatformState",
-                        "user ${id.toString()} not found");
-                    return;
-                  }
-                  setState(() {
-                    feed["talking"] = true;
-                    onFeedsChanged(feeds);
-                  });
-                } else if (event == 'stopped-talking') {
-                  FlutterLogs.logInfo(
-                      "VideoRoom", "initPlatformState", "stopped-talking");
-                  // const feeds = Object.assign([], this.state.feeds);
-                  final id = msg['id'];
-                  FlutterLogs.logInfo("VideoRoom", "initPlatformState",
-                      "user ${id.toString()} - stop talking");
-                  final feed = feeds.firstWhere((feed) => feed["id"] == id,
-                      orElse: () => null);
-                  if (feed == null) {
-                    FlutterLogs.logWarn("VideoRoom", "initPlatformState",
-                        "user ${id.toString()} not found");
-                    return;
-                  }
-                  setState(() {
-                    feed["talking"] = false;
-                    onFeedsChanged(feeds);
                   });
 
-                  // this.setState({ feeds });
-                } else if (event == 'destroyed') {
-                  FlutterLogs.logInfo(
-                      "VideoRoom", "initPlatformState", "destroyed");
-
-                  // The room has been destroyed
-                  // Janus.warn('The room has been destroyed!');
-                } else if (event == 'event') {
-                  if (msg['configured'] == 'ok') {
-                    FlutterLogs.logInfo(
-                        "VideoRoom", "initPlatformState", "configured $msg");
-                    FlutterLogs.logInfo(
-                        "VideoRoom", "initPlatformState", "streams ${msg["streams"]}");
-
-                    widget.configuredStreams = json.encode(msg["streams"]);
-                    var userJson = widget.user.toJson();
-                    widget.user = User.fromJson(userJson);
-                    updateGxyUser(context, userJson);
-
-                  } else if (msg['publishers'] != null &&
-                      msg['publishers'] != null) {
-                    FlutterLogs.logInfo(
-                        "VideoRoom", "initPlatformState", "just joined");
-                    // User just joined the room.
-                    (msg['publishers'] as List).forEach((value) {
-                      value["display"] = (jsonDecode(value["display"]));
-                    });
-                    var newFeeds = msg['publishers']
-                        as List; //sortAndFilterFeeds(msg['publishers'] as List);
+                  Set newFeedsIds = new Set();
+                  // var tempset = newFeeds.map((feed) => feed["id"]).toSet();
+                  newFeedsIds
+                      .addAll(newFeeds.map((feed) => feed["id"]).toSet());
+                  if (feeds != null &&
+                      feeds.any((feed) => newFeedsIds.lookup(feed["id"]))) {
                     FlutterLogs.logInfo(
                         "VideoRoom",
                         "initPlatformState",
-                        "new list of available publishers/feeds: "
-                            "${newFeeds.toString()}");
-
-                    Set newFeedsIds = new Set();
-                    newFeedsIds
-                        .addAll(newFeeds.map((feed) => feed["id"]).toSet());
-                    if (feeds.any((feed) => newFeedsIds.contains(feed["id"]))) {
-                      FlutterLogs.logWarn(
-                          "VideoRoom",
-                          "joinning",
-                          "new feed joining but one of the feeds already exist: "
-                              "${newFeeds.toString()}");
-                      return;
-                    }
-                    // Merge new feed with existing feeds and sort.
-                    var feedsNewState = feeds + newFeeds;
-                    switcher.makeSubscription(
-                        newFeeds,
-                        /* feedsJustJoined= */ true,
-                        /* subscribeToVideo= */ false,
-                        /* subscribeToAudio= */ true,
-                        /* subscribeToData= */ true);
-                    switcher.switchVideos(
-                        /* page= */ page,
-                        feeds,
-                        feedsNewState);
-                    updateFeeds(feedsNewState);
-                  } else if (msg['leaving'] != null && msg['leaving'] != null) {
-                    // User leaving the room which is same as publishers gone.
-                    final leaving = msg['leaving'];
-                    FlutterLogs.logInfo("VideoRoom", "leaving",
-                        "publisher: ${leaving.toString()} is leaving");
-                    // const { feeds } = this.state;
-                    switcher.unsubscribeFrom([leaving], /* onlyVideo= */ false);
-                    List feedsNewState =
-                        (feeds).where((feed) => feed["id"] != leaving).toList();
-                    switcher.switchVideos(
-                        /* page= */ page,
-                        feeds,
-                        feedsNewState);
-                    updateFeeds(feedsNewState);
-                    // After user has left, if the current page index is
-                    // overflowing, go back one page.
-                    if (page > getLastPageIndex(feedsNewState.length)) {
-                      this.switchPage(page - 1);
-                    }
-
-                    FlutterLogs.logInfo("VideoRoom", "initPlatformState",
-                        "publisher: ${leaving.toString()} left");
-                  } else if (msg['unpublished'] != null &&
-                      msg['unpublished'] != null) {
-                    FlutterLogs.logInfo(
-                        "VideoRoom", "initPlatformState", "unpublished");
-                    // const unpublished = msg['unpublished'];
-                    // Janus.log('Publisher unpublished: ', unpublished);
-                    // if (unpublished === 'ok') {
-                    // // That's us
-                    // videoroom.hangup();
-                    // return;
-                    // }
-
-                  } else if (msg['error'] != null && msg['error'] != null) {
-                    FlutterLogs.logError(
-                        "VideoRoom", "initPlatformState", msg['error']);
-                    // if (msg['error_code'] === 426) {
-                    // Janus.log('This is a no such room');
-                    // } else {
-                    // Janus.log(msg['error']);
-                    // }
+                        "new feed joining but one of the feeds already exist: "
+                            "${newFeeds.toString()} | "
+                            "${publishersList.toString()}");
+                    return;
                   }
+                  // Merge new feed with existing feeds and sort.
+                  List newFeedsState =
+                  feeds != null ? (feeds + newFeeds) : newFeeds;
+
+                  updateFeeds(newFeedsState);
+                  // Merge new feed with existing feeds and sort.
+                  switcher.makeSubscription(
+                      newFeeds,
+                      /* feedsJustJoined= */ true,
+                      /* subscribeToVideo= */ false,
+                      /* subscribeToAudio= */ true,
+                      /* subscribeToData= */ true);
+                  switcher.switchVideos(
+                    /* page= */
+                      page,
+                      List.empty(),
+                      newFeedsState);
+                }
+              } else if (event == 'talking') {
+                FlutterLogs.logInfo(
+                    "VideoRoom", "initPlatformState", "talking");
+                final id = msg['id'];
+
+                FlutterLogs.logInfo("VideoRoom", "initPlatformState",
+                    "user ${id.toString()} - is talking");
+                final feed = feeds.firstWhere((feed) => feed["id"] == id,
+                    orElse: () => null);
+                if (feed == null) {
+                  FlutterLogs.logWarn("VideoRoom", "initPlatformState",
+                      "user ${id.toString()} not found");
+                  return;
+                }
+                setState(() {
+                  feed["talking"] = true;
+                  onFeedsChanged(feeds);
+                });
+              } else if (event == 'stopped-talking') {
+                FlutterLogs.logInfo(
+                    "VideoRoom", "initPlatformState", "stopped-talking");
+                // const feeds = Object.assign([], this.state.feeds);
+                final id = msg['id'];
+                FlutterLogs.logInfo("VideoRoom", "initPlatformState",
+                    "user ${id.toString()} - stop talking");
+                final feed = feeds.firstWhere((feed) => feed["id"] == id,
+                    orElse: () => null);
+                if (feed == null) {
+                  FlutterLogs.logWarn("VideoRoom", "initPlatformState",
+                      "user ${id.toString()} not found");
+                  return;
+                }
+                setState(() {
+                  feed["talking"] = false;
+                  onFeedsChanged(feeds);
+                });
+
+                // this.setState({ feeds });
+              } else if (event == 'destroyed') {
+                FlutterLogs.logInfo(
+                    "VideoRoom", "initPlatformState", "destroyed");
+
+                // The room has been destroyed
+                // Janus.warn('The room has been destroyed!');
+              } else if (event == 'event') {
+                if (msg['configured'] == 'ok') {
+                  FlutterLogs.logInfo(
+                      "VideoRoom", "initPlatformState", "configured $msg");
+                  FlutterLogs.logInfo(
+                      "VideoRoom", "initPlatformState",
+                      "streams ${msg["streams"]}");
+
+                  widget.configuredStreams = json.encode(msg["streams"]);
+                  var userJson = widget.user.toJson();
+                  widget.user = User.fromJson(userJson);
+                  updateGxyUser(context, userJson);
+                } else if (msg['publishers'] != null &&
+                    msg['publishers'] != null) {
+                  FlutterLogs.logInfo(
+                      "VideoRoom", "initPlatformState", "just joined");
+                  // User just joined the room.
+                  (msg['publishers'] as List).forEach((value) {
+                    value["display"] = (jsonDecode(value["display"]));
+                  });
+                  var newFeeds = msg['publishers']
+                  as List; //sortAndFilterFeeds(msg['publishers'] as List);
+                  FlutterLogs.logInfo(
+                      "VideoRoom",
+                      "initPlatformState",
+                      "new list of available publishers/feeds: "
+                          "${newFeeds.toString()}");
+
+                  Set newFeedsIds = new Set();
+                  newFeedsIds
+                      .addAll(newFeeds.map((feed) => feed["id"]).toSet());
+                  if (feeds.any((feed) => newFeedsIds.contains(feed["id"]))) {
+                    FlutterLogs.logWarn(
+                        "VideoRoom",
+                        "joinning",
+                        "new feed joining but one of the feeds already exist: "
+                            "${newFeeds.toString()}");
+                    return;
+                  }
+                  // Merge new feed with existing feeds and sort.
+                  var feedsNewState = feeds + newFeeds;
+                  switcher.makeSubscription(
+                      newFeeds,
+                      /* feedsJustJoined= */ true,
+                      /* subscribeToVideo= */ false,
+                      /* subscribeToAudio= */ true,
+                      /* subscribeToData= */ true);
+                  switcher.switchVideos(
+                    /* page= */
+                      page,
+                      feeds,
+                      feedsNewState);
+                  updateFeeds(feedsNewState);
+                } else if (msg['leaving'] != null && msg['leaving'] != null) {
+                  // User leaving the room which is same as publishers gone.
+                  final leaving = msg['leaving'];
+                  FlutterLogs.logInfo("VideoRoom", "leaving",
+                      "publisher: ${leaving.toString()} is leaving");
+                  // const { feeds } = this.state;
+                  switcher.unsubscribeFrom([leaving], /* onlyVideo= */ false);
+                  List feedsNewState =
+                  (feeds).where((feed) => feed["id"] != leaving).toList();
+                  switcher.switchVideos(
+                    /* page= */
+                      page,
+                      feeds,
+                      feedsNewState);
+                  updateFeeds(feedsNewState);
+                  // After user has left, if the current page index is
+                  // overflowing, go back one page.
+                  if (page > getLastPageIndex(feedsNewState.length)) {
+                    this.switchPage(page - 1);
+                  }
+
+                  FlutterLogs.logInfo("VideoRoom", "initPlatformState",
+                      "publisher: ${leaving.toString()} left");
+                } else if (msg['unpublished'] != null &&
+                    msg['unpublished'] != null) {
+                  FlutterLogs.logInfo(
+                      "VideoRoom", "initPlatformState", "unpublished");
+                  // const unpublished = msg['unpublished'];
+                  // Janus.log('Publisher unpublished: ', unpublished);
+                  // if (unpublished === 'ok') {
+                  // // That's us
+                  // videoroom.hangup();
+                  // return;
+                  // }
+
+                } else if (msg['error'] != null && msg['error'] != null) {
+                  FlutterLogs.logError(
+                      "VideoRoom", "initPlatformState", msg['error']);
+                  // if (msg['error_code'] === 426) {
+                  // Janus.log('This is a no such room');
+                  // } else {
+                  // Janus.log(msg['error']);
+                  // }
                 }
               }
-              if (jsep != null) {
-                widget.pluginHandle.handleRemoteJsep(jsep);
-              }
-            },
-            onSuccess: (plugin) async {
-              // setState(() {
-              await prepareAndRegisterMyStream(plugin);
-            },
-            slowLink: (uplink, lost, mid) {
-              FlutterLogs.logWarn("VideoRoom", "plugin: janus.plugin.videoroom",
-                  "slowLink: uplink ${uplink} lost ${lost} mid ${mid}");
-              if(widget.mainToIsolateStream !=null && widget.mainToIsolateStream[0]!=null)
-                  (widget.mainToIsolateStream[0] as SendPort).send({"type":"slowLink","direction":uplink ? "sending":"receiving","lost":lost});
-            },
-            onIceConnectionState:(connection){
-              FlutterLogs.logWarn("VideoRoom", "onIceConnectionState",
-                  "state: $connection");
-              if(widget.mainToIsolateStream !=null && widget.mainToIsolateStream[0]!=null)
-
-                (widget.mainToIsolateStream[1] as SendPort).send({"type":"iceState","state":connection.toString()});
-            },
-            onRenegotiationNeededCallback: () async {
-              FlutterLogs.logWarn("VideoRoom", "onRenegotiationNeededCallback",
-                  "videoroom");
-
             }
-        ));
-      }, onError: (e) {
-        FlutterLogs.logError("VideoRoom", "plugin: janus.plugin.videoroom",
-            "some error occurred: ${e.toString()}");
-      });
-    });
+            if (jsep != null) {
+              widget.pluginHandle.handleRemoteJsep(jsep);
+            }
+          },
+          onSuccess: (plugin) async {
+            // setState(() {
+            await prepareAndRegisterMyStream(plugin);
+          },
+          slowLink: (uplink, lost, mid) {
+            FlutterLogs.logWarn("VideoRoom", "plugin: janus.plugin.videoroom",
+                "slowLink: uplink ${uplink} lost ${lost} mid ${mid}");
+            if (widget.mainToIsolateStream != null &&
+                widget.mainToIsolateStream[0] != null)
+              (widget.mainToIsolateStream[0] as SendPort).send({
+                "type": "slowLink",
+                "direction": uplink ? "sending" : "receiving",
+                "lost": lost
+              });
+          },
+          onIceConnectionState: (connection) {
+            FlutterLogs.logWarn("VideoRoom", "onIceConnectionState",
+                "state: $connection");
+            if (widget.mainToIsolateStream != null &&
+                widget.mainToIsolateStream[0] != null)
+              (widget.mainToIsolateStream[1] as SendPort).send(
+                  {"type": "iceState", "state": connection.toString()});
+          },
+          onRenegotiationNeededCallback: () async {
+            FlutterLogs.logWarn("VideoRoom", "onRenegotiationNeededCallback",
+                "videoroom");
+          }
+      ));
+    }, onError: (e) {
+    FlutterLogs.logError("VideoRoom", "plugin: janus.plugin.videoroom",
+    "some error occurred: ${e.toString()}");
+    })
+  };
   }
 
   Future prepareAndRegisterMyStreamRecovery(Plugin plugin) async {
@@ -1115,7 +1151,8 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
       //   onError: (error) {
       //   },
       // );
-
+      FlutterLogs.logInfo("VideoRoom", "subscribeTo",
+          "sending....");
       widget.subscriberHandle.send(
         message: {"request": 'subscribe', "streams": subscription},
         onSuccess: () {
@@ -1134,7 +1171,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     if (creatingFeed) {
       // Still working on the handle
       Future.delayed(
-          Duration(milliseconds: 500), () => subscribeTo(subscription));
+          Duration(milliseconds: 1500), () => subscribeTo(subscription));
       return;
     }
 
@@ -1157,7 +1194,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     // final RoomArguments args = ModalRoute.of(/context).settings.arguments;
     widget.roomNumber = args.roomNumber;
     widget.token = args.token;
-    widget.server = args.server;//"https://gxydev.kli.one/janusgxy";//"https://gxydev.kli.one/janusgxy";//
+    widget.server = args.server;//"https://gxydev.kli.one/janusgxy";//"https://gxydev.kli.one/janusgxy";//args.server;//
     widget.user = args.user;
     widget.groupName = args.groupName;
     widget.janusName = args.janusName;
@@ -1478,6 +1515,89 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     }, onError: (error) {
       print("xxxz plugin offer error: ${error}");
     });
+  }
+
+  void registerMQTTTopics() {
+
+    String rxTopicUser = 'janus/' + widget.janusName + '/from-janus' + "/" + widget.user.id;
+    String rxTopic = 'janus/' + widget.janusName + '/from-janus';
+    String txTopic = 'janus/' + widget.janusName + '/to-janus';
+    String stTopic = 'janus/' + widget.janusName + '/status';
+
+
+    context.read<MQTTClient>().subscribe(rxTopicUser);
+    context.read<MQTTClient>().subscribe(rxTopic);
+
+    context.read<MQTTClient>().subscribe(stTopic);
+    context.read<MQTTClient>().addOnMsgReceivedCallback((payload, topic) => widget._janusClient.onMessage(payload, topic));
+    widget._janusClient.mqttSender = (msg) {
+    var correlationData = parse(msg)["transaction"];
+    // let cd = correlationData ? " | transaction: " + correlationData : ""
+    // log.debug("%c[mqtt] --> send message" + cd + " | topic: " + topic + " | data: " + message, "color: darkgrey");
+    var container =  MqttPropertyContainer();
+    var resTopicProp = MqttUtf8StringProperty();
+    resTopicProp.identifier = MqttPropertyIdentifier.responseTopic;
+    resTopicProp.value = rxTopic;
+
+    var correlationProp = MqttUtf8StringProperty();
+    correlationProp.identifier = MqttPropertyIdentifier.correlationdata;
+    correlationProp.value = correlationData;
+    container.add(correlationProp);
+
+    var userProp = MqttUserProperty();
+    userProp.identifier = MqttPropertyIdentifier.userProperty;
+    userProp.pairValue = context.read<MainStore>().activeUser.toJson().toString();
+    userProp.pairName = "userProperties";
+    container.add(userProp);
+
+
+
+
+ //   var properties = rxTopic.isEmpty ? MqttPropertyContainer().userProperties.add(MqttUserProperty())//{userProperties: user || this.user, responseTopic: rxTopic, correlationData} : {userProperties: user || this.user};
+    // let options = {qos: 1, retain, properties};
+    // this.mq.publish(topic, message, {...options}, (err) => {
+
+
+
+      // context.read<MQTTClient>().send(txTopic, msg,retain: false,container);
+
+    MqttPublishMessage message = MqttPublishMessage();
+    message.withResponseTopic(rxTopicUser).withResponseCorrelationdata(MqttByteBuffer.fromList(correlationData.codeUnits).buffer).withUserProperties(container.userProperties).withQos(MqttQos.atLeastOnce);
+    message.toTopic(txTopic);
+    var payload = MqttPublishPayload();
+
+    var jsonBytes = utf8.encode(msg);
+    JsonEncoder encoder = JsonEncoder();
+    var res =  encoder.convert(jsonBytes);
+    payload.message = MqttByteBuffer.fromList(jsonBytes).buffer;
+    
+    message.payload = payload;
+    // Timer(Duration(seconds:2),() {
+    //
+
+    context.read<MQTTClient>().sendPublishMessage(message);
+
+
+      print("xxx msg send $msg to server ${widget.server}");
+    print("xxx msg send  after inversion ${MqttUtilities.bytesToStringAsString(payload.message)}");
+    // });
+    };
+
+  }
+
+  void unRegisterMqtt() {
+    String rxTopicUser = 'janus/' + widget.janusName + '/from-janus' + "/" + widget.user.id;
+    String rxTopic = 'janus/' + widget.janusName + '/from-janus';
+
+    String stTopic = 'janus/' + widget.janusName + '/status';
+
+
+
+    context.read<MQTTClient>().unsubscribe(rxTopic);
+    context.read<MQTTClient>().unsubscribe(rxTopicUser);
+    context.read<MQTTClient>().unsubscribe(stTopic);
+    context.read<MQTTClient>().removeOnMsgReceivedCallback((payload, topic) => widget._janusClient.onMessage(payload, topic));
+    widget._janusClient.mqttSender = null;
   }
 }
 

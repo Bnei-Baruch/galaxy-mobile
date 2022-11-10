@@ -12,6 +12,7 @@ import 'package:galaxy_mobile/utils/ambient_direction.dart';
 import 'package:galaxy_mobile/utils/topics.dart';
 import 'package:galaxy_mobile/viewmodels/chat_view_model.dart';
 import 'package:icon_badge/icon_badge.dart';
+import 'package:janus_client/janus_client.dart';
 import 'package:mdi/mdi.dart';
 import 'package:provider/provider.dart';
 import 'package:phone_state_i/phone_state_i.dart';
@@ -566,7 +567,7 @@ class _DashboardState extends State<Dashboard>
             mqttClient.unsubscribe("galaxy/room/$_activeRoomId/chat");
             mqttClient.removeOnConnectedCallback();
             mqttClient.removeOnConnectionFailedCallback();
-            mqttClient.removeOnMsgReceivedCallback();
+            mqttClient.clearOnMsgReceivedCallback();
             mqttClient.removeOnSubscribedCallback();
           }
           changeAudioDevice(AudioDevice.speaker);
@@ -1110,6 +1111,7 @@ class _DashboardState extends State<Dashboard>
 
     mqttClient.addOnSubscribedCallback((topic) => subscribedToTopic(topic));
     mqttClient.addOnMsgReceivedCallback((payload, topic) => handleCmdData(payload, topic));
+
     mqttClient.addOnConnectionFailedCallback(() => handleConnectionFailed());
 
     mqttClient.subscribe("galaxy/room/$_activeRoomId");

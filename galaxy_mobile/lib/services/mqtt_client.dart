@@ -1,10 +1,16 @@
+
 import 'dart:math';
+import 'dart:typed_data';
+import 'dart:convert';
 
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:galaxy_mobile/config/env.dart';
-import 'package:mqtt_client/mqtt_client.dart';
-import 'package:mqtt_client/mqtt_server_client.dart';
+import 'package:mqtt5_client/mqtt5_client.dart';
+import 'package:mqtt5_client/mqtt5_server_client.dart';
+// import 'package:mqtt_client/mqtt5_client.dart';
+// import 'package:mqtt_client/mqtt5_server_client.dart';
 
+import 'keycloak.dart';
 import 'logger.dart';
 
 final logger = new Logger("MQTTClient");
@@ -65,10 +71,12 @@ class MQTTClient {
     _onSubscribedCallbackList.clear();
   }
 
-  void removeOnMsgReceivedCallback() {
+  void removeOnMsgReceivedCallback(Function(String payload, String topic) onMsgReceivedCallback) {
+    _onMsgReceivedCallbackList.remove(onMsgReceivedCallback);
+  }
+  void clearOnMsgReceivedCallback() {
     _onMsgReceivedCallbackList.clear();
   }
-
   void removeOnConnectionFailedCallback() {
     _onConnectionFailedCallbackList.clear();
   }
@@ -79,7 +87,7 @@ class MQTTClient {
     _client.connectionMessage.authenticateAs(_username, token);
   }
 
-  Future<MqttServerClient> connect({bool internalRetry = false}) async {
+  Future<MqttServerClient> connect({bool internalRetry = false,User user }) async {
     if(!internalRetry)
       _connectionAttempt = 0;
       logger.info(">>> connection attempt: $_connectionAttempt");
@@ -94,27 +102,31 @@ class MQTTClient {
       _client.autoReconnect = true;
       _client.useWebSocket = true;
       _client.clientIdentifier = clientId;
-      _client.keepAlivePeriod = 10;
+
+
+      _client.keepAlivePeriod = 3;
       _client.port = 443; // ( or whatever your WS port is)
       _client.connectionMessage = MqttConnectMessage()
           .authenticateAs(_username, _password)
           .withClientIdentifier(clientId)
-          .keepAliveFor(10)
-          .startClean()
-          .will()
-          .withProtocolVersion(4)
-          .withProtocolName("MQTT")
-          .withWillTopic(APP_MQTT_WILL_TOPIC)
-          .withWillMessage(APP_MQTT_WILL_MESSAGE)
-          .withWillRetain()
-          .withWillQos(MqttQos.exactlyOnce);
+          .keepAliveFor(3)
+          .startClean();
+          // .will()
+         // .withWillProperties(prop)
+          //.withWillTopic(APP_MQTT_WILL_TOPIC)
+      //     .withWillRetain()
+      // .withMaximumMessageSize(256000)
+      // .withRequestResponseInformation(true)
+      // .withRequestProblemInformation(true);
+ //         .withWillQos(MqttQos.atMostOnce);
 
     await _client.connect();
 
       _client.updates.listen((List<MqttReceivedMessage<MqttMessage>> c) {
+        logger.info("xxx got reply in mqtt client");
         final MqttPublishMessage message = c[0].payload;
         final payload =
-            MqttPublishPayload.bytesToStringAsString(message.payload.message);
+            MqttUtilities.bytesToStringAsString(message.payload.message);
         final String topic = c[0].topic;
 
         logger.info("Received message: $payload from topic: $topic>");
@@ -122,6 +134,8 @@ class MQTTClient {
             in _onMsgReceivedCallbackList) {
           msgReceivedCallback(payload, topic);
         }
+      },onError: (e)=>{
+      logger.info("xxx got reply error in mqtt client  $e")
       });
 
 
@@ -135,16 +149,21 @@ class MQTTClient {
   }
 
   void unsubscribe(String topic) {
-    _client.unsubscribe(topic);
+    _client.unsubscribeStringTopic(topic);
   }
 
-  void send(String topic, String content) {
-    final builder = MqttClientPayloadBuilder();
-    builder.addString(content);
-    _client.publishMessage(topic, MqttQos.exactlyOnce, builder.payload);
+  void send(String topic, String content,{bool retain = false, List<MqttUserProperty> userProperties}) {
+   final builder = MqttPublishMessage();
+
+    _client.publishMessage(topic, MqttQos.exactlyOnce, MqttByteBuffer.fromList(content.codeUnits).buffer,retain: retain,userProperties: userProperties);
+
+  }
+  void sendPublishMessage(MqttPublishMessage message)
+  {
+    _client.publishUserMessage(message);
   }
 
-  MqttClientConnectionStatus getStatus()
+  MqttConnectionStatus getStatus()
   {
     return _client.connectionStatus;
   }
@@ -165,19 +184,19 @@ class MQTTClient {
     }
   }
 
-  void onSubscribed(String topic) {
-    logger.info("Subscribed to topic: $topic");
+  void onSubscribed(MqttSubscription subscription) {
+    logger.info("Subscribed to topic: ${subscription.topic}");
     for (Function(String) subscribedCallback in _onSubscribedCallbackList) {
-      subscribedCallback(topic);
+      subscribedCallback(subscription.topic.toString());
     }
   }
 
-  void onSubscribeFail(String topic) {
-    logger.warn("Failed to subscribe to $topic");
+  void onSubscribeFail(MqttSubscription subscription) {
+    logger.warn("Failed to subscribe to ${subscription.topic}");
   }
 
-  void onUnsubscribed(String topic) {
-    logger.info("Unsubscribed from topic: $topic");
+  void onUnsubscribed(MqttSubscription subscription) {
+    logger.info("Unsubscribed from topic: ${subscription.topic}");
   }
 
   void pong() {
@@ -188,7 +207,7 @@ class MQTTClient {
     if (_isConnected) {
       removeOnConnectedCallback();
       removeOnConnectionFailedCallback();
-      removeOnMsgReceivedCallback();
+      clearOnMsgReceivedCallback();
       removeOnSubscribedCallback();
       _client.disconnect();
     }

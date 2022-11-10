@@ -38,7 +38,7 @@ dependencies:
   shared_preferences: <=2.0.3
   synchronized: ^2.1.0+1
   slide_to_confirm: ^0.0.7
-  mqtt_client: ^8.2.0
+  mqtt5_client: ^2.1.0
   jwt_decode: ^0.2.0
   mdi: ^3.0.0
   flutter_html: ^1.2.0

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/gestures.dart';
@@ -6,10 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:galaxy_mobile/models/main_store.dart';
 import 'package:galaxy_mobile/screens/streaming/constants.dart';
+import 'package:galaxy_mobile/services/mqtt_client.dart';
 import 'package:janus_client/Plugin.dart';
 import 'package:janus_client/janus_client.dart';
 import 'package:janus_client/utils.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:mqtt5_client/mqtt5_client.dart';
 
 import 'components/player_widget.dart';
 import 'package:provider/provider.dart';
@@ -384,12 +387,109 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
       }
     };
     widget.isPlayerShown = false;
+    registerMQTTTopics();
+    if (janusClient.mqttSender != null) {
+      context.read<MQTTClient>().addOnSubscribedCallback((topic) => {
+        if (topic.contains("from-janus") &&
+           janusClient.status.isEmpty)
+          janusConnect()
+      });
+    } else {
+      janusConnect();
+    }
+
+  }
+
+  void janusConnect() {
     janusClient.connect(onSuccess: (sessionId) {
       widget.connected = true;
       setState(() {});
     });
   }
 
+  void registerMQTTTopics() {
+    var stream = context.read<MainStore>().activeStreamGateway;
+    String rxTopicUser = 'janus/' + stream.name + '/from-janus' + "/" + context.read<MainStore>().activeUser.id;
+    String rxTopic = 'janus/' + stream.name + '/from-janus';
+    String txTopic = 'janus/' + stream.name + '/to-janus';
+    String stTopic = 'janus/' + stream.name + '/status';
+
+
+    context.read<MQTTClient>().subscribe(rxTopicUser);
+    context.read<MQTTClient>().subscribe(rxTopic);
+
+    context.read<MQTTClient>().subscribe(stTopic);
+    context.read<MQTTClient>().addOnMsgReceivedCallback((payload, topic) => janusClient.onMessage(payload, topic));
+    janusClient.mqttSender = (msg) {
+      var correlationData = parse(msg)["transaction"];
+      // let cd = correlationData ? " | transaction: " + correlationData : ""
+      // log.debug("%c[mqtt] --> send message" + cd + " | topic: " + topic + " | data: " + message, "color: darkgrey");
+      var container =  MqttPropertyContainer();
+      var resTopicProp = MqttUtf8StringProperty();
+      resTopicProp.identifier = MqttPropertyIdentifier.responseTopic;
+      resTopicProp.value = rxTopic;
+
+      var correlationProp = MqttUtf8StringProperty();
+      correlationProp.identifier = MqttPropertyIdentifier.correlationdata;
+      correlationProp.value = correlationData;
+      container.add(correlationProp);
+
+      var userProp = MqttUserProperty();
+      userProp.identifier = MqttPropertyIdentifier.userProperty;
+      userProp.pairValue = context.read<MainStore>().activeUser.toJson().toString();
+      userProp.pairName = "userProperties";
+      container.add(userProp);
+
+
+
+
+      //   var properties = rxTopic.isEmpty ? MqttPropertyContainer().userProperties.add(MqttUserProperty())//{userProperties: user || this.user, responseTopic: rxTopic, correlationData} : {userProperties: user || this.user};
+      // let options = {qos: 1, retain, properties};
+      // this.mq.publish(topic, message, {...options}, (err) => {
+
+
+
+      // context.read<MQTTClient>().send(txTopic, msg,retain: false,container);
+
+      MqttPublishMessage message = MqttPublishMessage();
+      message.withResponseTopic(rxTopicUser).withResponseCorrelationdata(MqttByteBuffer.fromList(correlationData.codeUnits).buffer).withUserProperties(container.userProperties).withQos(MqttQos.atLeastOnce);
+      message.toTopic(txTopic);
+      var payload = MqttPublishPayload();
+
+      var jsonBytes = utf8.encode(msg);
+      JsonEncoder encoder = JsonEncoder();
+      var res =  encoder.convert(jsonBytes);
+      payload.message = MqttByteBuffer.fromList(jsonBytes).buffer;
+
+      message.payload = payload;
+      // Timer(Duration(seconds:2),() {
+      //
+
+      context.read<MQTTClient>().sendPublishMessage(message);
+
+
+      print("xxx msg send $msg to server ${stream.url}");
+      print("xxx msg send  after inversion ${MqttUtilities.bytesToStringAsString(payload.message)}");
+      // });
+    };
+
+  }
+
+  void unRegisterMqtt() {
+    var stream = context.read<MainStore>().activeStreamGateway;
+    String rxTopicUser = 'janus/' + stream.name + '/from-janus' + "/" + context.read<MainStore>().activeUser.id;
+    String rxTopic = 'janus/' + stream.name + '/from-janus';
+
+    String stTopic = 'janus/' + stream.name + '/status';
+
+
+
+    context.read<MQTTClient>().unsubscribe(rxTopic);
+    context.read<MQTTClient>().unsubscribe(rxTopicUser);
+    context.read<MQTTClient>().unsubscribe(stTopic);
+    context.read<MQTTClient>().removeOnMsgReceivedCallback((payload, topic) => janusClient.onMessage(payload, topic));
+    janusClient.mqttSender = null;
+  }
   void getPresets() {
     FlutterLogs.logInfo("Streaming", "getPresets", "enter");
     final int audio =

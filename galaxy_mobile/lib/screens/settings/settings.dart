@@ -90,7 +90,7 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
                   onPressed: () {
                     Navigator.of(this.dialogContext, rootNavigator: true).pop();
                     dialogContext = null;
-                    mqttClient.connect();
+                    mqttClient.connect(user: context.read<MainStore>().activeUser);
                     // dismisses only the dialog and returns nothing
                   },
                   child: new Text('OK'),
@@ -102,7 +102,7 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
       }
     });
 
-    mqttClient.connect();
+    mqttClient.connect(user: context.read<MainStore>().activeUser);
   }
 
   @override
