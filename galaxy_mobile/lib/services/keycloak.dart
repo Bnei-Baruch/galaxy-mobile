@@ -11,6 +11,7 @@ class User {
   final String group;
   final bool question;
   final bool camera;
+  final int timestamp;
   final List<String> roles;
   final int rfid;
 
@@ -28,6 +29,7 @@ class User {
         roles = json['roles'],
         question = json['question'],
         camera = json['camera'],
+        timestamp = json['timestamp'],
         group = json['group'];
 
   Map<String, dynamic> toJson() => {
@@ -45,6 +47,7 @@ class User {
         'question': question,
         'camera': camera,
         'group': group,
+        'timestamp' : timestamp
       };
 
   @override
@@ -60,6 +63,7 @@ class User {
         'roles: ${this.roles},'
         'question: ${this.question} ,'
         'camera: ${this.camera} ,'
+        'timestamp : ${this.timestamp}'
         'group: ${this.group}}';
   }
 

@@ -95,13 +95,18 @@ class MonitoringData {
 
     userJson["galaxyVersion"] = version;
 
-    userJson["title"] = user["givenName"];
+    userJson["title"] = user["name"];
 
-    userJson["display"] = user["givenName"];
+    userJson["display"] = user["name"];
 
     userJson["janus"] = janus;
 
+    userJson["role"] = "user";
 
+    userJson["system"] = Platform.isAndroid ? "Android" : "iOS";
+
+
+    print("user = $user");
   }
 
   startMonitor() {
@@ -127,7 +132,7 @@ class MonitoringData {
     int counter = 1;
     updateBackend("ff");
     //loop for 1 min - in this 1 min gather data oer sec [call gatherDataPerInterval], after one min send data to backend
-    looper = Timer.periodic(Duration(milliseconds: spec["sample_interval"]), (timer) {
+    looper = Timer.periodic(Duration(seconds: 60), (timer) {
       gatherDataPerInterval();
       // if (counter == 60) {
       //   updateBackend("ff");
