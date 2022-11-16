@@ -145,30 +145,33 @@ class _DashboardState extends State<Dashboard>
         });
         //show message on screen
       } else {
-        //if marked no connection then reneter room
-        if(dialogPleaseWaitContext!=null) {
-          Navigator.pop(dialogPleaseWaitContext);
-          dialogPleaseWaitContext = null;
-        }
-        FlutterLogs.logInfo("Dashboard", "ConnectivityResult", "connection ${result.toString()}");
-        if (hadNoConnection || (context.read<MainStore>().network != result)) {
-          FlutterLogs.logInfo(
-              "Dashboard", "ConnectivityResult", "reconnecting - exit room");
 
-          FlutterLogs.logInfo(
-              "Dashboard", "ConnectivityResult", "reconnecting - enter room");
-          //enter room
-          setState(() {
-            stream.exit();
-            videoRoom.exitRoom();
-
-            userTimer.cancel();
-            //go out of the room and re-enter , since jauns doesn't have a reconnect infra to do it right
-            Navigator.of(this.context).pop(false);
-            callReEnter();
-          });
-          hadNoConnection = false;
-        }
+        // //if marked no connection then reneter room
+        // if(dialogPleaseWaitContext!=null) {
+        //   Navigator.pop(dialogPleaseWaitContext);
+        //   dialogPleaseWaitContext = null;
+        // }
+        // FlutterLogs.logInfo("Dashboard", "ConnectivityResult", "connection ${result.toString()}");
+        // if (hadNoConnection || (context.read<MainStore>().network != result)) {
+        //   FlutterLogs.logInfo(
+        //       "Dashboard", "ConnectivityResult", "reconnecting - exit room");
+        //
+        //   FlutterLogs.logInfo(
+        //       "Dashboard", "ConnectivityResult", "reconnecting - enter room");
+        //   //enter room
+        //   setState(() {
+        //
+        //     //recover mqtt connection
+        //     stream.exit();
+        //     videoRoom.exitRoom();
+        //
+        //     userTimer.cancel();
+        //     //go out of the room and re-enter , since jauns doesn't have a reconnect infra to do it right
+        //     Navigator.of(this.context).pop(false);
+        //     //callReEnter();
+        //   });
+        //   hadNoConnection = false;
+        // }
       }
       setState(() {
         context.read<MainStore>().network = result;
@@ -1113,6 +1116,7 @@ class _DashboardState extends State<Dashboard>
     mqttClient.addOnMsgReceivedCallback((payload, topic) => handleCmdData(payload, topic));
 
     mqttClient.addOnConnectionFailedCallback(() => handleConnectionFailed());
+    mqttClient.addOnConnectedCallback(() => handleConnected());
 
     mqttClient.subscribe("galaxy/room/$_activeRoomId");
     mqttClient.subscribe("galaxy/room/$_activeRoomId/chat");
@@ -1127,6 +1131,37 @@ class _DashboardState extends State<Dashboard>
         }else{
           print("URL can't be launched.");
         }
+
+  }
+
+  handleConnected() {
+    FlutterLogs.logInfo(
+        "Dashboard", "mqtt", "handleConnected");
+    //if marked no connection then reneter room
+    if(dialogPleaseWaitContext!=null) {
+      Navigator.pop(dialogPleaseWaitContext);
+      dialogPleaseWaitContext = null;
+    }
+    // FlutterLogs.logInfo("Dashboard", "ConnectivityResult", "connection ${result.toString()}");
+    // if (hadNoConnection || (context.read<MainStore>().network != result)) {
+
+
+
+      //enter room
+      setState(() {
+        FlutterLogs.logInfo(
+            "Dashboard", "ConnectivityResult", "reconnecting - exit room");
+        //recover mqtt connection
+        stream.exit();
+        videoRoom.exitRoom();
+
+        userTimer.cancel();
+        //go out of the room and re-enter , since jauns doesn't have a reconnect infra to do it right
+        Navigator.of(this.context).pop(false);
+        //callReEnter();
+      });
+      hadNoConnection = false;
+    // }
 
   }
 }

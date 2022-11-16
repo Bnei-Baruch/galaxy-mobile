@@ -92,17 +92,17 @@ class VideoRoom extends StatefulWidget {
   String configuredStreams;
 
   void exitRoom() async {
-    state.unRegisterMqtt();
+
     if (_janusClient != null) _janusClient.destroy();
     if (pluginHandle != null) pluginHandle.hangup();
     if (subscriberHandle != null) subscriberHandle.destroy();
     if (_localRenderer != null) {
-      _localRenderer.srcObject = null;
-      await _localRenderer.dispose();
+    //  _localRenderer.srcObject = null;
+     await _localRenderer.dispose();
 
     }
     if (_remoteRenderers != null && _remoteRenderers.isNotEmpty) {
-      _remoteRenderers.map((e) => e.srcObject = null);
+      _remoteRenderers.map((e) => e.dispose());
     }
     if (myStream != null) {
       myStream.getAudioTracks().first.setMicrophoneMute(false);
@@ -110,6 +110,7 @@ class VideoRoom extends StatefulWidget {
       myStream.getAudioTracks().first.enabled = false;
       myStream.dispose();
     }
+    state.unRegisterMqtt();
     pluginHandle = null;
     subscriberHandle = null;
     questionInRoom = null;
