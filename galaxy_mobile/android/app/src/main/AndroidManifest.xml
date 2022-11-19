@@ -58,6 +58,7 @@
         android:label="Arvut"
         android:icon="@mipmap/launcher_icon">
         <activity
+            android:exported="true"
             android:name=".MainActivity"
             android:launchMode="singleTop"
             android:theme="@style/LaunchTheme"
