@@ -86,7 +86,7 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
               content: Text(
                   'Server is unreachable,\nplease make sure internet connection is available'),
               actions: <Widget>[
-                new FlatButton(
+                new TextButton(
                   onPressed: () {
                     Navigator.of(this.dialogContext, rootNavigator: true).pop();
                     dialogContext = null;
@@ -217,10 +217,15 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
                           SizedBox(width: 10.w),
                           Container(
                               height: 60.0,
-                              child: RaisedButton(
-                                  shape: RoundedRectangleBorder(
+                              child: ElevatedButton(
+                                style: ButtonStyle(
+                                  shape: MaterialStateProperty.all(RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10.0)
-                                  ),
+                                  ))
+                                ),
+                                  // shape: RoundedRectangleBorder(
+                                  //     borderRadius: BorderRadius.circular(10.0)
+                                  // ),
                                   child: Row(
                                       crossAxisAlignment: CrossAxisAlignment.center,
                                       mainAxisAlignment: MainAxisAlignment.center,

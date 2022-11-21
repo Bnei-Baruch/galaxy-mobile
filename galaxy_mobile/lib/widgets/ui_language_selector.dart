@@ -13,19 +13,19 @@ class UILanguageSelector extends StatelessWidget {
   void setLanguage(BuildContext context, String language) {
     switch (language) {
       case "English":
-        EasyLocalization.of(context).locale = Locale('en', 'US');
+        EasyLocalization.of(context).setLocale( Locale('en', 'US'));
         break;
 
       case "Русский":
-        EasyLocalization.of(context).locale = Locale('ru', 'RU');
+        EasyLocalization.of(context).setLocale( Locale('ru', 'RU'));
         break;
 
       case "עברית":
-        EasyLocalization.of(context).locale = Locale('he', 'IL');
+        EasyLocalization.of(context).setLocale(Locale('he', 'IL'));
         break;
 
       case "Español":
-        EasyLocalization.of(context).locale = Locale('es', '');
+        EasyLocalization.of(context).setLocale(Locale('es', ''));
         break;
 
       default:
@@ -71,10 +71,16 @@ class UILanguageSelector extends StatelessWidget {
     return Align(
         alignment: AlignmentDirectional.centerEnd,
         child: DropdownSearch<String>(
-            showSelectedItem: true,
-            mode: Mode.DIALOG,
-            label: _withLabel ? 'interface_language'.tr() : '',
-            hint: 'select_language'.tr(),
+            popupProps: PopupProps.dialog(
+              title: Text( _withLabel ? 'interface_language'.tr() : ''),
+
+
+            ),
+
+          //  showSelectedItem: true,
+           // mode: Mode.DIALOG,
+           // label: _withLabel ? 'interface_language'.tr() : '',
+           // hint: 'select_language'.tr(),
             items: languages,
             selectedItem: getLanguage(context),
             onChanged: (String language) => {
@@ -84,15 +90,26 @@ class UILanguageSelector extends StatelessWidget {
                 "selected language: $language"),
               setLanguage(context, language)
             },
-            dropdownSearchDecoration: InputDecoration.collapsed(
-              filled: true,
-              //border: OutlineInputBorder(),
-              // contentPadding: EdgeInsets.fromLTRB(12, 12, 8, 0),
-              fillColor: Colors
-                  .transparent //Theme.of(context).inputDecorationTheme.fillColor,
+            dropdownDecoratorProps: DropDownDecoratorProps(
+              dropdownSearchDecoration:  InputDecoration.collapsed(
+                  filled: true,
+                  //border: OutlineInputBorder(),
+                  // contentPadding: EdgeInsets.fromLTRB(12, 12, 8, 0),
+                  fillColor: Colors
+                      .transparent //Theme.of(context).inputDecorationTheme.fillColor,
+              ),
             ),
-            showClearButton: false,
-            showSearchBox: false)
+            // dropdownSearchDecoration: InputDecoration.collapsed(
+            //   filled: true,
+            //   //border: OutlineInputBorder(),
+            //   // contentPadding: EdgeInsets.fromLTRB(12, 12, 8, 0),
+            //   fillColor: Colors
+            //       .transparent //Theme.of(context).inputDecorationTheme.fillColor,
+            // ),
+            // dropdownBuilder: DropdownSearchBuilder,
+            // showClearButton: false,
+            // showSearchBox: false
+        )
         );
   }
 }

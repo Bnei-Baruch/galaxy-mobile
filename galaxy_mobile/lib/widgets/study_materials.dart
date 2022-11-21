@@ -8,11 +8,17 @@ import 'package:galaxy_mobile/widgets/loader.dart';
 import 'package:galaxy_mobile/models/study_material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:html/dom.dart' as dom;
 
 
 class StudyMaterials extends StatelessWidget {
 
-  Future<void> _onLinkOpen(String url) async {
+  Future<void> _onLinkOpen(
+      String url,
+  RenderContext context,
+      Map<String, String> attributes,
+  dom.Element element,
+      ) async {
     if (await canLaunch(url)) {
       await launch(url);
     } else {
@@ -58,22 +64,22 @@ class StudyMaterials extends StatelessWidget {
                   child: Html(
                     data: material.htmlContent,
                     onLinkTap: _onLinkOpen,
-                    customRender: {
-                      // We need this override div since flutter_html doesn't
-                      // change direction based on the "dir" attribute on it.
-                      "div": (renderContext, Widget child, attributes, _) {
-                        if (attributes['dir'] == null) {
-                          // Use the default renderer for div.
-                          return null;
-                        }
-
-                        return Directionality(
-                          textDirection: attributes['dir'] == 'rtl' ? ui.TextDirection.rtl
-                              : ui.TextDirection.ltr,
-                          child: child
-                        );
-                      },
-                    },
+                    // customRender: {
+                    //   // We need this override div since flutter_html doesn't
+                    //   // change direction based on the "dir" attribute on it.
+                    //   "div": (renderContext, Widget child, attributes, _) {
+                    //     if (attributes['dir'] == null) {
+                    //       // Use the default renderer for div.
+                    //       return null;
+                    //     }
+                    //
+                    //     return Directionality(
+                    //       textDirection: attributes['dir'] == 'rtl' ? ui.TextDirection.rtl
+                    //           : ui.TextDirection.ltr,
+                    //       child: child
+                    //     );
+                    //   },
+                    // },
                   )
                 )
               ],

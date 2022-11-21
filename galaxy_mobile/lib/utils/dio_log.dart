@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 class LogInterceptors extends Interceptor {
   @override
-  Future onRequest(RequestOptions options) async {
+  Future onRequest(RequestOptions options,RequestInterceptorHandler handler) async {
     debugPrint("--> ${options.method} ${options.uri}");
     return options;
   }

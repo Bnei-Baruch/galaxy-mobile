@@ -246,7 +246,7 @@ class _DashboardState extends State<Dashboard>
           title: new Text('Room Message'),
           content: Text('Your user is already in the room'),
           actions: <Widget>[
-            new FlatButton(
+            new TextButton(
               onPressed: () {
                 Navigator.of(context, rootNavigator: true).pop();
                 Navigator.of(this.context).pop();
@@ -466,7 +466,7 @@ class _DashboardState extends State<Dashboard>
         title: new Text('Room Message'),
         content: Text('Connection to server failure'),
         actions: <Widget>[
-          new FlatButton(
+          new TextButton(
             onPressed: () {
               Navigator.of(context, rootNavigator: true).pop();
               Navigator.of(this.context).pop();

@@ -1,6 +1,5 @@
 import 'package:flag/flag.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_volume_slider/flutter_volume_slider.dart';
 import 'package:galaxy_mobile/screens/streaming/constants.dart';
 
 typedef BooleanCallback = void Function(bool isTrue);
@@ -175,7 +174,7 @@ class _PlayerStateWidget extends State<PlayerWidget> {
                                                         children: <Widget>[
                                                           value.keys.contains(
                                                               "flag")
-                                                              ? Flag(
+                                                              ? Flag.fromCode(
                                                               value["flag"],
                                                               height: 24,
                                                               width: 24,

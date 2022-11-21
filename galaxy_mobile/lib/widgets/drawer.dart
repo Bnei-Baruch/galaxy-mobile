@@ -32,7 +32,7 @@ class AppDrawer extends StatelessWidget {
     FlutterLogs.logInfo("AppDrawer", "archiveLogs", "2");
     encoder.create(path + '/galaxyLogs.zip');
     FlutterLogs.logInfo(
-        "AppDrawer", "archiveLogs", "2.0 zip path ${encoder.zip_path}");
+        "AppDrawer", "archiveLogs", "2.0 zip path ${encoder.zipPath}");
     if (Platform.isAndroid) {
       File logcat = File(path + "/galaxy/logcat.txt");
       final String logs = await Logcat.execute();

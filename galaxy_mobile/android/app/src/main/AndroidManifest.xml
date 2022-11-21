@@ -53,8 +53,7 @@
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <application
-
-        android:name="io.flutter.app.FlutterApplication"
+        android:name="${applicationName}"
         android:label="Arvut"
         android:icon="@mipmap/launcher_icon">
         <activity

@@ -29,9 +29,14 @@ class RoomSelector extends StatelessWidget {
 
     // TODO: the dropdown is slow, consider replace with another package.
     return DropdownSearch<Room>(
-      mode: Mode.DIALOG,
-      label: 'room'.tr(),
-      hint: 'select_room'.tr(),
+      popupProps: PopupProps.dialog(
+        title: Text('room'.tr()),
+
+
+      ),
+     // mode: Mode.DIALOG,
+    //  label: 'room'.tr(),
+  //    hint: 'select_room'.tr(),
       items: rooms,
       selectedItem: activeRoom,
       // onFind: (String filter) => getData(filter),
@@ -43,15 +48,29 @@ class RoomSelector extends StatelessWidget {
           context.read<MainStore>().setActiveRoom(room.description)
         }
       },
-      dropdownSearchDecoration: InputDecoration(
-        filled: true,
-          border: OutlineInputBorder(),
-          contentPadding: EdgeInsets.fromLTRB(12, 12, 8, 0),
-        fillColor: Colors.transparent //Theme.of(context).inputDecorationTheme.fillColor,
+      dropdownDecoratorProps: DropDownDecoratorProps(
+        dropdownSearchDecoration: InputDecoration(
+            filled: true,
+            border: OutlineInputBorder(),
+            contentPadding: EdgeInsets.fromLTRB(12, 12, 8, 0),
+            fillColor: Colors.transparent //Theme.of(context).inputDecorationTheme.fillColor,
+        ),
       ),
-      showClearButton: true,
-      showSearchBox: true,
-      autoFocusSearchBox: true,
+      // dropdownSearchDecoration: InputDecoration(
+      //   filled: true,
+      //     border: OutlineInputBorder(),
+      //     contentPadding: EdgeInsets.fromLTRB(12, 12, 8, 0),
+      //   fillColor: Colors.transparent //Theme.of(context).inputDecorationTheme.fillColor,
+      // ),
+      clearButtonProps: ClearButtonProps(
+
+      ),
+      dropdownButtonProps: DropdownButtonProps(
+
+      ),
+      // showClearButton: true,
+      // showSearchBox: true,
+      // autoFocusSearchBox: true,
       filterFn:(room,string){
 
         if(string.isEmpty)
@@ -71,11 +90,11 @@ class RoomSelector extends StatelessWidget {
             return room.description.toLowerCase().contains(string.toLowerCase());
           }
       } ,
-      searchBoxDecoration: InputDecoration(
-        border: OutlineInputBorder(),
-        contentPadding: EdgeInsets.fromLTRB(12, 12, 8, 0),
-        labelText: "Search",
-      ),
+      // searchBoxDecoration: InputDecoration(
+      //   border: OutlineInputBorder(),
+      //   contentPadding: EdgeInsets.fromLTRB(12, 12, 8, 0),
+      //   labelText: "Search",
+      // ),
     );
   }
   String replaceNoPrintable(String value, {String replaceWith = ' '}) {

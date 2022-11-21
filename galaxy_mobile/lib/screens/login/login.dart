@@ -38,7 +38,7 @@ class _LoginState extends State<Login>  with WidgetsBindingObserver {
      newVersion = NewVersion(
         iOSId: 'com.galaxy.mobile',
         androidId: 'com.galaxy_mobile',
-        context: context
+       // context: context
     );
     WidgetsBinding.instance.addObserver(this);
     advancedStatusCheck(newVersion);
@@ -58,7 +58,7 @@ class _LoginState extends State<Login>  with WidgetsBindingObserver {
       int localVersion = int.parse(status.localVersion.replaceAll(".",""));
       int storeVersion = int.parse(status.storeVersion.replaceAll(".",""));
       if (isVersionGreaterThan(status.storeVersion,status.localVersion))
-        newVersion.showUpdateDialog(status);
+        newVersion.showUpdateDialog();
     }
   }
 
@@ -209,10 +209,14 @@ class _LoginState extends State<Login>  with WidgetsBindingObserver {
                   height: 60.0,
                   child: Opacity(
                       opacity: 0.8,
-                      child: RaisedButton(
-                          elevation: 5.0,
-                          // color: Color(0xff0062b0),
-                          highlightColor: Color(0xff00c6d2),
+                      child: ElevatedButton(
+                        style: ButtonStyle(
+                          elevation: MaterialStateProperty.all(5),
+                          foregroundColor: MaterialStateProperty.all(Color(0xff00c6d2))
+                        ),
+                          // elevation: 5.0,
+                          // // color: Color(0xff0062b0),
+                          // highlightColor: Color(0xff00c6d2),
                           child: Text("login".tr(),
                               style:
                                   TextStyle(color: Colors.white, fontSize: 24)),

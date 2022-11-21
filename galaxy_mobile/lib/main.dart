@@ -6,6 +6,7 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_plugin/flutter_foreground_plugin.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:galaxy_mobile/models/main_store.dart';
 import 'package:galaxy_mobile/routes.dart';
 import 'package:galaxy_mobile/services/api.dart';
@@ -126,19 +127,21 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
             Wakelock.enable();
           }
         },
-        child: ScreenUtilInit(
-            designSize: Size(412, 732),
-            allowFontScaling: false,
-            builder: () => MaterialApp(
-                debugShowCheckedModeBanner: false,
-                localizationsDelegates: context.localizationDelegates,
-                supportedLocales: context.supportedLocales,
-                locale: context.locale,
-                theme: appTheme(),
-                initialRoute: '/',
-                routes: routes)
-        )
-    );
+       child: ScreenUtilInit(
+
+           designSize: Size(412, 732),
+         child: MaterialApp(
+             debugShowCheckedModeBanner: false,
+             localizationsDelegates: context.localizationDelegates,
+             supportedLocales: context.supportedLocales,
+             locale: context.locale,
+             theme: appTheme(),
+             initialRoute: '/',
+             routes: routes)
+       )
+       );
+
+    // );
   }
 }
 
@@ -146,8 +149,11 @@ Future<RemoteConfig> setupRemoteConfig() async {
   await Firebase.initializeApp();
   final RemoteConfig remoteConfig = RemoteConfig.instance as RemoteConfig;
   await remoteConfig.setConfigSettings(RemoteConfigSettings(
-    fetchTimeoutMillis:  10*1000,
-    minimumFetchIntervalMillis: 1*60*1000,
+    fetchTimeout: Duration(milliseconds: 10*1000),
+
+    //fetchTimeoutMillis:  10*1000,
+    minimumFetchInterval: Duration(milliseconds:1*60*1000 ),
+   // minimumFetchIntervalMillis: 1*60*1000,
   ));
   await remoteConfig.setDefaults(<String, dynamic>{
     'currentVer': '1.0.18',
