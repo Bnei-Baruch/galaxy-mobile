@@ -56,6 +56,7 @@ void main() async {
   print("main init logs passed");
   await Firebase.initializeApp();
 
+
   Wakelock.enable();
   // await SentryFlutter.init(
   //         (options) {
@@ -91,6 +92,7 @@ void main() async {
                   Locale('he', 'IL'),
                   Locale('es', '')
                 ],
+                startLocale: Locale('en', 'US'),
                 path: 'assets/translations',
                 fallbackLocale: Locale('en', 'US'),
                 child: MyApp())
@@ -128,16 +130,18 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
           }
         },
        child: ScreenUtilInit(
-
            designSize: Size(412, 732),
-         child: MaterialApp(
-             debugShowCheckedModeBanner: false,
-             localizationsDelegates: context.localizationDelegates,
-             supportedLocales: context.supportedLocales,
-             locale: context.locale,
-             theme: appTheme(),
-             initialRoute: '/',
-             routes: routes)
+        builder: (_, child) {
+          return MaterialApp(
+              debugShowCheckedModeBanner: false,
+              localizationsDelegates: context.localizationDelegates,
+              supportedLocales: context.supportedLocales,
+              locale: context.locale,
+              theme: appTheme(),
+              initialRoute: '/',
+              routes: routes);
+
+        }
        )
        );
 

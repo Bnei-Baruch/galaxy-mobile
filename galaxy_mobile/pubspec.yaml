@@ -38,22 +38,24 @@ dependencies:
   shared_preferences: ^2.0.15
   synchronized: ^3.0.0+3
   slide_to_confirm: ^1.1.0
-  mqtt5_client: ^3.3.3
+  mqtt5_client: #^3.3.3
+    path: ../../mqtt5_client
   jwt_decode: ^0.3.1
   mdi: ^4.0.0
   flutter_html: ^3.0.0-alpha.6
-  flutter_logs: #^2.1.4
-    git:
-      url: https://github.com/igala/flutter_logs.git
-      ref: 2.1.4-3
-    #path: ../../flutter_logs
+  flutter_logs: ^2.1.8
+#    git:
+#      url: https://github.com/igala/flutter_logs.git
+#      ref: 2.1.4-3
+#    path: ../../flutter_logs
 
   system_info: ^1.0.1
   disk_space: ^0.2.1
   archive: ^3.3.4
   flutter_email_sender: ^5.2.0
   fluttertoast: ^8.1.1
-  easy_localization: ^3.0.1
+  easy_localization: #^3.0.2-dev
+    path: /Users/shidur/Downloads/easy_localization-develop
   package_info: ^2.0.2
   firebase_core: ^2.3.0
   firebase_analytics: ^10.0.6
@@ -65,13 +67,13 @@ dependencies:
   url_launcher: ^6.1.6
   connectivity_plus: ^3.0.2
   phone_state_i:
-    git:
-      url: https://github.com/igala/PhoneCallState.git
-      ref: 0.0.3.1
-#    path: ../../Documents/GitHub/PhoneCallState-fork
-  logcat: #^1.0.2
-    git:
-      url: https://github.com/igala/logcat.git
+#    git:
+#      url: https://github.com/igala/PhoneCallState.git
+#      ref: 0.0.3.1
+    path: /Users/shidur/PhoneCallState
+  logcat: ^1.0.2
+#    git:
+#      url: https://github.com/igala/logcat.git
 #    path: ../../Documents/GitHub/logcat-fork/
   flutter_foreground_plugin: #^0.6.0
 #    git:

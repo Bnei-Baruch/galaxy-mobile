@@ -41,7 +41,7 @@ class _LoginState extends State<Login>  with WidgetsBindingObserver {
        // context: context
     );
     WidgetsBinding.instance.addObserver(this);
-    advancedStatusCheck(newVersion);
+    //advancedStatusCheck(newVersion);
   }
 
   basicStatusCheck(NewVersion newVersion) {
@@ -260,7 +260,7 @@ class _LoginState extends State<Login>  with WidgetsBindingObserver {
         break;
       case AppLifecycleState.resumed:
         FlutterLogs.logInfo("login", "appLifeCycleState", "resumed");
-        advancedStatusCheck(newVersion);
+ //       advancedStatusCheck(newVersion);
         break;
       case AppLifecycleState.paused:
         FlutterLogs.logInfo("login", "appLifeCycleState", "paused");

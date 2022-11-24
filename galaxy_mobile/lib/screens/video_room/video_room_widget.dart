@@ -675,7 +675,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         // "https://gxydev.kab.sh/janusgxy",
       ], withCredentials: true, isUnifiedPlan: true, token: widget.token);
 
-      registerMQTTTopics();
+     registerMQTTTopics();
       if (widget._janusClient.mqttSender != null) {
         context.read<MQTTClient>().addOnSubscribedCallback((topic) => {
               if (topic.contains("from-janus") &&

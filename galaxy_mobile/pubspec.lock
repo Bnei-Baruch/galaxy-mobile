@@ -155,6 +155,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.5"
+  dart_internal:
+    dependency: transitive
+    description:
+      name: dart_internal
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.6"
   dart_style:
     dependency: transitive
     description:
@@ -228,9 +235,9 @@ packages:
   easy_localization:
     dependency: "direct main"
     description:
-      name: easy_localization
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "/Users/shidur/Downloads/easy_localization-develop"
+      relative: false
+    source: path
     version: "3.0.1"
   easy_logger:
     dependency: transitive
@@ -436,12 +443,10 @@ packages:
   flutter_logs:
     dependency: "direct main"
     description:
-      path: "."
-      ref: "2.1.4-3"
-      resolved-ref: "883b711a6b553e2da5481ae8f81a920e89151f2d"
-      url: "https://github.com/igala/flutter_logs.git"
-    source: git
-    version: "2.1.4"
+      name: flutter_logs
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.1.9"
   flutter_screenutil:
     dependency: "direct main"
     description:
@@ -576,11 +581,9 @@ packages:
   logcat:
     dependency: "direct main"
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: e2cff9d026a5ca32d8eece95bf9adfa4f6cd708f
-      url: "https://github.com/igala/logcat.git"
-    source: git
+      name: logcat
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "1.0.2"
   logger:
     dependency: transitive
@@ -627,10 +630,10 @@ packages:
   mqtt5_client:
     dependency: "direct main"
     description:
-      name: mqtt5_client
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "3.3.3"
+      path: "../../mqtt5_client"
+      relative: true
+    source: path
+    version: "2.1.0"
   nested:
     dependency: transitive
     description:
@@ -659,6 +662,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.0"
+  observable:
+    dependency: transitive
+    description:
+      name: observable
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.24.0"
   package_config:
     dependency: transitive
     description:
@@ -802,11 +812,9 @@ packages:
   phone_state_i:
     dependency: "direct main"
     description:
-      path: "."
-      ref: "0.0.3.1"
-      resolved-ref: "3f99d68df74db7fd04689bade84ca426bb7fa53e"
-      url: "https://github.com/igala/PhoneCallState.git"
-    source: git
+      path: "/Users/shidur/PhoneCallState"
+      relative: false
+    source: path
     version: "0.0.1"
   platform:
     dependency: transitive
@@ -1234,5 +1242,5 @@ packages:
     source: hosted
     version: "3.1.1"
 sdks:
-  dart: ">=2.18.0 <3.0.0"
+  dart: ">=2.18.0 <2.20.0"
   flutter: ">=3.3.0"
