@@ -174,12 +174,7 @@ class _PlayerStateWidget extends State<PlayerWidget> {
                                                         children: <Widget>[
                                                           value.keys.contains(
                                                               "flag")
-                                                              ? Flag.fromCode(
-                                                              FlagsCode.values.firstWhere((e) => FlagsCode.values[e.index].name == value["flag"].toString(),orElse: ()=> FlagsCode.IL),
-                                                              height: 24,
-                                                              width: 24,
-                                                              fit: BoxFit
-                                                                  .contain)
+                                                              ? buildFlag(value)
                                                               : Icon(
                                                               Icons.group),
                                                           SizedBox(
@@ -280,5 +275,21 @@ class _PlayerStateWidget extends State<PlayerWidget> {
         ],
       ),
     );
+  }
+
+  Flag buildFlag(Map<String, Object> value) {
+
+
+    var code = FlagsCode.values.firstWhere((e) =>
+    e.name.toLowerCase() == value["flag"].toString(),
+        orElse: () => FlagsCode.IL);
+
+   
+    return Flag.fromCode(
+        code,
+        height: 24,
+        width: 24,
+        fit: BoxFit
+            .contain);
   }
 }
