@@ -92,29 +92,31 @@ class VideoRoom extends StatefulWidget {
   String configuredStreams;
 
   void exitRoom() async {
+    state.unRegisterMqtt();
 
-    if (_janusClient != null) _janusClient.destroy();
     if (pluginHandle != null) pluginHandle.hangup();
     if (subscriberHandle != null) subscriberHandle.destroy();
+    if (_janusClient != null) _janusClient.destroy();
+
+
     if (_localRenderer != null) {
-    //  _localRenderer.srcObject = null;
-     await _localRenderer.dispose();
+     _localRenderer.srcObject = null;
+   // await _localRenderer.dispose();
 
     }
     if (_remoteRenderers != null && _remoteRenderers.isNotEmpty) {
-      _remoteRenderers.map((e) => e.dispose());
+  //   _remoteRenderers.map((e) => e.dispose());
     }
     if (myStream != null) {
-      myStream.getAudioTracks().first.setMicrophoneMute(false);
+      Helper.setMicrophoneMute(false,myStream.getAudioTracks().first);
       myStream.getVideoTracks().first.enabled = false;
       myStream.getAudioTracks().first.enabled = false;
-      myStream.dispose();
+     myStream.dispose();
     }
-    state.unRegisterMqtt();
     pluginHandle = null;
     subscriberHandle = null;
     questionInRoom = null;
-    state.dispose();
+  // state.dispose();
     state = null;
 
   }
@@ -135,10 +137,9 @@ class VideoRoom extends StatefulWidget {
   }
 
   void mute() {
-    myStream
+    Helper.setMicrophoneMute(!myAudioMuted,myStream
         .getAudioTracks()
-        .first
-        .setMicrophoneMute(!myStream.getAudioTracks().first.muted);
+        .first);
     if (state != null && state.mounted)
       state.setState(() {
         myAudioMuted = !myAudioMuted;
@@ -566,10 +567,10 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
               lock.synchronized(() async {
                 Future.delayed(const Duration(milliseconds: 100), () {
                   setState(() {
-                    widget._remoteRenderers.elementAt(slot).trackIndex =
-                        trackIndex;
-                    widget._remoteRenderers.elementAt(slot).srcObject =
-                        stream; //remoteStream.elementAt(slot);
+                    // widget._remoteRenderers.elementAt(slot).trackIndex =
+                    //     trackIndex;
+                    widget._remoteRenderers.elementAt(slot).setSrcObject(
+                        stream: stream,trackId: track.id); //remoteStream.elementAt(slot);
 
                     FlutterLogs.logInfo(
                         "VideoRoom",
@@ -1000,10 +1001,9 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
       widget.myStream.getVideoTracks().first.enabled = false;
     }
     widget.myStream = stream;
-    widget.myStream
-        .getAudioTracks()
-        .first
-        .setMicrophoneMute(true);
+    Helper.setMicrophoneMute(true,  widget.myStream.getAudioTracks().first);
+
+
 
     setState(() {
       widget._localRenderer.srcObject = widget.myStream;
@@ -1030,7 +1030,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     widget.pluginHandle = plugin;
     MediaStream stream = await plugin.initializeMediaDevices();
     widget.myStream = stream;
-    widget.myStream.getAudioTracks().first.setMicrophoneMute(true);
+   Helper.setMicrophoneMute(true,widget.myStream.getAudioTracks().first);
     widget.myStream.getVideoTracks().first.enabled =
         !widget.myVideoMuted;
     widget.myAudioMuted = true;
@@ -1069,7 +1069,11 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
           });
           plugin.send(
               message: publish, jsep: offer, onSuccess: () {});
-        });
+        },
+    onError:(error) {
+          print("xxx msg send error $error");
+    }
+    );
   }
 
   // Subscribe to feeds, whether already existing in the room, when I joined

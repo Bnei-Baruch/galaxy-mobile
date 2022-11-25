@@ -16,6 +16,7 @@ import 'package:mqtt5_client/mqtt5_client.dart';
 
 import 'components/player_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 class StreamingUnified extends StatefulWidget {
   int defaultVideo = 15;
@@ -171,10 +172,10 @@ class StreamingUnified extends StatefulWidget {
         this.trlAudioMuted = true; // disbaling translation
         state._remoteTrlStreamAudio.getAudioTracks().last.enabled = false;
         trlAudioMuted = true;
-        state._remoteStreamAudio
-            .getAudioTracks()
-            .last
-            .setVolume(DEFAULT_VOLUME);
+
+        Helper.setVolume(DEFAULT_VOLUME, state._remoteStreamAudio
+        .getAudioTracks()
+        .last);
         audioTrlStreamingPlugin.send(message: {"request": "stop"});
         audioTrlStreamingPlugin.destroy();
       }
@@ -208,10 +209,10 @@ class StreamingUnified extends StatefulWidget {
         this.prevMuted != this.audioElementMuted) {
       this.mixvolume = this.audioElementMuted ? 0 : this.audioElementVolume;
       this.trlAudioElementVolume = this.mixvolume;
-      state._remoteTrlStreamAudio
-          .getAudioTracks()
-          .last
-          .setVolume(trlAudioElementVolume);
+
+      Helper.setVolume(trlAudioElementVolume, state._remoteTrlStreamAudio
+        .getAudioTracks()
+        .last);
     }
     if (trlAudioElementVolume > 0.05) {
       // If translator is talking (remote volume > 0.05) we want to reduce Rav to 5%.
@@ -227,10 +228,11 @@ class StreamingUnified extends StatefulWidget {
 
     FlutterLogs.logInfo("Streaming", "handle question ",
         "ducerMixaudio audioElementVolume=$audioElementVolume");
-    state._remoteStreamAudio
+    Helper.setVolume(audioElementVolume,  state._remoteStreamAudio
         .getAudioTracks()
-        .last
-        .setVolume(audioElementVolume);
+        .last);
+
+        // .setVolume(audioElementVolume);
     // state._remoteTrlStreamAudio.getAudioTracks().first.setVolume(0.6);
     // state._remoteStreamAudio.getAudioTracks().first.setVolume(0.06);
     // });
@@ -610,7 +612,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
               FlutterLogs.logInfo("Streaming", "initTrlAudioStream",
                   "disabling trl stream track count ${_remoteTrlStreamAudio.getAudioTracks().length}");
               _remoteTrlStreamAudio.getAudioTracks().last.enabled = false;
-              _remoteTrlStreamAudio.getAudioTracks().last.setVolume(0);
+             Helper.setVolume(0, _remoteTrlStreamAudio.getAudioTracks().last);
             }
           }
 

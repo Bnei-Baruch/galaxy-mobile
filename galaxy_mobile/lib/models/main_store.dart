@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:connectivity_plus_platform_interface/src/enums.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_webrtc/src/interface/media_stream.dart';
+//import 'package:flutter_webrtc/src/interface/media_stream.dart';
 import 'package:galaxy_mobile/models/shared_pref.dart';
 import 'package:galaxy_mobile/screens/dashboard/dashboard.dart';
 import 'package:galaxy_mobile/services/api.dart';
@@ -13,6 +13,7 @@ import 'package:galaxy_mobile/services/keycloak.dart';
 import 'package:galaxy_mobile/services/mqtt_client.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:janus_client/Plugin.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 // TODO: Find a place for this.
 class RoomUser {

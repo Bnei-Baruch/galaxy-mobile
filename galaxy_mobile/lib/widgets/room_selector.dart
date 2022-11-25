@@ -31,7 +31,7 @@ class RoomSelector extends StatelessWidget {
     return DropdownSearch<Room>(
       popupProps: PopupProps.dialog(
         title: Text('room'.tr()),
-
+        showSearchBox: true
 
       ),
      // mode: Mode.DIALOG,

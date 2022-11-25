@@ -175,7 +175,7 @@ class _PlayerStateWidget extends State<PlayerWidget> {
                                                           value.keys.contains(
                                                               "flag")
                                                               ? Flag.fromCode(
-                                                              value["flag"],
+                                                              FlagsCode.values.firstWhere((e) => FlagsCode.values[e.index].name == value["flag"].toString(),orElse: ()=> FlagsCode.IL),
                                                               height: 24,
                                                               width: 24,
                                                               fit: BoxFit

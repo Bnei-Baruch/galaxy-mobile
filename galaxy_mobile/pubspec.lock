@@ -169,6 +169,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.1"
+  dart_webrtc:
+    dependency: transitive
+    description:
+      name: dart_webrtc
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.11"
   dbus:
     dependency: transitive
     description:
@@ -474,12 +481,10 @@ packages:
   flutter_webrtc:
     dependency: transitive
     description:
-      path: "."
-      ref: "0.5.8.4"
-      resolved-ref: db80a2e7c3427ab859060f5a549e11bbe5885c15
-      url: "https://github.com/igala/flutter-webrtc.git"
-    source: git
-    version: "0.5.8"
+      name: flutter_webrtc
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.9.16"
   fluttertoast:
     dependency: "direct main"
     description:
@@ -1185,6 +1190,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.2.0"
+  webrtc_interface:
+    dependency: transitive
+    description:
+      name: webrtc_interface
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.10"
   webview_flutter:
     dependency: "direct main"
     description:
