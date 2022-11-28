@@ -14,8 +14,8 @@ import 'package:galaxy_mobile/viewmodels/chat_view_model.dart';
 import 'package:icon_badge/icon_badge.dart';
 import 'package:janus_client/janus_client.dart';
 import 'package:mdi/mdi.dart';
+import 'package:phonecall_state/phone_state_i.dart';
 import 'package:provider/provider.dart';
-import 'package:phone_state_i/phone_state_i.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_logs/flutter_logs.dart';
@@ -138,6 +138,7 @@ class _DashboardState extends State<Dashboard>
             stream.exit();
             videoRoom.exitRoom();
             userTimer.cancel();
+            subscription.cancel();
 
             Navigator.pop(dialogPleaseWaitContext);
             Navigator.of(context).pop();
@@ -203,6 +204,7 @@ class _DashboardState extends State<Dashboard>
           // if (mqttClient != null) {
           //   mqttClient.disconnect();
           // }
+          subscription.cancel();
           userTimer.cancel();
 
           //go out of the room and re-enter , since jauns doesn't have a reconnect infra to do it right
@@ -239,6 +241,7 @@ class _DashboardState extends State<Dashboard>
       stream.exit();
       videoRoom.exitRoom();
       userTimer.cancel();
+      subscription.cancel();
 
       showDialog(
         context: context,
@@ -460,6 +463,8 @@ class _DashboardState extends State<Dashboard>
     stream.exit();
     videoRoom.exitRoom();
     userTimer.cancel();
+    subscription.cancel();
+
     showDialog(
       context: context,
       builder: (context) => new AlertDialog(
@@ -564,6 +569,8 @@ class _DashboardState extends State<Dashboard>
           stream.exit();
           videoRoom.exitRoom();
           userTimer.cancel();
+          subscription.cancel();
+
           if (mqttClient != null) {
             mqttClient.unsubscribe("galaxy/room/$_activeRoomId");
             // TODO: move to a function.
@@ -631,6 +638,8 @@ class _DashboardState extends State<Dashboard>
                                     stream.exit();
                                     videoRoom.exitRoom();
                                     userTimer.cancel();
+                                    subscription.cancel();
+
                                     if (mqttClient != null) {
                                       mqttClient.unsubscribe(
                                           "galaxy/room/$_activeRoomId");
@@ -1154,7 +1163,7 @@ class _DashboardState extends State<Dashboard>
         //recover mqtt connection
         stream.exit();
         videoRoom.exitRoom();
-
+        subscription.cancel();
         userTimer.cancel();
         //go out of the room and re-enter , since jauns doesn't have a reconnect infra to do it right
         Navigator.of(this.context).pop(false);

@@ -424,10 +424,12 @@ packages:
   flutter_foreground_plugin:
     dependency: "direct main"
     description:
-      path: "/Users/shidur/flutter_foreground_service_plugin/"
-      relative: false
-    source: path
-    version: "0.6.0"
+      path: "."
+      ref: "0.8.0.1"
+      resolved-ref: "7bf202a7988cb91bc2484164aeb6f945a39087d6"
+      url: "https://github.com/igala/flutter_foreground_service_plugin.git"
+    source: git
+    version: "0.8.0"
   flutter_html:
     dependency: "direct main"
     description:
@@ -544,9 +546,11 @@ packages:
   janus_client:
     dependency: "direct main"
     description:
-      path: "../../flutter_janus_client"
-      relative: true
-    source: path
+      path: "."
+      ref: "0.4.0+11"
+      resolved-ref: "5e98df7faed09796f700b4cb9ab18074e74ef2f5"
+      url: "https://github.com/igala/flutter_janus_client.git"
+    source: git
     version: "0.0.4"
   js:
     dependency: transitive
@@ -814,12 +818,14 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "5.1.0"
-  phone_state_i:
+  phonecall_state:
     dependency: "direct main"
     description:
-      path: "/Users/shidur/PhoneCallState"
-      relative: false
-    source: path
+      path: "."
+      ref: HEAD
+      resolved-ref: "58d8ceeed51de49a879fdd3a8a3de21efd58d0e6"
+      url: "https://github.com/igala/phonecall_state.git"
+    source: git
     version: "0.0.1"
   platform:
     dependency: transitive
@@ -1254,5 +1260,5 @@ packages:
     source: hosted
     version: "3.1.1"
 sdks:
-  dart: ">=2.18.0 <2.20.0"
+  dart: ">=2.18.4 <2.20.0"
   flutter: ">=3.3.0"

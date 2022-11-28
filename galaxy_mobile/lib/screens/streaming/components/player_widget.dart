@@ -284,7 +284,7 @@ class _PlayerStateWidget extends State<PlayerWidget> {
     e.name.toLowerCase() == value["flag"].toString(),
         orElse: () => FlagsCode.IL);
 
-   
+
     return Flag.fromCode(
         code,
         height: 24,

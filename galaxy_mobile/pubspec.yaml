@@ -66,21 +66,21 @@ dependencies:
   flutter_fgbg: ^0.2.1
   url_launcher: ^6.1.6
   connectivity_plus: ^3.0.2
-  phone_state_i:
-#    git:
-#      url: https://github.com/igala/PhoneCallState.git
+  phonecall_state:
+    git:
+      url: https://github.com/igala/phonecall_state.git
 #      ref: 0.0.3.1
-    path: /Users/shidur/PhoneCallState
+#    path: /Users/shidur/PhoneCallState
   logcat: ^1.0.2
 #    git:
 #      url: https://github.com/igala/logcat.git
 #    path: ../../Documents/GitHub/logcat-fork/
   flutter_foreground_plugin: #^0.6.0
-#    git:
-#        url: https://github.com/igala/flutter_foreground_service_plugin.git
+    git:
+        url: https://github.com/igala/flutter_foreground_service_plugin.git
     #https://github.com/shivanshtalwar0/flutter_janus_client.git
-#        ref: 0.6.0.1
-      path: /Users/shidur/flutter_foreground_service_plugin/
+        ref: 0.8.0.1
+#      path: /Users/shidur/flutter_foreground_service_plugin/
   dots_indicator: ^2.1.0
   flutter_audio_manager: #^0.2.3.1
     git:
@@ -89,11 +89,11 @@ dependencies:
   readmore: ^2.2.0
 
   janus_client: #^0.0.4
-#        git:
-#          url: https://github.com/igala/flutter_janus_client.git
+        git:
+          url: https://github.com/igala/flutter_janus_client.git
 #          #https://github.com/shivanshtalwar0/flutter_janus_client.git
-#          ref: 0.0.4+10
-    path: ../../flutter_janus_client
+          ref: 0.4.0+11
+#    path: ../../flutter_janus_client
 
 
   # The following adds the Cupertino Icons font to your application.
