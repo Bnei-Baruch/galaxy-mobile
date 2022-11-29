@@ -242,9 +242,9 @@ packages:
   easy_localization:
     dependency: "direct main"
     description:
-      path: "/Users/shidur/Downloads/easy_localization-develop"
-      relative: false
-    source: path
+      name: easy_localization
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "3.0.1"
   easy_logger:
     dependency: transitive
@@ -425,8 +425,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "0.8.0.1"
-      resolved-ref: "7bf202a7988cb91bc2484164aeb6f945a39087d6"
+      ref: "0.8.0.2"
+      resolved-ref: ea28246d7254b7f0647a68b8de09e33dcc2643c2
       url: "https://github.com/igala/flutter_foreground_service_plugin.git"
     source: git
     version: "0.8.0"

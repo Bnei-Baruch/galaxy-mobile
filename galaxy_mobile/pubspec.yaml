@@ -15,7 +15,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.1.6+45
+version: 1.1.7+47
 
 environment:
   sdk: ">=2.10.0 <3.0.0"
@@ -54,8 +54,8 @@ dependencies:
   archive: ^3.3.4
   flutter_email_sender: ^5.2.0
   fluttertoast: ^8.1.1
-  easy_localization: #^3.0.2-dev
-    path: /Users/shidur/Downloads/easy_localization-develop
+  easy_localization: ^3.0.1
+#    path: /Users/shidur/Downloads/easy_localization-develop
   package_info: ^2.0.2
   firebase_core: ^2.3.0
   firebase_analytics: ^10.0.6
@@ -79,7 +79,7 @@ dependencies:
     git:
         url: https://github.com/igala/flutter_foreground_service_plugin.git
     #https://github.com/shivanshtalwar0/flutter_janus_client.git
-        ref: 0.8.0.1
+        ref: 0.8.0.2
 #      path: /Users/shidur/flutter_foreground_service_plugin/
   dots_indicator: ^2.1.0
   flutter_audio_manager: #^0.2.3.1
@@ -106,8 +106,7 @@ dependencies:
   device_info: ^2.0.3
 
   icon_badge: ^1.0.0
-
-  new_version: ^0.3.1
+  new_version: ^0.3.0
   webview_flutter: ^3.0.4
 
 

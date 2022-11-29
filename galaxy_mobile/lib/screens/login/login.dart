@@ -17,7 +17,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:readmore/readmore.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_logs/flutter_logs.dart';
-
 import 'package:flutter/services.dart' show rootBundle;
 
 class Login extends StatefulWidget {
@@ -41,7 +40,7 @@ class _LoginState extends State<Login>  with WidgetsBindingObserver {
        // context: context
     );
     WidgetsBinding.instance.addObserver(this);
-    //advancedStatusCheck(newVersion);
+    advancedStatusCheck(newVersion);
   }
 
   basicStatusCheck(NewVersion newVersion) {
@@ -260,7 +259,7 @@ class _LoginState extends State<Login>  with WidgetsBindingObserver {
         break;
       case AppLifecycleState.resumed:
         FlutterLogs.logInfo("login", "appLifeCycleState", "resumed");
- //       advancedStatusCheck(newVersion);
+       advancedStatusCheck(newVersion);
         break;
       case AppLifecycleState.paused:
         FlutterLogs.logInfo("login", "appLifeCycleState", "paused");
