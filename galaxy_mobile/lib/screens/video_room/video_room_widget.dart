@@ -92,6 +92,7 @@ class VideoRoom extends StatefulWidget {
   String configuredStreams;
 
   void exitRoom() async {
+    Helper.setMicrophoneMute(false,myStream.getAudioTracks().first);
     state.unRegisterMqtt();
 
     if (pluginHandle != null) pluginHandle.hangup();
@@ -108,7 +109,7 @@ class VideoRoom extends StatefulWidget {
   //   _remoteRenderers.map((e) => e.dispose());
     }
     if (myStream != null) {
-      Helper.setMicrophoneMute(false,myStream.getAudioTracks().first);
+
       myStream.getVideoTracks().first.enabled = false;
       myStream.getAudioTracks().first.enabled = false;
      myStream.dispose();
