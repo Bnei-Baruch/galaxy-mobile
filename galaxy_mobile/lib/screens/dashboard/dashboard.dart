@@ -233,9 +233,14 @@ class _DashboardState extends State<Dashboard>
       initMQTT();
       initAudioMgr();
       toggleBarsVisibility();
+      //changeAudioDevice(AudioDevice.values.firstWhere((element) =>element.index == context.read<MainStore>().getAudioDevice()));
+
     };
     videoRoom.updateGoingToBackground = (){
       updateRoomWithMyState(false);
+    };
+    videoRoom.resetAudioRoute = (){
+      changeAudioDevice(AudioDevice.values.firstWhere((element) =>element.index == context.read<MainStore>().getAudioDevice()));
     };
     videoRoom.callExitRoomUserExists = () {
       stream.exit();
@@ -319,7 +324,8 @@ class _DashboardState extends State<Dashboard>
     });
 
 
-    if (await changeAudioDevice(_audioDevice)) {
+    Timer(Duration(milliseconds: 1500),(){
+    if ( changeAudioDevice(_audioDevice)) {
       FlutterLogs.logInfo(
           "dashboard", "initAudioMgr", ">>> switch to ${_audioDevice.toString()}: Success");
 
@@ -327,7 +333,7 @@ class _DashboardState extends State<Dashboard>
       FlutterLogs.logError(
           "dashboard", "initAudioMgr", ">>> switch to SPEAKER: Failed");
     }
-
+    });
     if (!mounted) return;
     setState(() {});
   }

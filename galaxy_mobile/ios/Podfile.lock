@@ -1,86 +1,92 @@
 PODS:
-  - AppAuth (1.3.1):
-    - AppAuth/Core (= 1.3.1)
-    - AppAuth/ExternalUserAgent (= 1.3.1)
-  - AppAuth/Core (1.3.1)
-  - AppAuth/ExternalUserAgent (1.3.1)
-  - CocoaLumberjack/Core (3.7.2)
-  - CocoaLumberjack/Swift (3.7.2):
-    - CocoaLumberjack/Core
+  - AppAuth (1.6.0):
+    - AppAuth/Core (= 1.6.0)
+    - AppAuth/ExternalUserAgent (= 1.6.0)
+  - AppAuth/Core (1.6.0)
+  - AppAuth/ExternalUserAgent (1.6.0):
+    - AppAuth/Core
   - connectivity_plus (0.0.1):
     - Flutter
-    - Reachability
+    - ReachabilitySwift
   - device_info (0.0.1):
     - Flutter
   - disk_space (0.0.1):
     - Flutter
-  - Firebase/Analytics (7.3.0):
+  - Firebase/Analytics (10.2.0):
     - Firebase/Core
-  - Firebase/Core (7.3.0):
+  - Firebase/Core (10.2.0):
     - Firebase/CoreOnly
-    - FirebaseAnalytics (= 7.3.0)
-  - Firebase/CoreOnly (7.3.0):
-    - FirebaseCore (= 7.3.0)
-  - Firebase/Crashlytics (7.3.0):
+    - FirebaseAnalytics (~> 10.2.0)
+  - Firebase/CoreOnly (10.2.0):
+    - FirebaseCore (= 10.2.0)
+  - Firebase/Crashlytics (10.2.0):
     - Firebase/CoreOnly
-    - FirebaseCrashlytics (~> 7.3.0)
-  - Firebase/RemoteConfig (7.3.0):
+    - FirebaseCrashlytics (~> 10.2.0)
+  - Firebase/RemoteConfig (10.2.0):
     - Firebase/CoreOnly
-    - FirebaseRemoteConfig (~> 7.3.0)
-  - firebase_analytics (7.0.1):
-    - Firebase/Analytics (= 7.3.0)
+    - FirebaseRemoteConfig (~> 10.2.0)
+  - firebase_analytics (10.0.6):
+    - Firebase/Analytics (= 10.2.0)
     - firebase_core
     - Flutter
-  - firebase_core (0.7.0):
-    - Firebase/CoreOnly (= 7.3.0)
+  - firebase_core (2.3.0):
+    - Firebase/CoreOnly (= 10.2.0)
     - Flutter
-  - firebase_crashlytics (0.4.0-1):
-    - Firebase/Crashlytics (= 7.3.0)
-    - firebase_core
-  - firebase_remote_config (0.6.0):
-    - Firebase/RemoteConfig (= 7.3.0)
+  - firebase_crashlytics (3.0.6):
+    - Firebase/Crashlytics (= 10.2.0)
     - firebase_core
     - Flutter
-  - FirebaseABTesting (7.11.0):
-    - FirebaseCore (~> 7.0)
-  - FirebaseAnalytics (7.3.0):
-    - FirebaseCore (~> 7.0)
-    - FirebaseInstallations (~> 7.0)
-    - GoogleAppMeasurement (= 7.3.0)
-    - GoogleUtilities/AppDelegateSwizzler (~> 7.0)
-    - GoogleUtilities/MethodSwizzler (~> 7.0)
-    - GoogleUtilities/Network (~> 7.0)
-    - "GoogleUtilities/NSData+zlib (~> 7.0)"
-    - nanopb (~> 2.30906.0)
-  - FirebaseCore (7.3.0):
-    - FirebaseCoreDiagnostics (~> 7.0)
-    - GoogleUtilities/Environment (~> 7.0)
-    - GoogleUtilities/Logger (~> 7.0)
-  - FirebaseCoreDiagnostics (7.3.0):
-    - GoogleDataTransport (~> 8.0)
-    - GoogleUtilities/Environment (~> 7.0)
-    - GoogleUtilities/Logger (~> 7.0)
-    - nanopb (~> 2.30906.0)
-  - FirebaseCrashlytics (7.3.0):
-    - FirebaseCore (~> 7.0)
-    - FirebaseInstallations (~> 7.0)
-    - GoogleDataTransport (~> 8.0)
-    - nanopb (~> 2.30906.0)
-    - PromisesObjC (~> 1.2)
-  - FirebaseInstallations (7.11.0):
-    - FirebaseCore (~> 7.0)
-    - GoogleUtilities/Environment (~> 7.0)
-    - GoogleUtilities/UserDefaults (~> 7.0)
-    - PromisesObjC (~> 1.2)
-  - FirebaseRemoteConfig (7.3.0):
-    - FirebaseABTesting (~> 7.0)
-    - FirebaseCore (~> 7.0)
-    - FirebaseInstallations (~> 7.0)
-    - GoogleUtilities/Environment (~> 7.0)
-    - "GoogleUtilities/NSData+zlib (~> 7.0)"
+  - firebase_remote_config (3.0.6):
+    - Firebase/RemoteConfig (= 10.2.0)
+    - firebase_core
+    - Flutter
+  - FirebaseABTesting (10.2.0):
+    - FirebaseCore (~> 10.0)
+  - FirebaseAnalytics (10.2.0):
+    - FirebaseAnalytics/AdIdSupport (= 10.2.0)
+    - FirebaseCore (~> 10.0)
+    - FirebaseInstallations (~> 10.0)
+    - GoogleUtilities/AppDelegateSwizzler (~> 7.8)
+    - GoogleUtilities/MethodSwizzler (~> 7.8)
+    - GoogleUtilities/Network (~> 7.8)
+    - "GoogleUtilities/NSData+zlib (~> 7.8)"
+    - nanopb (< 2.30910.0, >= 2.30908.0)
+  - FirebaseAnalytics/AdIdSupport (10.2.0):
+    - FirebaseCore (~> 10.0)
+    - FirebaseInstallations (~> 10.0)
+    - GoogleAppMeasurement (= 10.2.0)
+    - GoogleUtilities/AppDelegateSwizzler (~> 7.8)
+    - GoogleUtilities/MethodSwizzler (~> 7.8)
+    - GoogleUtilities/Network (~> 7.8)
+    - "GoogleUtilities/NSData+zlib (~> 7.8)"
+    - nanopb (< 2.30910.0, >= 2.30908.0)
+  - FirebaseCore (10.2.0):
+    - FirebaseCoreInternal (~> 10.0)
+    - GoogleUtilities/Environment (~> 7.8)
+    - GoogleUtilities/Logger (~> 7.8)
+  - FirebaseCoreInternal (10.2.0):
+    - "GoogleUtilities/NSData+zlib (~> 7.8)"
+  - FirebaseCrashlytics (10.2.0):
+    - FirebaseCore (~> 10.0)
+    - FirebaseInstallations (~> 10.0)
+    - GoogleDataTransport (~> 9.2)
+    - GoogleUtilities/Environment (~> 7.8)
+    - nanopb (< 2.30910.0, >= 2.30908.0)
+    - PromisesObjC (~> 2.1)
+  - FirebaseInstallations (10.2.0):
+    - FirebaseCore (~> 10.0)
+    - GoogleUtilities/Environment (~> 7.8)
+    - GoogleUtilities/UserDefaults (~> 7.8)
+    - PromisesObjC (~> 2.1)
+  - FirebaseRemoteConfig (10.2.0):
+    - FirebaseABTesting (~> 10.0)
+    - FirebaseCore (~> 10.0)
+    - FirebaseInstallations (~> 10.0)
+    - GoogleUtilities/Environment (~> 7.8)
+    - "GoogleUtilities/NSData+zlib (~> 7.8)"
   - Flutter (1.0.0)
   - flutter_appauth (0.0.1):
-    - AppAuth (= 1.3.1)
+    - AppAuth (= 1.6.0)
     - Flutter
   - flutter_audio_manager (0.0.1):
     - Flutter
@@ -89,90 +95,100 @@ PODS:
   - flutter_fgbg (0.0.1):
     - Flutter
   - flutter_logs (0.0.1):
-    - CocoaLumberjack/Swift
     - Flutter
     - ZIPFoundation
-  - flutter_volume_slider (1.0.0):
+  - flutter_webrtc (0.9.17):
     - Flutter
-  - flutter_webrtc (0.2.2):
-    - Flutter
-    - GoogleWebRTC (= 1.1.31999)
-    - Libyuv (= 1703)
+    - WebRTC-SDK (= 104.5112.07)
   - fluttertoast (0.0.2):
     - Flutter
     - Toast
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
-  - GoogleAppMeasurement (7.3.0):
-    - GoogleUtilities/AppDelegateSwizzler (~> 7.0)
-    - GoogleUtilities/MethodSwizzler (~> 7.0)
-    - GoogleUtilities/Network (~> 7.0)
-    - "GoogleUtilities/NSData+zlib (~> 7.0)"
-    - nanopb (~> 2.30906.0)
-  - GoogleDataTransport (8.1.0):
-    - nanopb (~> 2.30906.0)
-  - GoogleUtilities/AppDelegateSwizzler (7.4.3):
+  - GoogleAppMeasurement (10.2.0):
+    - GoogleAppMeasurement/AdIdSupport (= 10.2.0)
+    - GoogleUtilities/AppDelegateSwizzler (~> 7.8)
+    - GoogleUtilities/MethodSwizzler (~> 7.8)
+    - GoogleUtilities/Network (~> 7.8)
+    - "GoogleUtilities/NSData+zlib (~> 7.8)"
+    - nanopb (< 2.30910.0, >= 2.30908.0)
+  - GoogleAppMeasurement/AdIdSupport (10.2.0):
+    - GoogleAppMeasurement/WithoutAdIdSupport (= 10.2.0)
+    - GoogleUtilities/AppDelegateSwizzler (~> 7.8)
+    - GoogleUtilities/MethodSwizzler (~> 7.8)
+    - GoogleUtilities/Network (~> 7.8)
+    - "GoogleUtilities/NSData+zlib (~> 7.8)"
+    - nanopb (< 2.30910.0, >= 2.30908.0)
+  - GoogleAppMeasurement/WithoutAdIdSupport (10.2.0):
+    - GoogleUtilities/AppDelegateSwizzler (~> 7.8)
+    - GoogleUtilities/MethodSwizzler (~> 7.8)
+    - GoogleUtilities/Network (~> 7.8)
+    - "GoogleUtilities/NSData+zlib (~> 7.8)"
+    - nanopb (< 2.30910.0, >= 2.30908.0)
+  - GoogleDataTransport (9.2.0):
+    - GoogleUtilities/Environment (~> 7.7)
+    - nanopb (< 2.30910.0, >= 2.30908.0)
+    - PromisesObjC (< 3.0, >= 1.2)
+  - GoogleUtilities/AppDelegateSwizzler (7.10.0):
     - GoogleUtilities/Environment
     - GoogleUtilities/Logger
     - GoogleUtilities/Network
-  - GoogleUtilities/Environment (7.4.3):
-    - PromisesObjC (~> 1.2)
-  - GoogleUtilities/Logger (7.4.3):
+  - GoogleUtilities/Environment (7.10.0):
+    - PromisesObjC (< 3.0, >= 1.2)
+  - GoogleUtilities/Logger (7.10.0):
     - GoogleUtilities/Environment
-  - GoogleUtilities/MethodSwizzler (7.4.3):
+  - GoogleUtilities/MethodSwizzler (7.10.0):
     - GoogleUtilities/Logger
-  - GoogleUtilities/Network (7.4.3):
+  - GoogleUtilities/Network (7.10.0):
     - GoogleUtilities/Logger
     - "GoogleUtilities/NSData+zlib"
     - GoogleUtilities/Reachability
-  - "GoogleUtilities/NSData+zlib (7.4.3)"
-  - GoogleUtilities/Reachability (7.4.3):
+  - "GoogleUtilities/NSData+zlib (7.10.0)"
+  - GoogleUtilities/Reachability (7.10.0):
     - GoogleUtilities/Logger
-  - GoogleUtilities/UserDefaults (7.4.3):
+  - GoogleUtilities/UserDefaults (7.10.0):
     - GoogleUtilities/Logger
-  - GoogleWebRTC (1.1.31999)
   - janus_client (0.0.1):
     - Flutter
-  - Libyuv (1703)
   - logcat (0.0.1):
     - Flutter
-  - nanopb (2.30906.0):
-    - nanopb/decode (= 2.30906.0)
-    - nanopb/encode (= 2.30906.0)
-  - nanopb/decode (2.30906.0)
-  - nanopb/encode (2.30906.0)
+  - nanopb (2.30909.0):
+    - nanopb/decode (= 2.30909.0)
+    - nanopb/encode (= 2.30909.0)
+  - nanopb/decode (2.30909.0)
+  - nanopb/encode (2.30909.0)
   - package_info (0.0.1):
     - Flutter
-  - path_provider (0.0.1):
+  - package_info_plus (0.4.5):
     - Flutter
-  - phone_state_i (0.0.1):
+  - path_provider_ios (0.0.1):
     - Flutter
-  - PromisesObjC (1.2.12)
-  - Reachability (3.2)
+  - phonecall_state (0.0.1):
+    - Flutter
+  - PromisesObjC (2.1.1)
+  - ReachabilitySwift (5.0.0)
   - searchable_dropdown (1.1.1):
     - Flutter
-  - Sentry (6.1.4):
-    - Sentry/Core (= 6.1.4)
-  - Sentry/Core (6.1.4)
+  - Sentry/HybridSDK (7.31.1)
   - sentry_flutter (0.0.1):
     - Flutter
-    - Sentry (~> 6.1.4)
-  - shared_preferences (0.0.1):
+    - FlutterMacOS
+    - Sentry/HybridSDK (= 7.31.1)
+  - shared_preferences_ios (0.0.1):
     - Flutter
-  - sqflite (0.0.1):
+  - sqflite (0.0.2):
     - Flutter
-    - FMDB (~> 2.7.2)
+    - FMDB (>= 2.7.5)
   - Toast (4.0.0)
-  - url_launcher (0.0.1):
-    - Flutter
-  - video_player (0.0.1):
+  - url_launcher_ios (0.0.1):
     - Flutter
   - wakelock (0.0.1):
     - Flutter
-  - webview_flutter (0.0.1):
+  - WebRTC-SDK (104.5112.07)
+  - webview_flutter_wkwebview (0.0.1):
     - Flutter
-  - ZIPFoundation (0.9.11)
+  - ZIPFoundation (0.9.15)
 
 DEPENDENCIES:
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
@@ -188,32 +204,30 @@ DEPENDENCIES:
   - flutter_email_sender (from `.symlinks/plugins/flutter_email_sender/ios`)
   - flutter_fgbg (from `.symlinks/plugins/flutter_fgbg/ios`)
   - flutter_logs (from `.symlinks/plugins/flutter_logs/ios`)
-  - flutter_volume_slider (from `.symlinks/plugins/flutter_volume_slider/ios`)
   - flutter_webrtc (from `.symlinks/plugins/flutter_webrtc/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - janus_client (from `.symlinks/plugins/janus_client/ios`)
   - logcat (from `.symlinks/plugins/logcat/ios`)
   - package_info (from `.symlinks/plugins/package_info/ios`)
-  - path_provider (from `.symlinks/plugins/path_provider/ios`)
-  - phone_state_i (from `.symlinks/plugins/phone_state_i/ios`)
+  - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
+  - path_provider_ios (from `.symlinks/plugins/path_provider_ios/ios`)
+  - phonecall_state (from `.symlinks/plugins/phonecall_state/ios`)
   - searchable_dropdown (from `.symlinks/plugins/searchable_dropdown/ios`)
   - sentry_flutter (from `.symlinks/plugins/sentry_flutter/ios`)
-  - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
+  - shared_preferences_ios (from `.symlinks/plugins/shared_preferences_ios/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
-  - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
-  - video_player (from `.symlinks/plugins/video_player/ios`)
+  - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
   - wakelock (from `.symlinks/plugins/wakelock/ios`)
-  - webview_flutter (from `.symlinks/plugins/webview_flutter/ios`)
+  - webview_flutter_wkwebview (from `.symlinks/plugins/webview_flutter_wkwebview/ios`)
 
 SPEC REPOS:
   trunk:
     - AppAuth
-    - CocoaLumberjack
     - Firebase
     - FirebaseABTesting
     - FirebaseAnalytics
     - FirebaseCore
-    - FirebaseCoreDiagnostics
+    - FirebaseCoreInternal
     - FirebaseCrashlytics
     - FirebaseInstallations
     - FirebaseRemoteConfig
@@ -221,13 +235,12 @@ SPEC REPOS:
     - GoogleAppMeasurement
     - GoogleDataTransport
     - GoogleUtilities
-    - GoogleWebRTC
-    - Libyuv
     - nanopb
     - PromisesObjC
-    - Reachability
+    - ReachabilitySwift
     - Sentry
     - Toast
+    - WebRTC-SDK
     - ZIPFoundation
 
 EXTERNAL SOURCES:
@@ -257,8 +270,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_fgbg/ios"
   flutter_logs:
     :path: ".symlinks/plugins/flutter_logs/ios"
-  flutter_volume_slider:
-    :path: ".symlinks/plugins/flutter_volume_slider/ios"
   flutter_webrtc:
     :path: ".symlinks/plugins/flutter_webrtc/ios"
   fluttertoast:
@@ -269,80 +280,77 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/logcat/ios"
   package_info:
     :path: ".symlinks/plugins/package_info/ios"
-  path_provider:
-    :path: ".symlinks/plugins/path_provider/ios"
-  phone_state_i:
-    :path: ".symlinks/plugins/phone_state_i/ios"
+  package_info_plus:
+    :path: ".symlinks/plugins/package_info_plus/ios"
+  path_provider_ios:
+    :path: ".symlinks/plugins/path_provider_ios/ios"
+  phonecall_state:
+    :path: ".symlinks/plugins/phonecall_state/ios"
   searchable_dropdown:
     :path: ".symlinks/plugins/searchable_dropdown/ios"
   sentry_flutter:
     :path: ".symlinks/plugins/sentry_flutter/ios"
-  shared_preferences:
-    :path: ".symlinks/plugins/shared_preferences/ios"
+  shared_preferences_ios:
+    :path: ".symlinks/plugins/shared_preferences_ios/ios"
   sqflite:
     :path: ".symlinks/plugins/sqflite/ios"
-  url_launcher:
-    :path: ".symlinks/plugins/url_launcher/ios"
-  video_player:
-    :path: ".symlinks/plugins/video_player/ios"
+  url_launcher_ios:
+    :path: ".symlinks/plugins/url_launcher_ios/ios"
   wakelock:
     :path: ".symlinks/plugins/wakelock/ios"
-  webview_flutter:
-    :path: ".symlinks/plugins/webview_flutter/ios"
+  webview_flutter_wkwebview:
+    :path: ".symlinks/plugins/webview_flutter_wkwebview/ios"
 
 SPEC CHECKSUMS:
-  AppAuth: 8803ba1aec6d00d9afd30093f82e600307eaa6ea
-  CocoaLumberjack: b7e05132ff94f6ae4dfa9d5bce9141893a21d9da
-  connectivity_plus: f5e5e0b894ec1187bfab9816d6c2f034da8d46da
+  AppAuth: 8fca6b5563a5baef2c04bee27538025e4ceb2add
+  connectivity_plus: 413a8857dd5d9f1c399a39130850d02fe0feaf7e
   device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
   disk_space: e94d34bbdf77954adfb39e60bde9cc5c7233eda6
-  Firebase: 26223c695fe322633274198cb19dca8cb7e54416
-  firebase_analytics: 41043f6e14fc9bc27c3f05217ab7f2b0ad9b41eb
-  firebase_core: 91b27774a52f41f8b58484a75edf71197ac01c59
-  firebase_crashlytics: e6ecb908f6249ce3757d18a812819a41495bf1cb
-  firebase_remote_config: 1c56b7b8caa840aa2e9432e66bf606d10f492fc9
-  FirebaseABTesting: e66f1f80747792630d9b292966de206d5df9853b
-  FirebaseAnalytics: 2580c2d62535ae7b644143d48941fcc239ea897a
-  FirebaseCore: 4d3c72622ce0e2106aaa07bb4b2935ba2c370972
-  FirebaseCoreDiagnostics: d50e11039e5984d92c8a512be2395f13df747350
-  FirebaseCrashlytics: d31325312c92e2cb2f0386d589b9aa44e303d99b
-  FirebaseInstallations: a58d4f72ec5861840b84df489f2668d970df558a
-  FirebaseRemoteConfig: 826fad8bec5ce1912ef97a124d6ec0ce4dcf6ec1
-  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
-  flutter_appauth: a6bf9fa3192a14a981475c4cbe3bcebd3b563144
+  Firebase: a3ea7eba4382afd83808376edb99acdaff078dcf
+  firebase_analytics: f58660932fa1d373ced20b098ada23fe0ed1f55b
+  firebase_core: db1432de826785171029b7c1a26e5b22ce1dd477
+  firebase_crashlytics: 70150805355d1e11e2fbbfa379fc9e776d05e5ad
+  firebase_remote_config: 2b96deea3f044fac2ebfffb6735fb4fc8477419a
+  FirebaseABTesting: 22840e1573ea2fbb519f5a2f1c93be7232508358
+  FirebaseAnalytics: 24a15e58e505abcedc3017b6f7c206fbfa964580
+  FirebaseCore: 813838072b797b64f529f3c2ee35e696e5641dd1
+  FirebaseCoreInternal: 091bde13e47bb1c5e9fe397634f3593dc390430f
+  FirebaseCrashlytics: df7406152189d48346deafb716806d7bd9ebb573
+  FirebaseInstallations: 004915af170935e3a583faefd5f8bc851afc220f
+  FirebaseRemoteConfig: 5bdeadd64a042dad0f6a38fee7e017818240c3d2
+  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  flutter_appauth: 525652bda90e43ca5eb7ed748ecc106b79d1f5a1
   flutter_audio_manager: 5945fdba99ff5e6c54d7e9b78d35b3a3bd574a9b
   flutter_email_sender: 02d7443217d8c41483223627972bfdc09f74276b
   flutter_fgbg: 31c0d1140a131daea2d342121808f6aa0dcd879d
-  flutter_logs: 6ef6417dca85185f872e917433b5ea65631c8078
-  flutter_volume_slider: 626493356983f02af6b984b596b071c90171002d
-  flutter_webrtc: 39898454258b54ba51996850d5da8d5d53bf1524
-  fluttertoast: 6122fa75143e992b1d3470f61000f591a798cc58
+  flutter_logs: 5d0dca26963e0f30b11a995a764744ef77d5d428
+  flutter_webrtc: 6767eafaa728c1e58026e901ca19f3fd5d713397
+  fluttertoast: 74526702fea2c060ea55dde75895b7e1bde1c86b
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
-  GoogleAppMeasurement: 8d3c0aeede16ab7764144b5a4ca8e1d4323841b7
-  GoogleDataTransport: 116c84c4bdeb76be2a7a46de51244368f9794eab
-  GoogleUtilities: 45dbb24a7f351d69d0a601482b39ad6c32e30dab
-  GoogleWebRTC: b39a78c4f5cc6b0323415b9233db03a2faa7b0f0
+  GoogleAppMeasurement: 3bc3a6484b7bb20dd8489242c4dd3c92a3e5107b
+  GoogleDataTransport: 1c8145da7117bd68bbbed00cf304edb6a24de00f
+  GoogleUtilities: bad72cb363809015b1f7f19beb1f1cd23c589f95
   janus_client: d77ae8ecd25551407740931f9506f1a64ba067a3
-  Libyuv: 5f79ced0ee66e60a612ca97de1e6ccacd187a437
   logcat: 0221d9de6a7f3f636a02f7a3fb4071c8ae52bafb
-  nanopb: 1bf24dd71191072e120b83dd02d08f3da0d65e53
+  nanopb: b552cce312b6c8484180ef47159bc0f65a1f0431
   package_info: 873975fc26034f0b863a300ad47e7f1ac6c7ec62
-  path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
-  phone_state_i: ce1e01bad2a0f9771c9919d1021b4f51a129a402
-  PromisesObjC: 3113f7f76903778cf4a0586bd1ab89329a0b7b97
-  Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
+  package_info_plus: 6c92f08e1f853dc01228d6f553146438dafcd14e
+  path_provider_ios: 14f3d2fd28c4fdb42f44e0f751d12861c43cee02
+  phonecall_state: db474814125e604230ff4ce00bba20357b7bc0ba
+  PromisesObjC: ab77feca74fa2823e7af4249b8326368e61014cb
+  ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
   searchable_dropdown: 5058be32fdc5e0481d300ff2087129072e71bd62
-  Sentry: 9d055e2de30a77685e86b219acf02e59b82091fc
-  sentry_flutter: 8b2b2e1c0101ef562106b5d272d3c0c741512c01
-  shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
-  sqflite: 4001a31ff81d210346b500c55b17f4d6c7589dd0
+  Sentry: f04f9823ec51fcded88e5c6769142e30dd7dbe95
+  sentry_flutter: 17bfc61990c61086c152dfa5379a9fed653a7d7c
+  shared_preferences_ios: 548a61f8053b9b8a49ac19c1ffbc8b92c50d68ad
+  sqflite: 6d358c025f5b867b29ed92fc697fd34924e11904
   Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
-  url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
-  video_player: 9cc823b1d9da7e8427ee591e8438bfbcde500e6e
-  wakelock: bfc7955c418d0db797614075aabbc58a39ab5107
-  webview_flutter: d2b4d6c66968ad042ad94cbb791f5b72b4678a96
-  ZIPFoundation: b1f0de4eed33e74a676f76e12559ab6b75990197
+  url_launcher_ios: 839c58cdb4279282219f5e248c3321761ff3c4de
+  wakelock: d0fc7c864128eac40eba1617cb5264d9c940b46f
+  WebRTC-SDK: ef83f71e443c135d98de109940343bcf6d313e8f
+  webview_flutter_wkwebview: b7e70ef1ddded7e69c796c7390ee74180182971f
+  ZIPFoundation: 063163dc828bf699c5be160eb4f58f676322d94f
 
-PODFILE CHECKSUM: fe0e1ee7f3d1f7d00b11b474b62dd62134535aea
+PODFILE CHECKSUM: ddd3a6c2b6398e8e8d7650eadace701ba104d48b
 
-COCOAPODS: 1.11.2
+COCOAPODS: 1.11.3

@@ -57,6 +57,7 @@ class VideoRoom extends StatefulWidget {
   VoidCallback callExitRoomUserExists;
   VoidCallback updateGoingToBackground;
   VoidCallback onCurrentUserJoinedRoom;
+  VoidCallback resetAudioRoute;
   UpdateUserCallback updateGlxUserCB;
   User user;
   // sendJanusMQTT sender;
@@ -1406,6 +1407,11 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         //fix for background task killed after 10 min in ios
         if(Platform.isIOS)
           widget.mainToIsolateStream[1].send({"type": "start"});
+
+       // set audio source
+        Timer(Duration(milliseconds: 1500), () {
+          widget.resetAudioRoute();
+        });
         break;
       case AppLifecycleState.paused:
         FlutterLogs.logInfo(

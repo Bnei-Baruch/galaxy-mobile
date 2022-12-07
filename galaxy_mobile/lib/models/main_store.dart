@@ -148,6 +148,9 @@ class MainStore extends ChangeNotifier {
     notifyListeners();
   }
 
+   int getAudioDevice() {
+   return audioDevice;
+  }
   // TODO: this function should be declared as async.
   void updateMonitor(String data) {
     _api.updateMonitor(data);
