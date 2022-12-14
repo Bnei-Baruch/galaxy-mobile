@@ -1223,6 +1223,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
 
     final double itemHeight = userGridHeight / 2;
     final double itemWidth = userGridWidth / 2;
+    final safePaddingRight = MediaQuery.of(context).padding.right;
     int pageCount = getNumPages(feeds.length);
 
     FlutterLogs.logInfo(
@@ -1282,6 +1283,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                 if (pageCount > 1) Align(
                   alignment: Alignment.centerRight,
                   child: IconButton(
+                    padding: EdgeInsets.only(right: safePaddingRight),
                     color: Colors.blue,
                     icon: DirectionalChild(
                         ltrChildBuilder: (context) => Icon(Icons.arrow_forward),
