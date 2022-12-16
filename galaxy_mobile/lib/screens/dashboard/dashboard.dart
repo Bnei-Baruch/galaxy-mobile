@@ -192,7 +192,7 @@ class _DashboardState extends State<Dashboard>
         FlutterLogs.logInfo("Dashboard", "phoneCall", "mark re-enter, conversation is in progress");
         callInProgress = true;
         stream.state.playerOverlay.muteStreamIfNeeded();
-
+        videoRoom.unMute();
       } else if (callInProgress) {
         callInProgress = false;
         FlutterLogs.logInfo(
@@ -739,7 +739,7 @@ class _DashboardState extends State<Dashboard>
                               "Dashboard", "onTap", value.toString());
                           switch (value) {
                             case 0:
-                              videoRoom.mute();
+                              videoRoom.toggleMute();
                               setState(() {
                                 audioMute = !audioMute;
                               });

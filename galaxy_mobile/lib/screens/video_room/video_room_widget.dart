@@ -138,7 +138,7 @@ class VideoRoom extends StatefulWidget {
     this.isQuestion = isQuestion;
   }
 
-  void mute() {
+  void toggleMute() {
     Helper.setMicrophoneMute(!myAudioMuted,myStream
         .getAudioTracks()
         .first);
@@ -148,6 +148,18 @@ class VideoRoom extends StatefulWidget {
       });
     else {
       myAudioMuted = !myAudioMuted;
+    }
+  }
+  void unMute() {
+    Helper.setMicrophoneMute(false,myStream
+        .getAudioTracks()
+        .first);
+    if (state != null && state.mounted)
+      state.setState(() {
+        myAudioMuted = false;
+      });
+    else {
+      myAudioMuted = false;
     }
   }
 
