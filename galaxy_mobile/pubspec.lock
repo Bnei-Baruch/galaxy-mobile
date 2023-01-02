@@ -639,9 +639,11 @@ packages:
   mqtt5_client:
     dependency: "direct main"
     description:
-      path: "../../mqtt5_client"
-      relative: true
-    source: path
+      path: "."
+      ref: "2.1.0_flutter_3.3.7"
+      resolved-ref: "1db07646113b39f157bf01141eb7f54c477729d1"
+      url: "https://github.com/igala/mqtt5_client.git"
+    source: git
     version: "2.1.0"
   nested:
     dependency: transitive
