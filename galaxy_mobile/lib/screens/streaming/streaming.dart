@@ -25,7 +25,7 @@ class StreamingUnified extends StatefulWidget {
   bool isOnAir = false;
 
   BooleanCallback fullscreen;
-
+  BooleanCallback audioPlay;
   final double DEFAULT_VOLUME = 0.6;
 
   var videoTrack;

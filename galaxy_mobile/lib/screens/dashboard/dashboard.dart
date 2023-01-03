@@ -33,8 +33,9 @@ import 'package:galaxy_mobile/widgets/questions/questions_dialog_content.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 
-enum AudioDevice { receiver, speaker, bluetooth }
+enum AudioDevice { earpiece, speaker, bluetooth }
 
 final int SECONDS_TO_SHOW_CONTROLS = 10;
 
@@ -306,6 +307,13 @@ class _DashboardState extends State<Dashboard>
       setState(() {});
     };
 
+    stream.audioPlay = (isPlaying) {
+      if(isPlaying)
+        {
+          switchAudioDevice();
+        }
+    };
+
     _hideBarsTimer = RestartableTimer(Duration(seconds: SECONDS_TO_SHOW_CONTROLS), hideBars);
     // The timer starts as inactive.
     _hideBarsTimer.cancel();
@@ -341,66 +349,60 @@ class _DashboardState extends State<Dashboard>
   switchAudioDevice() async {
     FlutterLogs.logInfo(
         "dashboard", "switchAudioDevice", "#### switchAudioDevice BEGIN");
+    List<MediaDeviceInfo> availableDeviceOutputs = await Helper.audiooutputs;
+
     bool res;
     _audioDevice = AudioDevice.values[(context.read<MainStore>().audioDevice)];
-    if (_audioDevice == AudioDevice.receiver) {
-      res = await changeAudioDevice(AudioDevice.speaker);
-      if (res) {
+    if (_audioDevice == AudioDevice.earpiece) {
+      await Helper.selectAudioOutput(AudioDevice.speaker.name);
+      //if (res) {
         FlutterLogs.logInfo(
             "dashboard", "switchAudioDevice", ">>> switch to SPEAKER: Success");
         context
             .read<MainStore>()
             .setAudioDevice(AudioDevice.speaker.index);
-      } else {
+     // }
+    //else {
         FlutterLogs.logError(
             "dashboard", "switchAudioDevice", ">>> switch to SPEAKER: Failed");
-      }
-    } else if (_audioDevice == AudioDevice.speaker) {
-      res = await changeAudioDevice(AudioDevice.bluetooth);
-      AudioInput currentOutput = await FlutterAudioManager.getCurrentOutput();
-      if (res && currentOutput.port == AudioPort.bluetooth) {
+    //  }
+    } else if (_audioDevice == AudioDevice.speaker && availableDeviceOutputs.any((element) => element.kind == "bluetooth")) {
+      Helper.selectAudioOutput(AudioDevice.bluetooth.name);
+      // AudioInput currentOutput = await FlutterAudioManager.getCurrentOutput();
+      // if (res && currentOutput.port == AudioPort.bluetooth) {
         FlutterLogs.logInfo("dashboard", "switchAudioDevice",
             ">>> switch to BLUETOOTH: Success");
         context
             .read<MainStore>()
             .setAudioDevice(AudioDevice.bluetooth.index);
       } else {
-        FlutterLogs.logError("dashboard", "switchAudioDevice",
-            ">>> switch to BLUETOOTH: Failed");
-        res = await changeAudioDevice(AudioDevice.receiver);
-        if (res) {
+        // FlutterLogs.logError("dashboard", "switchAudioDevice",
+        //     ">>> switch to BLUETOOTH: Failed");
+       await Helper.selectAudioOutput(AudioDevice.earpiece.name);
+        //if (res) {
           FlutterLogs.logInfo("dashboard", "switchAudioDevice",
               ">>> switch to RECEIVER: Success");
           context
               .read<MainStore>()
-              .setAudioDevice(AudioDevice.receiver.index);
-        } else {
-          FlutterLogs.logError("dashboard", "switchAudioDevice",
-              ">>> switch to RECEIVER: Failed");
-        }
+              .setAudioDevice(AudioDevice.earpiece.index);
+        // } else {
+        //   FlutterLogs.logError("dashboard", "switchAudioDevice",
+        //       ">>> switch to RECEIVER: Failed");
+        // }
       }
 
-    } else if (_audioDevice == AudioDevice.bluetooth) {
-      res = await changeAudioDevice(AudioDevice.receiver);
-      if (res) {
-        FlutterLogs.logInfo("dashboard", "switchAudioDevice",
-            ">>> switch to RECEIVER: Success");
-        context
-            .read<MainStore>()
-            .setAudioDevice(AudioDevice.receiver.index);
-      } else {
-        FlutterLogs.logError(
-            "dashboard", "switchAudioDevice", ">>> switch to RECEIVER: Failed");
-      }
-    }
-    FlutterLogs.logInfo(
-        "dashboard", "switchAudioDevice", "#### switchAudioDevice END");
+   // var deviceid = "speaker";//(audioDevices.where((element) => element.label == "Speakerphone") as MediaDeviceInfo).deviceId;
+  //  var deviceid = "earpiece";
+  //  await  Helper.selectAudioOutput(deviceid);
+
+
+    //Helper.setSpeakerphoneOn(true);
   }
 
   changeAudioDevice(AudioDevice audioDevice) async {
     bool res = false;
     switch (audioDevice) {
-      case AudioDevice.receiver:
+      case AudioDevice.earpiece:
         res = await FlutterAudioManager.changeToReceiver();
         break;
       case AudioDevice.speaker:
@@ -553,7 +555,7 @@ class _DashboardState extends State<Dashboard>
   Icon setIcon() {
     FlutterLogs.logInfo("dashboard", "setIcon", "#### setIcon BEGIN");
     _audioDevice = AudioDevice.values[(context.read<MainStore>().audioDevice)];
-    if (_audioDevice == AudioDevice.receiver) {
+    if (_audioDevice == AudioDevice.earpiece) {
       return Icon(Mdi.volumeMute);
     } else if (_audioDevice == AudioDevice.speaker) {
       return Icon(Icons.volume_up);
@@ -1150,7 +1152,8 @@ class _DashboardState extends State<Dashboard>
   }
 
   handleConnected() {
-    FlutterLogs.logInfo(
+    FlutterLogs.
+    logInfo(
         "Dashboard", "mqtt", "handleConnected");
     //if marked no connection then reneter room
     if(dialogPleaseWaitContext!=null) {
