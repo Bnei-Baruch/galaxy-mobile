@@ -323,13 +323,25 @@ class _DashboardState extends State<Dashboard>
 
   Future<void> initAudioMgr() async {
     FlutterAudioManager.setListener(() async {
+      var current = await FlutterAudioManager.getCurrentOutput();
       FlutterLogs.logInfo(
-          "VideoRoom", "FlutterAudioManager", "######## audio device changed");
+          "VideoRoom", "FlutterAudioManager", "######## audio device changed $current");
 
       //await getAudioInput();
+      if(current.name != _audioDevice.name)
+        {
+          if (await changeAudioDevice(_audioDevice)) {
+            FlutterLogs.logInfo(
+                "dashboard", "initAudioMgr", "### reset and  switch  back to  ${_audioDevice.toString()}: Success");
 
+          } else {
+            FlutterLogs.logError(
+                "dashboard", "initAudioMgr", ">>> reset and  switch  back to  ${_audioDevice.toString()}:: Failed");
+          }
+        }
       setState(() {});
     });
+
 
 
     Timer(Duration(milliseconds: 1500),(){
@@ -342,6 +354,7 @@ class _DashboardState extends State<Dashboard>
           "dashboard", "initAudioMgr", ">>> switch to SPEAKER: Failed");
     }
     });
+
     if (!mounted) return;
     setState(() {});
   }
@@ -392,12 +405,7 @@ class _DashboardState extends State<Dashboard>
       }
     }
 
-   // var deviceid = "speaker";//(audioDevices.where((element) => element.label == "Speakerphone") as MediaDeviceInfo).deviceId;
-  //  var deviceid = "earpiece";
-  //  await  Helper.selectAudioOutput(deviceid);
 
-
-    //Helper.setSpeakerphoneOn(true);
   }
 
   changeAudioDevice(AudioDevice audioDevice) async {
