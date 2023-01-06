@@ -310,23 +310,27 @@ class _DashboardState extends State<Dashboard>
 
   Future<void> initAudioMgr() async {
     FlutterAudioManager.setListener(() async {
+      var current = await FlutterAudioManager.getCurrentOutput();
       FlutterLogs.logInfo(
-          "VideoRoom", "FlutterAudioManager", "######## audio device changed");
+          "VideoRoom", "FlutterAudioManager", "######## audio device changed $current");
 
       //await getAudioInput();
+      if(current.name != _audioDevice.name)
+        {
+          if (await changeAudioDevice(_audioDevice)) {
+            FlutterLogs.logInfo(
+                "dashboard", "initAudioMgr", "### reset and  switch  back to  ${_audioDevice.toString()}: Success");
 
+          } else {
+            FlutterLogs.logError(
+                "dashboard", "initAudioMgr", ">>> reset and  switch  back to  ${_audioDevice.toString()}:: Failed");
+          }
+        }
       setState(() {});
     });
 
 
-    if (await changeAudioDevice(_audioDevice)) {
-      FlutterLogs.logInfo(
-          "dashboard", "initAudioMgr", ">>> switch to ${_audioDevice.toString()}: Success");
 
-    } else {
-      FlutterLogs.logError(
-          "dashboard", "initAudioMgr", ">>> switch to SPEAKER: Failed");
-    }
 
     if (!mounted) return;
     setState(() {});
