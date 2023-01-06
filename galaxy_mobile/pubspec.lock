@@ -175,7 +175,7 @@ packages:
       name: dart_webrtc
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.11"
+    version: "1.0.12"
   dbus:
     dependency: transitive
     description:
@@ -486,7 +486,7 @@ packages:
       name: flutter_webrtc
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.9.16"
+    version: "0.9.18"
   fluttertoast:
     dependency: "direct main"
     description:
@@ -547,8 +547,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "0.4.0+11"
-      resolved-ref: "5e98df7faed09796f700b4cb9ab18074e74ef2f5"
+      ref: "0.4.0+12"
+      resolved-ref: "9c7069bc97a0a585b90056b0d3529f9d5421dde2"
       url: "https://github.com/igala/flutter_janus_client.git"
     source: git
     version: "0.0.4"
@@ -836,6 +836,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.1.0"
+  platform_detect:
+    dependency: transitive
+    description:
+      name: platform_detect
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.7"
   plugin_platform_interface:
     dependency: transitive
     description:
