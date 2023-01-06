@@ -39,7 +39,10 @@ dependencies:
   synchronized: ^3.0.0+3
   slide_to_confirm: ^1.1.0
   mqtt5_client: #^3.3.3
-    path: ../../mqtt5_client
+      git:
+        url: https://github.com/igala/mqtt5_client.git
+        ref: 2.1.0_flutter_3.3.7
+    #path: ../../mqtt5_client
   jwt_decode: ^0.3.1
   mdi: ^4.0.0
   flutter_html: ^3.0.0-alpha.6
@@ -92,7 +95,7 @@ dependencies:
         git:
           url: https://github.com/igala/flutter_janus_client.git
 #          #https://github.com/shivanshtalwar0/flutter_janus_client.git
-          ref: 0.4.0+11
+          ref: 0.4.0+12
 #    path: ../../flutter_janus_client
 
 
