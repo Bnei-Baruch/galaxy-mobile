@@ -30,7 +30,7 @@ class SharedPrefs {
   int get videoPreset => _sharedPrefs.getInt('videoPreset') ?? 1;
   set videoPreset(int value) => _sharedPrefs.setInt('videoPreset', value);
 
-  int get audioDevice => _sharedPrefs.getInt('audioDevice') ?? AudioDevice.speaker.index;
+  int get audioDevice => _sharedPrefs.getInt('audioDevice') ?? AudioDevice.receiver.index;
   set audioDevice(int value) => _sharedPrefs.setInt('audioDevice', value);
 
 
