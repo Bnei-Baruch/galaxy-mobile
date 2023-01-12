@@ -800,7 +800,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
             decoration: BoxDecoration(
                 border: Border.all(
                     color:
-                        widget.isOnAir ? Colors.redAccent : Colors.green,
+                        widget.isOnAir ? Colors.redAccent : Colors.transparent,
                     width: 3)),
             child: (_remoteRenderer.srcObject != null && widget.isVideoPlaying)
                 ? RTCVideoView(
