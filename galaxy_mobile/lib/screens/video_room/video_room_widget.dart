@@ -1228,6 +1228,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
 
     final double itemHeight = userGridHeight / 2;
     final double itemWidth = userGridWidth / 2;
+    final double arrowSize = MediaQuery.of(context).orientation == Orientation.portrait ? 24.0 : 48.0;
     int pageCount = getNumPages(feeds.length);
 
     FlutterLogs.logInfo(
@@ -1288,6 +1289,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                   alignment: Alignment.centerRight,
                   child: IconButton(
                     color: Colors.blue,
+                    iconSize:arrowSize,
                     icon: DirectionalChild(
                         ltrChildBuilder: (context) => Icon(Icons.arrow_forward),
                         rtlChildBuilder: (context) => Icon(Icons.arrow_back)
@@ -1299,6 +1301,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                   alignment: Alignment.centerLeft,
                   child: IconButton(
                     color: Colors.blue,
+                     iconSize: arrowSize,
                     icon: DirectionalChild(
                       ltrChildBuilder: (context) => Icon(Icons.arrow_back),
                       rtlChildBuilder: (context) => Icon(Icons.arrow_forward)
