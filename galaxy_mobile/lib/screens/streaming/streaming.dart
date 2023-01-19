@@ -258,6 +258,8 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
 
   MediaStream _remoteTrlStreamAudio;
 
+  final double playerControlsHeight = 50;
+
   getStreamListing() {
     //should get this list from our server later on
     var body = {"request": "list"};
@@ -753,12 +755,14 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
       initVideoStream();
     }
 
+    final navBarHeigh = 86;
+
     double height = MediaQuery.of(context).size.height;
     return MediaQuery.of(context).orientation == Orientation.portrait
-        ? height / 3
+        ? height / 3 - playerControlsHeight
         : widget.isFullScreen
             ? height
-            : height / 2;
+            : height - navBarHeigh - (playerControlsHeight * 2);
   }
 
   double getWidth() {
@@ -782,14 +786,16 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
       //audio trl init
       initTrlAudioStream();
     }
-    return Stack(alignment: Alignment.topCenter, children: [
+    return Stack(
+      alignment: Alignment.topCenter,
+      children: [
       Column(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            height: getHeight() - 50,
+            height: getHeight(),
             width: getWidth(),
             decoration: BoxDecoration(
                 border: Border.all(
@@ -801,7 +807,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
                     _remoteRenderer,
                     mirror: false,
                     // objectFit:
-                    //     RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
+                        // RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
                     // RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
                   )
                 : Material(
@@ -835,7 +841,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
                         ))),
           ),
           Container(
-            height: 50,
+            height: playerControlsHeight,
             width: getWidth(),
             child: widget.isPlayerShown ? playerOverlay : Container(),
           )
