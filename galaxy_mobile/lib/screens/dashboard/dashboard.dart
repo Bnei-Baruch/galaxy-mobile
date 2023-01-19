@@ -329,25 +329,30 @@ class _DashboardState extends State<Dashboard>
       FlutterLogs.logInfo(
           "VideoRoom", "FlutterAudioManager", "zzz audio device changed $current");
 
-      //await getAudioInput();
-      if(current.name.toLowerCase() != _audioDevice.name && !isChangingAudioRoute)
-        {
+
+      if(WebRTC.platformIsIOS) { //in ios env we loose the route when Janus gets and event
+        if (current.name.toLowerCase() != _audioDevice.name &&
+            !isChangingAudioRoute) {
           if (await changeAudioDevice(_audioDevice)) {
             FlutterLogs.logInfo(
-                "dashboard", "initAudioMgr", "zzz reset and  switch  back to  ${_audioDevice.toString()}: Success");
-
+                "dashboard", "initAudioMgr",
+                "zzz reset and  switch  back to  ${_audioDevice
+                    .toString()}: Success");
           } else {
             FlutterLogs.logError(
-                "dashboard", "initAudioMgr", "zzz reset and  switch  back to  ${_audioDevice.toString()}:: Failed");
+                "dashboard", "initAudioMgr",
+                "zzz reset and  switch  back to  ${_audioDevice
+                    .toString()}:: Failed");
           }
         }
+      }
       setState(() {});
     });
 
 
 
-    Timer(Duration(milliseconds: 1500),(){
-    if ( changeAudioDevice(_audioDevice)) {
+    Timer(Duration(milliseconds: 1500),()  {
+    if (  routeAudioOutput(_audioDevice) != null) {
       FlutterLogs.logInfo(
           "dashboard", "initAudioMgr", ">>> switch to ${_audioDevice.toString()}: Success");
 
@@ -364,21 +369,22 @@ class _DashboardState extends State<Dashboard>
   switchAudioDevice() async {
 
     isChangingAudioRoute = true;
-    if(WebRTC.platformIsAndroid)
-      await androidRouteAudioOutput();
-    else
-      {
-        await iOSRouteAudioOutput();
-      }
+
+    await routeAudioOutput();
+
     isChangingAudioRoute = false;
 
   }
 
-  Future<void> iOSRouteAudioOutput() async {
+  Future<void> routeAudioOutput([AudioDevice toOutput]) async {
        FlutterLogs.logInfo(
         "dashboard", "switchAudioDevice", "#### switchAudioDevice BEGIN");
     bool res;
-    _audioDevice = AudioDevice.values[(context.read<MainStore>().audioDevice)];
+    if(toOutput == AudioDevice.bluetooth)
+      _audioDevice = AudioDevice.speaker;
+    else
+      _audioDevice = AudioDevice.values[(context.read<MainStore>().audioDevice)];
+
     if (_audioDevice == AudioDevice.receiver) {
       res = await changeAudioDevice(AudioDevice.speaker);
       if (res) {
@@ -433,146 +439,7 @@ class _DashboardState extends State<Dashboard>
         "dashboard", "switchAudioDevice", "#### switchAudioDevice END");
   }
 
-  Future<void> androidRouteAudioOutput() async {
-     List<MediaDeviceInfo> availableDeviceOutputs = await Helper.audiooutputs;
-    FlutterLogs.logInfo(
-        "dashboard", "switchAudioDevice", "zzz switchAudioDevice BEGIN available devices ${availableDeviceOutputs.map((e) => e.deviceId).toString()}  number of devices=${availableDeviceOutputs.length}");  //headset,speaker,bluetooth,earpiece
-    bool res;
-    var available = availableDeviceOutputs.map((e) => e.deviceId).toList();
-    available = available.map((e) => e == "headset"?"headphones":e).toList();
-    available = available.map((e) => e == "earpiece"?"receiver":e).toList();
 
-    _audioDevice = AudioDevice.values[(context.read<MainStore>().audioDevice)];
-    if (_audioDevice == AudioDevice.receiver && available.any((element) => element == "speaker")){   //// switching  receiver => speaker
-      FlutterLogs.logInfo(
-          "dashboard", "switchAudioDevice", "zzz try speaker");
-
-      await Helper.setSpeakerphoneOn(true);
-      await Helper.selectAudioOutput("speaker");
-      res = await changeAudioDevice(AudioDevice.speaker);
-      if (res) {
-        FlutterLogs.logInfo(
-            "dashboard", "switchAudioDevice", ">>> switch to SPEAKER: Success");
-        context
-            .read<MainStore>()
-            .setAudioDevice(AudioDevice.speaker.index);
-     }
-    else {
-        FlutterLogs.logError(
-            "dashboard", "switchAudioDevice", ">>> switch to SPEAKER: Failed");
-     }
-    } else if (_audioDevice == AudioDevice.speaker && available.any((element) => element == "bluetooth")) { //// switching  speaker => bluetooth
-      FlutterLogs.logInfo(
-          "dashboard", "switchAudioDevice", "zzz try bluetooth");
-      await Helper.setSpeakerphoneOn(false);
-      await Helper.selectAudioOutput("bluetooth");
-      res = await changeAudioDevice(AudioDevice.bluetooth);
-      AudioInput currentOutput = await FlutterAudioManager.getCurrentOutput();
-      if (res && currentOutput.port == AudioPort.bluetooth) {
-        FlutterLogs.logInfo("dashboard", "switchAudioDevice",
-            ">>> switch to BLUETOOTH: Success");
-        context
-            .read<MainStore>()
-            .setAudioDevice(AudioDevice.bluetooth.index);
-      }
-
-      // else {
-      //   FlutterLogs.logError("dashboard", "switchAudioDevice",
-      //       ">>> switch to BLUETOOTH: Failed");
-      //   res = await changeAudioDevice(AudioDevice.receiver);
-      //   if (res) {
-      //     FlutterLogs.logInfo("dashboard", "switchAudioDevice",
-      //         ">>> switch to RECEIVER: Success");
-      //     context
-      //         .read<MainStore>()
-      //         .setAudioDevice(AudioDevice.receiver.index);
-      //   } else {
-      //     FlutterLogs.logError("dashboard", "switchAudioDevice",
-      //         ">>> switch to RECEIVER: Failed");
-      //   }
-      // }
-      } else if (_audioDevice == AudioDevice.speaker  && available.any((element) => element == "headphones")) { //// switching  speaker =>  headphones
-      FlutterLogs.logInfo(
-          "dashboard", "switchAudioDevice", "zzz try headphones");
-      await Helper.setSpeakerphoneOn(true);
-      await Helper.selectAudioOutput("headset");
-      res = await changeAudioDevice(AudioDevice.headphones);
-      if (res) {
-        FlutterLogs.logInfo("dashboard", "switchAudioDevice",
-            ">>> switch to RECEIVER: Success");
-        context
-            .read<MainStore>()
-            .setAudioDevice(AudioDevice.headphones.index);
-      } else {
-        FlutterLogs.logError(
-            "dashboard", "switchAudioDevice", ">>> switch to RECEIVER: Failed");
-      }
-    }else if (_audioDevice == AudioDevice.bluetooth  && available.any((element) => element == "headphones")) {//// switching  bluetooth =>  headphones
-      FlutterLogs.logInfo(
-          "dashboard", "switchAudioDevice", "zzz try headphones");
-      await Helper.setSpeakerphoneOn(true);
-      await Helper.selectAudioOutput("headset");
-      res = await changeAudioDevice(AudioDevice.headphones);
-      if (res) {
-        FlutterLogs.logInfo("dashboard", "switchAudioDevice",
-            ">>> switch to RECEIVER: Success");
-        context
-            .read<MainStore>()
-            .setAudioDevice(AudioDevice.headphones.index);
-      } else {
-        FlutterLogs.logError(
-            "dashboard", "switchAudioDevice", ">>> switch to RECEIVER: Failed");
-      }
-    }else if (_audioDevice == AudioDevice.bluetooth  && available.any((element) => element == "receiver")) {//// switching  bluetooth =>  receiver
-      FlutterLogs.logInfo(
-          "dashboard", "switchAudioDevice", "zzz try receiver");
-      await Helper.setSpeakerphoneOn(true);
-      await Helper.selectAudioOutput("earpiece");
-      res = await changeAudioDevice(AudioDevice.receiver);
-      if (res) {
-        FlutterLogs.logInfo("dashboard", "switchAudioDevice",
-            ">>> switch to RECEIVER: Success");
-        context
-            .read<MainStore>()
-            .setAudioDevice(AudioDevice.receiver.index);
-      } else {
-        FlutterLogs.logError(
-            "dashboard", "switchAudioDevice", ">>> switch to RECEIVER: Failed");
-      }
-    }else if (_audioDevice == AudioDevice.headphones  && available.any((element) => element == "receiver")) { //// switching  headphones =>   receiver
-      FlutterLogs.logInfo(
-          "dashboard", "switchAudioDevice", "zzz try receiver");
-      await Helper.setSpeakerphoneOn(true);
-      await Helper.selectAudioOutput("earpiece");
-      res = await changeAudioDevice(AudioDevice.receiver);
-      if (res) {
-        FlutterLogs.logInfo("dashboard", "switchAudioDevice",
-            ">>> switch to RECEIVER: Success");
-        context
-            .read<MainStore>()
-            .setAudioDevice(AudioDevice.receiver.index);
-      } else {
-        FlutterLogs.logError(
-            "dashboard", "switchAudioDevice", ">>> switch to RECEIVER: Failed");
-      }
-    }else if (_audioDevice == AudioDevice.speaker  && available.any((element) => element == "receiver")) {//// switching  speaker =>   receiver
-      FlutterLogs.logInfo(
-          "dashboard", "switchAudioDevice", "zzz try receiver");
-      await Helper.setSpeakerphoneOn(true);
-      await Helper.selectAudioOutput("earpiece");
-      res = await changeAudioDevice(AudioDevice.receiver);
-      if (res) {
-        FlutterLogs.logInfo("dashboard", "switchAudioDevice",
-            ">>> switch to RECEIVER: Success");
-        context
-            .read<MainStore>()
-            .setAudioDevice(AudioDevice.receiver.index);
-      } else {
-        FlutterLogs.logError(
-            "dashboard", "switchAudioDevice", ">>> switch to RECEIVER: Failed");
-      }
-    }
-  }
 
   changeAudioDevice(AudioDevice audioDevice) async {
     bool res = false;
