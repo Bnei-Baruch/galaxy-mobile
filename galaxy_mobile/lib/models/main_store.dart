@@ -91,7 +91,7 @@ class MainStore extends ChangeNotifier {
         SharedPrefs().roomName = roomName;
       }
       else
-        SharedPrefs().roomName = null;
+        SharedPrefs().roomName = "";
 
       notifyListeners();
     }
