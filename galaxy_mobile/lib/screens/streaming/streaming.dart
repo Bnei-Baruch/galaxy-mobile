@@ -752,7 +752,6 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
     } else if (_orientation != MediaQuery.of(context).orientation) {
       FlutterLogs.logInfo("Streaming", "getHeight", "orientation changed");
       _orientation = MediaQuery.of(context).orientation;
-      initVideoStream();
     }
 
     final navBarHeigh = 86;
