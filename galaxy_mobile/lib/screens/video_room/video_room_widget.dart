@@ -95,7 +95,8 @@ class VideoRoom extends StatefulWidget {
   void exitRoom() async {
     Helper.setMicrophoneMute(false,myStream.getAudioTracks().first);
     state.unRegisterMqtt();
-
+    state.context.read<MainStore>().setFriendsInRoom([]);
+    WidgetsBinding.instance.removeObserver(state);
     if (pluginHandle != null) pluginHandle.hangup();
     if (subscriberHandle != null) subscriberHandle.destroy();
     if (_janusClient != null) _janusClient.destroy();

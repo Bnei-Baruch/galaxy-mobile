@@ -622,7 +622,7 @@ class _DashboardState extends State<Dashboard>
     return WillPopScope(
         onWillPop: () {
           final mqttClient = context.read<MQTTClient>();
-          Navigator.of(context).pop(true);
+
           stream.exit();
           videoRoom.exitRoom();
           userTimer.cancel();
@@ -638,6 +638,7 @@ class _DashboardState extends State<Dashboard>
             mqttClient.removeOnSubscribedCallback();
           }
           changeAudioDevice(AudioDevice.receiver);
+          Navigator.of(context).pop(true);
           return;
         },
         child: Scaffold(
@@ -691,7 +692,7 @@ class _DashboardState extends State<Dashboard>
                                   onPressed: () {
                                     final mqttClient =
                                         context.read<MQTTClient>();
-                                    Navigator.of(context).pop(true);
+
                                     stream.exit();
                                     videoRoom.exitRoom();
                                     userTimer.cancel();
@@ -705,6 +706,7 @@ class _DashboardState extends State<Dashboard>
                                           "galaxy/room/$_activeRoomId/chat");
                                      // mqttClient.disconnect();
                                     }
+                                    Navigator.of(context).pop(true);
                                   }))
                         ]),
           body: GestureDetector(

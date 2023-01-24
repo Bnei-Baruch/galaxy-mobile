@@ -62,7 +62,7 @@ void main() async {
   await initLogs();
   print("main init logs passed");
   await Firebase.initializeApp();
-
+  EasyLocalization.ensureInitialized();
 
   Wakelock.enable();
   // await SentryFlutter.init(
