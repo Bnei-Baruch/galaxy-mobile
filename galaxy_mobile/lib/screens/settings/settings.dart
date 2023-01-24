@@ -296,6 +296,10 @@ class _SettingsState extends State<Settings> with WidgetsBindingObserver {
         // }
         // );
       }
+      else
+        {
+          selfWidget.unMute();
+        }
       setState(() {
         selfWidget.restartCamera();
       });

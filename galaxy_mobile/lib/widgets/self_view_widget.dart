@@ -26,6 +26,16 @@ class SelfViewWidget extends StatefulWidget {
       (state.myStream as MediaStream).getVideoTracks().first.stop();
     }
   }
+  void unMute() {
+    FlutterLogs.logInfo("SelfViewWidget", "unmute", "");
+    if (state != null
+        && state.mounted
+        && (state.myStream as MediaStream) != null
+        && (state.myStream as MediaStream).getAudioTracks().isNotEmpty ) {
+      Helper.setMicrophoneMute(false, (state.myStream as MediaStream).getAudioTracks().first);
+
+    }
+  }
 }
 
 class _SelfViewWidgetState extends State<SelfViewWidget>
