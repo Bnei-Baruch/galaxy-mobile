@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 
 class ScreenLoader extends StatelessWidget {
@@ -20,7 +21,7 @@ class ScreenLoader extends StatelessWidget {
             LinearProgressIndicator(),
             FittedBox(
                   fit: BoxFit.fill,
-                  child: Text('Please Wait',style: TextStyle(
+                  child: Text('please wait'.tr(),style: TextStyle(
                     color: Colors.white,
                     fontStyle: FontStyle.normal,
                     fontWeight: FontWeight.normal,

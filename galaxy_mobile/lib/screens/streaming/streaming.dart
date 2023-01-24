@@ -741,7 +741,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
     janusClient.destroy();
     if (_remoteRenderer != null) {
       _remoteRenderer.srcObject = null;
-      await _remoteRenderer.dispose();
+    //  await _remoteRenderer.dispose();
     }
     Navigator.of(context).pop();
   }

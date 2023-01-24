@@ -455,7 +455,7 @@ packages:
       name: flutter_logs
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.9"
+    version: "2.1.10"
   flutter_screenutil:
     dependency: "direct main"
     description:
