@@ -52,4 +52,8 @@ class Utils {
     DateFormat dateFormat = new DateFormat(format);
     return dateFormat.format(dateTime);
   }
+
+  static bool isRTL(String text) {
+    return Bidi.detectRtlDirectionality(text);
+  }
 }

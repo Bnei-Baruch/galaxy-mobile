@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'dart:ui' as ui;
 
+import 'package:galaxy_mobile/utils/utils.dart';
+
 typedef OnSubmitMessageCallback = Function(String);
 
 class SendChatMessageBar extends StatefulWidget {
@@ -91,6 +93,7 @@ class _SendChatMessageBarState extends State<SendChatMessageBar> {
                             hintText: 'virtual_chat.enterMessage'.tr(),
                             border: InputBorder.none,
                           ),
+                          textDirection: Utils.isRTL(_textController.text) ? ui.TextDirection.rtl : ui.TextDirection.ltr,
                           controller: _textController,
                         )
                       ),
