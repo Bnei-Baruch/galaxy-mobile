@@ -2,8 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:galaxy_mobile/utils/utils.dart';
 import 'package:provider/provider.dart';
 import 'package:galaxy_mobile/models/main_store.dart';
+import 'dart:ui' as ui;
 
 typedef OnSubmitCallback = Future<void> Function(String userName, String roomName, String questionContent);
 
@@ -95,6 +97,7 @@ class _SendQuestionFormState extends State<SendQuestionForm> {
               autovalidateMode: _isSubmitted
                   ? AutovalidateMode.onUserInteraction
                   : AutovalidateMode.disabled,
+                  textDirection: Utils.isRTL(_userName) ? ui.TextDirection.rtl: ui.TextDirection.ltr,
             ),
             TextFormField(
               enabled: !_isFormLocked,
@@ -108,6 +111,9 @@ class _SendQuestionFormState extends State<SendQuestionForm> {
               autovalidateMode: _isSubmitted
                   ? AutovalidateMode.onUserInteraction
                   : AutovalidateMode.disabled,
+                  textDirection: Utils.isRTL(_roomName)
+                    ? ui.TextDirection.rtl
+                    : ui.TextDirection.ltr,
             ),
             TextFormField(
               enabled: !_isFormLocked,
@@ -122,6 +128,9 @@ class _SendQuestionFormState extends State<SendQuestionForm> {
                   ? AutovalidateMode.onUserInteraction
                   : AutovalidateMode.disabled,
               onChanged: (text) => setState(() => _questionContent = text),
+              textDirection: Utils.isRTL(_questionContent)
+                    ? ui.TextDirection.rtl
+                    : ui.TextDirection.ltr,
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
