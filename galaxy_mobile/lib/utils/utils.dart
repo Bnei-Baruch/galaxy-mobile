@@ -14,6 +14,11 @@ class Utils {
     final jsonResponse = jsonDecode(jsonString);
     return jsonResponse;
   }
+  static Future parseTxt(String jsonName) async {
+    String txtString = await Utils._loadJsonFromAsset(jsonName);
+
+    return txtString;
+  }
 
   static List sortAndFilterFeeds(List feeds) {
     feeds = feeds

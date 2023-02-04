@@ -22,6 +22,7 @@ import 'package:mdi/mdi.dart';
 import 'package:mqtt5_client/mqtt5_client.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_logs/flutter_logs.dart';
+import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
 
 
 import 'dart:async';
@@ -449,6 +450,9 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
           }
 
           if (jsep != null) {
+            String fixedSDP = fixJsep(jsep);
+            print(fixedSDP);
+            jsep["sdp"] = fixedSDP;
             await widget.subscriberHandle.handleRemoteJsep(jsep);
             // var body = {"request": "start", "room": 2157};
             var body = {
@@ -762,6 +766,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                   //          List newFeeds = sortAndFilterFeeds();
                   publishersList = Utils.sortAndFilterFeeds(publishersList);
                   List newFeeds = publishersList;
+                //  newFeeds.removeWhere((element) => element["display"]["display"].toString().contains("Avi"));
                   FlutterLogs.logInfo(
                       "VideoRoom",
                       "initPlatformState",
@@ -875,6 +880,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                   });
                   var newFeeds = msg['publishers']
                   as List; //sortAndFilterFeeds(msg['publishers'] as List);
+        //          newFeeds.removeWhere((element) => element["display"].toString().contains("Avi"));
                   FlutterLogs.logInfo(
                       "VideoRoom",
                       "initPlatformState",
@@ -953,7 +959,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
               }
             }
             if (jsep != null) {
-              widget.pluginHandle.handleRemoteJsep(jsep);
+              await widget.pluginHandle.handleRemoteJsep(jsep);
             }
           },
           onSuccess: (plugin) async {
@@ -1082,6 +1088,8 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
               "addAudio": true,
             }
           });
+          // fix the h264 profile
+          var matches = offer.sdp.allMatches(";profile-level-id");
           plugin.send(
               message: publish, jsep: offer, onSuccess: () {});
         },
@@ -1626,6 +1634,34 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     context.read<MQTTClient>().unsubscribe(stTopic);
     context.read<MQTTClient>().removeOnMsgReceivedCallback((payload, topic) => widget._janusClient.onMessage(payload, topic));
     widget._janusClient.mqttSender = null;
+  }
+
+  String fixJsep(jsep) {
+    var sdp_map = sdp_transform.parse(jsep["sdp"]);
+    var medias = sdp_map["media"];
+    bool fixed = false;
+    medias.forEach((element) {
+
+      if(element["type"] == "video")
+      {
+        if((element["fmtp"] as List).isEmpty)
+        {
+          var payload = LinkedHashMap();
+          var config = LinkedHashMap();
+          config["config"] = "level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42e01f";
+          payload["payload"] = "107";
+          element["fmtp"] = [payload,config].toList();
+
+          print("## fixing sdp!!!");
+          fixed = true;
+        }
+
+      }
+    });
+
+      String newSDP = sdp_transform.write(sdp_map, null);
+
+    return newSDP;
   }
 }
 

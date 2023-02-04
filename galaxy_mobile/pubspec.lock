@@ -486,7 +486,7 @@ packages:
       name: flutter_webrtc
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.9.18"
+    version: "0.9.19"
   fluttertoast:
     dependency: "direct main"
     description:
@@ -546,11 +546,9 @@ packages:
   janus_client:
     dependency: "direct main"
     description:
-      path: "."
-      ref: "0.4.0+12"
-      resolved-ref: "9c7069bc97a0a585b90056b0d3529f9d5421dde2"
-      url: "https://github.com/igala/flutter_janus_client.git"
-    source: git
+      path: "../../flutter_janus_client"
+      relative: true
+    source: path
     version: "0.0.4"
   js:
     dependency: transitive
@@ -913,6 +911,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.3.5"
+  sdp_transform:
+    dependency: "direct main"
+    description:
+      name: sdp_transform
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.3.2"
   searchable_dropdown:
     dependency: "direct main"
     description:
