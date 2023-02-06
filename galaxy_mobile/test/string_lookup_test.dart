@@ -35,7 +35,10 @@ void main() {
     // sdp = sdp.replaceRange(start,start+"profile-level-id=42e01f".length,"profile-level-id=111111");
     var sdp_map = parse(sdp.toString());
     var medias = sdp_map["media"];
+    bool foundMid = false;
+    int midFound = -1;
     medias.forEach((element) {
+
 
       if(element["type"] == "video")
         {
@@ -46,12 +49,14 @@ void main() {
              config["config"] = "level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42e01f";
              payload["payload"] = "107";
               element["fmtp"] = [payload,config].toList();
+              foundMid = true;
+              midFound = element["mid"];
             }
 
         }
     });
     final sdp_lines = splitter.convert(sdp.toString());
-    var newS = sdp_lines.toString();
+    var newS =  sdp.replaceFirst("a=mid:$midFound","a=mid:$midFound\na=fmtp:107 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42e01f" );
     String newSDP =  write(sdp_map, null);
     var result = sdp_map.containsValue("level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42e01f");
     print(sdp_map);

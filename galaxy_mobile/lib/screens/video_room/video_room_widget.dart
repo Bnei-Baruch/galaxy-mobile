@@ -1089,7 +1089,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
             }
           });
           // fix the h264 profile
-          var matches = offer.sdp.allMatches(";profile-level-id");
+          offer.sdp = fixJsep(offer.sdp);
           plugin.send(
               message: publish, jsep: offer, onSuccess: () {});
         },
@@ -1636,10 +1636,10 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     widget._janusClient.mqttSender = null;
   }
 
-  String fixJsep(jsep) {
-    var sdp_map = sdp_transform.parse(jsep["sdp"]);
-    var medias = sdp_map["media"];
+  String fixJsep(sdp) {
+    var medias = sdp["media"];
     bool fixed = false;
+    int mid = -1;
     medias.forEach((element) {
 
       if(element["type"] == "video")
@@ -1654,14 +1654,15 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
 
           print("## fixing sdp!!!");
           fixed = true;
+          mid = element["mid"];
         }
 
       }
     });
 
-      String newSDP = sdp_transform.write(sdp_map, null);
+    sdp = sdp.replaceFirst("a=mid:$mid","a=mid:$mid\na=fmtp:107 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42e01f" );
 
-    return newSDP;
+    return sdp;
   }
 }
 
