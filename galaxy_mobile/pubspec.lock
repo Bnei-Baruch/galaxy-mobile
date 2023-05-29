@@ -175,7 +175,7 @@ packages:
       name: dart_webrtc
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.12"
+    version: "1.0.16"
   dbus:
     dependency: transitive
     description:
@@ -483,10 +483,12 @@ packages:
   flutter_webrtc:
     dependency: transitive
     description:
-      name: flutter_webrtc
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.9.19"
+      path: "."
+      ref: "0.9.31.route"
+      resolved-ref: "681d2708ec6075f03f593175bb1bec0c84ca3b49"
+      url: "https://github.com/igala/flutter-webrtc.git"
+    source: git
+    version: "0.9.31"
   fluttertoast:
     dependency: "direct main"
     description:
@@ -546,9 +548,11 @@ packages:
   janus_client:
     dependency: "direct main"
     description:
-      path: "../../flutter_janus_client"
-      relative: true
-    source: path
+      path: "."
+      ref: "0.0.4+16"
+      resolved-ref: eed4731cd084ce600e25a453367b6ed4db1ba10d
+      url: "https://github.com/igala/flutter_janus_client.git"
+    source: git
     version: "0.0.4"
   js:
     dependency: transitive
@@ -756,12 +760,12 @@ packages:
     source: hosted
     version: "1.0.1"
   path_provider:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: path_provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.11"
+    version: "2.0.14"
   path_provider_android:
     dependency: transitive
     description:
@@ -769,13 +773,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.21"
-  path_provider_ios:
+  path_provider_foundation:
     dependency: transitive
     description:
-      name: path_provider_ios
+      name: path_provider_foundation
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.11"
+    version: "2.2.2"
   path_provider_linux:
     dependency: transitive
     description:
@@ -783,13 +787,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.7"
-  path_provider_macos:
-    dependency: transitive
-    description:
-      name: path_provider_macos
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.0.6"
   path_provider_platform_interface:
     dependency: transitive
     description:
@@ -1216,7 +1213,7 @@ packages:
       name: webrtc_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.10"
+    version: "1.0.13"
   webview_flutter:
     dependency: "direct main"
     description:

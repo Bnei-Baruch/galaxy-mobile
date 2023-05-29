@@ -50,6 +50,7 @@ class _DashboardState extends State<Dashboard>
   VideoRoom videoRoom = VideoRoom();
   ChatViewModel chatViewModel = ChatViewModel();
   var activeUser;
+  var mqttClient;
   int activeUserJoinedRoomTimestamp = 0;
   bool callInProgress;
   String _activeRoomId;
@@ -240,7 +241,7 @@ class _DashboardState extends State<Dashboard>
 
     };
     videoRoom.updateGoingToBackground = (){
-      updateRoomWithMyState(false);
+     updateRoomWithMyState(false);
     };
     videoRoom.resetAudioRoute = (){
       changeAudioDevice(AudioDevice.values.firstWhere((element) =>element.index == context.read<MainStore>().getAudioDevice()));
@@ -274,6 +275,7 @@ class _DashboardState extends State<Dashboard>
       updateGxyUser(context, user);
     };
     activeUser = context.read<MainStore>().activeUser;
+    mqttClient = context.read<MQTTClient>();
     _audioDevice = AudioDevice.values[(context.read<MainStore>().audioDevice)];
 
     audioMute = true;
@@ -331,39 +333,39 @@ class _DashboardState extends State<Dashboard>
 
 
       if(WebRTC.platformIsIOS) { //in ios env we loose the route when Janus gets and event
-        if (current.name.toLowerCase() != _audioDevice.name &&
-            !isChangingAudioRoute) {
-          if (await changeAudioDevice(_audioDevice)) {
-            FlutterLogs.logInfo(
-                "dashboard", "initAudioMgr",
-                "zzz reset and  switch  back to  ${_audioDevice
-                    .toString()}: Success");
-          } else {
-            FlutterLogs.logError(
-                "dashboard", "initAudioMgr",
-                "zzz reset and  switch  back to  ${_audioDevice
-                    .toString()}:: Failed");
-          }
-        }
+        // if (current.name.toLowerCase() != _audioDevice.name &&
+        //     !isChangingAudioRoute) {
+        //   if (await changeAudioDevice(_audioDevice)) {
+        //     FlutterLogs.logInfo(
+        //         "dashboard", "initAudioMgr",
+        //         "zzz reset and  switch  back to  ${_audioDevice
+        //             .toString()}: Success");
+        //   } else {
+        //     FlutterLogs.logError(
+        //         "dashboard", "initAudioMgr",
+        //         "zzz reset and  switch  back to  ${_audioDevice
+        //             .toString()}:: Failed");
+        //   }
+        // }
       }
       setState(() {});
     });
 
 
-
-    Timer(Duration(milliseconds: 1500),()  {
-    if (  routeAudioOutput(_audioDevice) != null) {
-      FlutterLogs.logInfo(
-          "dashboard", "initAudioMgr", ">>> switch to ${_audioDevice.toString()}: Success");
-
-    } else {
-      FlutterLogs.logError(
-          "dashboard", "initAudioMgr", ">>> switch to SPEAKER: Failed");
-    }
-    });
-
-    if (!mounted) return;
-    setState(() {});
+    //
+    // Timer(Duration(milliseconds: 1500),()  {
+    // if (  routeAudioOutput(_audioDevice) != null) {
+    //   FlutterLogs.logInfo(
+    //       "dashboard", "initAudioMgr", ">>> switch to ${_audioDevice.toString()}: Success");
+    //
+    // } else {
+    //   FlutterLogs.logError(
+    //       "dashboard", "initAudioMgr", ">>> switch to SPEAKER: Failed");
+    // }
+    // });
+    //
+    // if (!mounted) return;
+    // setState(() {});
   }
 
   switchAudioDevice() async {
@@ -435,6 +437,7 @@ class _DashboardState extends State<Dashboard>
             "dashboard", "switchAudioDevice", ">>> switch to RECEIVER: Failed");
       }
     }
+
     FlutterLogs.logInfo(
         "dashboard", "switchAudioDevice", "#### switchAudioDevice END");
   }
@@ -442,19 +445,28 @@ class _DashboardState extends State<Dashboard>
 
 
   changeAudioDevice(AudioDevice audioDevice) async {
+    FlutterLogs.logInfo(  "dashboard", "zz audiooutputs", (await Helper.audiooutputs).map((e) => e.deviceId.toString()).toList().toString());
     bool res = false;
     isChangingAudioRoute = true;
     switch (audioDevice) {
       case AudioDevice.receiver:
+        await Helper.setSpeakerphoneOn(false);
+
+       await Helper.selectAudioOutput("earpiece");
         res = await FlutterAudioManager.changeToReceiver();
         break;
       case AudioDevice.speaker:
+        await Helper.setSpeakerphoneOn(true);
+        await Helper.selectAudioOutput("speaker");
         res = await FlutterAudioManager.changeToSpeaker();
         break;
       case AudioDevice.bluetooth:
+        await Helper.setSpeakerphoneOn(false);
+        await Helper.selectAudioOutput("bluetooth");
         res = await FlutterAudioManager.changeToBluetooth();
         break;
       case AudioDevice.headphones:
+        await Helper.setSpeakerphoneOn(false);
         res = await FlutterAudioManager.changeToHeadphones();
         break;
       default:
@@ -507,7 +519,7 @@ class _DashboardState extends State<Dashboard>
       case "audio-out":
         if (videoRoom.getIsQuestion()) {
           videoRoom.toggleQuestion();
-          updateRoomWithMyState(false);
+         updateRoomWithMyState(false);
         }
         stream.toggleOnAir(jsonCmd);
         break;
@@ -557,7 +569,7 @@ class _DashboardState extends State<Dashboard>
         "Dashboard", "subscribedToTopic", "topic = $topic");
     if (topic == "galaxy/room/" + _activeRoomId) {
       Future.delayed(const Duration(milliseconds: 1000), () {
-        updateRoomWithMyState(false);
+       updateRoomWithMyState(false);
 
         //toggle audio mode only
         final s = context.read<MainStore>();
@@ -579,8 +591,12 @@ class _DashboardState extends State<Dashboard>
     }
   }
 
+  @override
+  void didChangeDependencies() async {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+  }
   void updateRoomWithMyState(bool isQuestion) {
-    final mqttClient = context.read<MQTTClient>();
     var userData;
     if (userMap != null)
       userData = userMap;
@@ -802,14 +818,14 @@ class _DashboardState extends State<Dashboard>
                               videoRoom.toggleVideo();
                               setState(() {
                                 videoMute = !videoMute;
-                                updateRoomWithMyState(false);
+                               updateRoomWithMyState(false);
                               });
                               break;
                             case 2:
                               if (videoRoom.questionInRoom == null) {
                                 bool isQ = videoRoom.getIsQuestion();
                                 videoRoom.toggleQuestion();
-                                updateRoomWithMyState(!isQ);
+                               updateRoomWithMyState(!isQ);
                                 setState(() {
                                   videoRoom.setIsQuestion(!isQ);
                                 });

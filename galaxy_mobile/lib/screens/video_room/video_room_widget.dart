@@ -95,10 +95,11 @@ class VideoRoom extends StatefulWidget {
 
   void exitRoom() async {
     Helper.setMicrophoneMute(false,myStream.getAudioTracks().first);
-    state.unRegisterMqtt();
+
     state.context.read<MainStore>().setFriendsInRoom([]);
     WidgetsBinding.instance.removeObserver(state);
     if (pluginHandle != null) pluginHandle.hangup();
+    state.unRegisterMqtt();
     if (subscriberHandle != null) subscriberHandle.destroy();
     if (_janusClient != null) _janusClient.destroy();
 
@@ -450,9 +451,9 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
           }
 
           if (jsep != null) {
-            String fixedSDP = fixJsep(jsep);
-            print(fixedSDP);
-            jsep["sdp"] = fixedSDP;
+            // String fixedSDP = fixJsep(jsep);
+            // print(fixedSDP);
+            // jsep["sdp"] = fixedSDP;
             await widget.subscriberHandle.handleRemoteJsep(jsep);
             // var body = {"request": "start", "room": 2157};
             var body = {
@@ -1089,7 +1090,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
             }
           });
           // fix the h264 profile
-          offer.sdp = fixJsep(offer.sdp);
+         // offer.sdp = fixJsep(offer.sdp);
           plugin.send(
               message: publish, jsep: offer, onSuccess: () {});
         },
@@ -1465,7 +1466,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     userData["session"] = widget._janusClient.sessionId;
     userData["handle"] = widget.pluginHandle.handleId;
     userData["extra"] = {};
-    userData["extra"]["streams"]= json.decode(widget.configuredStreams);
+    userData["extra"]["streams"]= widget.configuredStreams!=null?json.decode(widget.configuredStreams):null;
     print("## extra = ${widget.configuredStreams}");
     widget.updateGlxUserCB(userData);
   }

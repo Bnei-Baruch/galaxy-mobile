@@ -123,6 +123,7 @@ void main() async {
 class MyApp extends StatelessWidget with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
+    ScreenUtil.init(context);
     WidgetsBinding.instance?.addObserver(this);
     return FGBGNotifier(
         onEvent: (event) {

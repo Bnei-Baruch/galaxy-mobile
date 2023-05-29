@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_appauth_platform_interface/src/token_response.dart';
@@ -11,6 +12,7 @@ import 'package:galaxy_mobile/widgets/connected_dots.dart';
 import 'package:galaxy_mobile/widgets/ui_language_selector.dart';
 import 'package:new_version/new_version.dart';
 import 'package:package_info/package_info.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -102,8 +104,25 @@ class _LoginState extends State<Login>  with WidgetsBindingObserver {
   void login() async {
     final auth = context.read<AuthService>();
     final store = context.read<MainStore>();
-    // if(store.getLastLogin().isAfter(DateTime.now().subtract(Duration(hours: 21))))
-    //   FlutterLogs.clearLogs();
+    if(store.getLastLogin().isAfter(DateTime.now().subtract(Duration(hours: 21))))
+      {
+        if(Platform.isIOS)
+          {
+            var supportDir = await getApplicationSupportDirectory();
+            Directory logsDir = Directory(supportDir.path+"/Logs");
+            logsDir.deleteSync(recursive: true);
+            logsDir.create();
+          }
+        else
+          {
+            var supportDir = await getExternalStorageDirectories();
+            FlutterLogs.logInfo("login", "logs", "supportDir= $supportDir");
+
+             Directory logsDir = Directory(supportDir[0].path+"/galaxy/Logs");
+            logsDir.deleteSync(recursive: true);
+            logsDir.create();
+          }
+      }
     final api = context.read<Api>();
     var authResponse = await auth.signIn();
 
