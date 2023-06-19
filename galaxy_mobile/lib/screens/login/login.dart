@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_app_version_checker/flutter_app_version_checker.dart';
 import 'package:flutter_appauth_platform_interface/src/token_response.dart';
 import 'package:galaxy_mobile/models/main_store.dart';
 import 'package:galaxy_mobile/models/shared_pref.dart';
@@ -30,12 +31,22 @@ class _LoginState extends State<Login>  with WidgetsBindingObserver {
   Timer refresher;
   var newVersion;
 
+  final _versionChecker = AppVersionChecker(
+    appId: "com.galaxy_mobile",
+    androidStore: AndroidStore.googlePlayStore,
+
+  );
+
+  String snapValue;
+  String versionValue;
+
   Future<String> getFileData(String path) async {
     return await rootBundle.loadString(path);
   }
 
   @override
   initState() {
+     checkVersion();
      newVersion = NewVersion(
         iOSId: 'com.galaxy.mobile',
         androidId: 'com.galaxy_mobile',
@@ -45,6 +56,20 @@ class _LoginState extends State<Login>  with WidgetsBindingObserver {
     advancedStatusCheck(newVersion);
   }
 
+  void checkVersion() async {
+    await Future.wait([
+
+      _versionChecker
+          .checkUpdate()
+          .then((value) => versionValue = value.toString()),
+    ]);
+
+    setState(() {
+      setState(() {
+        FlutterLogs.logInfo("Login", "version", "version is $versionValue");
+      });
+    });
+  }
   basicStatusCheck(NewVersion newVersion) {
     newVersion.showAlertIfNecessary();
   }

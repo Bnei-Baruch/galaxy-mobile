@@ -85,6 +85,8 @@ PODS:
     - GoogleUtilities/Environment (~> 7.8)
     - "GoogleUtilities/NSData+zlib (~> 7.8)"
   - Flutter (1.0.0)
+  - flutter_app_version_checker (0.0.1):
+    - Flutter
   - flutter_appauth (0.0.1):
     - AppAuth (= 1.6.0)
     - Flutter
@@ -200,6 +202,7 @@ DEPENDENCIES:
   - firebase_crashlytics (from `.symlinks/plugins/firebase_crashlytics/ios`)
   - firebase_remote_config (from `.symlinks/plugins/firebase_remote_config/ios`)
   - Flutter (from `Flutter`)
+  - flutter_app_version_checker (from `.symlinks/plugins/flutter_app_version_checker/ios`)
   - flutter_appauth (from `.symlinks/plugins/flutter_appauth/ios`)
   - flutter_audio_manager (from `.symlinks/plugins/flutter_audio_manager/ios`)
   - flutter_email_sender (from `.symlinks/plugins/flutter_email_sender/ios`)
@@ -261,6 +264,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/firebase_remote_config/ios"
   Flutter:
     :path: Flutter
+  flutter_app_version_checker:
+    :path: ".symlinks/plugins/flutter_app_version_checker/ios"
   flutter_appauth:
     :path: ".symlinks/plugins/flutter_appauth/ios"
   flutter_audio_manager:
@@ -320,6 +325,7 @@ SPEC CHECKSUMS:
   FirebaseInstallations: 52153982b057d3afcb4e1fbb3eb0b6d00611e681
   FirebaseRemoteConfig: 5bdeadd64a042dad0f6a38fee7e017818240c3d2
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  flutter_app_version_checker: 2beb5e211990c45ebfc17b81aa4d08ebd7edb757
   flutter_appauth: 525652bda90e43ca5eb7ed748ecc106b79d1f5a1
   flutter_audio_manager: 5945fdba99ff5e6c54d7e9b78d35b3a3bd574a9b
   flutter_email_sender: 02d7443217d8c41483223627972bfdc09f74276b

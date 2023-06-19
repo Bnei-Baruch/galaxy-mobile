@@ -278,7 +278,7 @@ class _DashboardState extends State<Dashboard>
     mqttClient = context.read<MQTTClient>();
     _audioDevice = AudioDevice.values[(context.read<MainStore>().audioDevice)];
 
-    audioMute = true;
+   audioMute = true;
     videoMute = true;
 
     videoRoom.updateVideoState = (mute) {
@@ -348,7 +348,9 @@ class _DashboardState extends State<Dashboard>
         //   }
         // }
       }
-      setState(() {});
+      // setState(() {
+      //
+      // });
     });
 
 
@@ -366,6 +368,11 @@ class _DashboardState extends State<Dashboard>
     //
     // if (!mounted) return;
     // setState(() {});
+
+    // set audio source
+    Timer(Duration(milliseconds: 500), () {
+        videoRoom.resetAudioRoute();
+    });
   }
 
   switchAudioDevice() async {

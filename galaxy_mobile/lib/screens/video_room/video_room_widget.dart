@@ -141,10 +141,25 @@ class VideoRoom extends StatefulWidget {
     this.isQuestion = isQuestion;
   }
 
-  void toggleMute() {
-    Helper.setMicrophoneMute(!myAudioMuted,myStream
-        .getAudioTracks()
-        .first);
+
+
+
+  Future<void> toggleMute() async {
+    FlutterLogs.logInfo("VideoRoom", "toggleMute1", "${ myStream.getAudioTracks().first}");
+    // await Helper.setVolume(!myAudioMuted?10.0000000000:0.0,myStream
+    //     .getAudioTracks()
+    //     .first);
+    myStream.getAudioTracks().first.enabled = myAudioMuted;
+    // if(myAudioMuted)
+    //   myStream.getAudioTracks().first.stop();
+    //  Helper.setMicrophoneMute(!myAudioMuted,myStream
+    //     .getAudioTracks()
+    //     .first);
+
+
+
+
+     FlutterLogs.logInfo("VideoRoom", "toggleMute1", "${myStream.getAudioTracks().first}");
     if (state != null && state.mounted)
       state.setState(() {
         myAudioMuted = !myAudioMuted;
@@ -154,9 +169,10 @@ class VideoRoom extends StatefulWidget {
     }
   }
   void unMute() {
-    Helper.setMicrophoneMute(false,myStream
-        .getAudioTracks()
-        .first);
+    myStream.getAudioTracks().first.enabled = true;
+    // Helper.setMicrophoneMute(false,myStream
+    //     .getAudioTracks()
+    //     .first);
     if (state != null && state.mounted)
       state.setState(() {
         myAudioMuted = false;
@@ -1023,13 +1039,13 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
       widget.myStream.getVideoTracks().first.enabled = false;
     }
     widget.myStream = stream;
-    Helper.setMicrophoneMute(true,  widget.myStream.getAudioTracks().first);
+    //Helper.setMicrophoneMute(widget.myAudioMuted,  widget.myStream.getAudioTracks().first);
 
 
 
     setState(() {
       widget._localRenderer.srcObject = widget.myStream;
-      widget.myAudioMuted = true;
+     // widget.myAudioMuted = true;
       widget.myVideoMuted = true;
       widget.updateVideoState(true);
       widget.myStream.getVideoTracks().first.enabled = false;
@@ -1052,10 +1068,14 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     widget.pluginHandle = plugin;
     MediaStream stream = await plugin.initializeMediaDevices();
     widget.myStream = stream;
-   Helper.setMicrophoneMute(true,widget.myStream.getAudioTracks().first);
+  // Helper.setMicrophoneMute(true,widget.myStream.getAudioTracks().first);
     widget.myStream.getVideoTracks().first.enabled =
         !widget.myVideoMuted;
+
+    // Helper.setVolume(0.0,widget.myStream.getAudioTracks().first);
     widget.myAudioMuted = true;
+    widget.myStream.getAudioTracks().first.enabled =
+    !widget.myAudioMuted;
     widget.updateVideoState(true);
 
     setState(() {
