@@ -14,6 +14,7 @@ import 'package:janus_client/utils.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:mqtt5_client/mqtt5_client.dart';
 
+import '../../services/keycloak.dart';
 import 'components/player_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
@@ -260,6 +261,8 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
 
   final double playerControlsHeight = 50;
 
+  User activeUser;
+
   getStreamListing() {
     //should get this list from our server later on
     var body = {"request": "list"};
@@ -337,6 +340,9 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
       _remoteStreamAudio.getAudioTracks().last.enabled =
           !muted; //.setVolume(muted ? 0 : 0.5);
       // FlutterLogs.logInfo("Streaming", "&&&&&&&&&&&&&&&&", "audio trl");
+      setState(() {
+
+      });
     };
 
     playerOverlay.audioChange = () {
@@ -424,6 +430,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
 
     context.read<MQTTClient>().subscribe(stTopic);
     context.read<MQTTClient>().addOnMsgReceivedCallback((payload, topic) => janusClient.onMessage(payload, topic));
+    activeUser = context.read<MainStore>().activeUser;
     janusClient.mqttSender = (msg) {
       var correlationData = parse(msg)["transaction"];
       // let cd = correlationData ? " | transaction: " + correlationData : ""
@@ -440,7 +447,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
 
       var userProp = MqttUserProperty();
       userProp.identifier = MqttPropertyIdentifier.userProperty;
-      userProp.pairValue = context.read<MainStore>().activeUser.toJson().toString();
+      userProp.pairValue = activeUser.toJson().toString();
       userProp.pairName = "userProperties";
       container.add(userProp);
 
@@ -518,6 +525,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
           _remoteStreamAudio = stream;
           // _remoteStreamAudio.addTrack(track);
           // widget.audioStream = stream;
+          _remoteStreamAudio.getAudioTracks().last.enabled = false;
           playerOverlay.isPlaying = true;
         },
         plugin: "janus.plugin.streaming",
@@ -783,7 +791,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
       //audio plugin init
       initAudioStream();
       //audio trl init
-      initTrlAudioStream();
+     // initTrlAudioStream();
     }
     return Stack(
       alignment: Alignment.topCenter,
@@ -802,14 +810,24 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
                         widget.isOnAir ? Colors.redAccent : Colors.transparent,
                     width: 3)),
             child: (_remoteRenderer.srcObject != null && widget.isVideoPlaying)
-                ? RTCVideoView(
+                ?
+            Stack(children: [
+              RTCVideoView(
                     _remoteRenderer,
                     mirror: false,
                     // objectFit:
                         // RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
                     // RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-                  )
-                : Material(
+                  ),
+              Visibility(
+                  visible: playerOverlay.isMuted,
+                  child:
+              Padding(padding: EdgeInsets.fromLTRB(0,16,16,0),
+              child: Icon(Icons.volume_off),
+              )
+              )
+
+                ]): Material(
                     child: InkWell(
                         onTap: () {
                           setState(() {

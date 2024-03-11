@@ -11,7 +11,7 @@ import 'package:galaxy_mobile/utils/dio_log.dart';
 import 'package:galaxy_mobile/models/study_material.dart';
 
 class Room {
-  final num room;
+  var room;
   final String janus;
   final String description;
   final bool questions;

@@ -54,7 +54,7 @@ class VideoRoom extends StatefulWidget {
   List<RTCVideoView> remote_videos = new List();
   String server;
   String token;
-  int roomNumber;
+  var roomNumber;
   VoidCallback callExitRoomUserExists;
   VoidCallback updateGoingToBackground;
   VoidCallback onCurrentUserJoinedRoom;
@@ -450,9 +450,9 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
               "VideoRoom", "_newRemoteFeed", "message: ${msg.toString()}");
           //update feed
           var event = msg["videoroom"];
-          if (event == 'attached' ||
+          if ((event == 'attached' ||
               (event == 'event' && msg['switched'] == 'ok') ||
-              event == 'updated') {
+              event == 'updated') && (msg['streams']!=null)) {
             List midslist = (msg['streams'] as List)
                 .map((stream) => {
                       "mid": stream["mid"],
@@ -474,7 +474,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
             // var body = {"request": "start", "room": 2157};
             var body = {
               "request": "start",
-              "room": widget.roomNumber,
+              "room": widget.roomNumber is String ? widget.roomNumber.toString(): widget.roomNumber.toInt(),
             };
             await widget.subscriberHandle.send(
                 message: body,
@@ -499,7 +499,8 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
           widget.subscriberHandle = plugin;
           var register = {
             "request": "join",
-            "room": widget.roomNumber,
+            "room": widget.roomNumber is String ? widget.roomNumber.toString(): widget.roomNumber.toInt(),
+            "id": widget.user.id,
             "ptype": "subscriber",
             "streams": feeds,
           };
@@ -1049,6 +1050,8 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
       widget.myVideoMuted = true;
       widget.updateVideoState(true);
       widget.myStream.getVideoTracks().first.enabled = false;
+      widget.myStream.getAudioTracks().first.enabled =
+      !widget.myAudioMuted;
     });
 
     Timer(Duration(seconds: 4),() async {
@@ -1084,7 +1087,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
 
     var register = {
       "request": "join",
-      "room": widget.roomNumber,
+      "room": widget.roomNumber is String ? widget.roomNumber.toString(): widget.roomNumber.toInt(),
       "ptype": "publisher",
       "display": jsonEncode({
         "id": widget.user.sub,
@@ -1093,6 +1096,8 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
         "display": widget.user.givenName+"\u{1F4F1}"//0xF0 0x9F 0x93 0xB1"
       }) //'User test'
     };
+    widget.roomNumber is String ? register.putIfAbsent("id", () => widget.user.id):FlutterLogs.logInfo("VideoRoom", "room type is old type",
+        "videoroom");
     plugin.send(
         message: register,
         onSuccess: () async {
@@ -1112,7 +1117,10 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
           // fix the h264 profile
          // offer.sdp = fixJsep(offer.sdp);
           plugin.send(
-              message: publish, jsep: offer, onSuccess: () {});
+              message: publish, jsep: offer, onSuccess: () {
+            FlutterLogs.logInfo("VideoRoom", "joined publisher successfully",
+                "@@@");
+          });
         },
     onError:(error) {
           print("xxx msg send error $error");
@@ -1235,7 +1243,7 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
     final RoomArguments args = RoomArguments(
         mainStore.activeGateway.url,
         mainStore.activeGateway.token,
-        mainStore.activeRoom.room.toInt(),
+        mainStore.activeRoom.room,
         mainStore.activeRoom.description,
         mainStore.activeUser,
         mainStore.activeGateway.name);
@@ -1691,7 +1699,7 @@ class RoomArguments {
   final String janusName;
   final String server;
   final String token;
-  final int roomNumber;
+  var roomNumber;
   final String groupName;
   final User user;
   RoomArguments(this.server, this.token, this.roomNumber, this.groupName,

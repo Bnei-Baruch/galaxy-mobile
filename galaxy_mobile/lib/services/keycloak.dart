@@ -13,7 +13,7 @@ class User {
   final bool camera;
   final int timestamp;
   final List<String> roles;
-  final int rfid;
+  var rfid;
 
   User.fromJson(Map<String, dynamic> json)
       : sub = json['sub'],

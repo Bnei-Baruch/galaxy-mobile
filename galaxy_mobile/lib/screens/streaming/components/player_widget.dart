@@ -15,7 +15,7 @@ class PlayerWidget extends StatefulWidget {
   Map<String, Object> audioTypeValue;
   Map<String, Object> videoTypeValue;
 
-  bool isMuted = false;
+  bool isMuted = true;
   bool isFullScreen = false;
 
   int audioPreset;

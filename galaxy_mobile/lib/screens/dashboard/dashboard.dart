@@ -243,8 +243,11 @@ class _DashboardState extends State<Dashboard>
     videoRoom.updateGoingToBackground = (){
      updateRoomWithMyState(false);
     };
-    videoRoom.resetAudioRoute = (){
-      changeAudioDevice(AudioDevice.values.firstWhere((element) =>element.index == context.read<MainStore>().getAudioDevice()));
+    videoRoom.resetAudioRoute = () async {
+
+      var current_output = await FlutterAudioManager.getCurrentOutput();
+      if(current_output.port.index != context.read<MainStore>().getAudioDevice())
+          changeAudioDevice(AudioDevice.values.firstWhere((element) =>element.index == context.read<MainStore>().getAudioDevice()));
     };
     videoRoom.callExitRoomUserExists = () {
       stream.exit();
@@ -716,10 +719,11 @@ class _DashboardState extends State<Dashboard>
                                     final mqttClient =
                                         context.read<MQTTClient>();
 
+                                    subscription.cancel();
                                     stream.exit();
                                     videoRoom.exitRoom();
                                     userTimer.cancel();
-                                    subscription.cancel();
+
 
                                     if (mqttClient != null) {
                                       mqttClient.unsubscribe(
