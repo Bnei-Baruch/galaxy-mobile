@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_logs/flutter_logs.dart';
@@ -174,9 +175,8 @@ class StreamingUnified extends StatefulWidget {
         state._remoteTrlStreamAudio.getAudioTracks().last.enabled = false;
         trlAudioMuted = true;
 
-        Helper.setVolume(DEFAULT_VOLUME, state._remoteStreamAudio
-        .getAudioTracks()
-        .last);
+        Helper.setVolume(
+            DEFAULT_VOLUME, state._remoteStreamAudio.getAudioTracks().last);
         audioTrlStreamingPlugin.send(message: {"request": "stop"});
         audioTrlStreamingPlugin.destroy();
       }
@@ -211,9 +211,8 @@ class StreamingUnified extends StatefulWidget {
       this.mixvolume = this.audioElementMuted ? 0 : this.audioElementVolume;
       this.trlAudioElementVolume = this.mixvolume;
 
-      Helper.setVolume(trlAudioElementVolume, state._remoteTrlStreamAudio
-        .getAudioTracks()
-        .last);
+      Helper.setVolume(trlAudioElementVolume,
+          state._remoteTrlStreamAudio.getAudioTracks().last);
     }
     if (trlAudioElementVolume > 0.05) {
       // If translator is talking (remote volume > 0.05) we want to reduce Rav to 5%.
@@ -229,11 +228,10 @@ class StreamingUnified extends StatefulWidget {
 
     FlutterLogs.logInfo("Streaming", "handle question ",
         "ducerMixaudio audioElementVolume=$audioElementVolume");
-    Helper.setVolume(audioElementVolume,  state._remoteStreamAudio
-        .getAudioTracks()
-        .last);
+    Helper.setVolume(
+        audioElementVolume, state._remoteStreamAudio.getAudioTracks().last);
 
-        // .setVolume(audioElementVolume);
+    // .setVolume(audioElementVolume);
     // state._remoteTrlStreamAudio.getAudioTracks().first.setVolume(0.6);
     // state._remoteStreamAudio.getAudioTracks().first.setVolume(0.06);
     // });
@@ -340,9 +338,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
       _remoteStreamAudio.getAudioTracks().last.enabled =
           !muted; //.setVolume(muted ? 0 : 0.5);
       // FlutterLogs.logInfo("Streaming", "&&&&&&&&&&&&&&&&", "audio trl");
-      setState(() {
-
-      });
+      setState(() {});
     };
 
     playerOverlay.audioChange = () {
@@ -400,14 +396,12 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
     registerMQTTTopics();
     if (janusClient.mqttSender != null) {
       context.read<MQTTClient>().addOnSubscribedCallback((topic) => {
-        if (topic.contains("from-janus") &&
-           janusClient.status.isEmpty)
-          janusConnect()
-      });
+            if (topic.contains("from-janus") && janusClient.status.isEmpty)
+              janusConnect()
+          });
     } else {
       janusConnect();
     }
-
   }
 
   void janusConnect() {
@@ -419,23 +413,27 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
 
   void registerMQTTTopics() {
     var stream = context.read<MainStore>().activeStreamGateway;
-    String rxTopicUser = 'janus/' + stream.name + '/from-janus' + "/" + context.read<MainStore>().activeUser.id;
+    String rxTopicUser = 'janus/' +
+        stream.name +
+        '/from-janus' +
+        "/" +
+        context.read<MainStore>().activeUser.id;
     String rxTopic = 'janus/' + stream.name + '/from-janus';
     String txTopic = 'janus/' + stream.name + '/to-janus';
     String stTopic = 'janus/' + stream.name + '/status';
-
 
     context.read<MQTTClient>().subscribe(rxTopicUser);
     context.read<MQTTClient>().subscribe(rxTopic);
 
     context.read<MQTTClient>().subscribe(stTopic);
-    context.read<MQTTClient>().addOnMsgReceivedCallback((payload, topic) => janusClient.onMessage(payload, topic));
+    context.read<MQTTClient>().addOnMsgReceivedCallback(
+        (payload, topic) => janusClient.onMessage(payload, topic));
     activeUser = context.read<MainStore>().activeUser;
     janusClient.mqttSender = (msg) {
       var correlationData = parse(msg)["transaction"];
       // let cd = correlationData ? " | transaction: " + correlationData : ""
       // log.debug("%c[mqtt] --> send message" + cd + " | topic: " + topic + " | data: " + message, "color: darkgrey");
-      var container =  MqttPropertyContainer();
+      var container = MqttPropertyContainer();
       var resTopicProp = MqttUtf8StringProperty();
       resTopicProp.identifier = MqttPropertyIdentifier.responseTopic;
       resTopicProp.value = rxTopic;
@@ -451,25 +449,25 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
       userProp.pairName = "userProperties";
       container.add(userProp);
 
-
-
-
       //   var properties = rxTopic.isEmpty ? MqttPropertyContainer().userProperties.add(MqttUserProperty())//{userProperties: user || this.user, responseTopic: rxTopic, correlationData} : {userProperties: user || this.user};
       // let options = {qos: 1, retain, properties};
       // this.mq.publish(topic, message, {...options}, (err) => {
 
-
-
       // context.read<MQTTClient>().send(txTopic, msg,retain: false,container);
 
       MqttPublishMessage message = MqttPublishMessage();
-      message.withResponseTopic(rxTopicUser).withResponseCorrelationdata(MqttByteBuffer.fromList(correlationData.codeUnits).buffer).withUserProperties(container.userProperties).withQos(MqttQos.atLeastOnce);
+      message
+          .withResponseTopic(rxTopicUser)
+          .withResponseCorrelationdata(
+              MqttByteBuffer.fromList(correlationData.codeUnits).buffer)
+          .withUserProperties(container.userProperties)
+          .withQos(MqttQos.atLeastOnce);
       message.toTopic(txTopic);
       var payload = MqttPublishPayload();
 
       var jsonBytes = utf8.encode(msg);
       JsonEncoder encoder = JsonEncoder();
-      var res =  encoder.convert(jsonBytes);
+      var res = encoder.convert(jsonBytes);
       payload.message = MqttByteBuffer.fromList(jsonBytes).buffer;
 
       message.payload = payload;
@@ -478,29 +476,32 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
 
       context.read<MQTTClient>().sendPublishMessage(message);
 
-
       print("xxx msg send $msg to server ${stream.url}");
-      print("xxx msg send  after inversion ${MqttUtilities.bytesToStringAsString(payload.message)}");
+      print(
+          "xxx msg send  after inversion ${MqttUtilities.bytesToStringAsString(payload.message)}");
       // });
     };
-
   }
 
   void unRegisterMqtt() {
     var stream = context.read<MainStore>().activeStreamGateway;
-    String rxTopicUser = 'janus/' + stream.name + '/from-janus' + "/" + context.read<MainStore>().activeUser.id;
+    String rxTopicUser = 'janus/' +
+        stream.name +
+        '/from-janus' +
+        "/" +
+        context.read<MainStore>().activeUser.id;
     String rxTopic = 'janus/' + stream.name + '/from-janus';
 
     String stTopic = 'janus/' + stream.name + '/status';
 
-
-
     context.read<MQTTClient>().unsubscribe(rxTopic);
     context.read<MQTTClient>().unsubscribe(rxTopicUser);
     context.read<MQTTClient>().unsubscribe(stTopic);
-    context.read<MQTTClient>().removeOnMsgReceivedCallback((payload, topic) => janusClient.onMessage(payload, topic));
+    context.read<MQTTClient>().removeOnMsgReceivedCallback(
+        (payload, topic) => janusClient.onMessage(payload, topic));
     janusClient.mqttSender = null;
   }
+
   void getPresets() {
     FlutterLogs.logInfo("Streaming", "getPresets", "enter");
     final int audio =
@@ -525,7 +526,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
           _remoteStreamAudio = stream;
           // _remoteStreamAudio.addTrack(track);
           // widget.audioStream = stream;
-          _remoteStreamAudio.getAudioTracks().last.enabled = false;
+          // _remoteStreamAudio.getAudioTracks().last.enabled = false;
           playerOverlay.isPlaying = true;
         },
         plugin: "janus.plugin.streaming",
@@ -622,7 +623,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
               FlutterLogs.logInfo("Streaming", "initTrlAudioStream",
                   "disabling trl stream track count ${_remoteTrlStreamAudio.getAudioTracks().length}");
               _remoteTrlStreamAudio.getAudioTracks().last.enabled = false;
-             Helper.setVolume(0, _remoteTrlStreamAudio.getAudioTracks().last);
+              Helper.setVolume(0, _remoteTrlStreamAudio.getAudioTracks().last);
             }
           }
 
@@ -749,7 +750,7 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
     janusClient.destroy();
     if (_remoteRenderer != null) {
       _remoteRenderer.srcObject = null;
-    //  await _remoteRenderer.dispose();
+      //  await _remoteRenderer.dispose();
     }
     Navigator.of(context).pop();
   }
@@ -787,15 +788,13 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
       FlutterLogs.logInfo("Streaming", "build", "initializing");
       widget.initialized = true;
       //video plugin init
-      initVideoStream();
+      //initVideoStream();
       //audio plugin init
-      initAudioStream();
+      //initAudioStream();
       //audio trl init
-     // initTrlAudioStream();
+      // initTrlAudioStream();
     }
-    return Stack(
-      alignment: Alignment.topCenter,
-      children: [
+    return Stack(alignment: Alignment.topCenter, children: [
       Column(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.center,
@@ -810,24 +809,48 @@ class _StreamingUnifiedState extends State<StreamingUnified> {
                         widget.isOnAir ? Colors.redAccent : Colors.transparent,
                     width: 3)),
             child: (_remoteRenderer.srcObject != null && widget.isVideoPlaying)
-                ?
-            Stack(children: [
-              RTCVideoView(
-                    _remoteRenderer,
-                    mirror: false,
-                    // objectFit:
-                        // RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
-                    // RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-                  ),
-              Visibility(
-                  visible: playerOverlay.isMuted,
-                  child:
-              Padding(padding: EdgeInsets.fromLTRB(0,16,16,0),
-              child: Icon(Icons.volume_off),
-              )
-              )
-
-                ]): Material(
+                ? Stack(children: [
+                    RTCVideoView(
+                      _remoteRenderer,
+                      mirror: false,
+                      // objectFit:
+                      // RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
+                      // RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+                    ),
+                    // Visibility(
+                    //     visible: playerOverlay.isMuted,
+                    //     child: Padding(
+                    //         padding: EdgeInsets.fromLTRB(0, 16, 16, 0),
+                    //         child: GestureDetector(
+                    //           child: Container(
+                    //             padding: EdgeInsets.all(5),
+                    //             color: Colors.white,
+                    //             child: Row(
+                    //                 mainAxisSize: MainAxisSize.min,
+                    //                 children: <Widget>[
+                    //                   Icon(
+                    //                     Icons.volume_off,
+                    //                     size: 20,
+                    //                     color: Colors.black,
+                    //                   ),
+                    //                   Text(
+                    //                     "unmute".tr(),
+                    //                     style: TextStyle(
+                    //                         fontSize: 20,
+                    //                         color: Colors.black,
+                    //                         backgroundColor: Colors.white),
+                    //                   )
+                    //                 ]),
+                    //           ),
+                    //           onTap: () {
+                    //             setState(() {
+                    //               playerOverlay.mute(false);
+                    //               playerOverlay.isMuted = false;
+                    //             });
+                    //           },
+                    //         )))
+                  ])
+                : Material(
                     child: InkWell(
                         onTap: () {
                           setState(() {
