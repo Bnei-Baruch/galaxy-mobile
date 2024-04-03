@@ -36,6 +36,7 @@ dependencies:
  # flutter_volume_slider: ^1.0.6
   flag: ^6.0.0
   dotenv: ^4.0.1
+  headset_connection_event: ^3.1.0
   shared_preferences: ^2.0.15
   synchronized: ^3.0.0+3
   slide_to_confirm: ^1.1.0
