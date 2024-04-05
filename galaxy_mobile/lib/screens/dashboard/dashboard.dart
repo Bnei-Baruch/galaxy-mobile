@@ -495,10 +495,10 @@ class _DashboardState extends State<Dashboard>
   }
 
   Future<void> routeAudioOutput([AudioDevice toOutput]) async {
-       FlutterLogs.logInfo(
-        "dashboard", "switchAudioDevice", "#### switchAudioDevice BEGIN toOutput $toOutput  availableInputs $availableInputs");
-    bool res;
+
        availableInputsWebRTC = await Helper.enumerateDevices("audiooutput");
+       FlutterLogs.logInfo(
+           "dashboard", "routeAudioOutput", "#### switchAudioDevice BEGIN toOutput $toOutput  availableoutput ${availableInputsWebRTC.map((e) => e.groupId)}");
 
        List<AudioDevice> devices = [AudioDevice.receiver,AudioDevice.speaker,AudioDevice.bluetooth,AudioDevice.headphones];
     switch(toOutput)
@@ -530,13 +530,17 @@ class _DashboardState extends State<Dashboard>
       default:
         //go through next available output
       //remove bt or headphones if not available
-        if(availableInputsWebRTC.every((element) => element.deviceId != AudioPort.bluetooth.name && (element.groupId==null || (element.groupId!=null && !element.groupId.toLowerCase().contains(AudioPort.bluetooth.name)))))
+        if(availableInputsWebRTC.every((element) => btConnected==false && ((element.deviceId != AudioPort.bluetooth.name && element.groupId==null) || (element.groupId!=null && !element.groupId.toLowerCase().contains(AudioPort.bluetooth.name)))))
         {
           //remove bluetooth from list
+          FlutterLogs.logInfo(
+              "dashboard", "switchAudioDevice", "removing bt from list");
           devices.remove(AudioDevice.bluetooth);
         }
-        if(availableInputsWebRTC.every((element) => element.deviceId != AudioPort.headphones.name &&  (element.groupId==null || (element.groupId!=null && element.groupId.toLowerCase() != AudioPort.headphones.name))))
+        if(availableInputsWebRTC.every((element) => headPhonesConnected==false && ((element.deviceId != AudioPort.headphones.name &&  element.groupId==null )|| (element.groupId!=null && element.groupId.toLowerCase() != AudioPort.headphones.name))))
           {
+            FlutterLogs.logInfo(
+                "dashboard", "switchAudioDevice", "removing headphones from list");
             devices.remove(AudioDevice.headphones);
           }
 
