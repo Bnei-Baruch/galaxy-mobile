@@ -14,6 +14,7 @@ import 'package:galaxy_mobile/widgets/ui_language_selector.dart';
 import 'package:new_version/new_version.dart';
 import 'package:package_info/package_info.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -176,6 +177,11 @@ class _LoginState extends State<Login>  with WidgetsBindingObserver {
         });
     } else {
       store.setLastLogin(DateTime.now());
+
+      Map<Permission, PermissionStatus> statuses = await [
+        Permission.bluetooth,
+      ].request();
+      print(statuses[Permission.bluetooth]);
       Navigator.pushNamed(context, '/settings');
     }
   }
