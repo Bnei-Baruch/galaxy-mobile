@@ -1314,8 +1314,10 @@ class _VideoRoomState extends State<VideoRoom> with WidgetsBindingObserver {
                       // Render friends' items.
                       ...([0, 1, 2].map((slotIndex) {
                         RTCVideoRenderer slotRenderer = widget._remoteRenderers?.elementAt(slotIndex);
+
                         var slotFeed = feeds?.firstWhere((element) => element["videoSlot"] == slotIndex, orElse: () => null);
-                        if (slotRenderer?.srcObject == null || slotFeed == null) {
+                        print("slot renderer #### ${widget._remoteRenderers}, $slotFeed");
+                        if (slotFeed == null) {
                           return Container();
                         }
 
