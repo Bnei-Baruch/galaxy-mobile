@@ -1348,14 +1348,33 @@ class _DashboardState extends State<Dashboard>
   RelativeRect buttonMenuPosition(BuildContext c) {
     final RenderBox bar = c.findRenderObject();
     final RenderBox overlay = Overlay.of(c).context.findRenderObject();
-    final RelativeRect position = RelativeRect.fromRect(
-      Rect.fromPoints(
-        bar.localToGlobal(bar.size.bottomRight(Offset.zero), ancestor: overlay),
-        bar.localToGlobal(bar.size.bottomRight(Offset.zero), ancestor: overlay),
-      ),
-      Offset.zero & overlay.size,
-    );
-    return position;
+    var code = EasyLocalization.of(context).locale.languageCode;
+    if(code == "he"){
+      final RelativeRect position = RelativeRect.fromRect(
+        Rect.fromPoints(
+          bar.localToGlobal(
+              bar.size.bottomLeft(Offset.zero), ancestor: overlay),
+          bar.localToGlobal(
+              bar.size.bottomLeft(Offset.zero), ancestor: overlay),
+        ),
+        Offset.zero & overlay.size,
+      );
+      return position;
+    }
+
+      else {
+      final RelativeRect position = RelativeRect.fromRect(
+        Rect.fromPoints(
+          bar.localToGlobal(
+              bar.size.bottomRight(Offset.zero), ancestor: overlay),
+          bar.localToGlobal(
+              bar.size.bottomRight(Offset.zero), ancestor: overlay),
+        ),
+        Offset.zero & overlay.size,
+      );
+      return position;
+    }
+
   }
 
   void showBars() {
