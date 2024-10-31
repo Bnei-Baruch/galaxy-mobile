@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:archive/archive.dart';
@@ -66,6 +67,7 @@ class Api {
   Dio _questionsBackend;
   Dio _studyMaterialsBackend;
   Dio _monitor;
+  Dio _active;
 
   Api() {
     this._galaxyBackend = new Dio();
@@ -79,15 +81,20 @@ class Api {
     this._monitor = new Dio();
     this._monitor.options.baseUrl = APP_MONITORING_BACKEND;
 
+    this._active = new Dio();
+    this._active.options.baseUrl = APP_API_ACTIVATION_BACKEND;
+
     this._galaxyBackend.interceptors.add(LogInterceptors());
     this._questionsBackend.interceptors.add(LogInterceptors());
     this._studyMaterialsBackend.interceptors.add(LogInterceptors());
+    this._active.interceptors.add(LogInterceptors());
   }
 
   setAccessToken(String accessToken) {
     _galaxyBackend.options.headers["Authorization"] = "Bearer $accessToken";
     _questionsBackend.options.headers["Authorization"] = "Bearer $accessToken";
     _studyMaterialsBackend.options.headers["Authorization"] = "Bearer $accessToken";
+    _active.options.headers["Authorization"] = "Bearer $accessToken";
   }
 
   // fetchConfig = () =>
@@ -105,6 +112,13 @@ class Api {
         streamData.values.map((dynamic e) => RoomData.fromJson(e)).toList();
 
     return [rooms, streams];
+  }
+  
+  Future<bool> isUserActive(String userId) async{
+    final response = await _active.get('/profile/$userId/short');
+        FlutterLogs.logInfo("Api", "isUserActive", response.data.toString());
+        return response.data['active'].toString() != "false";
+
   }
 
   // fetchAvailableRooms = (params = {}) =>

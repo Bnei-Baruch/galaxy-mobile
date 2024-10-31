@@ -166,25 +166,49 @@ class _LoginState extends State<Login>  with WidgetsBindingObserver {
     api.setAccessToken(authResponse.accessToken);
 
     await context.read<MainStore>().init();
-    if (!context.read<MainStore>().activeUser.roles.contains("gxy_user")) {
+    bool active = await context.read<MainStore>().isActive();
+    if(!active){
+      final auth = context.read<AuthService>();
+      await auth.logout();
       showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text("User Permission"),
-              content: Text("Not Allowed"),
-          );
-        });
-    } else {
-      store.setLastLogin(DateTime.now());
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text("User Permission"),
+              content: Text("Please contact help@kli.one"),
+            );
+          });
 
-      Map<Permission, PermissionStatus> statuses = await [
-        Permission.bluetooth,Permission.bluetoothConnect
-      ].request();
-      print("permission status: ${statuses[Permission.bluetooth]}  and ${statuses[Permission.bluetoothConnect]}");
+    }
+    else {
+      if (!context
+          .read<MainStore>()
+          .activeUser
+          .roles
+          .contains("gxy_user")) {
+        final auth = context.read<AuthService>();
+        await auth.logout();
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text("User Permission"),
+                content: Text("Not Allowed"),
+              );
+            });
+
+      } else {
+        store.setLastLogin(DateTime.now());
+
+        Map<Permission, PermissionStatus> statuses = await [
+          Permission.bluetooth, Permission.bluetoothConnect
+        ].request();
+        print("permission status: ${statuses[Permission
+            .bluetooth]}  and ${statuses[Permission.bluetoothConnect]}");
 
 
-     Navigator.pushNamed(context, '/settings');
+        Navigator.pushNamed(context, '/settings');
+      }
     }
   }
 

@@ -203,4 +203,10 @@ class MainStore extends ChangeNotifier {
     FlutterLogs.logInfo("MainStore", "set last login date", dateTime.toString());
     SharedPrefs().lastLogin = dateTime;
   }
+
+  Future<bool> isActive() async{
+    FlutterLogs.logInfo("MainStore", "isActiveUser", "");
+    return await _api.isUserActive(activeUser.id);
+
+  }
 }
