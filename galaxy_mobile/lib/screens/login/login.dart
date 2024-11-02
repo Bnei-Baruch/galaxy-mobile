@@ -201,7 +201,7 @@ class _LoginState extends State<Login>  with WidgetsBindingObserver {
         store.setLastLogin(DateTime.now());
 
         Map<Permission, PermissionStatus> statuses = await [
-          Permission.bluetooth, Permission.bluetoothConnect
+          Permission.bluetooth, Permission.bluetoothConnect,Permission.notification
         ].request();
         print("permission status: ${statuses[Permission
             .bluetooth]}  and ${statuses[Permission.bluetoothConnect]}");

@@ -432,8 +432,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "0.8.0.2"
-      resolved-ref: ea28246d7254b7f0647a68b8de09e33dcc2643c2
+      ref: "0.8.0.3"
+      resolved-ref: fabd1077c14b0c29ae8d180772d0841774c41c9e
       url: "https://github.com/igala/flutter_foreground_service_plugin.git"
     source: git
     version: "0.8.0"
